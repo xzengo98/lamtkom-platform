@@ -1,6 +1,10 @@
-<a
-  href="/admin/categories/new"
-  className="rounded-2xl bg-cyan-400 px-5 py-3 font-bold text-slate-950"
->
-  إضافة فئة جديدة
-</a>
+"use client";
+
+export default function NewCategoryPage() {
+  return (
+    <div className="space-y-8">
+      <h2 className="text-3xl font-black">إضافة فئة جديدة</h2>
+      <p className="text-slate-300">صفحة الإضافة شغالة.</p>
+    </div>
+  );
+}
