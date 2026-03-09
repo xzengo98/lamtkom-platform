@@ -12,7 +12,7 @@ type LoginPageProps = {
 async function loginAction(formData: FormData) {
   "use server";
 
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "").trim();
 
   if (!email || !password) {
@@ -27,7 +27,7 @@ async function loginAction(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent("بيانات الدخول غير صحيحة")}`);
+    redirect("/login?error=بيانات الدخول غير صحيحة");
   }
 
   redirect("/");
