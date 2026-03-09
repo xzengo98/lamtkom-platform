@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 type Category = {
   id: string;
   name: string;
   slug: string;
+  image_url: string | null;
 };
 
 type QuestionRow = {
@@ -191,7 +193,7 @@ export default function GameBoardClient({
           <TeamCard name={teamTwo} score={teamTwoScore} accent="cyan" />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {grouped.map((category) => {
             const visual = categoryVisuals[category.slug] ?? categoryVisuals.default;
 
@@ -200,7 +202,7 @@ export default function GameBoardClient({
                 key={category.id}
                 className="rounded-[2.25rem] border border-white/10 bg-white/5 p-4 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.7)]"
               >
-                <div className="grid grid-cols-[88px_1fr_88px] gap-3">
+                <div className="grid grid-cols-[76px_1fr_76px] gap-3">
                   <div className="space-y-3">
                     {category.slots.filter((_, i) => i % 2 === 0).map((slot) => (
                       <PointsButton
@@ -216,19 +218,30 @@ export default function GameBoardClient({
 
                   <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/70">
                     <div
-                      className={`relative flex h-[440px] flex-col overflow-hidden bg-gradient-to-br ${visual.gradient}`}
+                      className={`relative flex h-[260px] flex-col overflow-hidden bg-gradient-to-br ${visual.gradient}`}
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_30%)]" />
 
-                      <div className="relative flex flex-1 items-center justify-center">
-                        <div className="select-none text-[120px] opacity-90">
-                          {visual.emoji}
-                        </div>
+                      <div className="relative flex flex-1 items-center justify-center px-4">
+                        {category.image_url ? (
+                          <div className="relative h-[110px] w-[110px] md:h-[130px] md:w-[130px]">
+                            <Image
+                              src={category.image_url}
+                              alt={category.name}
+                              fill
+                              className="object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
+                            />
+                          </div>
+                        ) : (
+                          <div className="select-none text-[64px] opacity-90 md:text-[78px]">
+                            {visual.emoji}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="relative border-t border-white/10 bg-slate-950/70 px-4 py-5 text-center">
-                        <div className="text-3xl font-black">{category.name}</div>
-                        <div className="mt-2 text-sm text-cyan-300">{category.slug}</div>
+                      <div className="relative border-t border-white/10 bg-slate-950/70 px-4 py-4 text-center">
+                        <div className="text-2xl font-black">{category.name}</div>
+                        <div className="mt-1 text-sm text-cyan-300">{category.slug}</div>
                       </div>
                     </div>
                   </div>
@@ -386,7 +399,7 @@ function PointsButton({
       type="button"
       disabled={!question || used}
       onClick={() => question && onOpen(question)}
-      className={`flex h-[65px] w-full items-center justify-center rounded-[1.6rem] text-3xl font-black transition ${
+      className={`flex h-[52px] w-full items-center justify-center rounded-[1.4rem] text-2xl font-black transition ${
         !question
           ? "cursor-not-allowed border border-white/5 bg-slate-900/30 text-slate-700"
           : used

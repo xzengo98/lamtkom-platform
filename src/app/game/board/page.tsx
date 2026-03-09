@@ -7,6 +7,7 @@ type Category = {
   id: string;
   name: string;
   slug: string;
+  image_url: string | null;
 };
 
 type QuestionRow = {
@@ -62,7 +63,7 @@ export default async function GameBoardPage({ searchParams }: PageProps) {
 
   const { data: categoriesData, error: categoriesError } = await supabase
     .from("categories")
-    .select("id, name, slug")
+    .select("id, name, slug, image_url")
     .in("slug", categorySlugs)
     .eq("is_active", true);
 
