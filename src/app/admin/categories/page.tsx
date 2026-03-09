@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminEmptyState from "@/components/admin/admin-empty-state";
 import AdminPageHeader from "@/components/admin/admin-page-header";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 type Category = {
   id: string;
@@ -22,19 +22,28 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     async function loadCategories() {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("sort_order", { ascending: true });
+      try {
+        const supabase = getSupabaseClient();
 
-      if (error) {
-        setErrorMessage(error.message);
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .order("sort_order", { ascending: true });
+
+        if (error) {
+          setErrorMessage(error.message);
+          setLoading(false);
+          return;
+        }
+
+        setCategories((data ?? []) as Category[]);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : "Unknown error"
+        );
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setCategories((data ?? []) as Category[]);
-      setLoading(false);
     }
 
     loadCategories();
