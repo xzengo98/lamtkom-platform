@@ -31,7 +31,7 @@ const sectionColors: Record<string, string> = {
   general: "from-orange-400/20 via-orange-300/10 to-transparent",
   islamic: "from-emerald-400/20 via-lime-300/10 to-transparent",
   entertainment: "from-fuchsia-400/20 via-pink-300/10 to-transparent",
-  "sports-section": "from-cyan-400/20 via-sky-300/10 to-transparent",
+  sports: "from-cyan-400/20 via-sky-300/10 to-transparent",
 };
 
 export default function StartGameForm({
@@ -46,16 +46,19 @@ export default function StartGameForm({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const safeSections = Array.isArray(sections) ? sections : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const groupedSections = useMemo(() => {
-    return (sections ?? [])
+    return safeSections
       .map((section) => ({
         ...section,
-        categories: (categories ?? []).filter(
+        categories: safeCategories.filter(
           (category) => category.section_id === section.id
         ),
       }))
-      .filter((section) => (section.categories ?? []).length > 0);
-  }, [sections, categories]);
+      .filter((section) => section.categories.length > 0);
+  }, [safeSections, safeCategories]);
 
   function toggleCategory(slug: string) {
     setSelectedCategories((prev) =>
@@ -168,7 +171,7 @@ export default function StartGameForm({
                   </div>
 
                   <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                    {(section.categories ?? []).map((category) => {
+                    {section.categories.map((category) => {
                       const active = selectedCategories.includes(category.slug);
 
                       return (
@@ -178,7 +181,7 @@ export default function StartGameForm({
                           onClick={() => toggleCategory(category.slug)}
                           className={`overflow-hidden rounded-[2rem] border text-right transition ${
                             active
-                              ? "border-cyan-400 bg-cyan-400/10 shadow-[0_0_0_1px_rgba(34,211,238,0.25)]"
+                              ? "border-cyan-400 bg-cyan-400/10"
                               : "border-white/10 bg-slate-950/60 hover:border-white/20"
                           }`}
                         >
@@ -206,7 +209,7 @@ export default function StartGameForm({
                                     src={category.image_url}
                                     alt={category.name}
                                     fill
-                                    className="object-contain drop-shadow-[0_14px_30px_rgba(0,0,0,0.35)]"
+                                    className="object-contain"
                                   />
                                 </div>
                               ) : (

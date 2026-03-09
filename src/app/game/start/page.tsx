@@ -55,8 +55,7 @@ export default async function GameStartPage({
         <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center">
           <h1 className="text-4xl font-black">لا توجد ألعاب متبقية</h1>
           <p className="mt-4 text-lg text-red-200">
-            تم استهلاك عدد الألعاب المتاحة لحسابك. تواصل مع الإدارة أو انتظر
-            تزويد رصيد الألعاب.
+            تم استهلاك عدد الألعاب المتاحة لحسابك.
           </p>
 
           <div className="mt-8">
@@ -117,8 +116,7 @@ export default async function GameStartPage({
         <div className="mb-8 rounded-[2rem] border border-white/10 bg-white/5 px-8 py-6">
           <h1 className="text-4xl font-black md:text-5xl">إعداد لعبة جديدة</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
-            اختر الفئات، أدخل اسم اللعبة واسمَي الفريقين، ثم ابدأ لوحة اللعبة
-            الاحترافية.
+            اختر الفئات، أدخل اسم اللعبة واسمَي الفريقين.
           </p>
           <div className="mt-4 text-cyan-300">
             الألعاب المتبقية: {profile.games_remaining}
