@@ -1,14 +1,28 @@
 import AdminEmptyState from "@/components/admin/admin-empty-state";
 import AdminPageHeader from "@/components/admin/admin-page-header";
+import { supabase } from "@/lib/supabase/client";
 
-const categories = [
-  { name: "تاريخ", questions: 120, status: "مفعلة" },
-  { name: "رياضة", questions: 98, status: "مفعلة" },
-  { name: "جغرافيا", questions: 76, status: "مفعلة" },
-  { name: "أفلام", questions: 54, status: "معلقة" },
-];
+export default async function AdminCategoriesPage() {
+  const { data: categories, error } = await supabase
+    .from("categories")
+    .select("*")
+    .order("sort_order", { ascending: true });
 
-export default function AdminCategoriesPage() {
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <AdminPageHeader
+          title="إدارة الفئات"
+          description="حدث خطأ أثناء جلب البيانات من قاعدة البيانات."
+        />
+
+        <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-200">
+          فشل تحميل الفئات من Supabase.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <AdminPageHeader
@@ -31,27 +45,29 @@ export default function AdminCategoriesPage() {
           <select className="rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none">
             <option>كل الحالات</option>
             <option>مفعلة</option>
-            <option>معلقة</option>
+            <option>غير مفعلة</option>
           </select>
         </div>
       </div>
 
-      {categories.length > 0 ? (
+      {categories && categories.length > 0 ? (
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
-          <div className="grid grid-cols-3 border-b border-white/10 bg-slate-900/60 px-6 py-4 font-bold text-slate-200">
+          <div className="grid grid-cols-4 border-b border-white/10 bg-slate-900/60 px-6 py-4 font-bold text-slate-200">
             <div>اسم الفئة</div>
-            <div>عدد الأسئلة</div>
+            <div>Slug</div>
+            <div>الترتيب</div>
             <div>الحالة</div>
           </div>
 
           {categories.map((category) => (
             <div
-              key={category.name}
-              className="grid grid-cols-3 border-b border-white/10 px-6 py-4 text-slate-300 last:border-b-0"
+              key={category.id}
+              className="grid grid-cols-4 border-b border-white/10 px-6 py-4 text-slate-300 last:border-b-0"
             >
               <div>{category.name}</div>
-              <div>{category.questions}</div>
-              <div>{category.status}</div>
+              <div>{category.slug}</div>
+              <div>{category.sort_order}</div>
+              <div>{category.is_active ? "مفعلة" : "غير مفعلة"}</div>
             </div>
           ))}
         </div>
