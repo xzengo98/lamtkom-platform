@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Navbar() {
+  noStore();
+
   const supabase = await getSupabaseServerClient();
 
   const {
@@ -30,8 +33,8 @@ export default async function Navbar() {
         <nav className="flex items-center gap-6 text-sm font-semibold text-slate-300">
           <Link href="/">الرئيسية</Link>
           <Link href="/pricing">الباقات</Link>
-          <Link href="/game/start">اللعب</Link>
-
+          <Link href="/game/start" prefetch={false}>اللعب</Link>
+          {user ? <Link href="/account">حسابي</Link> : null}
           {isAdmin ? <Link href="/admin">الإدارة</Link> : null}
         </nav>
 
@@ -39,12 +42,12 @@ export default async function Navbar() {
           {user ? (
             <>
               <Link
-  href="/game/start"
-  prefetch={false}
-  className="rounded-2xl bg-cyan-400 px-5 py-2 font-bold text-slate-950"
->
-  ابدأ الآن
-</Link>
+                href="/game/start"
+                prefetch={false}
+                className="rounded-2xl bg-cyan-400 px-5 py-2 font-bold text-slate-950"
+              >
+                ابدأ الآن
+              </Link>
 
               <Link
                 href="/logout"
