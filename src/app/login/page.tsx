@@ -1,40 +1,53 @@
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-type LoginPageProps = {
-  searchParams: Promise<{
-    error?: string;
-    success?: string;
-  }>;
-};
+export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-async function loginAction(formData: FormData) {
-  "use server";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "").trim();
+  const urlError = searchParams.get("error");
+  const urlSuccess = searchParams.get("success");
 
-  if (!email || !password) {
-    redirect("/login?error=يرجى إدخال البريد الإلكتروني وكلمة المرور");
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErrorMessage("");
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail || !cleanPassword) {
+      setErrorMessage("يرجى إدخال البريد الإلكتروني وكلمة المرور");
+      return;
+    }
+
+    setLoading(true);
+
+    const supabase = getSupabaseBrowserClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password: cleanPassword,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMessage("بيانات الدخول غير صحيحة");
+      return;
+    }
+
+    router.refresh();
+    router.push("/");
   }
-
-  const supabase = await getSupabaseServerClient();
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    redirect("/login?error=بيانات الدخول غير صحيحة");
-  }
-
-  redirect("/");
-}
-
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const params = await searchParams;
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
@@ -45,25 +58,32 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             سجّل دخولك للوصول إلى حسابك وألعابك.
           </p>
 
-          {params.error ? (
+          {urlError ? (
             <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
-              {params.error}
+              {urlError}
             </div>
           ) : null}
 
-          {params.success ? (
+          {urlSuccess ? (
             <div className="mt-6 rounded-2xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-green-200">
-              {params.success}
+              {urlSuccess}
             </div>
           ) : null}
 
-          <form action={loginAction} className="mt-8 space-y-5">
+          {errorMessage ? (
+            <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <form onSubmit={handleLogin} className="mt-8 space-y-5">
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-200">
                 البريد الإلكتروني
               </label>
               <input
-                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="name@email.com"
                 className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
@@ -75,7 +95,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 كلمة المرور
               </label>
               <input
-                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="******"
                 className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
@@ -84,9 +105,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             <button
               type="submit"
-              className="w-full rounded-2xl bg-cyan-400 px-6 py-3 font-black text-slate-950"
+              disabled={loading}
+              className="w-full rounded-2xl bg-cyan-400 px-6 py-3 font-black text-slate-950 disabled:opacity-60"
             >
-              تسجيل الدخول
+              {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </button>
           </form>
 
