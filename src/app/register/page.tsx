@@ -1,84 +1,82 @@
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-type RegisterPageProps = {
-  searchParams: Promise<{
-    error?: string;
-  }>;
-};
+export default function RegisterPage() {
+  const router = useRouter();
 
-async function registerAction(formData: FormData) {
-  "use server";
+  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const username = String(formData.get("username") ?? "")
-    .trim()
-    .toLowerCase();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "").trim();
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  if (!username || !phone || !email || !password) {
-    redirect("/register?error=يرجى تعبئة جميع الحقول");
-  }
+  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setErrorMessage("");
 
-  if (password.length < 6) {
-    redirect("/register?error=كلمة المرور يجب أن تكون 6 أحرف على الأقل");
-  }
+    const cleanUsername = username.trim().toLowerCase();
+    const cleanPhone = phone.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
 
-  const supabase = await getSupabaseServerClient();
+    if (!cleanUsername || !cleanPhone || !cleanEmail || !cleanPassword) {
+      setErrorMessage("يرجى تعبئة جميع الحقول");
+      return;
+    }
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        username,
-        phone,
+    if (cleanPassword.length < 6) {
+      setErrorMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      return;
+    }
+
+    setLoading(true);
+
+    const supabase = getSupabaseBrowserClient();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password: cleanPassword,
+      options: {
+        data: {
+          username: cleanUsername,
+          phone: cleanPhone,
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
-    const msg = error.message.toLowerCase();
-
-    if (msg.includes("user already registered")) {
-      redirect("/register?error=هذا البريد الإلكتروني مستخدم بالفعل");
+    if (error) {
+      setLoading(false);
+      setErrorMessage("تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا");
+      return;
     }
 
-    if (
-      msg.includes("duplicate") ||
-      msg.includes("unique") ||
-      msg.includes("database error saving new user")
-    ) {
-      redirect(
-        "/register?error=تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا"
-      );
+    if (!data.user) {
+      setLoading(false);
+      setErrorMessage("تعذر إنشاء الحساب");
+      return;
     }
 
-    redirect(`/register?error=${encodeURIComponent(error.message)}`);
+    const loginResult = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password: cleanPassword,
+    });
+
+    setLoading(false);
+
+    if (loginResult.error) {
+      setErrorMessage("تم إنشاء الحساب لكن تعذر تسجيل الدخول مباشرة");
+      return;
+    }
+
+    router.refresh();
+    router.push("/");
   }
-
-  if (!data.user) {
-    redirect("/register?error=تعذر إنشاء الحساب");
-  }
-
-  const loginResult = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (loginResult.error) {
-    redirect("/login?error=تم إنشاء الحساب لكن تعذر تسجيل الدخول مباشرة");
-  }
-
-  redirect("/");
-}
-
-export default async function RegisterPage({
-  searchParams,
-}: RegisterPageProps) {
-  const params = await searchParams;
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
@@ -92,19 +90,20 @@ export default async function RegisterPage({
           </div>
 
           <div className="p-8">
-            {params.error ? (
+            {errorMessage ? (
               <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
-                {params.error}
+                {errorMessage}
               </div>
             ) : null}
 
-            <form action={registerAction} className="space-y-5">
+            <form onSubmit={handleRegister} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-200">
                   اسم المستخدم
                 </label>
                 <input
-                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"
                   className="w-full rounded-2xl border border-white/10 bg-slate-900 px-5 py-4 text-white outline-none"
                 />
@@ -115,7 +114,8 @@ export default async function RegisterPage({
                   رقم الهاتف
                 </label>
                 <input
-                  name="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   placeholder="05xxxxxxxx أو +971..."
                   className="w-full rounded-2xl border border-white/10 bg-slate-900 px-5 py-4 text-white outline-none"
                 />
@@ -126,7 +126,8 @@ export default async function RegisterPage({
                   البريد الإلكتروني
                 </label>
                 <input
-                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="name@email.com"
                   className="w-full rounded-2xl border border-white/10 bg-slate-900 px-5 py-4 text-white outline-none"
@@ -138,7 +139,8 @@ export default async function RegisterPage({
                   كلمة المرور
                 </label>
                 <input
-                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   placeholder="******"
                   className="w-full rounded-2xl border border-white/10 bg-slate-900 px-5 py-4 text-white outline-none"
@@ -147,9 +149,10 @@ export default async function RegisterPage({
 
               <button
                 type="submit"
-                className="w-full rounded-2xl bg-cyan-400 px-6 py-4 text-lg font-black text-slate-950"
+                disabled={loading}
+                className="w-full rounded-2xl bg-cyan-400 px-6 py-4 text-lg font-black text-slate-950 disabled:opacity-60"
               >
-                إنشاء الحساب
+                {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
               </button>
             </form>
 

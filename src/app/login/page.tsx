@@ -1,21 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const urlError = searchParams.get("error");
-  const urlSuccess = searchParams.get("success");
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,18 +53,6 @@ export default function LoginPage() {
           <p className="mt-3 text-slate-300">
             سجّل دخولك للوصول إلى حسابك وألعابك.
           </p>
-
-          {urlError ? (
-            <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
-              {urlError}
-            </div>
-          ) : null}
-
-          {urlSuccess ? (
-            <div className="mt-6 rounded-2xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-green-200">
-              {urlSuccess}
-            </div>
-          ) : null}
 
           {errorMessage ? (
             <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
