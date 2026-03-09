@@ -1,28 +1,85 @@
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { unstable_noStore as noStore } from "next/cache";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export const dynamic = "force-dynamic";
+type Profile = {
+  email: string | null;
+  username: string | null;
+  phone: string | null;
+  role: string;
+  games_remaining: number;
+  games_played: number;
+  created_at: string;
+};
 
-export default async function AccountPage() {
-  noStore();
+export default function AccountPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
-  const supabase = await getSupabaseServerClient();
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    let mounted = true;
 
-  if (!user) {
-    redirect("/login");
+    async function loadAccount() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("email, username, phone, role, games_remaining, games_played, created_at")
+        .eq("id", user.id)
+        .single();
+
+      if (!mounted) return;
+
+      setProfile((data as Profile | null) ?? null);
+      setLoading(false);
+    }
+
+    loadAccount();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.replace("/login");
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("email, username, phone, role, games_remaining, games_played, created_at")
-    .eq("id", user.id)
-    .single();
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-white/10 bg-white/5 p-10 text-center">
+          جارٍ تحميل بيانات الحساب...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
@@ -85,7 +142,7 @@ export default async function AccountPage() {
             <div className="rounded-[2rem] border border-white/10 bg-slate-900/60 p-6">
               <div className="text-sm text-slate-400">البريد الإلكتروني</div>
               <div className="mt-3 text-2xl font-black break-all">
-                {profile?.email || user.email || "-"}
+                {profile?.email || "-"}
               </div>
             </div>
 
@@ -96,12 +153,13 @@ export default async function AccountPage() {
           </div>
 
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              href="/logout"
+            <button
+              type="button"
+              onClick={handleLogout}
               className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-3 font-semibold text-red-300"
             >
               تسجيل الخروج
-            </Link>
+            </button>
 
             <Link
               href="/"

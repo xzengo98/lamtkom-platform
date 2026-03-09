@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
@@ -37,8 +38,6 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const supabase = getSupabaseBrowserClient();
-
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password: cleanPassword,
@@ -52,7 +51,9 @@ export default function RegisterPage() {
 
     if (error) {
       setLoading(false);
-      setErrorMessage("تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا");
+      setErrorMessage(
+        "تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا"
+      );
       return;
     }
 
@@ -74,14 +75,14 @@ export default function RegisterPage() {
       return;
     }
 
-    router.refresh();
     router.push("/");
+    router.refresh();
   }
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
       <div className="mx-auto max-w-xl">
-        <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 shadow-[0_30px_100px_-40px_rgba(0,0,0,0.7)]">
+        <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 shadow-[0_30px_100px_-40px_rgba(0,0,0,0.8)]">
           <div className="border-b border-white/10 bg-gradient-to-l from-cyan-400/10 to-transparent px-8 py-8">
             <h1 className="text-4xl font-black">إنشاء حساب جديد</h1>
             <p className="mt-3 text-slate-300">

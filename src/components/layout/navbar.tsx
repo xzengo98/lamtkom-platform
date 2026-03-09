@@ -1,26 +1,95 @@
+"use client";
+
 import Link from "next/link";
-import { unstable_noStore as noStore } from "next/cache";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export default async function Navbar() {
-  noStore();
+type Profile = {
+  role: string;
+  games_remaining: number;
+  username: string | null;
+};
 
-  const supabase = await getSupabaseServerClient();
+type AuthState = {
+  loading: boolean;
+  isLoggedIn: boolean;
+  isAdmin: boolean;
+  gamesRemaining: number;
+  username: string | null;
+};
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function Navbar() {
+  const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
-  let isAdmin = false;
+  const [authState, setAuthState] = useState<AuthState>({
+    loading: true,
+    isLoggedIn: false,
+    isAdmin: false,
+    gamesRemaining: 0,
+    username: null,
+  });
 
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  useEffect(() => {
+    let mounted = true;
 
-    isAdmin = profile?.role === "admin";
+    async function loadUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (!user) {
+        setAuthState({
+          loading: false,
+          isLoggedIn: false,
+          isAdmin: false,
+          gamesRemaining: 0,
+          username: null,
+        });
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, games_remaining, username")
+        .eq("id", user.id)
+        .single();
+
+      if (!mounted) return;
+
+      const typedProfile = profile as Profile | null;
+
+      setAuthState({
+        loading: false,
+        isLoggedIn: true,
+        isAdmin: typedProfile?.role === "admin",
+        gamesRemaining: typedProfile?.games_remaining ?? 0,
+        username: typedProfile?.username ?? null,
+      });
+    }
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadUser();
+      router.refresh();
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.refresh();
+    router.push("/");
   }
 
   return (
@@ -33,28 +102,36 @@ export default async function Navbar() {
         <nav className="flex items-center gap-6 text-sm font-semibold text-slate-300">
           <Link href="/">الرئيسية</Link>
           <Link href="/pricing">الباقات</Link>
-          <Link href="/game/start" prefetch={false}>اللعب</Link>
-          {user ? <Link href="/account">حسابي</Link> : null}
-          {isAdmin ? <Link href="/admin">الإدارة</Link> : null}
+          <Link href="/game/start">اللعب</Link>
+          {authState.isLoggedIn ? <Link href="/account">حسابي</Link> : null}
+          {authState.isAdmin ? <Link href="/admin">الإدارة</Link> : null}
         </nav>
 
         <div className="flex items-center gap-3">
-          {user ? (
+          {authState.loading ? (
+            <div className="rounded-2xl border border-white/10 px-5 py-2 text-sm text-slate-400">
+              جارٍ التحميل...
+            </div>
+          ) : authState.isLoggedIn ? (
             <>
+              <div className="hidden rounded-2xl border border-white/10 px-4 py-2 text-sm text-slate-300 lg:block">
+                {authState.username || "مستخدم"} • الألعاب: {authState.gamesRemaining}
+              </div>
+
               <Link
                 href="/game/start"
-                prefetch={false}
                 className="rounded-2xl bg-cyan-400 px-5 py-2 font-bold text-slate-950"
               >
                 ابدأ الآن
               </Link>
 
-              <Link
-                href="/logout"
+              <button
+                type="button"
+                onClick={handleLogout}
                 className="rounded-2xl border border-white/10 px-5 py-2 font-semibold text-slate-200 transition hover:bg-white/5"
               >
                 تسجيل الخروج
-              </Link>
+              </button>
             </>
           ) : (
             <>
