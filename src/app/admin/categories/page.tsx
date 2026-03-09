@@ -1,18 +1,46 @@
 import AdminEmptyState from "@/components/admin/admin-empty-state";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
-type Category = {
+type CategoryRow = {
   id: string;
   name: string;
   slug: string;
   description: string | null;
-  is_active: boolean;
+  image_url: string | null;
   sort_order: number;
-  created_at: string;
+  is_active: boolean;
+  category_sections:
+    | {
+        name: string;
+        slug: string;
+      }
+    | {
+        name: string;
+        slug: string;
+      }[]
+    | null;
 };
+
+function getSectionName(
+  section:
+    | {
+        name: string;
+        slug: string;
+      }
+    | {
+        name: string;
+        slug: string;
+      }[]
+    | null
+) {
+  if (!section) return "بدون قسم";
+  if (Array.isArray(section)) return section[0]?.name ?? "بدون قسم";
+  return section.name;
+}
 
 export default async function AdminCategoriesPage() {
   try {
@@ -20,7 +48,19 @@ export default async function AdminCategoriesPage() {
 
     const { data, error } = await supabase
       .from("categories")
-      .select("*")
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        image_url,
+        sort_order,
+        is_active,
+        category_sections (
+          name,
+          slug
+        )
+      `)
       .order("sort_order", { ascending: true });
 
     if (error) {
@@ -28,7 +68,7 @@ export default async function AdminCategoriesPage() {
         <div className="space-y-8">
           <AdminPageHeader
             title="إدارة الفئات"
-            description="حدث خطأ أثناء جلب البيانات من قاعدة البيانات."
+            description="حدث خطأ أثناء جلب الفئات من قاعدة البيانات."
           />
 
           <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-200">
@@ -38,13 +78,13 @@ export default async function AdminCategoriesPage() {
       );
     }
 
-    const categories = (data ?? []) as Category[];
+    const categories = (data ?? []) as unknown as CategoryRow[];
 
     return (
       <div className="space-y-8">
         <AdminPageHeader
           title="إدارة الفئات"
-          description="من هنا ستضيف الفئات وتعدّلها وتحذفها لاحقًا."
+          description="إدارة الفئات مع الأقسام والصور والوصف والترتيب."
           action={
             <a
               href="/admin/categories/new"
@@ -55,46 +95,58 @@ export default async function AdminCategoriesPage() {
           }
         />
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-4">
-          <div className="grid gap-4 md:grid-cols-[1fr_220px]">
-            <input
-              type="text"
-              placeholder="ابحث عن فئة..."
-              className="rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
-            />
-            <select className="rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none">
-              <option>كل الحالات</option>
-              <option>مفعلة</option>
-              <option>غير مفعلة</option>
-            </select>
-          </div>
-        </div>
-
         {categories.length > 0 ? (
-          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
-            <div className="grid grid-cols-4 border-b border-white/10 bg-slate-900/60 px-6 py-4 font-bold text-slate-200">
-              <div>اسم الفئة</div>
-              <div>Slug</div>
-              <div>الترتيب</div>
-              <div>الحالة</div>
-            </div>
-
+          <div className="grid gap-4">
             {categories.map((category) => (
               <div
                 key={category.id}
-                className="grid grid-cols-4 border-b border-white/10 px-6 py-4 text-slate-300 last:border-b-0"
+                className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
               >
-                <div>{category.name}</div>
-                <div>{category.slug}</div>
-                <div>{category.sort_order}</div>
-                <div>{category.is_active ? "مفعلة" : "غير مفعلة"}</div>
+                <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                  <div className="flex gap-4">
+                    <div className="relative h-24 w-24 overflow-hidden rounded-2xl border border-white/10 bg-slate-900">
+                      {category.image_url ? (
+                        <Image
+                          src={category.image_url}
+                          alt={category.name}
+                          fill
+                          className="object-contain p-2"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-3xl">
+                          ✨
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-black">{category.name}</h3>
+                      <p className="mt-2 text-cyan-300">{category.slug}</p>
+                      <p className="mt-3 text-slate-300">
+                        {category.description || "بدون وصف"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 text-sm text-slate-300">
+                    <span className="rounded-full bg-slate-900/70 px-3 py-1">
+                      القسم: {getSectionName(category.category_sections)}
+                    </span>
+                    <span className="rounded-full bg-slate-900/70 px-3 py-1">
+                      ترتيب: {category.sort_order}
+                    </span>
+                    <span className="rounded-full bg-slate-900/70 px-3 py-1">
+                      {category.is_active ? "مفعّلة" : "غير مفعّلة"}
+                    </span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         ) : (
           <AdminEmptyState
             title="لا توجد فئات بعد"
-            description="ابدأ بإضافة أول فئة حتى يتمكن النظام من تنظيم الأسئلة وربطها باللعبة."
+            description="ابدأ بإضافة أول فئة مع القسم الرئيسي والصورة."
             buttonText="إضافة أول فئة"
           />
         )}
