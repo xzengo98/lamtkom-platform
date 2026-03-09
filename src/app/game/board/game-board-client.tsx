@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type Category = {
   id: string;
@@ -73,6 +74,8 @@ export default function GameBoardClient({
   categories,
   questions,
 }: Props) {
+  const router = useRouter();
+
   const [teamOneScore, setTeamOneScore] = useState(0);
   const [teamTwoScore, setTeamTwoScore] = useState(0);
   const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>(
@@ -112,6 +115,44 @@ export default function GameBoardClient({
       };
     });
   }, [categories, questions]);
+
+  const playableQuestionIds = useMemo(() => {
+    return grouped.flatMap((category) =>
+      category.slots
+        .map((slot) => slot.question?.id ?? null)
+        .filter((id): id is string => Boolean(id))
+    );
+  }, [grouped]);
+
+  useEffect(() => {
+    if (playableQuestionIds.length === 0) return;
+
+    const allUsed = playableQuestionIds.every((id) =>
+      usedQuestionIds.includes(id)
+    );
+
+    if (allUsed && !openQuestion) {
+      const params = new URLSearchParams({
+        gameName,
+        teamOne,
+        teamTwo,
+        teamOneScore: String(teamOneScore),
+        teamTwoScore: String(teamTwoScore),
+      });
+
+      router.push(`/game/result?${params.toString()}`);
+    }
+  }, [
+    gameName,
+    teamOne,
+    teamTwo,
+    teamOneScore,
+    teamTwoScore,
+    usedQuestionIds,
+    playableQuestionIds,
+    openQuestion,
+    router,
+  ]);
 
   function openQuestionCard(
     question: QuestionRow,
