@@ -29,6 +29,7 @@ type Props = {
 
 type OpenQuestion = QuestionRow & {
   categoryName: string;
+  slotIndex: number;
 };
 
 export default function GameBoardClient({
@@ -48,17 +49,43 @@ export default function GameBoardClient({
   const [showWinnerPicker, setShowWinnerPicker] = useState(false);
 
   const grouped = useMemo(() => {
-    return categories.map((category) => ({
-      ...category,
-      questions: questions
+    const targetPattern = [200, 200, 400, 400, 600, 600];
+
+    return categories.map((category) => {
+      const categoryQuestions = questions
         .filter((question) => question.category_id === category.id)
-        .sort((a, b) => a.points - b.points),
-    }));
+        .sort((a, b) => {
+          if (a.points !== b.points) return a.points - b.points;
+          return a.question_text.localeCompare(b.question_text, "ar");
+        });
+
+      const slots = targetPattern.map((points, index) => {
+        const matched = categoryQuestions.filter((q) => q.points === points);
+        const samePointIndex =
+          targetPattern.slice(0, index + 1).filter((value) => value === points)
+            .length - 1;
+
+        return {
+          points,
+          question: matched[samePointIndex] ?? null,
+          slotIndex: index,
+        };
+      });
+
+      return {
+        ...category,
+        slots,
+      };
+    });
   }, [categories, questions]);
 
-  function openQuestionCard(question: QuestionRow, categoryName: string) {
+  function openQuestionCard(
+    question: QuestionRow,
+    categoryName: string,
+    slotIndex: number
+  ) {
     if (usedQuestionIds.includes(question.id)) return;
-    setOpenQuestion({ ...question, categoryName });
+    setOpenQuestion({ ...question, categoryName, slotIndex });
     setShowAnswer(false);
     setShowWinnerPicker(false);
   }
@@ -93,7 +120,7 @@ export default function GameBoardClient({
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="border-b border-white/10 bg-white/5 px-6 py-5">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4">
+        <div className="mx-auto flex max-w-[1700px] flex-wrap items-center justify-between gap-4">
           <div>
             <div className="text-sm text-slate-400">اسم اللعبة</div>
             <div className="text-3xl font-black">{gameName}</div>
@@ -116,7 +143,7 @@ export default function GameBoardClient({
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1600px] px-6 py-6">
+      <div className="mx-auto max-w-[1700px] px-6 py-6">
         <div className="mb-6 grid gap-6 lg:grid-cols-[280px_1fr_280px]">
           <TeamCard name={teamOne} score={teamOneScore} />
           <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 text-center">
@@ -128,7 +155,15 @@ export default function GameBoardClient({
           <TeamCard name={teamTwo} score={teamTwoScore} />
         </div>
 
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${Math.max(categories.length, 1)}, minmax(0, 1fr))` }}>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${Math.max(
+              categories.length,
+              1
+            )}, minmax(0, 1fr))`,
+          }}
+        >
           {grouped.map((category) => (
             <div
               key={category.id}
@@ -140,17 +175,18 @@ export default function GameBoardClient({
               </div>
 
               <div className="space-y-4">
-                {[200, 400, 600].map((points) => {
-                  const question = category.questions.find((q) => q.points === points);
+                {category.slots.map((slot) => {
+                  const question = slot.question;
                   const used = question ? usedQuestionIds.includes(question.id) : true;
 
                   return (
                     <button
-                      key={points}
+                      key={`${category.id}-${slot.slotIndex}-${slot.points}`}
                       type="button"
                       disabled={!question || used}
                       onClick={() =>
-                        question && openQuestionCard(question, category.name)
+                        question &&
+                        openQuestionCard(question, category.name, slot.slotIndex)
                       }
                       className={`flex h-24 w-full items-center justify-center rounded-[2rem] text-4xl font-black transition ${
                         !question
@@ -160,7 +196,7 @@ export default function GameBoardClient({
                           : "border border-cyan-400/20 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20"
                       }`}
                     >
-                      {points}
+                      {slot.points}
                     </button>
                   );
                 })}
