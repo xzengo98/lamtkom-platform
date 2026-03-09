@@ -74,7 +74,7 @@ export default async function RegisterPage({
           <form action={registerAction} className="mt-8 space-y-5">
             <div>
               <label className="mb-2 block text-sm font-bold text-slate-200">
-                الاسم الكامل
+               اسم المستخدمٍ
               </label>
               <input
                 name="full_name"

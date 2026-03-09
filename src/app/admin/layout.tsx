@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -15,7 +17,27 @@ const sidebarItems = [
   { label: "إضافة سؤال جديد", href: "/admin/questions/new" },
 ];
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const supabase = getSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    redirect("/");
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="grid min-h-screen xl:grid-cols-[320px_minmax(0,1fr)]">

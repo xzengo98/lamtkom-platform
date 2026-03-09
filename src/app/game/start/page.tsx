@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import StartGameForm from "./start-game-form";
 
@@ -21,8 +23,54 @@ type CategorySection = {
   is_active: boolean;
 };
 
-export default async function GameStartPage() {
+type SearchParams = Promise<{
+  error?: string;
+}>;
+
+export default async function GameStartPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
   const supabase = getSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("games_remaining")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.games_remaining <= 0) {
+    return (
+      <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center">
+          <h1 className="text-4xl font-black">لا توجد ألعاب متبقية</h1>
+          <p className="mt-4 text-lg text-red-200">
+            تم استهلاك عدد الألعاب المتاحة لحسابك. تواصل مع الإدارة أو انتظر
+            تزويد رصيد الألعاب.
+          </p>
+
+          <div className="mt-8">
+            <Link
+              href="/"
+              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-white"
+            >
+              الرجوع للرئيسية
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const [sectionsResult, categoriesResult] = await Promise.all([
     supabase
@@ -72,6 +120,14 @@ export default async function GameStartPage() {
             اختر الفئات، أدخل اسم اللعبة واسمَي الفريقين، ثم ابدأ لوحة اللعبة
             الاحترافية.
           </p>
+          <div className="mt-4 text-cyan-300">
+            الألعاب المتبقية: {profile.games_remaining}
+          </div>
+          {params.error ? (
+            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
+              {params.error}
+            </div>
+          ) : null}
         </div>
 
         <StartGameForm sections={sections} categories={categories} />
