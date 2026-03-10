@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import RichTextEditor from "@/components/admin/rich-text-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -54,10 +55,6 @@ export default async function EditQuestionPage({
     const points = Number(formData.get("points") || 200);
     const is_active = formData.get("is_active") === "on";
 
-    const media_type =
-      (formData.get("media_type")?.toString() as "none" | "image" | "video") ||
-      "none";
-    const media_url = formData.get("media_url")?.toString().trim() || null;
     const year_tolerance_before = Number(formData.get("year_tolerance_before") || 0);
     const year_tolerance_after = Number(formData.get("year_tolerance_after") || 0);
 
@@ -73,8 +70,6 @@ export default async function EditQuestionPage({
         category_id,
         points,
         is_active,
-        media_type,
-        media_url,
         year_tolerance_before,
         year_tolerance_after,
       })
@@ -88,14 +83,14 @@ export default async function EditQuestionPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-8 text-white">
+    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <div className="flex items-center justify-between gap-4">
+        <div className="mb-6 rounded-[2rem] border border-white/10 bg-white/5 p-5 md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-4xl font-black">تعديل السؤال</h1>
+              <h1 className="text-3xl font-black md:text-4xl">تعديل السؤال</h1>
               <p className="mt-2 text-slate-300">
-                عدّل نص السؤال والإجابة والوسائط وسماحية السنوات.
+                عدّل السؤال والإجابة ويمكنك إدراج صور أو فيديو داخل المحتوى مباشرة.
               </p>
             </div>
 
@@ -110,52 +105,24 @@ export default async function EditQuestionPage({
 
         <form
           action={updateQuestion}
-          className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
+          className="rounded-[2rem] border border-white/10 bg-white/5 p-4 md:p-6"
         >
-          <div>
-            <label className="mb-2 block text-sm font-bold">نص السؤال</label>
-            <textarea
+          <div className="space-y-6">
+            <RichTextEditor
               name="question_text"
-              rows={5}
-              defaultValue={question.question_text}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
+              label="نص السؤال"
+              defaultValue={question.question_text ?? ""}
+              placeholder="اكتب السؤال هنا"
+              minHeight={220}
             />
-          </div>
 
-          <div className="mt-6">
-            <label className="mb-2 block text-sm font-bold">الإجابة</label>
-            <textarea
+            <RichTextEditor
               name="answer_text"
-              rows={4}
-              defaultValue={question.answer_text}
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
+              label="الإجابة"
+              defaultValue={question.answer_text ?? ""}
+              placeholder="اكتب الإجابة هنا"
+              minHeight={180}
             />
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-bold">نوع الوسائط</label>
-              <select
-                name="media_type"
-                defaultValue={question.media_type ?? "none"}
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
-              >
-                <option value="none">بدون وسائط</option>
-                <option value="image">صورة</option>
-                <option value="video">فيديو</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold">رابط الصورة أو الفيديو</label>
-              <input
-                name="media_url"
-                type="url"
-                defaultValue={question.media_url ?? ""}
-                placeholder="https://example.com/file.jpg أو https://youtube.com/watch?v=..."
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
-              />
-            </div>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -233,7 +200,7 @@ export default async function EditQuestionPage({
             </label>
           </div>
 
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="mt-8 flex flex-wrap justify-end gap-3">
             <Link
               href="/admin/questions"
               className="rounded-2xl border border-white/10 px-5 py-3 font-semibold text-slate-300"

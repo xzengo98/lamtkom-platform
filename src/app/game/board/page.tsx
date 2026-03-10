@@ -4,12 +4,46 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+type SearchParams = Promise<{
+  sessionId?: string;
+}>;
+
+type GameSessionRow = {
+  id: string;
+  user_id: string;
+  game_name: string;
+  team_one_name: string;
+  team_two_name: string;
+  selected_category_ids: string[] | null;
+  board_state: Record<string, unknown> | null;
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  sort_order?: number | null;
+};
+
+type QuestionRow = {
+  id: string;
+  question_text: string;
+  answer_text: string | null;
+  points: number;
+  is_active: boolean;
+  is_used: boolean;
+  category_id: string;
+  media_type?: "none" | "image" | "video" | null;
+  media_url?: string | null;
+  year_tolerance_before?: number | null;
+  year_tolerance_after?: number | null;
+};
+
 export default async function GameBoardPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    sessionId?: string;
-  }>;
+  searchParams: SearchParams;
 }) {
   const params = await searchParams;
   const sessionId = params.sessionId;
@@ -28,45 +62,108 @@ export default async function GameBoardPage({
     redirect("/login");
   }
 
-  const { data: session } = await supabase
+  const { data: sessionData } = await supabase
     .from("game_sessions")
     .select("*")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .single();
 
+  const session = sessionData as GameSessionRow | null;
+
   if (!session) {
     redirect("/game/start");
   }
 
-  const categoryIds = Array.isArray(session.selected_category_ids)
-    ? session.selected_category_ids
+  const selectedRaw: string[] = Array.isArray(session.selected_category_ids)
+    ? session.selected_category_ids.map((value: string) => String(value))
     : [];
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name, slug, image_url")
-    .in("id", categoryIds)
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
+  let categories: CategoryRow[] = [];
 
-  const { data: questions } = await supabase
-    .from("questions")
-    .select(`
-      id,
-      question_text,
-      answer_text,
-      points,
-      is_active,
-      is_used,
-      category_id,
-      media_type,
-      media_url,
-      year_tolerance_before,
-      year_tolerance_after
-    `)
-    .in("category_id", categoryIds)
-    .eq("is_active", true);
+  if (selectedRaw.length > 0) {
+    const { data: categoriesByIdData } = await supabase
+      .from("categories")
+      .select("id, name, slug, image_url, sort_order")
+      .in("id", selectedRaw)
+      .eq("is_active", true);
+
+    const categoriesById = (categoriesByIdData ?? []) as CategoryRow[];
+
+    if (categoriesById.length > 0) {
+      const orderMap = new Map<string, number>(
+        selectedRaw.map((value: string, index: number) => [value, index])
+      );
+
+      categories = [...categoriesById]
+        .sort((a: CategoryRow, b: CategoryRow) => {
+          const aOrder = orderMap.get(a.id) ?? 999;
+          const bOrder = orderMap.get(b.id) ?? 999;
+          return aOrder - bOrder;
+        })
+        .map((category: CategoryRow) => ({
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          image_url: category.image_url,
+        }));
+    } else {
+      const { data: categoriesBySlugData } = await supabase
+        .from("categories")
+        .select("id, name, slug, image_url, sort_order")
+        .in("slug", selectedRaw)
+        .eq("is_active", true);
+
+      const categoriesBySlug = (categoriesBySlugData ?? []) as CategoryRow[];
+
+      if (categoriesBySlug.length > 0) {
+        const orderMap = new Map<string, number>(
+          selectedRaw.map((value: string, index: number) => [value, index])
+        );
+
+        categories = [...categoriesBySlug]
+          .sort((a: CategoryRow, b: CategoryRow) => {
+            const aOrder = orderMap.get(a.slug) ?? 999;
+            const bOrder = orderMap.get(b.slug) ?? 999;
+            return aOrder - bOrder;
+          })
+          .map((category: CategoryRow) => ({
+            id: category.id,
+            name: category.name,
+            slug: category.slug,
+            image_url: category.image_url,
+          }));
+      }
+    }
+  }
+
+  const categoryIds: string[] = categories.map(
+    (category: CategoryRow) => category.id
+  );
+
+  let questions: QuestionRow[] = [];
+
+  if (categoryIds.length > 0) {
+    const { data: questionsData } = await supabase
+      .from("questions")
+      .select(`
+        id,
+        question_text,
+        answer_text,
+        points,
+        is_active,
+        is_used,
+        category_id,
+        media_type,
+        media_url,
+        year_tolerance_before,
+        year_tolerance_after
+      `)
+      .in("category_id", categoryIds)
+      .eq("is_active", true);
+
+    questions = (questionsData ?? []) as QuestionRow[];
+  }
 
   return (
     <GameBoardClient
@@ -76,8 +173,8 @@ export default async function GameBoardPage({
       gameName={session.game_name}
       teamOne={session.team_one_name}
       teamTwo={session.team_two_name}
-      categories={categories ?? []}
-      questions={questions ?? []}
+      categories={categories}
+      questions={questions}
     />
   );
 }

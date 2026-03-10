@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import RichTextEditor from "@/components/admin/rich-text-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -40,10 +41,6 @@ export default async function NewQuestionPage() {
     const points = Number(formData.get("points") || 200);
     const is_active = formData.get("is_active") === "on";
 
-    const media_type =
-      (formData.get("media_type")?.toString() as "none" | "image" | "video") ||
-      "none";
-    const media_url = formData.get("media_url")?.toString().trim() || null;
     const year_tolerance_before = Number(formData.get("year_tolerance_before") || 0);
     const year_tolerance_after = Number(formData.get("year_tolerance_after") || 0);
 
@@ -57,10 +54,10 @@ export default async function NewQuestionPage() {
       category_id,
       points,
       is_active,
-      media_type,
-      media_url,
       year_tolerance_before,
       year_tolerance_after,
+      media_type: "none",
+      media_url: null,
     });
 
     if (error) {
@@ -71,14 +68,14 @@ export default async function NewQuestionPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-8 text-white">
+    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <div className="flex items-center justify-between gap-4">
+        <div className="mb-6 rounded-[2rem] border border-white/10 bg-white/5 p-5 md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-4xl font-black">إضافة سؤال جديد</h1>
+              <h1 className="text-3xl font-black md:text-4xl">إضافة سؤال جديد</h1>
               <p className="mt-2 text-slate-300">
-                أضف سؤالًا مع الإجابة والنقاط والفئة، ويمكنك إرفاق صورة أو فيديو وسماحية سنوات.
+                أضف سؤالًا مع الإجابة والنقاط والفئة، ويمكنك إدراج صور أو فيديو داخل السؤال أو الإجابة مباشرة.
               </p>
             </div>
 
@@ -93,51 +90,22 @@ export default async function NewQuestionPage() {
 
         <form
           action={createQuestion}
-          className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
+          className="rounded-[2rem] border border-white/10 bg-white/5 p-4 md:p-6"
         >
-          <div>
-            <label className="mb-2 block text-sm font-bold">نص السؤال</label>
-            <textarea
+          <div className="space-y-6">
+            <RichTextEditor
               name="question_text"
-              rows={5}
-              placeholder="اكتب السؤال هنا"
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
+              label="نص السؤال"
+              placeholder="اكتب السؤال هنا، ويمكنك إدراج صورة أو فيديو داخله"
+              minHeight={220}
             />
-          </div>
 
-          <div className="mt-6">
-            <label className="mb-2 block text-sm font-bold">الإجابة</label>
-            <textarea
+            <RichTextEditor
               name="answer_text"
-              rows={4}
-              placeholder="اكتب الإجابة الصحيحة هنا"
-              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
+              label="الإجابة"
+              placeholder="اكتب الإجابة هنا، ويمكنك إدراج صورة أو فيديو داخلها"
+              minHeight={180}
             />
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-bold">نوع الوسائط</label>
-              <select
-                name="media_type"
-                defaultValue="none"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
-              >
-                <option value="none">بدون وسائط</option>
-                <option value="image">صورة</option>
-                <option value="video">فيديو</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold">رابط الصورة أو الفيديو</label>
-              <input
-                name="media_url"
-                type="url"
-                placeholder="https://example.com/file.jpg أو https://youtube.com/watch?v=..."
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
-              />
-            </div>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -216,7 +184,7 @@ export default async function NewQuestionPage() {
             </label>
           </div>
 
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="mt-8 flex flex-wrap justify-end gap-3">
             <Link
               href="/admin/questions"
               className="rounded-2xl border border-white/10 px-5 py-3 font-semibold text-slate-300"

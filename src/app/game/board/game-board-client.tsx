@@ -2,14 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import {
-  getYouTubeEmbedUrl,
-  isDirectImage,
-  isDirectVideo,
-} from "@/lib/media";
 
 type Category = {
   id: string;
@@ -501,23 +495,7 @@ export default function GameBoardClient({
                     </div>
                   ) : null}
 
-                  <h2 className="text-xl font-black leading-[1.8] sm:text-2xl md:text-5xl md:leading-[1.7]">
-                    {openQuestion.question_text}
-                  </h2>
-
-                  {openQuestion.media_url ? (
-                    <div className="mt-6">
-                      <QuestionMedia
-                        mediaType={
-                          (openQuestion.media_type ?? "none") as
-                            | "none"
-                            | "image"
-                            | "video"
-                        }
-                        mediaUrl={openQuestion.media_url}
-                      />
-                    </div>
-                  ) : null}
+                  <RichHtmlContent html={openQuestion.question_text} />
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:gap-4">
@@ -551,13 +529,11 @@ export default function GameBoardClient({
                     </div>
                   ) : null}
 
-                  <div className="text-sm text-slate-300 md:text-lg">
+                  <div className="mb-4 text-sm text-slate-300 md:text-lg">
                     الإجابة الصحيحة
                   </div>
 
-                  <h2 className="mt-4 text-2xl font-black leading-[1.7] sm:text-3xl md:mt-6 md:text-6xl md:leading-[1.5]">
-                    {openQuestion.answer_text ?? "لا توجد إجابة"}
-                  </h2>
+                  <RichHtmlContent html={openQuestion.answer_text ?? ""} />
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:gap-4">
@@ -802,18 +778,13 @@ function BoardCategoryColumn({
 
           <div className="relative flex h-full items-center justify-center px-3">
             {category.image_url ? (
-              <div
-                className={`relative ${
+              <img
+                src={category.image_url}
+                alt={category.name}
+                className={`object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
                   compact ? "h-[70px] w-[70px]" : "h-[110px] w-[110px]"
                 }`}
-              >
-                <Image
-                  src={category.image_url}
-                  alt={category.name}
-                  fill
-                  className="object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
-                />
-              </div>
+              />
             ) : (
               <div className={compact ? "text-5xl" : "text-7xl"}>
                 {visual.emoji}
@@ -1017,65 +988,11 @@ function SideTeamCard({
   );
 }
 
-function QuestionMedia({
-  mediaType,
-  mediaUrl,
-}: {
-  mediaType: "none" | "image" | "video";
-  mediaUrl: string;
-}) {
-  if (!mediaUrl || mediaType === "none") return null;
-
-  if (mediaType === "image") {
-    return (
-      <div className="mx-auto max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-900/50 p-3">
-        <img
-          src={mediaUrl}
-          alt="Question media"
-          className="mx-auto max-h-[420px] w-auto max-w-full rounded-2xl object-contain"
-        />
-      </div>
-    );
-  }
-
-  if (mediaType === "video") {
-    const youtubeEmbed = getYouTubeEmbedUrl(mediaUrl);
-
-    if (youtubeEmbed) {
-      return (
-        <div className="mx-auto max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-900/50 p-3">
-          <div className="relative aspect-video w-full overflow-hidden rounded-2xl">
-            <iframe
-              src={youtubeEmbed}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      );
-    }
-
-    if (isDirectVideo(mediaUrl)) {
-      return (
-        <div className="mx-auto max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-900/50 p-3">
-          <video
-            src={mediaUrl}
-            controls
-            className="mx-auto aspect-video w-full rounded-2xl"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="mx-auto max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-900/50 p-3">
-        <div className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-6 text-sm text-slate-300">
-          هذا الرابط ليس فيديو مباشرًا أو يوتيوب قابلًا للتضمين.
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+function RichHtmlContent({ html }: { html: string }) {
+  return (
+    <div
+      className="rich-html-content text-right"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
