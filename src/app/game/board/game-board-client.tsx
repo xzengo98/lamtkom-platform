@@ -114,6 +114,7 @@ export default function GameBoardClient({
   const [showWinnerPicker, setShowWinnerPicker] = useState(
     Boolean(initialBoardState?.showWinnerPicker ?? false)
   );
+  const [modalBusy, setModalBusy] = useState(false);
   const [mobileScale, setMobileScale] = useState(1);
   const [mobileHeight, setMobileHeight] = useState(MOBILE_BOARD_HEIGHT);
 
@@ -307,28 +308,76 @@ export default function GameBoardClient({
     categoryName: string,
     slotIndex: number
   ) {
-    if (usedQuestionIds.includes(question.id)) return;
+    if (usedQuestionIds.includes(question.id) || modalBusy) return;
+
     setOpenQuestion({ ...question, categoryName, slotIndex });
     setShowAnswer(false);
     setShowWinnerPicker(false);
   }
 
   function closeModal() {
+    if (modalBusy) return;
+    setModalBusy(true);
+
     setOpenQuestion(null);
     setShowAnswer(false);
     setShowWinnerPicker(false);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 180);
   }
 
   function revealAnswer() {
+    if (modalBusy || !openQuestion) return;
+    setModalBusy(true);
+
     setShowAnswer(true);
+    setShowWinnerPicker(false);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 180);
   }
 
   function goToWinnerPicker() {
+    if (modalBusy || !openQuestion) return;
+    setModalBusy(true);
+
     setShowWinnerPicker(true);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 180);
+  }
+
+  function backToQuestion() {
+    if (modalBusy || !openQuestion) return;
+    setModalBusy(true);
+
+    setShowAnswer(false);
+    setShowWinnerPicker(false);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 180);
+  }
+
+  function backToAnswer() {
+    if (modalBusy || !openQuestion) return;
+    setModalBusy(true);
+
+    setShowWinnerPicker(false);
+    setShowAnswer(true);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 180);
   }
 
   function awardPoints(winner: "teamOne" | "teamTwo" | "none") {
-    if (!openQuestion) return;
+    if (!openQuestion || modalBusy) return;
+    setModalBusy(true);
 
     if (winner === "teamOne") {
       setTeamOneScore((prev) => prev + openQuestion.points);
@@ -337,7 +386,13 @@ export default function GameBoardClient({
     }
 
     setUsedQuestionIds((prev) => [...prev, openQuestion.id]);
-    closeModal();
+    setOpenQuestion(null);
+    setShowAnswer(false);
+    setShowWinnerPicker(false);
+
+    setTimeout(() => {
+      setModalBusy(false);
+    }, 220);
   }
 
   function increaseTeamOneScore() {
@@ -482,7 +537,7 @@ export default function GameBoardClient({
                   </div>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-orange-400/40 bg-[#35363a] px-4 py-6 text-center md:rounded-[2rem] md:px-6 md:py-10">
+                <div className="rounded-[1.5rem] border border-orange-400/40 bg-[#35363a] px-5 py-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:rounded-[2rem] md:px-10 md:py-12">
                   {(openQuestion.year_tolerance_before ||
                     openQuestion.year_tolerance_after) ? (
                     <div className="mb-4 flex justify-center">
@@ -500,7 +555,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 md:px-6"
+                    disabled={modalBusy}
+                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 disabled:opacity-50 md:px-6"
                   >
                     إغلاق
                   </button>
@@ -508,7 +564,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={revealAnswer}
-                    className="rounded-2xl bg-green-600 px-6 py-3 text-lg font-black text-white md:px-8 md:py-4 md:text-2xl"
+                    disabled={modalBusy}
+                    className="rounded-2xl bg-green-600 px-6 py-3 text-lg font-black text-white disabled:opacity-50 md:px-8 md:py-4 md:text-2xl"
                   >
                     الإجابة
                   </button>
@@ -516,7 +573,7 @@ export default function GameBoardClient({
               </div>
             ) : showAnswer && !showWinnerPicker ? (
               <div className="space-y-5 md:space-y-8">
-                <div className="rounded-[1.5rem] border border-orange-400/40 bg-[#35363a] px-4 py-6 text-center md:rounded-[2rem] md:px-6 md:py-10">
+                <div className="rounded-[1.5rem] border border-orange-400/40 bg-[#35363a] px-5 py-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] md:rounded-[2rem] md:px-10 md:py-12">
                   {(openQuestion.year_tolerance_before ||
                     openQuestion.year_tolerance_after) ? (
                     <div className="mb-4 flex justify-center">
@@ -537,8 +594,9 @@ export default function GameBoardClient({
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:gap-4">
                   <button
                     type="button"
-                    onClick={() => setShowAnswer(false)}
-                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 md:px-6"
+                    onClick={backToQuestion}
+                    disabled={modalBusy}
+                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 disabled:opacity-50 md:px-6"
                   >
                     ارجع للسؤال
                   </button>
@@ -546,7 +604,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={goToWinnerPicker}
-                    className="rounded-2xl bg-red-600 px-6 py-3 text-lg font-black text-white md:px-8 md:py-4 md:text-2xl"
+                    disabled={modalBusy}
+                    className="rounded-2xl bg-red-600 px-6 py-3 text-lg font-black text-white disabled:opacity-50 md:px-8 md:py-4 md:text-2xl"
                   >
                     أي فريق؟
                   </button>
@@ -560,7 +619,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={() => awardPoints("teamOne")}
-                    className="rounded-[1.5rem] bg-red-600 px-5 py-5 text-2xl font-black text-white md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
+                    disabled={modalBusy}
+                    className="rounded-[1.5rem] bg-red-600 px-5 py-5 text-2xl font-black text-white disabled:opacity-50 md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
                   >
                     {teamOne}
                   </button>
@@ -568,7 +628,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={() => awardPoints("teamTwo")}
-                    className="rounded-[1.5rem] bg-red-600 px-5 py-5 text-2xl font-black text-white md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
+                    disabled={modalBusy}
+                    className="rounded-[1.5rem] bg-red-600 px-5 py-5 text-2xl font-black text-white disabled:opacity-50 md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
                   >
                     {teamTwo}
                   </button>
@@ -576,7 +637,8 @@ export default function GameBoardClient({
                   <button
                     type="button"
                     onClick={() => awardPoints("none")}
-                    className="rounded-[1.5rem] bg-slate-500 px-5 py-5 text-2xl font-black text-white md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
+                    disabled={modalBusy}
+                    className="rounded-[1.5rem] bg-slate-500 px-5 py-5 text-2xl font-black text-white disabled:opacity-50 md:rounded-[2rem] md:px-8 md:py-8 md:text-4xl"
                   >
                     ولا أحد
                   </button>
@@ -585,8 +647,9 @@ export default function GameBoardClient({
                 <div className="flex justify-center">
                   <button
                     type="button"
-                    onClick={() => setShowWinnerPicker(false)}
-                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 md:px-6"
+                    onClick={backToAnswer}
+                    disabled={modalBusy}
+                    className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 disabled:opacity-50 md:px-6"
                   >
                     العودة للإجابة
                   </button>
@@ -651,9 +714,9 @@ function BoardContent({
   const sidebarWidth = compact ? 170 : 250;
   const gap = compact ? 12 : 16;
   const columns =
-  categoryCount > 0
-    ? `repeat(${categoryCount}, minmax(0, 1fr)) ${sidebarWidth}px`
-    : `${sidebarWidth}px`;
+    categoryCount > 0
+      ? `repeat(${categoryCount}, minmax(0, 1fr)) ${sidebarWidth}px`
+      : `${sidebarWidth}px`;
 
   return (
     <div className="h-full w-full" dir="ltr">
@@ -686,11 +749,13 @@ function BoardContent({
             compact={compact}
           />
         ))}
+
         {grouped.length === 0 ? (
           <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-8 text-center text-red-200">
             لا توجد فئات أو أسئلة جاهزة لهذه الجلسة.
           </div>
         ) : null}
+
         <div className="flex flex-col gap-3" dir="rtl">
           <SideTeamCard
             compact={compact}
@@ -996,21 +1061,34 @@ function SideTeamCard({
 function RichHtmlContent({ html }: { html: string }) {
   return (
     <>
-      <div
-        className="rich-html-content text-right"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div className="rich-html-shell">
+        <div
+          className="rich-html-content"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </div>
 
       <style jsx global>{`
+        .rich-html-shell {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
         .rich-html-content {
+          width: 100%;
+          max-width: 980px;
+          margin: 0 auto;
+          text-align: center;
           color: white;
-          font-size: 1.4rem;
+          font-size: 1.25rem;
           line-height: 1.9;
         }
 
         @media (min-width: 768px) {
           .rich-html-content {
-            font-size: 2.2rem;
+            font-size: 2rem;
             line-height: 1.8;
           }
         }
@@ -1019,7 +1097,8 @@ function RichHtmlContent({ html }: { html: string }) {
         .rich-html-content h2,
         .rich-html-content h3 {
           font-weight: 900;
-          margin: 0 0 14px;
+          margin: 0 0 16px;
+          text-align: center;
         }
 
         .rich-html-content h1 {
@@ -1034,14 +1113,36 @@ function RichHtmlContent({ html }: { html: string }) {
           font-size: 1.5rem;
         }
 
+        @media (min-width: 768px) {
+          .rich-html-content h1 {
+            font-size: 3rem;
+          }
+
+          .rich-html-content h2 {
+            font-size: 2.4rem;
+          }
+
+          .rich-html-content h3 {
+            font-size: 2rem;
+          }
+        }
+
+        .rich-html-content p,
+        .rich-html-content div,
+        .rich-html-content span {
+          text-align: center;
+        }
+
         .rich-html-content p {
-          margin: 0 0 12px;
+          margin: 0 0 14px;
         }
 
         .rich-html-content ul,
         .rich-html-content ol {
-          margin: 12px 0;
-          padding-right: 24px;
+          margin: 14px auto;
+          padding: 0 24px;
+          display: inline-block;
+          text-align: right;
         }
 
         .rich-html-content ul {
@@ -1054,36 +1155,40 @@ function RichHtmlContent({ html }: { html: string }) {
 
         .rich-html-content img {
           max-width: 100%;
+          max-height: 420px;
           height: auto;
           display: block;
-          margin: 18px auto;
-          border-radius: 18px;
+          margin: 22px auto;
+          border-radius: 20px;
+          object-fit: contain;
         }
 
         .rich-html-content video {
           width: 100%;
-          max-width: 100%;
+          max-width: 900px;
+          max-height: 420px;
           display: block;
-          margin: 18px auto;
-          border-radius: 18px;
+          margin: 22px auto;
+          border-radius: 20px;
         }
 
         .rich-html-content iframe {
           width: 100%;
           min-height: 320px;
           border: 0;
-          border-radius: 18px;
-          margin: 18px auto;
+          border-radius: 20px;
+          margin: 22px auto;
           display: block;
         }
 
         .rich-html-content .video-wrap {
           position: relative;
           width: 100%;
+          max-width: 900px;
           padding-top: 56.25%;
           overflow: hidden;
-          border-radius: 18px;
-          margin: 18px 0;
+          border-radius: 20px;
+          margin: 22px auto;
         }
 
         .rich-html-content .video-wrap iframe {
