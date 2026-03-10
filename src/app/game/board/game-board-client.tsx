@@ -300,19 +300,19 @@ export default function GameBoardClient({
       : "tie";
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="border-b border-white/10 bg-gradient-to-l from-white/10 via-white/5 to-transparent px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5">
+    <main className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+      <div className="border-b border-white/10 bg-gradient-to-l from-white/10 via-white/5 to-transparent px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
         <div className="mx-auto max-w-[1800px]">
           <div className="grid grid-cols-2 items-center gap-2 md:flex md:flex-wrap md:items-center md:justify-between md:gap-4">
             <div className="order-2 text-right md:order-1">
               <div className="text-[10px] text-slate-400 sm:text-xs">اسم اللعبة</div>
-              <div className="text-lg font-black sm:text-xl md:text-3xl">
+              <div className="text-base font-black sm:text-lg md:text-3xl">
                 {gameName}
               </div>
             </div>
 
             <div className="order-1 col-span-2 flex justify-center md:order-2">
-              <div className="rounded-full bg-orange-400 px-4 py-2 text-center text-xs font-black text-slate-950 sm:px-6 sm:text-sm md:px-8 md:py-3 md:text-xl">
+              <div className="rounded-full bg-orange-400 px-4 py-2 text-center text-[11px] font-black text-slate-950 sm:px-6 sm:text-sm md:px-8 md:py-3 md:text-xl">
                 الحكم هو من يحدد الفريق الصحيح
               </div>
             </div>
@@ -320,13 +320,13 @@ export default function GameBoardClient({
             <div className="order-3 col-span-2 flex justify-start gap-2 md:col-span-1 md:justify-end md:gap-3">
               <Link
                 href="/game/start"
-                className="rounded-2xl border border-white/10 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white sm:px-4 sm:text-sm md:px-4 md:py-3"
+                className="rounded-2xl border border-white/10 px-3 py-2 text-[11px] font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white sm:px-4 sm:text-sm md:px-4 md:py-3"
               >
                 لعبة جديدة
               </Link>
               <Link
                 href="/"
-                className="rounded-2xl border border-white/10 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white sm:px-4 sm:text-sm md:px-4 md:py-3"
+                className="rounded-2xl border border-white/10 px-3 py-2 text-[11px] font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white sm:px-4 sm:text-sm md:px-4 md:py-3"
               >
                 الخروج
               </Link>
@@ -335,8 +335,8 @@ export default function GameBoardClient({
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1800px] px-2 py-3 sm:px-3 sm:py-4 md:px-6 md:py-6">
-        <div className="mb-3 grid grid-cols-[1fr_1.25fr_1fr] gap-2 sm:mb-4 sm:gap-3 md:mb-8 md:grid-cols-[280px_1fr_280px] md:gap-6">
+      <div className="mx-auto max-w-[1800px] px-2 py-2 sm:px-3 sm:py-3 md:px-6 md:py-5">
+        <div className="mb-2 grid grid-cols-[92px_1fr_92px] gap-2 sm:mb-3 sm:grid-cols-[110px_1fr_110px] sm:gap-3 md:mb-6 md:grid-cols-[220px_1fr_220px] md:gap-5">
           <TeamCard
             name={teamOne}
             score={teamOneScore}
@@ -347,15 +347,15 @@ export default function GameBoardClient({
             isTie={leadingTeam === "tie"}
           />
 
-          <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-3 text-center sm:rounded-[1.4rem] sm:p-4 md:rounded-[2rem] md:p-6">
+          <div className="rounded-[1rem] border border-white/10 bg-white/5 px-2 py-3 text-center sm:rounded-[1.2rem] sm:px-3 sm:py-4 md:rounded-[2rem] md:px-6 md:py-6">
             <div className="text-[10px] text-slate-400 sm:text-xs md:text-sm">
               الجولة الحالية
             </div>
-            <div className="mt-1 text-lg font-black text-cyan-300 sm:text-xl md:mt-3 md:text-4xl">
+            <div className="mt-1 line-clamp-1 text-base font-black text-cyan-300 sm:text-xl md:mt-2 md:text-4xl">
               {gameName}
             </div>
 
-            <div className="mt-2 text-[10px] font-bold sm:text-xs md:mt-4 md:text-sm">
+            <div className="mt-1 min-h-[18px] text-[10px] font-bold sm:text-xs md:mt-3 md:min-h-[24px] md:text-sm">
               {leadingTeam === "tie" ? (
                 <span className="text-slate-400">لا يوجد متصدر حاليًا</span>
               ) : (
@@ -384,10 +384,10 @@ export default function GameBoardClient({
             return (
               <div
                 key={category.id}
-                className="rounded-[1rem] border border-white/10 bg-white/5 p-2 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.7)] sm:rounded-[1.2rem] sm:p-2.5 md:rounded-[2.25rem] md:p-4"
+                className="rounded-[0.95rem] border border-white/10 bg-white/5 p-1.5 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.7)] sm:rounded-[1.1rem] sm:p-2 md:rounded-[2rem] md:p-4"
               >
-                <div className="grid grid-cols-[42px_1fr_42px] gap-1 sm:grid-cols-[48px_1fr_48px] sm:gap-2 md:grid-cols-[76px_1fr_76px] md:gap-3">
-                  <div className="space-y-1 sm:space-y-2 md:space-y-3">
+                <div className="grid grid-cols-[38px_1fr_38px] gap-1 sm:grid-cols-[42px_1fr_42px] sm:gap-1.5 md:grid-cols-[72px_1fr_72px] md:gap-3">
+                  <div className="space-y-1 md:space-y-3">
                     {category.slots
                       .filter((_, i) => i % 2 === 0)
                       .map((slot) => (
@@ -402,15 +402,15 @@ export default function GameBoardClient({
                       ))}
                   </div>
 
-                  <div className="overflow-hidden rounded-[1rem] border border-white/10 bg-slate-900/70 sm:rounded-[1.2rem] md:rounded-[2rem]">
+                  <div className="overflow-hidden rounded-[0.95rem] border border-white/10 bg-slate-900/70 sm:rounded-[1.1rem] md:rounded-[1.8rem]">
                     <div
-                      className={`relative flex h-[118px] flex-col overflow-hidden bg-gradient-to-br sm:h-[135px] md:h-[260px] ${visual.gradient}`}
+                      className={`relative flex h-[104px] flex-col overflow-hidden bg-gradient-to-br sm:h-[118px] md:h-[250px] ${visual.gradient}`}
                     >
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_30%)]" />
 
-                      <div className="relative flex flex-1 items-center justify-center px-2 md:px-4">
+                      <div className="relative flex flex-1 items-center justify-center px-1 md:px-4">
                         {category.image_url ? (
-                          <div className="relative h-[34px] w-[34px] sm:h-[42px] sm:w-[42px] md:h-[130px] md:w-[130px]">
+                          <div className="relative h-[34px] w-[34px] sm:h-[40px] sm:w-[40px] md:h-[118px] md:w-[118px]">
                             <Image
                               src={category.image_url}
                               alt={category.name}
@@ -419,24 +419,21 @@ export default function GameBoardClient({
                             />
                           </div>
                         ) : (
-                          <div className="select-none text-[24px] opacity-90 sm:text-[30px] md:text-[78px]">
+                          <div className="select-none text-[22px] opacity-90 sm:text-[26px] md:text-[72px]">
                             {visual.emoji}
                           </div>
                         )}
                       </div>
 
-                      <div className="relative border-t border-white/10 bg-slate-950/70 px-2 py-2 text-center md:px-4 md:py-4">
-                        <div className="line-clamp-2 text-[12px] font-black leading-4 sm:text-[13px] sm:leading-5 md:text-2xl md:leading-normal">
+                      <div className="relative border-t border-white/10 bg-slate-950/75 px-2 py-2 text-center md:px-4 md:py-4">
+                        <div className="line-clamp-2 text-[11px] font-black leading-4 sm:text-[12px] sm:leading-4 md:text-2xl md:leading-normal">
                           {category.name}
-                        </div>
-                        <div className="mt-1 text-[9px] text-cyan-300 sm:text-[10px] md:text-sm">
-                          {category.slug}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1 sm:space-y-2 md:space-y-3">
+                  <div className="space-y-1 md:space-y-3">
                     {category.slots
                       .filter((_, i) => i % 2 === 1)
                       .map((slot) => (
@@ -591,7 +588,7 @@ function PointsButton({
       type="button"
       disabled={!question || used}
       onClick={() => question && onOpen(question)}
-      className={`flex h-[36px] w-full items-center justify-center rounded-[1rem] text-sm font-black transition sm:h-[40px] sm:rounded-[1.1rem] sm:text-base md:h-[52px] md:rounded-[1.4rem] md:text-2xl ${
+      className={`flex h-[32px] w-full items-center justify-center rounded-[0.85rem] text-[13px] font-black transition sm:h-[36px] sm:rounded-[0.95rem] sm:text-sm md:h-[50px] md:rounded-[1.3rem] md:text-2xl ${
         !question
           ? "cursor-not-allowed border border-white/5 bg-slate-900/30 text-slate-700"
           : used
@@ -634,8 +631,8 @@ function TeamCard({
   const leadingWrapper =
     isLeading && !isTie
       ? accent === "orange"
-        ? "border-orange-300/40 bg-orange-400/10 shadow-[0_0_30px_rgba(251,146,60,0.15)]"
-        : "border-cyan-300/40 bg-cyan-400/10 shadow-[0_0_30px_rgba(34,211,238,0.15)]"
+        ? "border-orange-300/40 bg-orange-400/10 shadow-[0_0_28px_rgba(251,146,60,0.14)]"
+        : "border-cyan-300/40 bg-cyan-400/10 shadow-[0_0_28px_rgba(34,211,238,0.14)]"
       : "border-white/10 bg-white/5";
 
   const leadingBadge =
@@ -647,32 +644,34 @@ function TeamCard({
 
   return (
     <div
-      className={`rounded-[1.2rem] border p-3 text-center transition sm:rounded-[1.4rem] sm:p-4 md:rounded-[2rem] md:p-5 ${leadingWrapper}`}
+      className={`rounded-[1rem] border p-2 text-center transition sm:rounded-[1.15rem] sm:p-3 md:rounded-[2rem] md:p-5 ${leadingWrapper}`}
     >
-      <div className="mb-2 flex min-h-[24px] items-center justify-center md:mb-3">
-        <div className={`rounded-full border px-3 py-1 text-[10px] font-bold sm:text-xs ${leadingBadge}`}>
+      <div className="mb-1 flex min-h-[18px] items-center justify-center sm:min-h-[20px] md:mb-3 md:min-h-[24px]">
+        <div
+          className={`rounded-full border px-2 py-0.5 text-[8px] font-bold sm:px-3 sm:py-1 sm:text-[10px] ${leadingBadge}`}
+        >
           متصدر
         </div>
       </div>
 
       <div
-        className={`rounded-xl px-2 py-2 text-sm font-black sm:text-base md:rounded-2xl md:px-4 md:py-3 md:text-xl ${accentClass}`}
+        className={`rounded-xl px-2 py-2 text-[12px] font-black sm:text-sm md:rounded-2xl md:px-4 md:py-3 md:text-xl ${accentClass}`}
       >
         <span className="line-clamp-1 block">{name}</span>
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-2 sm:gap-3 md:mt-5 md:gap-4">
+      <div className="mt-2 flex items-center justify-center gap-1.5 sm:gap-2 md:mt-5 md:gap-4">
         <button
           type="button"
           onClick={onDecrease}
-          className={`flex h-8 w-8 items-center justify-center rounded-full border text-base font-black transition sm:h-9 sm:w-9 md:h-12 md:w-12 md:text-2xl ${actionClass}`}
+          className={`flex h-6 w-6 items-center justify-center rounded-full border text-sm font-black transition sm:h-8 sm:w-8 sm:text-base md:h-12 md:w-12 md:text-2xl ${actionClass}`}
           aria-label={`تقليل نقاط ${name}`}
         >
           −
         </button>
 
-        <div className="min-w-[64px] rounded-2xl border border-white/10 bg-slate-900/70 px-2 py-2 sm:min-w-[72px] md:min-w-[110px] md:px-5 md:py-3">
-          <div className="text-3xl font-black sm:text-4xl md:text-5xl">
+        <div className="min-w-[42px] rounded-xl border border-white/10 bg-slate-900/70 px-2 py-1.5 sm:min-w-[54px] sm:rounded-2xl sm:px-3 sm:py-2 md:min-w-[110px] md:px-5 md:py-3">
+          <div className="text-2xl font-black sm:text-4xl md:text-5xl">
             {score}
           </div>
         </div>
@@ -680,14 +679,14 @@ function TeamCard({
         <button
           type="button"
           onClick={onIncrease}
-          className={`flex h-8 w-8 items-center justify-center rounded-full border text-base font-black transition sm:h-9 sm:w-9 md:h-12 md:w-12 md:text-2xl ${actionClass}`}
+          className={`flex h-6 w-6 items-center justify-center rounded-full border text-sm font-black transition sm:h-8 sm:w-8 sm:text-base md:h-12 md:w-12 md:text-2xl ${actionClass}`}
           aria-label={`زيادة نقاط ${name}`}
         >
           +
         </button>
       </div>
 
-      <div className="mt-2 text-[10px] text-slate-400 sm:text-xs md:text-sm">
+      <div className="mt-1 text-[9px] text-slate-400 sm:text-[10px] md:mt-2 md:text-sm">
         نقطة
       </div>
     </div>
