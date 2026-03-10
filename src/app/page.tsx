@@ -197,7 +197,7 @@ export default function HomePage() {
           <div className="absolute -right-16 top-10 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl" />
           <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
 
-          <div className="relative grid grid-cols-[1.02fr_0.98fr] gap-3 sm:gap-8 lg:items-center">
+          <div className="relative grid grid-cols-[1fr_1fr] items-start gap-3 sm:gap-8 lg:items-center">
             <div className="min-w-0 flex flex-col gap-3 sm:gap-6">
               <div className="flex flex-wrap gap-2 text-[10px] text-slate-200 sm:gap-3 sm:text-sm">
                 <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-1.5 sm:px-4 sm:py-2">
@@ -302,18 +302,18 @@ export default function HomePage() {
             </div>
 
             <div className="min-w-0">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-2 shadow-xl shadow-slate-950/30 backdrop-blur sm:rounded-[2rem] sm:p-5">
-                <div className="rounded-[1.25rem] border border-white/10 bg-slate-950/80 p-2.5 sm:rounded-[1.5rem] sm:p-5">
+              <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-2 shadow-xl shadow-slate-950/30 backdrop-blur sm:rounded-[2rem] sm:p-5">
+                <div className="rounded-[1.15rem] border border-white/10 bg-slate-950/80 p-2.5 sm:rounded-[1.5rem] sm:p-5">
                   <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 sm:gap-3 sm:pb-4">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-[10px] text-slate-400 sm:text-sm">
                         معاينة سريعة
                       </p>
-                      <h2 className="mt-1 text-sm font-bold text-white sm:text-2xl">
+                      <h2 className="mt-1 text-sm font-bold leading-tight text-white sm:text-2xl">
                         لوحة لعبة جاهزة
                       </h2>
                     </div>
-                    <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[9px] font-medium text-cyan-200 sm:px-3 sm:text-xs">
+                    <span className="shrink-0 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[9px] font-medium text-cyan-200 sm:px-3 sm:text-xs">
                       تجربة منظمة وواضحة
                     </span>
                   </div>
@@ -588,14 +588,20 @@ function PreviewTeamCard({
   hint: string;
 }) {
   return (
-    <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-2.5 sm:rounded-[1.5rem] sm:p-4">
-      <p className="text-[10px] text-slate-400 sm:text-sm">{teamName}</p>
-      <div className="mt-2 flex items-end justify-between gap-2 sm:mt-3 sm:gap-3">
-        <p className="text-xl font-black text-white sm:text-3xl">{score}</p>
-        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[9px] text-slate-300 sm:px-3 sm:text-xs">
+    <div className="overflow-hidden rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-2.5 sm:rounded-[1.5rem] sm:p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 text-[10px] font-medium leading-4 text-slate-300 sm:text-sm">
+          {teamName}
+        </p>
+        <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[8px] text-slate-300 sm:px-3 sm:py-1 sm:text-xs">
           نقاط
         </span>
       </div>
+
+      <p className="mt-3 text-[1.35rem] font-black leading-none tracking-tight text-white sm:text-3xl">
+        {score}
+      </p>
+
       <p className="mt-2 text-[10px] leading-5 text-slate-300 sm:mt-3 sm:text-sm">
         {hint}
       </p>
@@ -612,10 +618,10 @@ function PreviewCategory({
 }) {
   return (
     <div className="rounded-[1rem] border border-white/10 bg-white/[0.03] p-2.5 sm:rounded-2xl sm:p-4">
-      <p className="text-[10px] font-semibold text-white sm:text-sm">
+      <p className="text-[10px] font-semibold leading-4 text-white sm:text-sm">
         {label}
       </p>
-      <p className="mt-1.5 text-[10px] text-slate-400 sm:mt-2 sm:text-sm">
+      <p className="mt-1.5 text-[9px] leading-4 tracking-tight text-slate-400 sm:mt-2 sm:text-sm">
         {points}
       </p>
     </div>
