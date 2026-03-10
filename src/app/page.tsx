@@ -221,7 +221,7 @@ export default function HomePage() {
                   مرحبًا بك في SeenJeem
                 </p>
 
-                <h1 className="mt-1 font-black leading-[1] text-white sm:mt-3 sm:text-4xl lg:text-5xl">
+                <h1 className="mt-2 font-black leading-[1] text-white sm:mt-3 sm:text-4xl lg:text-5xl">
                   <span className="block text-[1rem] max-[390px]:text-[1rem] sm:hidden">
                    لعبة تحدي جماعية
                     <br />
@@ -248,7 +248,7 @@ export default function HomePage() {
                 <InfoStat title="" value="متابعة لاحقًا" />
               </div>
 
-              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-2.5 backdrop-blur sm:rounded-[1.75rem] sm:p-5">
+              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-2.5 backdrop-blur sm:rounded-[1rem] sm:p-5">
                 {loading ? (
                   <div className="flex flex-col gap-3">
                     <p className="text-xs text-slate-300 sm:text-base">
@@ -332,13 +332,13 @@ export default function HomePage() {
                         معاينة سريعة
                       </p>
                       <h2 className="mt-1 text-[0.95rem] font-bold leading-tight text-white max-[390px]:text-[0.88rem] sm:text-2xl">
-                        لوحة لعبة جاهزة
+                        لوحة للعبة جاهزة تخيلية
                       </h2>
                     </div>
 
                     <span className="w-fit rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[8px] font-medium leading-none text-cyan-200 sm:px-3 sm:text-xs">
-                      <span className="sm:hidden">تجربة واضحة</span>
-                      <span className="hidden sm:inline">تجربة منظمة وواضحة</span>
+                      <span className="sm:hidden">مثال للعبة</span>
+                      <span className="hidden sm:inline">مثال للعبة</span>
                     </span>
                   </div>
 
