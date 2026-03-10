@@ -650,7 +650,10 @@ function BoardContent({
   const categoryCount = Math.max(grouped.length, 1);
   const sidebarWidth = compact ? 170 : 250;
   const gap = compact ? 12 : 16;
-  const columns = `repeat(${categoryCount}, minmax(0, 1fr)) ${sidebarWidth}px`;
+  const columns =
+  categoryCount > 0
+    ? `repeat(${categoryCount}, minmax(0, 1fr)) ${sidebarWidth}px`
+    : `${sidebarWidth}px`;
 
   return (
     <div className="h-full w-full" dir="ltr">
@@ -683,7 +686,11 @@ function BoardContent({
             compact={compact}
           />
         ))}
-
+        {grouped.length === 0 ? (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-8 text-center text-red-200">
+            لا توجد فئات أو أسئلة جاهزة لهذه الجلسة.
+          </div>
+        ) : null}
         <div className="flex flex-col gap-3" dir="rtl">
           <SideTeamCard
             compact={compact}

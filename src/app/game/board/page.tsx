@@ -59,90 +59,126 @@ export default async function GameBoardPage({
     redirect("/login");
   }
 
-  const { data: sessionData } = await supabase
+  const { data: sessionData, error: sessionError } = await supabase
     .from("game_sessions")
     .select("*")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .single();
 
-  const session = sessionData as GameSessionRow | null;
-
-  if (!session) {
+  if (sessionError || !sessionData) {
     redirect("/game/start");
   }
+
+  const session = sessionData as GameSessionRow;
 
   const selectedRaw: string[] = Array.isArray(session.selected_category_ids)
     ? session.selected_category_ids.map((value) => String(value))
     : [];
 
+  if (selectedRaw.length === 0) {
+    return (
+      <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center">
+          <h1 className="text-4xl font-black">لا توجد فئات في هذه الجلسة</h1>
+          <p className="mt-4 text-lg text-red-200">
+            يبدو أن الجلسة أنشئت بدون فئات أو لم يتم حفظها بشكل صحيح.
+          </p>
+          <div className="mt-8">
+            <a
+              href="/game/start"
+              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-white"
+            >
+              الرجوع لإنشاء لعبة جديدة
+            </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   let categories: CategoryRow[] = [];
 
-  if (selectedRaw.length > 0) {
-    const { data: categoriesByIdData } = await supabase
+  const { data: categoriesByIdData } = await supabase
+    .from("categories")
+    .select("id, name, slug, image_url")
+    .in("id", selectedRaw)
+    .eq("is_active", true);
+
+  const categoriesById = (categoriesByIdData ?? []) as CategoryRow[];
+
+  if (categoriesById.length > 0) {
+    const orderMap = new Map<string, number>(
+      selectedRaw.map((value, index) => [value, index])
+    );
+
+    categories = [...categoriesById].sort((a, b) => {
+      const aOrder = orderMap.get(a.id) ?? 999;
+      const bOrder = orderMap.get(b.id) ?? 999;
+      return aOrder - bOrder;
+    });
+  } else {
+    const { data: categoriesBySlugData } = await supabase
       .from("categories")
       .select("id, name, slug, image_url")
-      .in("id", selectedRaw)
+      .in("slug", selectedRaw)
       .eq("is_active", true);
 
-    const categoriesById = (categoriesByIdData ?? []) as CategoryRow[];
+    const categoriesBySlug = (categoriesBySlugData ?? []) as CategoryRow[];
 
-    if (categoriesById.length > 0) {
+    if (categoriesBySlug.length > 0) {
       const orderMap = new Map<string, number>(
         selectedRaw.map((value, index) => [value, index])
       );
 
-      categories = [...categoriesById].sort((a, b) => {
-        const aOrder = orderMap.get(a.id) ?? 999;
-        const bOrder = orderMap.get(b.id) ?? 999;
+      categories = [...categoriesBySlug].sort((a, b) => {
+        const aOrder = orderMap.get(a.slug) ?? 999;
+        const bOrder = orderMap.get(b.slug) ?? 999;
         return aOrder - bOrder;
       });
-    } else {
-      const { data: categoriesBySlugData } = await supabase
-        .from("categories")
-        .select("id, name, slug, image_url")
-        .in("slug", selectedRaw)
-        .eq("is_active", true);
-
-      const categoriesBySlug = (categoriesBySlugData ?? []) as CategoryRow[];
-
-      if (categoriesBySlug.length > 0) {
-        const orderMap = new Map<string, number>(
-          selectedRaw.map((value, index) => [value, index])
-        );
-
-        categories = [...categoriesBySlug].sort((a, b) => {
-          const aOrder = orderMap.get(a.slug) ?? 999;
-          const bOrder = orderMap.get(b.slug) ?? 999;
-          return aOrder - bOrder;
-        });
-      }
     }
+  }
+
+  if (categories.length === 0) {
+    return (
+      <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center">
+          <h1 className="text-4xl font-black">تعذر تحميل الفئات</h1>
+          <p className="mt-4 text-lg text-red-200">
+            الفئات المختارة في الجلسة لم يتم العثور عليها داخل قاعدة البيانات.
+          </p>
+          <div className="mt-8">
+            <a
+              href="/game/start"
+              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-white"
+            >
+              الرجوع وإنشاء لعبة جديدة
+            </a>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const categoryIds = categories.map((category) => category.id);
 
-  let questions: QuestionRow[] = [];
+  const { data: questionsData } = await supabase
+    .from("questions")
+    .select(`
+      id,
+      question_text,
+      answer_text,
+      points,
+      is_active,
+      is_used,
+      category_id,
+      year_tolerance_before,
+      year_tolerance_after
+    `)
+    .in("category_id", categoryIds)
+    .eq("is_active", true);
 
-  if (categoryIds.length > 0) {
-    const { data: questionsData } = await supabase
-      .from("questions")
-      .select(`
-        id,
-        question_text,
-        answer_text,
-        points,
-        is_active,
-        is_used,
-        category_id,
-        year_tolerance_before,
-        year_tolerance_after
-      `)
-      .in("category_id", categoryIds)
-      .eq("is_active", true);
-
-    questions = (questionsData ?? []) as QuestionRow[];
-  }
+  const questions = (questionsData ?? []) as QuestionRow[];
 
   return (
     <GameBoardClient
