@@ -228,7 +228,7 @@ export default function HomePage() {
                     تفاعلية و حماسية
                   </span>
                   <span className="hidden sm:block">
-                    لعبة تحدي جماعية و تفاعلية وحماسية
+                    لعبة تحدي جماعية تفاعلية وحماسية
                   </span>
                 </h1>
 
@@ -331,8 +331,8 @@ export default function HomePage() {
                       <p className="text-[9px] text-slate-400 sm:text-sm">
                         معاينة سريعة
                       </p>
-                      <h2 className="mt-1 text-[0.95rem] font-bold leading-tight text-white max-[390px]:text-[0.88rem] sm:text-2xl">
-                        لوحة للعبة جاهزة تخيلية
+                      <h2 className="mt-1 text-[0.85rem] font-bold leading-tight text-white max-[390px]:text-[0.85rem] sm:text-2xl">
+                        لوحة للعبة جاهزة كمثال
                       </h2>
                     </div>
 
@@ -368,11 +368,10 @@ export default function HomePage() {
                     </p>
                     <p className="mt-1.5 text-[9px] leading-4.5 text-slate-300 max-[390px]:text-[8.5px] sm:mt-2 sm:text-sm sm:leading-7">
                       <span className="sm:hidden">
-                        واجهة واضحة مناسبة للعرض داخل الصفوف والفعاليات والمناسبات.
+                        واجهة واضحة مناسبة وسهله مخصصة للعرض داخل الصفوف والفعاليات والمناسبات والتجمعات
                       </span>
                       <span className="hidden sm:inline">
-                        واجهة مرتبة تساعد على تقديم اللعبة بشكل جذاب وواضح سواء
-                        داخل الفصول أو في الفعاليات والمناسبات المختلفة.
+                        واجهة واضحة مناسبة وسهله مخصصة للعرض داخل الصفوف والفعاليات والمناسبات والتجمعات
                       </span>
                     </p>
                   </div>
