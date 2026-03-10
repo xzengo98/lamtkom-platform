@@ -270,7 +270,7 @@ export default function GameBoardClient({
       const viewportHeight =
         window.visualViewport?.height ?? window.innerHeight ?? 700;
 
-      const reservedTop = 170;
+      const reservedTop = 145;
       const availableHeight = Math.max(viewportHeight - reservedTop, 220);
 
       const scaleByWidth = availableWidth / boardWidth;
@@ -404,14 +404,14 @@ export default function GameBoardClient({
           </div>
         </div>
 
-        <div className="mx-auto mt-3 flex max-w-[1700px] justify-center">
+        <div className="mx-auto mt-2 flex max-w-[1700px] justify-center md:mt-3">
           <div className="rounded-full bg-orange-400 px-4 py-2 text-center text-[11px] font-black text-slate-950 sm:px-6 sm:text-sm md:px-8 md:py-3 md:text-xl">
             الحكم هو من يحدد الفريق الصحيح
           </div>
         </div>
       </div>
 
-      <div className="block px-2 py-3 md:hidden">
+      <div className="block px-2 py-2 md:hidden">
         <div
           ref={mobileWrapRef}
           className="relative mx-auto w-full overflow-hidden"
@@ -931,7 +931,11 @@ function SideTeamCard({
             compact ? "min-w-[64px] px-3 py-2" : "min-w-[92px] px-5 py-3"
           }`}
         >
-          <div className={compact ? "text-4xl font-black" : "text-5xl font-black"}>
+          <div
+            className={
+              compact ? "text-[34px] font-black leading-none" : "text-5xl font-black"
+            }
+          >
             {score}
           </div>
         </div>
