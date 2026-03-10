@@ -257,21 +257,25 @@ export default function GameBoardClient({
       if (window.innerWidth >= 768) return;
 
       const categoriesCount = Math.max(grouped.length, 1);
-      const baseWidth =
+
+      const boardWidth =
         categoriesCount * MOBILE_CATEGORY_WIDTH +
         MOBILE_SIDEBAR_WIDTH +
         (categoriesCount + 1) * MOBILE_COLUMN_GAP +
         24;
 
       const wrapWidth = mobileWrapRef.current?.clientWidth ?? window.innerWidth;
-      const availableWidth = Math.max(wrapWidth - 4, 200);
+      const availableWidth = Math.max(wrapWidth - 4, 220);
 
       const viewportHeight =
         window.visualViewport?.height ?? window.innerHeight ?? 700;
-      const availableHeight = Math.max(viewportHeight - 180, 240);
 
-      const scaleByWidth = availableWidth / baseWidth;
+      const reservedTop = 170;
+      const availableHeight = Math.max(viewportHeight - reservedTop, 220);
+
+      const scaleByWidth = availableWidth / boardWidth;
       const scaleByHeight = availableHeight / MOBILE_BOARD_HEIGHT;
+
       const nextScale = Math.min(scaleByWidth, scaleByHeight, 1);
 
       setMobileScale(nextScale);
@@ -281,7 +285,6 @@ export default function GameBoardClient({
     updateMobileBoardScale();
 
     const resizeHandler = () => updateMobileBoardScale();
-
     window.addEventListener("resize", resizeHandler);
     window.addEventListener("orientationchange", resizeHandler);
 
@@ -411,15 +414,16 @@ export default function GameBoardClient({
       <div className="block px-2 py-3 md:hidden">
         <div
           ref={mobileWrapRef}
-          className="mx-auto w-full"
+          className="relative mx-auto w-full overflow-hidden"
           style={{ height: mobileHeight }}
         >
           <div
-            className="mx-auto rounded-[24px] border border-white/10 bg-slate-950/80 p-3"
+            className="absolute top-0 rounded-[24px] border border-white/10 bg-slate-950/80 p-3"
             style={{
+              left: "50%",
               width: mobileBoardWidth,
               height: MOBILE_BOARD_HEIGHT,
-              transform: `scale(${mobileScale})`,
+              transform: `translateX(-50%) scale(${mobileScale})`,
               transformOrigin: "top center",
             }}
           >
@@ -624,7 +628,6 @@ function BoardContent({
   compact?: boolean;
 }) {
   const categoryCount = Math.max(grouped.length, 1);
-
   const sidebarWidth = compact ? 170 : 250;
   const gap = compact ? 12 : 16;
   const columns = `repeat(${categoryCount}, minmax(0, 1fr)) ${sidebarWidth}px`;
