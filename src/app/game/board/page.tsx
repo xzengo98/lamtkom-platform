@@ -23,7 +23,6 @@ type CategoryRow = {
   name: string;
   slug: string;
   image_url: string | null;
-  sort_order?: number | null;
 };
 
 type QuestionRow = {
@@ -34,8 +33,6 @@ type QuestionRow = {
   is_active: boolean;
   is_used: boolean;
   category_id: string;
-  media_type?: "none" | "image" | "video" | null;
-  media_url?: string | null;
   year_tolerance_before?: number | null;
   year_tolerance_after?: number | null;
 };
@@ -76,7 +73,7 @@ export default async function GameBoardPage({
   }
 
   const selectedRaw: string[] = Array.isArray(session.selected_category_ids)
-    ? session.selected_category_ids.map((value: string) => String(value))
+    ? session.selected_category_ids.map((value) => String(value))
     : [];
 
   let categories: CategoryRow[] = [];
@@ -84,7 +81,7 @@ export default async function GameBoardPage({
   if (selectedRaw.length > 0) {
     const { data: categoriesByIdData } = await supabase
       .from("categories")
-      .select("id, name, slug, image_url, sort_order")
+      .select("id, name, slug, image_url")
       .in("id", selectedRaw)
       .eq("is_active", true);
 
@@ -92,25 +89,18 @@ export default async function GameBoardPage({
 
     if (categoriesById.length > 0) {
       const orderMap = new Map<string, number>(
-        selectedRaw.map((value: string, index: number) => [value, index])
+        selectedRaw.map((value, index) => [value, index])
       );
 
-      categories = [...categoriesById]
-        .sort((a: CategoryRow, b: CategoryRow) => {
-          const aOrder = orderMap.get(a.id) ?? 999;
-          const bOrder = orderMap.get(b.id) ?? 999;
-          return aOrder - bOrder;
-        })
-        .map((category: CategoryRow) => ({
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          image_url: category.image_url,
-        }));
+      categories = [...categoriesById].sort((a, b) => {
+        const aOrder = orderMap.get(a.id) ?? 999;
+        const bOrder = orderMap.get(b.id) ?? 999;
+        return aOrder - bOrder;
+      });
     } else {
       const { data: categoriesBySlugData } = await supabase
         .from("categories")
-        .select("id, name, slug, image_url, sort_order")
+        .select("id, name, slug, image_url")
         .in("slug", selectedRaw)
         .eq("is_active", true);
 
@@ -118,28 +108,19 @@ export default async function GameBoardPage({
 
       if (categoriesBySlug.length > 0) {
         const orderMap = new Map<string, number>(
-          selectedRaw.map((value: string, index: number) => [value, index])
+          selectedRaw.map((value, index) => [value, index])
         );
 
-        categories = [...categoriesBySlug]
-          .sort((a: CategoryRow, b: CategoryRow) => {
-            const aOrder = orderMap.get(a.slug) ?? 999;
-            const bOrder = orderMap.get(b.slug) ?? 999;
-            return aOrder - bOrder;
-          })
-          .map((category: CategoryRow) => ({
-            id: category.id,
-            name: category.name,
-            slug: category.slug,
-            image_url: category.image_url,
-          }));
+        categories = [...categoriesBySlug].sort((a, b) => {
+          const aOrder = orderMap.get(a.slug) ?? 999;
+          const bOrder = orderMap.get(b.slug) ?? 999;
+          return aOrder - bOrder;
+        });
       }
     }
   }
 
-  const categoryIds: string[] = categories.map(
-    (category: CategoryRow) => category.id
-  );
+  const categoryIds = categories.map((category) => category.id);
 
   let questions: QuestionRow[] = [];
 
@@ -154,8 +135,6 @@ export default async function GameBoardPage({
         is_active,
         is_used,
         category_id,
-        media_type,
-        media_url,
         year_tolerance_before,
         year_tolerance_after
       `)

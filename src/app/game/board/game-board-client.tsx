@@ -20,8 +20,6 @@ type QuestionRow = {
   is_active: boolean;
   is_used: boolean;
   category_id: string;
-  media_type?: "none" | "image" | "video" | null;
-  media_url?: string | null;
   year_tolerance_before?: number | null;
   year_tolerance_after?: number | null;
 };
@@ -990,9 +988,118 @@ function SideTeamCard({
 
 function RichHtmlContent({ html }: { html: string }) {
   return (
-    <div
-      className="rich-html-content text-right"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <>
+      <div
+        className="rich-html-content text-right"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+
+      <style jsx global>{`
+        .rich-html-content {
+          color: white;
+          font-size: 1.4rem;
+          line-height: 1.9;
+        }
+
+        @media (min-width: 768px) {
+          .rich-html-content {
+            font-size: 2.2rem;
+            line-height: 1.8;
+          }
+        }
+
+        .rich-html-content h1,
+        .rich-html-content h2,
+        .rich-html-content h3 {
+          font-weight: 900;
+          margin: 0 0 14px;
+        }
+
+        .rich-html-content h1 {
+          font-size: 2rem;
+        }
+
+        .rich-html-content h2 {
+          font-size: 1.8rem;
+        }
+
+        .rich-html-content h3 {
+          font-size: 1.5rem;
+        }
+
+        .rich-html-content p {
+          margin: 0 0 12px;
+        }
+
+        .rich-html-content ul,
+        .rich-html-content ol {
+          margin: 12px 0;
+          padding-right: 24px;
+        }
+
+        .rich-html-content ul {
+          list-style: disc;
+        }
+
+        .rich-html-content ol {
+          list-style: decimal;
+        }
+
+        .rich-html-content img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 18px auto;
+          border-radius: 18px;
+        }
+
+        .rich-html-content video {
+          width: 100%;
+          max-width: 100%;
+          display: block;
+          margin: 18px auto;
+          border-radius: 18px;
+        }
+
+        .rich-html-content iframe {
+          width: 100%;
+          min-height: 320px;
+          border: 0;
+          border-radius: 18px;
+          margin: 18px auto;
+          display: block;
+        }
+
+        .rich-html-content .video-wrap {
+          position: relative;
+          width: 100%;
+          padding-top: 56.25%;
+          overflow: hidden;
+          border-radius: 18px;
+          margin: 18px 0;
+        }
+
+        .rich-html-content .video-wrap iframe {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+        }
+
+        .rich-html-content a {
+          color: #22d3ee;
+          text-decoration: underline;
+        }
+
+        .rich-html-content strong {
+          font-weight: 900;
+        }
+
+        .rich-html-content em {
+          font-style: italic;
+        }
+      `}</style>
+    </>
   );
 }

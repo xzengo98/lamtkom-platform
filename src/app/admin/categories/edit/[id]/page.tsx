@@ -134,8 +134,18 @@ export default async function EditCategoryPage({
                 className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-white outline-none"
               />
               <p className="mt-2 text-xs text-slate-400">
-                ضع رابط صورة مباشر، وسيتم عرضها داخل الفئة تلقائيًا.
+                يجب أن يكون رابط صورة مباشر يبدأ بـ http أو https.
               </p>
+
+              {category.image_url ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-slate-900/60 p-4">
+                  <img
+                    src={category.image_url}
+                    alt={category.name}
+                    className="mx-auto h-28 w-28 object-contain"
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div>

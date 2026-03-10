@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import RichTextEditor from "@/components/admin/rich-text-editor";
+import HtmlSnippetEditor from "@/components/admin/html-snippet-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,6 @@ export default async function EditQuestionPage({
     const category_id = formData.get("category_id")?.toString().trim() || "";
     const points = Number(formData.get("points") || 200);
     const is_active = formData.get("is_active") === "on";
-
     const year_tolerance_before = Number(formData.get("year_tolerance_before") || 0);
     const year_tolerance_after = Number(formData.get("year_tolerance_after") || 0);
 
@@ -90,7 +89,7 @@ export default async function EditQuestionPage({
             <div>
               <h1 className="text-3xl font-black md:text-4xl">تعديل السؤال</h1>
               <p className="mt-2 text-slate-300">
-                عدّل السؤال والإجابة ويمكنك إدراج صور أو فيديو داخل المحتوى مباشرة.
+                عدّل السؤال والإجابة ويمكنك إدراج صورة أو فيديو داخل المحتوى مباشرة.
               </p>
             </div>
 
@@ -108,20 +107,20 @@ export default async function EditQuestionPage({
           className="rounded-[2rem] border border-white/10 bg-white/5 p-4 md:p-6"
         >
           <div className="space-y-6">
-            <RichTextEditor
+            <HtmlSnippetEditor
               name="question_text"
               label="نص السؤال"
               defaultValue={question.question_text ?? ""}
               placeholder="اكتب السؤال هنا"
-              minHeight={220}
+              rows={10}
             />
 
-            <RichTextEditor
+            <HtmlSnippetEditor
               name="answer_text"
               label="الإجابة"
               defaultValue={question.answer_text ?? ""}
               placeholder="اكتب الإجابة هنا"
-              minHeight={180}
+              rows={8}
             />
           </div>
 
