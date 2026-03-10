@@ -197,7 +197,7 @@ export default function HomePage() {
           <div className="absolute -right-16 top-10 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl" />
           <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
 
-          <div className="relative grid grid-cols-[1fr_1fr] items-start gap-3 sm:gap-8 lg:items-center">
+          <div className="relative grid grid-cols-[0.78fr_1.22fr] items-start gap-2.5 max-[390px]:grid-cols-[0.76fr_1.24fr] sm:gap-8 lg:items-center">
             <div className="min-w-0 flex flex-col gap-3 sm:gap-6">
               <div className="flex flex-wrap gap-2 text-[10px] text-slate-200 sm:gap-3 sm:text-sm">
                 <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-1.5 sm:px-4 sm:py-2">
@@ -212,7 +212,7 @@ export default function HomePage() {
                 <p className="text-[11px] font-medium text-cyan-300 sm:text-base">
                   مرحبًا بك في SeenJeem
                 </p>
-                <h1 className="mt-2 text-xl font-black leading-tight text-white sm:mt-3 sm:text-4xl lg:text-5xl">
+                <h1 className="mt-2 text-[1.95rem] font-black leading-[1.15] text-white max-[390px]:text-[1.78rem] sm:mt-3 sm:text-4xl lg:text-5xl">
                   حوّل أي مسابقة إلى تجربة تفاعلية ممتعة وسريعة التنظيم
                 </h1>
                 <p className="mt-3 text-xs leading-6 text-slate-300 sm:mt-4 sm:text-lg sm:leading-8">
@@ -228,7 +228,7 @@ export default function HomePage() {
                 <InfoStat title="حفظ التقدم" value="متابعة لاحقًا" />
               </div>
 
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3 backdrop-blur sm:rounded-[1.75rem] sm:p-5">
+              <div className="rounded-[1.45rem] border border-white/10 bg-white/5 p-3 backdrop-blur sm:rounded-[1.75rem] sm:p-5">
                 {loading ? (
                   <div className="flex flex-col gap-3">
                     <p className="text-xs text-slate-300 sm:text-base">
@@ -243,28 +243,28 @@ export default function HomePage() {
                         <p className="text-[11px] text-slate-300 sm:text-sm">
                           أهلاً {username || "بك"}
                         </p>
-                        <p className="mt-1 text-base font-bold text-white sm:text-xl">
+                        <p className="mt-1 text-[1.15rem] font-bold leading-tight text-white max-[390px]:text-[1.05rem] sm:text-xl">
                           عدد الألعاب المتبقية: {gamesRemaining}
                         </p>
-                        <p className="mt-1 text-[11px] leading-5 text-slate-400 sm:text-sm">
+                        <p className="mt-1 text-[10px] leading-5 text-slate-400 sm:text-sm">
                           ابدأ جولة جديدة أو تابع ألعابك من صفحة الحساب.
                         </p>
                       </div>
-                      <span className="w-fit rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1.5 text-[10px] text-emerald-200 sm:px-3 sm:py-2 sm:text-sm">
+                      <span className="w-fit rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1.5 text-[9px] text-emerald-200 sm:px-3 sm:py-2 sm:text-sm">
                         حسابك جاهز للعب
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-3">
+                    <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:gap-3">
                       <Link
                         href="/game/start"
-                        className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-cyan-400 px-3 py-2.5 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300 sm:min-h-12 sm:px-5 sm:py-3 sm:text-base"
+                        className="inline-flex min-h-9 items-center justify-center rounded-[1rem] bg-cyan-400 px-2 py-2 text-[11px] font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300 max-[390px]:text-[10px] sm:min-h-12 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-base"
                       >
                         ابدأ الآن
                       </Link>
                       <Link
                         href="/account"
-                        className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:min-h-12 sm:px-5 sm:py-3 sm:text-base"
+                        className="inline-flex min-h-9 items-center justify-center rounded-[1rem] border border-white/15 bg-white/5 px-2 py-2 text-[11px] font-bold text-white transition hover:bg-white/10 max-[390px]:text-[10px] sm:min-h-12 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-base"
                       >
                         حسابي
                       </Link>
@@ -282,16 +282,16 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-3">
+                    <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:gap-3">
                       <Link
                         href="/register"
-                        className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-cyan-400 px-3 py-2.5 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300 sm:min-h-12 sm:px-5 sm:py-3 sm:text-base"
+                        className="inline-flex min-h-9 items-center justify-center rounded-[1rem] bg-cyan-400 px-2 py-2 text-[11px] font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300 max-[390px]:text-[10px] sm:min-h-12 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-base"
                       >
                         إنشاء حساب
                       </Link>
                       <Link
                         href="/login"
-                        className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:min-h-12 sm:px-5 sm:py-3 sm:text-base"
+                        className="inline-flex min-h-9 items-center justify-center rounded-[1rem] border border-white/15 bg-white/5 px-2 py-2 text-[11px] font-bold text-white transition hover:bg-white/10 max-[390px]:text-[10px] sm:min-h-12 sm:rounded-2xl sm:px-5 sm:py-3 sm:text-base"
                       >
                         تسجيل الدخول
                       </Link>
@@ -302,23 +302,25 @@ export default function HomePage() {
             </div>
 
             <div className="min-w-0">
-              <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-2 shadow-xl shadow-slate-950/30 backdrop-blur sm:rounded-[2rem] sm:p-5">
-                <div className="rounded-[1.15rem] border border-white/10 bg-slate-950/80 p-2.5 sm:rounded-[1.5rem] sm:p-5">
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 sm:gap-3 sm:pb-4">
+              <div className="rounded-[1.15rem] border border-white/10 bg-white/5 p-1.5 shadow-xl shadow-slate-950/30 backdrop-blur max-[390px]:rounded-[1.05rem] sm:rounded-[2rem] sm:p-5">
+                <div className="rounded-[1rem] border border-white/10 bg-slate-950/80 p-2 sm:rounded-[1.5rem] sm:p-5">
+                  <div className="flex flex-col gap-2 border-b border-white/10 pb-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pb-4">
                     <div className="min-w-0">
-                      <p className="text-[10px] text-slate-400 sm:text-sm">
+                      <p className="text-[9px] text-slate-400 sm:text-sm">
                         معاينة سريعة
                       </p>
-                      <h2 className="mt-1 text-sm font-bold leading-tight text-white sm:text-2xl">
+                      <h2 className="mt-1 text-[0.95rem] font-bold leading-tight text-white max-[390px]:text-[0.88rem] sm:text-2xl">
                         لوحة لعبة جاهزة
                       </h2>
                     </div>
-                    <span className="shrink-0 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[9px] font-medium text-cyan-200 sm:px-3 sm:text-xs">
-                      تجربة منظمة وواضحة
+
+                    <span className="w-fit rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[8px] font-medium leading-none text-cyan-200 sm:px-3 sm:text-xs">
+                      <span className="sm:hidden">تجربة واضحة</span>
+                      <span className="hidden sm:inline">تجربة منظمة وواضحة</span>
                     </span>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-4">
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:mt-5 sm:gap-4">
                     <PreviewTeamCard
                       teamName="الفريق الأول"
                       score="200"
@@ -331,20 +333,25 @@ export default function HomePage() {
                     />
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:mt-4 sm:gap-3">
                     <PreviewCategory label="رياضة" points="100 • 200 • 300" />
                     <PreviewCategory label="تاريخ" points="100 • 200 • 300" />
                     <PreviewCategory label="جغرافيا" points="100 • 200 • 300" />
                     <PreviewCategory label="ثقافة عامة" points="100 • 200 • 300" />
                   </div>
 
-                  <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:mt-4 sm:p-4">
-                    <p className="text-[10px] text-slate-400 sm:text-sm">
+                  <div className="mt-2.5 rounded-[1rem] border border-white/10 bg-white/[0.03] p-2.5 sm:mt-4 sm:rounded-2xl sm:p-4">
+                    <p className="text-[9px] text-slate-400 sm:text-sm">
                       تجربة مناسبة للعرض
                     </p>
-                    <p className="mt-2 text-[11px] leading-5 text-slate-300 sm:text-sm sm:leading-7">
-                      واجهة مرتبة تساعد على تقديم اللعبة بشكل جذاب وواضح سواء داخل
-                      الفصول أو في الفعاليات والمناسبات المختلفة.
+                    <p className="mt-1.5 text-[9px] leading-4.5 text-slate-300 max-[390px]:text-[8.5px] sm:mt-2 sm:text-sm sm:leading-7">
+                      <span className="sm:hidden">
+                        واجهة واضحة مناسبة للعرض داخل الصفوف والفعاليات والمناسبات.
+                      </span>
+                      <span className="hidden sm:inline">
+                        واجهة مرتبة تساعد على تقديم اللعبة بشكل جذاب وواضح سواء داخل
+                        الفصول أو في الفعاليات والمناسبات المختلفة.
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -588,21 +595,21 @@ function PreviewTeamCard({
   hint: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-[1.15rem] border border-white/10 bg-white/[0.03] p-2.5 sm:rounded-[1.5rem] sm:p-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="min-w-0 text-[10px] font-medium leading-4 text-slate-300 sm:text-sm">
+    <div className="overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/[0.03] p-2 max-[390px]:p-1.5 sm:rounded-[1.5rem] sm:p-4">
+      <div className="flex items-center justify-between gap-1.5">
+        <p className="min-w-0 text-[8px] font-medium leading-4 text-slate-300 max-[390px]:text-[7.5px] sm:text-sm">
           {teamName}
         </p>
-        <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[8px] text-slate-300 sm:px-3 sm:py-1 sm:text-xs">
+        <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[7px] text-slate-300 max-[390px]:text-[6.5px] sm:px-3 sm:py-1 sm:text-xs">
           نقاط
         </span>
       </div>
 
-      <p className="mt-3 text-[1.35rem] font-black leading-none tracking-tight text-white sm:text-3xl">
+      <p className="mt-2.5 text-[1.05rem] font-black leading-none tracking-tight text-white max-[390px]:text-[0.95rem] sm:mt-3 sm:text-3xl">
         {score}
       </p>
 
-      <p className="mt-2 text-[10px] leading-5 text-slate-300 sm:mt-3 sm:text-sm">
+      <p className="mt-1.5 text-[8px] leading-4 text-slate-300 max-[390px]:text-[7.5px] sm:mt-3 sm:text-sm sm:leading-6">
         {hint}
       </p>
     </div>
@@ -617,11 +624,11 @@ function PreviewCategory({
   points: string;
 }) {
   return (
-    <div className="rounded-[1rem] border border-white/10 bg-white/[0.03] p-2.5 sm:rounded-2xl sm:p-4">
-      <p className="text-[10px] font-semibold leading-4 text-white sm:text-sm">
+    <div className="rounded-[0.9rem] border border-white/10 bg-white/[0.03] p-2 max-[390px]:p-1.5 sm:rounded-2xl sm:p-4">
+      <p className="text-[8px] font-semibold leading-4 text-white max-[390px]:text-[7.5px] sm:text-sm">
         {label}
       </p>
-      <p className="mt-1.5 text-[9px] leading-4 tracking-tight text-slate-400 sm:mt-2 sm:text-sm">
+      <p className="mt-1 text-[7.5px] leading-4 tracking-tight text-slate-400 max-[390px]:text-[7px] sm:mt-2 sm:text-sm">
         {points}
       </p>
     </div>
