@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import StartGameForm from "./start-game-form";
@@ -27,6 +28,8 @@ type SearchParams = Promise<{
   error?: string;
 }>;
 
+const REQUIRED_CATEGORY_COUNT = 6;
+
 export default async function GameStartPage({
   searchParams,
 }: {
@@ -51,20 +54,25 @@ export default async function GameStartPage({
 
   if (!profile || profile.games_remaining <= 0) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center">
-          <h1 className="text-4xl font-black">لا توجد ألعاب متبقية</h1>
-          <p className="mt-4 text-lg text-red-200">
-            تم استهلاك عدد الألعاب المتاحة لحسابك.
+      <main
+        dir="rtl"
+        className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 text-center sm:p-10">
+          <h1 className="text-2xl font-black sm:text-4xl">
+            لا توجد ألعاب متبقية
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-lg">
+            تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن
+            حسابك للمتابعة.
           </p>
-
-          <div className="mt-8">
-            <a
+          <div className="mt-6">
+            <Link
               href="/"
-              className="rounded-2xl border border-white/10 px-6 py-3 font-semibold text-white"
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-300"
             >
               الرجوع للرئيسية
-            </a>
+            </Link>
           </div>
         </div>
       </main>
@@ -92,11 +100,17 @@ export default async function GameStartPage({
       sectionsError?.message ?? categoriesError?.message ?? "Unknown error";
 
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
-        <div className="mx-auto max-w-7xl">
-          <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-200">
-            فشل تحميل بيانات الإعداد: {message}
-          </div>
+      <main
+        dir="rtl"
+        className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-center sm:p-10">
+          <h1 className="text-2xl font-black sm:text-4xl">
+            فشل تحميل بيانات الإعداد
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-red-100 sm:text-lg">
+            {message}
+          </p>
         </div>
       </main>
     );
@@ -105,7 +119,6 @@ export default async function GameStartPage({
   const sections: CategorySection[] = Array.isArray(sectionsData)
     ? (sectionsData as CategorySection[])
     : [];
-
   const categories: Category[] = Array.isArray(categoriesData)
     ? (categoriesData as Category[])
     : [];
@@ -135,11 +148,17 @@ export default async function GameStartPage({
       .filter(Boolean);
 
     if (!gameName || !teamOne || !teamTwo) {
-      redirect("/game/start?error=اسم اللعبة واسم الفريقين مطلوبة");
+      redirect(
+        "/game/start?error=" +
+          encodeURIComponent("اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة.")
+      );
     }
 
-    if (selectedCategoryIds.length < 3) {
-      redirect("/game/start?error=اختر 3 فئات على الأقل");
+    if (selectedCategoryIds.length !== REQUIRED_CATEGORY_COUNT) {
+      redirect(
+        "/game/start?error=" +
+          encodeURIComponent(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`)
+      );
     }
 
     const { data: profile } = await supabase
@@ -149,7 +168,9 @@ export default async function GameStartPage({
       .single();
 
     if (!profile || profile.games_remaining <= 0) {
-      redirect("/game/start?error=لا توجد ألعاب متبقية");
+      redirect(
+        "/game/start?error=" + encodeURIComponent("لا توجد ألعاب متبقية")
+      );
     }
 
     const initialBoardState = {
@@ -202,27 +223,64 @@ export default async function GameStartPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-white/10 bg-white/5 px-8 py-6">
-          <h1 className="text-4xl font-black md:text-5xl">إعداد لعبة جديدة</h1>
-          <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
-            اختر الفئات، أدخل اسم اللعبة واسمَي الفريقين.
-          </p>
-          <div className="mt-4 text-cyan-300">
-            الألعاب المتبقية: {profile.games_remaining}
-          </div>
+    <main dir="rtl" className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-10 pt-6 sm:px-6 lg:gap-8 lg:px-8 lg:pb-16 lg:pt-10">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 px-5 py-6 shadow-2xl shadow-slate-950/40 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.14),transparent_30%)]" />
 
-          {params.error ? (
-            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-200">
-              {params.error}
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+                <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-cyan-200">
+                  إعداد لعبة جديدة
+                </span>
+                <span className="rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1.5 text-orange-100">
+                  اختر 6 فئات بالضبط
+                </span>
+              </div>
+
+              <h1 className="mt-4 text-2xl font-black leading-tight sm:text-4xl lg:text-5xl">
+                جهّز اللعبة خلال دقائق
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-lg sm:leading-8">
+                اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدّد ست فئات لتبدأ
+                تجربة مرتبة وواضحة على الهاتف وسطح المكتب.
+              </p>
             </div>
-          ) : null}
-        </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:w-auto">
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
+                <p className="text-xs text-slate-400 sm:text-sm">
+                  الألعاب المتبقية
+                </p>
+                <p className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                  {profile.games_remaining}
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
+                <p className="text-xs text-slate-400 sm:text-sm">
+                  الفئات المطلوبة
+                </p>
+                <p className="mt-2 text-2xl font-black text-cyan-300 sm:text-3xl">
+                  {REQUIRED_CATEGORY_COUNT}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {params.error ? (
+          <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
+            {params.error}
+          </div>
+        ) : null}
 
         <StartGameForm
           sections={sections}
           categories={categories}
+          gamesRemaining={profile.games_remaining}
           action={createGameSession}
         />
       </div>
