@@ -46,33 +46,32 @@ type UploadQuestionRow = {
   answer_video_url?: string;
 };
 
+const MAX_IMPORT_QUESTIONS = 5000;
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+
 const sampleJson = `{
   "questions": [
     {
       "section": "عام",
-      "category": "الحياة",
+      "category": "تاريخ",
       "points": 200,
       "is_active": true,
-      "year_tolerance_before": 0,
-      "year_tolerance_after": 0,
-      "question_text": "<p>ما اسم اللعبة الشعبية الظاهرة في الصورة؟</p>",
-      "answer_text": "<p>الجواب هنا</p>",
-      "question_image_url": "https://example.com/question-image.jpg",
+      "question_text": "<p>في أي سنة سقطت القسطنطينية؟</p>",
+      "answer_text": "<p>1453</p>",
+      "question_image_url": "",
       "question_video_url": "",
       "answer_image_url": "",
       "answer_video_url": ""
     },
     {
-      "section_slug": "general",
-      "category_slug": "life",
+      "section": "عام",
+      "category": "تاريخ",
       "points": 400,
       "is_active": true,
-      "year_tolerance_before": 1,
-      "year_tolerance_after": 1,
-      "question_text": "<p>اكتب نص السؤال هنا</p>",
-      "answer_text": "<p>اكتب الجواب هنا</p>",
+      "question_text": "<p>ما اسم المعاهدة التي أنهت الحرب العالمية الأولى رسميًا؟</p>",
+      "answer_text": "<p>معاهدة فرساي</p>",
       "question_image_url": "",
-      "question_video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "question_video_url": "",
       "answer_image_url": "",
       "answer_video_url": ""
     }
@@ -151,9 +150,7 @@ function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
   }
 
   if (imageUrl) {
-    parts.push(
-      `<p><img src="${escapeAttribute(imageUrl)}" alt="" /></p>`
-    );
+    parts.push(`<p><img src="${escapeAttribute(imageUrl)}" alt="" /></p>`);
   }
 
   if (videoUrl) {
@@ -175,6 +172,60 @@ function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
   }
 
   return parts.join("\n\n").trim();
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function normalizeArabicDigits(value: string) {
+  const map: Record<string, string> = {
+    "٠": "0",
+    "١": "1",
+    "٢": "2",
+    "٣": "3",
+    "٤": "4",
+    "٥": "5",
+    "٦": "6",
+    "٧": "7",
+    "٨": "8",
+    "٩": "9",
+  };
+
+  return value.replace(/[٠-٩]/g, (char) => map[char] ?? char);
+}
+
+function normalizeComparableText(value: string) {
+  return normalizeArabicDigits(stripHtml(value))
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[ًٌٍَُِّْـ]/g, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/[ؤ]/g, "و")
+    .replace(/[ئ]/g, "ي")
+    .replace(/[ة]/g, "ه")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isLikelyYearQuestion(questionHtml: string, answerHtml: string) {
+  const questionText = normalizeArabicDigits(stripHtml(questionHtml)).toLowerCase();
+  const answerText = normalizeArabicDigits(stripHtml(answerHtml)).trim().toLowerCase();
+
+  const yearPromptRegex =
+    /(في اي سنة|في أي سنة|في اي عام|في أي عام|اي سنة|أي سنة|اي عام|أي عام|ما السنة|ما السنه|عام كم|سنة كم|سنه كم|متى وقع|متى حدث|متى سقط|متى بدات|متى بدأت)/;
+
+  const yearOnlyRegex =
+    /^\d{3,4}(\s*(م|ميلادي|هـ|هجري|ق\.?\s?م|قبل الميلاد))?$/i;
+
+  return yearPromptRegex.test(questionText) || yearOnlyRegex.test(answerText);
+}
+
+function getAutoToleranceByPoints(points: number) {
+  if (points === 600) return 10;
+  if (points === 400) return 5;
+  return 1;
 }
 
 export default async function AdminImportQuestionsPage({
@@ -250,10 +301,10 @@ export default async function AdminImportQuestionsPage({
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
       redirect(
         "/admin/questions/import?error=" +
-          encodeURIComponent("حجم الملف كبير جدًا. الحد الأقصى 5MB.")
+          encodeURIComponent("حجم الملف كبير جدًا. الحد الأقصى 20MB.")
       );
     }
 
@@ -283,10 +334,12 @@ export default async function AdminImportQuestionsPage({
       );
     }
 
-    if (rawItems.length > 500) {
+    if (rawItems.length > MAX_IMPORT_QUESTIONS) {
       redirect(
         "/admin/questions/import?error=" +
-          encodeURIComponent("الحد الأقصى في كل رفعه هو 500 سؤال.")
+          encodeURIComponent(
+            `الحد الأقصى في كل رفعة هو ${MAX_IMPORT_QUESTIONS} سؤال.`
+          )
       );
     }
 
@@ -311,6 +364,24 @@ export default async function AdminImportQuestionsPage({
 
     const categories = (categoriesData ?? []) as unknown as CategoryLookupRow[];
 
+    const { data: existingQuestionsData, error: existingQuestionsError } =
+      await supabase.from("questions").select("question_text");
+
+    if (existingQuestionsError) {
+      redirect(
+        "/admin/questions/import?error=" +
+          encodeURIComponent(
+            existingQuestionsError.message || "فشل فحص الأسئلة الحالية"
+          )
+      );
+    }
+
+    const existingQuestionKeys = new Set(
+      (existingQuestionsData ?? [])
+        .map((item) => normalizeComparableText(String(item.question_text ?? "")))
+        .filter(Boolean)
+    );
+
     const findCategory = (identifier: string) => {
       const normalized = identifier.trim().toLowerCase();
 
@@ -334,6 +405,7 @@ export default async function AdminImportQuestionsPage({
     }> = [];
 
     const validationErrors: string[] = [];
+    const fileQuestionKeys = new Set<string>();
 
     rawItems.forEach((item, index) => {
       const row = (item ?? {}) as UploadQuestionRow;
@@ -359,6 +431,27 @@ export default async function AdminImportQuestionsPage({
         );
         return;
       }
+
+      const normalizedQuestionKey = normalizeComparableText(questionBase);
+
+      if (!normalizedQuestionKey) {
+        validationErrors.push(`السطر ${line}: تعذر قراءة نص السؤال بشكل صحيح.`);
+        return;
+      }
+
+      if (fileQuestionKeys.has(normalizedQuestionKey)) {
+        validationErrors.push(`السطر ${line}: يوجد سؤال مكرر داخل نفس الملف.`);
+        return;
+      }
+
+      if (existingQuestionKeys.has(normalizedQuestionKey)) {
+        validationErrors.push(
+          `السطر ${line}: هذا السؤال موجود مسبقًا داخل قاعدة البيانات.`
+        );
+        return;
+      }
+
+      fileQuestionKeys.add(normalizedQuestionKey);
 
       const category = findCategory(categoryIdentifier);
 
@@ -386,6 +479,8 @@ export default async function AdminImportQuestionsPage({
         }
       }
 
+      const points = normalizePoints(row.points);
+
       const questionText = appendMediaHtml(
         questionBase,
         normalizeString(row.question_image_url),
@@ -398,14 +493,34 @@ export default async function AdminImportQuestionsPage({
         normalizeString(row.answer_video_url)
       );
 
+      const explicitBefore =
+        row.year_tolerance_before !== undefined &&
+        row.year_tolerance_before !== null;
+      const explicitAfter =
+        row.year_tolerance_after !== undefined &&
+        row.year_tolerance_after !== null;
+
+      let yearToleranceBefore = explicitBefore
+        ? normalizeTolerance(row.year_tolerance_before)
+        : 0;
+      let yearToleranceAfter = explicitAfter
+        ? normalizeTolerance(row.year_tolerance_after)
+        : 0;
+
+      if (!explicitBefore && !explicitAfter && isLikelyYearQuestion(questionBase, answerBase)) {
+        const autoTolerance = getAutoToleranceByPoints(points);
+        yearToleranceBefore = autoTolerance;
+        yearToleranceAfter = autoTolerance;
+      }
+
       insertRows.push({
         question_text: questionText,
         answer_text: answerText,
         category_id: category.id,
-        points: normalizePoints(row.points),
+        points,
         is_active: normalizeBool(row.is_active, true),
-        year_tolerance_before: normalizeTolerance(row.year_tolerance_before),
-        year_tolerance_after: normalizeTolerance(row.year_tolerance_after),
+        year_tolerance_before: yearToleranceBefore,
+        year_tolerance_after: yearToleranceAfter,
         media_type: "none",
         media_url: null,
       });
@@ -414,7 +529,7 @@ export default async function AdminImportQuestionsPage({
     if (validationErrors.length > 0) {
       redirect(
         "/admin/questions/import?error=" +
-          encodeURIComponent(validationErrors.slice(0, 4).join(" | "))
+          encodeURIComponent(validationErrors.slice(0, 8).join(" | "))
       );
     }
 
@@ -480,13 +595,16 @@ export default async function AdminImportQuestionsPage({
 
       <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 sm:p-6 lg:p-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
-          <form action={importQuestions} className="rounded-[1.75rem] border border-white/10 bg-slate-900/50 p-4 sm:p-5">
+          <form
+            action={importQuestions}
+            className="rounded-[1.75rem] border border-white/10 bg-slate-900/50 p-4 sm:p-5"
+          >
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-xs text-orange-100 sm:text-sm">
                 JSON Upload
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                الحد الأقصى 500 سؤال
+                الحد الأقصى {MAX_IMPORT_QUESTIONS} سؤال
               </span>
             </div>
 
@@ -553,7 +671,8 @@ export default async function AdminImportQuestionsPage({
                 <li>يجب أن تكون الفئة موجودة مسبقًا داخل لوحة الإدارة.</li>
                 <li>يمكنك كتابة القسم والفئة بالاسم أو بالـ slug.</li>
                 <li>الصور والفيديو تُضاف تلقائيًا داخل السؤال أو الجواب.</li>
-                <li>إذا وُجد خطأ في سطر واحد فلن يتم رفع أي سؤال حتى تصحيح الملف.</li>
+                <li>إذا كان جواب السؤال سنة فستُضاف السماحية تلقائيًا حسب النقاط.</li>
+                <li>إذا وُجد سؤال مكرر داخل الملف أو داخل قاعدة البيانات فلن يتم الرفع.</li>
               </ul>
             </div>
 
