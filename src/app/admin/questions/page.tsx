@@ -8,19 +8,21 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{
   q?: string;
+  section?: string;
   category?: string;
 }>;
 
-type CategoryFilterRow = {
+type CategorySectionRelation =
+  | { name: string }
+  | { name: string }[]
+  | null;
+
+type CategoryRow = {
   id: string;
   name: string;
   slug: string;
+  category_sections: CategorySectionRelation;
 };
-
-type CategoryRelation =
-  | { name: string; slug: string }
-  | { name: string; slug: string }[]
-  | null;
 
 type QuestionRow = {
   id: string;
@@ -30,10 +32,30 @@ type QuestionRow = {
   is_active: boolean;
   is_used: boolean;
   category_id: string | null;
-  categories: CategoryRelation;
+  categories:
+    | {
+        name: string;
+        slug: string;
+      }
+    | {
+        name: string;
+        slug: string;
+      }[]
+    | null;
 };
 
-function getCategoryName(categories: CategoryRelation) {
+function getSectionName(section: CategorySectionRelation) {
+  if (!section) return "بدون قسم";
+  if (Array.isArray(section)) return section[0]?.name ?? "بدون قسم";
+  return section.name;
+}
+
+function getCategoryName(
+  categories:
+    | { name: string; slug: string }
+    | { name: string; slug: string }[]
+    | null
+) {
   if (!categories) return "بدون فئة";
   if (Array.isArray(categories)) return categories[0]?.name ?? "بدون فئة";
   return categories.name;
@@ -71,14 +93,21 @@ export default async function AdminQuestionsPage({
 }) {
   try {
     const params = await searchParams;
+
     const searchQuery = String(params.q ?? "").trim();
+    const selectedSection = String(params.section ?? "").trim();
     const selectedCategory = String(params.category ?? "").trim();
+
+    const hasFilters =
+      searchQuery.length > 0 ||
+      selectedSection.length > 0 ||
+      selectedCategory.length > 0;
 
     const supabase = await getSupabaseServerClient();
 
     const { data: categoriesData, error: categoriesError } = await supabase
       .from("categories")
-      .select("id, name, slug")
+      .select("id, name, slug, category_sections ( name )")
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
 
@@ -90,49 +119,86 @@ export default async function AdminQuestionsPage({
       );
     }
 
-    const categories = (categoriesData ?? []) as CategoryFilterRow[];
+    const categories = (categoriesData ?? []) as CategoryRow[];
 
-    let query = supabase
-      .from("questions")
-      .select(
-        `
-          id,
-          question_text,
-          answer_text,
-          points,
-          is_active,
-          is_used,
-          category_id,
-          categories ( name, slug )
-        `
+    const sectionOptions = Array.from(
+      new Set(
+        categories
+          .map((category) => getSectionName(category.category_sections))
+          .filter(Boolean)
       )
-      .order("created_at", { ascending: false });
+    ).sort((a, b) => a.localeCompare(b, "ar"));
 
-    if (searchQuery) {
-      query = query.ilike("question_text", `%${searchQuery}%`);
+    const filteredCategoriesForDropdown = selectedSection
+      ? categories.filter(
+          (category) => getSectionName(category.category_sections) === selectedSection
+        )
+      : categories;
+
+    let questions: QuestionRow[] = [];
+
+    if (hasFilters) {
+      let allowedCategoryIds: string[] | null = null;
+
+      if (selectedSection) {
+        allowedCategoryIds = categories
+          .filter(
+            (category) => getSectionName(category.category_sections) === selectedSection
+          )
+          .map((category) => category.id);
+      }
+
+      if (selectedCategory) {
+        allowedCategoryIds = [selectedCategory];
+      }
+
+      if (allowedCategoryIds && allowedCategoryIds.length === 0) {
+        questions = [];
+      } else {
+        let query = supabase
+          .from("questions")
+          .select(
+            `
+              id,
+              question_text,
+              answer_text,
+              points,
+              is_active,
+              is_used,
+              category_id,
+              categories ( name, slug )
+            `
+          )
+          .order("created_at", { ascending: false })
+          .limit(150);
+
+        if (searchQuery) {
+          query = query.ilike("question_text", `%${searchQuery}%`);
+        }
+
+        if (allowedCategoryIds && allowedCategoryIds.length > 0) {
+          query = query.in("category_id", allowedCategoryIds);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          return (
+            <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+              فشل تحميل الأسئلة: {error.message}
+            </div>
+          );
+        }
+
+        questions = (data ?? []) as unknown as QuestionRow[];
+      }
     }
-
-    if (selectedCategory) {
-      query = query.eq("category_id", selectedCategory);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      return (
-        <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-          فشل تحميل الأسئلة: {error.message}
-        </div>
-      );
-    }
-
-    const questions = (data ?? []) as unknown as QuestionRow[];
 
     return (
       <div className="space-y-6">
         <AdminPageHeader
           title="إدارة الأسئلة"
-          description="راجع جميع الأسئلة، فلترها بسرعة، وعدّل أو احذف أي سؤال بسهولة."
+          description="فلتر الأسئلة بسرعة ثم عدّل أو احذف ما تحتاجه بدون تحميل كل الأسئلة دفعة واحدة."
           action={
             <>
               <Link
@@ -152,23 +218,41 @@ export default async function AdminQuestionsPage({
         />
 
         <section className="rounded-[2rem] border border-white/10 bg-slate-900/50 p-4 sm:p-5">
-          <form method="GET" className="grid gap-4 lg:grid-cols-[1.4fr_1fr_auto_auto]">
+          <form method="GET" className="grid gap-4 xl:grid-cols-4">
             <div>
               <label className="mb-2 block text-sm font-bold text-white">
-                فلترة حسب نص السؤال
+                البحث بنص السؤال
               </label>
               <input
                 type="text"
                 name="q"
                 defaultValue={searchQuery}
-                placeholder="اكتب جزءًا من نص السؤال..."
+                placeholder="اكتب جزءًا من السؤال..."
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500"
               />
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-bold text-white">
-                فلترة حسب الفئة
+                القسم
+              </label>
+              <select
+                name="section"
+                defaultValue={selectedSection}
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+              >
+                <option value="">كل الأقسام</option>
+                {sectionOptions.map((sectionName) => (
+                  <option key={sectionName} value={sectionName}>
+                    {sectionName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                الفئة
               </label>
               <select
                 name="category"
@@ -176,49 +260,50 @@ export default async function AdminQuestionsPage({
                 className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
               >
                 <option value="">كل الفئات</option>
-                {categories.map((category) => (
+                {filteredCategoriesForDropdown.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.name}
+                    {getSectionName(category.category_sections)} / {category.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            <button
-              type="submit"
-              className="inline-flex min-h-12 items-center justify-center self-end rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
-            >
-              تطبيق الفلترة
-            </button>
+            <div className="flex gap-3 xl:items-end">
+              <button
+                type="submit"
+                className="inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+              >
+                بحث / فلترة
+              </button>
 
-            <Link
-              href="/admin/questions"
-              className="inline-flex min-h-12 items-center justify-center self-end rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              تصفير
-            </Link>
+              <Link
+                href="/admin/questions"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                تصفير
+              </Link>
+            </div>
           </form>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-300">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              عدد النتائج: {questions.length}
+              يتم عرض الأسئلة فقط بعد استخدام الفلترة
             </span>
 
-            {searchQuery ? (
+            {hasFilters ? (
               <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-cyan-200">
-                نص البحث: {searchQuery}
-              </span>
-            ) : null}
-
-            {selectedCategory ? (
-              <span className="rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-orange-100">
-                تمت الفلترة حسب الفئة
+                عدد النتائج: {questions.length}
               </span>
             ) : null}
           </div>
         </section>
 
-        {questions.length > 0 ? (
+        {!hasFilters ? (
+          <AdminEmptyState
+            title="ابدأ بالفلترة أولًا"
+            description="اختر قسمًا أو فئة أو اكتب نص السؤال، وبعدها ستظهر النتائج هنا فقط."
+          />
+        ) : questions.length > 0 ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {questions.map((question) => {
               const questionPreview = truncateText(stripHtml(question.question_text));
@@ -287,7 +372,7 @@ export default async function AdminQuestionsPage({
         ) : (
           <AdminEmptyState
             title="لا توجد نتائج"
-            description="لم يتم العثور على أسئلة مطابقة للفلترة الحالية."
+            description="لم يتم العثور على أسئلة مطابقة للفلاتر الحالية."
           />
         )}
       </div>
