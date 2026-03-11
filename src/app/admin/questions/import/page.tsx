@@ -48,6 +48,7 @@ type UploadQuestionRow = {
 
 const MAX_IMPORT_QUESTIONS = 5000;
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+const INSERT_CHUNK_SIZE = 200;
 
 const sampleJson = `{
   "questions": [
@@ -96,22 +97,27 @@ function normalizeString(value: unknown) {
 
 function normalizeBool(value: unknown, fallback = true) {
   if (typeof value === "boolean") return value;
+
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
+
     if (["false", "0", "off", "no"].includes(normalized)) return false;
     if (["true", "1", "on", "yes"].includes(normalized)) return true;
   }
+
   return fallback;
 }
 
 function normalizePoints(value: unknown) {
   const numeric = Number(value ?? 200);
+
   if (numeric === 400 || numeric === 600) return numeric;
   return 200;
 }
 
 function normalizeTolerance(value: unknown) {
   const numeric = Number(value ?? 0);
+
   if (!Number.isFinite(numeric) || numeric < 0) return 0;
   return Math.floor(numeric);
 }
@@ -211,7 +217,9 @@ function normalizeComparableText(value: string) {
 
 function isLikelyYearQuestion(questionHtml: string, answerHtml: string) {
   const questionText = normalizeArabicDigits(stripHtml(questionHtml)).toLowerCase();
-  const answerText = normalizeArabicDigits(stripHtml(answerHtml)).trim().toLowerCase();
+  const answerText = normalizeArabicDigits(stripHtml(answerHtml))
+    .trim()
+    .toLowerCase();
 
   const yearPromptRegex =
     /(في اي سنة|في أي سنة|في اي عام|في أي عام|اي سنة|أي سنة|اي عام|أي عام|ما السنة|ما السنه|عام كم|سنة كم|سنه كم|متى وقع|متى حدث|متى سقط|متى بدات|متى بدأت)/;
@@ -226,6 +234,16 @@ function getAutoToleranceByPoints(points: number) {
   if (points === 600) return 10;
   if (points === 400) return 5;
   return 1;
+}
+
+function splitIntoChunks<T>(items: T[], chunkSize: number) {
+  const chunks: T[][] = [];
+
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+
+  return chunks;
 }
 
 export default async function AdminImportQuestionsPage({
@@ -322,10 +340,12 @@ export default async function AdminImportQuestionsPage({
     const rawItems = Array.isArray(parsed)
       ? parsed
       : parsed &&
-        typeof parsed === "object" &&
-        Array.isArray((parsed as { questions?: unknown[] }).questions)
-      ? (parsed as { questions: unknown[] }).questions
-      : [];
+          typeof parsed === "object" &&
+          Array.isArray((parsed as { questions?: unknown[] }).questions)
+        ? (parsed as { questions: unknown[] }).questions
+        : [];
+
+    const totalFoundInFile = rawItems.length;
 
     if (!Array.isArray(rawItems) || rawItems.length === 0) {
       redirect(
@@ -407,6 +427,9 @@ export default async function AdminImportQuestionsPage({
     const validationErrors: string[] = [];
     const fileQuestionKeys = new Set<string>();
 
+    let skippedDuplicateInFile = 0;
+    let skippedDuplicateInDatabase = 0;
+
     rawItems.forEach((item, index) => {
       const row = (item ?? {}) as UploadQuestionRow;
       const line = index + 1;
@@ -440,14 +463,12 @@ export default async function AdminImportQuestionsPage({
       }
 
       if (fileQuestionKeys.has(normalizedQuestionKey)) {
-        validationErrors.push(`السطر ${line}: يوجد سؤال مكرر داخل نفس الملف.`);
+        skippedDuplicateInFile += 1;
         return;
       }
 
       if (existingQuestionKeys.has(normalizedQuestionKey)) {
-        validationErrors.push(
-          `السطر ${line}: هذا السؤال موجود مسبقًا داخل قاعدة البيانات.`
-        );
+        skippedDuplicateInDatabase += 1;
         return;
       }
 
@@ -507,7 +528,11 @@ export default async function AdminImportQuestionsPage({
         ? normalizeTolerance(row.year_tolerance_after)
         : 0;
 
-      if (!explicitBefore && !explicitAfter && isLikelyYearQuestion(questionBase, answerBase)) {
+      if (
+        !explicitBefore &&
+        !explicitAfter &&
+        isLikelyYearQuestion(questionBase, answerBase)
+      ) {
         const autoTolerance = getAutoToleranceByPoints(points);
         yearToleranceBefore = autoTolerance;
         yearToleranceAfter = autoTolerance;
@@ -533,12 +558,37 @@ export default async function AdminImportQuestionsPage({
       );
     }
 
-    const { error } = await supabase.from("questions").insert(insertRows);
-
-    if (error) {
+    if (insertRows.length === 0) {
       redirect(
         "/admin/questions/import?error=" +
-          encodeURIComponent(error.message)
+          encodeURIComponent(
+            `لم يتم العثور على أسئلة جديدة للرفع. تم تخطي ${skippedDuplicateInFile} سؤال مكرر داخل الملف و${skippedDuplicateInDatabase} سؤال موجود مسبقًا في قاعدة البيانات.`
+          )
+      );
+    }
+
+    const chunks = splitIntoChunks(insertRows, INSERT_CHUNK_SIZE);
+    let insertedCount = 0;
+
+    for (const chunk of chunks) {
+      const { error } = await supabase.from("questions").insert(chunk);
+
+      if (error) {
+        redirect(
+          "/admin/questions/import?error=" +
+            encodeURIComponent(error.message || "فشل رفع إحدى دفعات الأسئلة.")
+        );
+      }
+
+      insertedCount += chunk.length;
+    }
+
+    if (insertedCount !== insertRows.length) {
+      redirect(
+        "/admin/questions/import?error=" +
+          encodeURIComponent(
+            `تم تجهيز ${insertRows.length} سؤال لكن تم إدخال ${insertedCount} فقط.`
+          )
       );
     }
 
@@ -547,9 +597,13 @@ export default async function AdminImportQuestionsPage({
     revalidatePath("/game/start");
     revalidatePath("/game/board");
 
+    const skippedTotal = skippedDuplicateInFile + skippedDuplicateInDatabase;
+
     redirect(
       "/admin/questions/import?success=" +
-        encodeURIComponent(`تم رفع ${insertRows.length} سؤال بنجاح.`)
+        encodeURIComponent(
+          `تم العثور على ${totalFoundInFile} سؤال في الملف، وتم رفع ${insertedCount} سؤال جديد، وتم تخطي ${skippedTotal} سؤال مكرر (${skippedDuplicateInFile} داخل الملف و${skippedDuplicateInDatabase} موجود مسبقًا).`
+        )
     );
   }
 
@@ -672,7 +726,10 @@ export default async function AdminImportQuestionsPage({
                 <li>يمكنك كتابة القسم والفئة بالاسم أو بالـ slug.</li>
                 <li>الصور والفيديو تُضاف تلقائيًا داخل السؤال أو الجواب.</li>
                 <li>إذا كان جواب السؤال سنة فستُضاف السماحية تلقائيًا حسب النقاط.</li>
-                <li>إذا وُجد سؤال مكرر داخل الملف أو داخل قاعدة البيانات فلن يتم الرفع.</li>
+                <li>
+                  إذا وُجد سؤال مكرر داخل الملف أو داخل قاعدة البيانات فسيتم
+                  تخطيه تلقائيًا مع رفع باقي الأسئلة.
+                </li>
               </ul>
             </div>
 
@@ -689,7 +746,9 @@ export default async function AdminImportQuestionsPage({
                     </span>
                   ))
                 ) : (
-                  <span className="text-sm text-slate-400">لا توجد فئات حالية.</span>
+                  <span className="text-sm text-slate-400">
+                    لا توجد فئات حالية.
+                  </span>
                 )}
               </div>
             </div>
@@ -709,7 +768,7 @@ export default async function AdminImportQuestionsPage({
         </div>
 
         <pre className="mt-6 overflow-x-auto rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-4 text-left text-xs leading-7 text-slate-200 sm:text-sm">
-{sampleJson}
+          {sampleJson}
         </pre>
       </section>
     </div>
