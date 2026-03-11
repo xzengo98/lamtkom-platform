@@ -74,7 +74,7 @@ type BoardContentProps = {
 const MOBILE_CATEGORY_WIDTH = 152;
 const MOBILE_SIDEBAR_WIDTH = 176;
 const MOBILE_COLUMN_GAP = 12;
-const MOBILE_BOARD_HEIGHT = 540;
+const MOBILE_BOARD_HEIGHT = 590;
 const QUESTION_TIMER_SECONDS = 30;
 
 const categoryVisuals: Record<
@@ -215,9 +215,6 @@ function BoardContent({
                   }`}
                 >
                   {category.name}
-                </p>
-                <p className="mt-1 text-center text-xs text-slate-300">
-                  {compact ? "6 خانات" : "اختر السؤال المناسب"}
                 </p>
               </div>
             </div>
@@ -809,7 +806,7 @@ export default function GameBoardClient({
 
       const viewportHeight =
         window.visualViewport?.height ?? window.innerHeight ?? 700;
-      const reservedTop = 148;
+      const reservedTop = 128;
       const availableHeight = Math.max(viewportHeight - reservedTop, 240);
 
       const scaleByWidth = availableWidth / boardWidth;

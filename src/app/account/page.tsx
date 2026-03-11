@@ -26,7 +26,7 @@ type ActiveSession = {
   status: string;
 };
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null | undefined) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString("ar-EG", {
     year: "numeric",
@@ -201,7 +201,10 @@ export default function AccountPage() {
           <StatCard label="الألعاب المتبقية" value={profile?.games_remaining ?? 0} />
           <StatCard label="عدد الألعاب التي لعبها" value={profile?.games_played ?? 0} />
           <StatCard label="رتبة الحساب" value={getRoleLabel(profile?.role)} />
-          <StatCard label="تاريخ إنشاء الحساب" value={formatDate(profile?.created_at ?? null)} />
+          <StatCard
+            label="تاريخ إنشاء الحساب"
+            value={formatDate(profile?.created_at ?? null)}
+          />
         </section>
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
@@ -274,7 +277,7 @@ export default function AccountPage() {
                     </div>
 
                     <Link
-                      href={`/game/board?session=${session.id}`}
+                      href={`/game/board?sessionId=${session.id}`}
                       className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
                     >
                       متابعة اللعبة
