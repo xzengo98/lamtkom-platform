@@ -6,6 +6,17 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+type SearchParams = Promise<{
+  q?: string;
+  category?: string;
+}>;
+
+type CategoryFilterRow = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type CategoryRelation =
   | { name: string; slug: string }
   | { name: string; slug: string }[]
@@ -18,6 +29,7 @@ type QuestionRow = {
   points: number;
   is_active: boolean;
   is_used: boolean;
+  category_id: string | null;
   categories: CategoryRelation;
 };
 
@@ -41,19 +53,46 @@ async function deleteQuestion(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id") ?? "");
-  const supabase = await getSupabaseServerClient();
+  if (!id) return;
 
+  const supabase = await getSupabaseServerClient();
   await supabase.from("questions").delete().eq("id", id);
 
   revalidatePath("/admin/questions");
+  revalidatePath("/admin");
+  revalidatePath("/game/start");
   revalidatePath("/game/board");
 }
 
-export default async function AdminQuestionsPage() {
+export default async function AdminQuestionsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   try {
+    const params = await searchParams;
+    const searchQuery = String(params.q ?? "").trim();
+    const selectedCategory = String(params.category ?? "").trim();
+
     const supabase = await getSupabaseServerClient();
 
-    const { data, error } = await supabase
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from("categories")
+      .select("id, name, slug")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (categoriesError) {
+      return (
+        <div className="rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+          فشل تحميل الفئات: {categoriesError.message}
+        </div>
+      );
+    }
+
+    const categories = (categoriesData ?? []) as CategoryFilterRow[];
+
+    let query = supabase
       .from("questions")
       .select(
         `
@@ -63,10 +102,21 @@ export default async function AdminQuestionsPage() {
           points,
           is_active,
           is_used,
+          category_id,
           categories ( name, slug )
         `
       )
       .order("created_at", { ascending: false });
+
+    if (searchQuery) {
+      query = query.ilike("question_text", `%${searchQuery}%`);
+    }
+
+    if (selectedCategory) {
+      query = query.eq("category_id", selectedCategory);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return (
@@ -82,7 +132,7 @@ export default async function AdminQuestionsPage() {
       <div className="space-y-6">
         <AdminPageHeader
           title="إدارة الأسئلة"
-          description="راجع جميع الأسئلة، عدّلها أو احذفها، ويمكنك أيضًا رفع ملف أسئلة كامل بدل الإضافة اليدوية."
+          description="راجع جميع الأسئلة، فلترها بسرعة، وعدّل أو احذف أي سؤال بسهولة."
           action={
             <>
               <Link
@@ -100,6 +150,73 @@ export default async function AdminQuestionsPage() {
             </>
           }
         />
+
+        <section className="rounded-[2rem] border border-white/10 bg-slate-900/50 p-4 sm:p-5">
+          <form method="GET" className="grid gap-4 lg:grid-cols-[1.4fr_1fr_auto_auto]">
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                فلترة حسب نص السؤال
+              </label>
+              <input
+                type="text"
+                name="q"
+                defaultValue={searchQuery}
+                placeholder="اكتب جزءًا من نص السؤال..."
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-500"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                فلترة حسب الفئة
+              </label>
+              <select
+                name="category"
+                defaultValue={selectedCategory}
+                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+              >
+                <option value="">كل الفئات</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              className="inline-flex min-h-12 items-center justify-center self-end rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+            >
+              تطبيق الفلترة
+            </button>
+
+            <Link
+              href="/admin/questions"
+              className="inline-flex min-h-12 items-center justify-center self-end rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+            >
+              تصفير
+            </Link>
+          </form>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-300">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              عدد النتائج: {questions.length}
+            </span>
+
+            {searchQuery ? (
+              <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-cyan-200">
+                نص البحث: {searchQuery}
+              </span>
+            ) : null}
+
+            {selectedCategory ? (
+              <span className="rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-orange-100">
+                تمت الفلترة حسب الفئة
+              </span>
+            ) : null}
+          </div>
+        </section>
 
         {questions.length > 0 ? (
           <div className="grid gap-4 xl:grid-cols-2">
@@ -146,7 +263,7 @@ export default async function AdminQuestionsPage() {
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <Link
-                        href={`/admin/questions/${question.id}/edit`}
+                        href={`/admin/questions/edit/${question.id}`}
                         className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-base font-bold text-white transition hover:bg-white/10"
                       >
                         تعديل
@@ -169,8 +286,8 @@ export default async function AdminQuestionsPage() {
           </div>
         ) : (
           <AdminEmptyState
-            title="لا توجد أسئلة"
-            description="ابدأ بإضافة سؤال جديد أو استخدم صفحة رفع الأسئلة بالجملة."
+            title="لا توجد نتائج"
+            description="لم يتم العثور على أسئلة مطابقة للفلترة الحالية."
           />
         )}
       </div>
