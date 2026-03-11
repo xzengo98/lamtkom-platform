@@ -102,7 +102,7 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
 
   if (availability.mode === "fixed") {
     return {
-      text: "أسئلة ثابتة",
+      text: "متاحة",
       className: "border-white/15 bg-white/10 text-white",
     };
   }
@@ -120,48 +120,12 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
   };
 }
 
-function getAvailabilityHint(availability: CategoryAvailability) {
-  const missing: string[] = [];
-
-  if (availability.easyCount < 2) missing.push("200");
-  if (availability.mediumCount < 2) missing.push("400");
-  if (availability.hardCount < 2) missing.push("600");
-
-  if (!availability.isSelectable) {
-    if (missing.length > 0) {
-      return `لا يمكن اختيار هذه الفئة حاليًا لأنها لا تحتوي على عدد كافٍ من أسئلة المستويات: ${missing.join(
-        " / "
-      )}.`;
-    }
-
-    return "هذه الفئة غير متاحة حاليًا.";
-  }
-
-  if (availability.mode === "fixed") {
-    return "هذه الفئة تعرض نفس المجموعة الثابتة من الأسئلة للحسابات المجانية.";
-  }
-
-  return "يتم السحب من الأسئلة غير المستخدمة سابقًا لهذا الحساب.";
-}
-
 function getSelectionError(availability: CategoryAvailability | undefined) {
-  if (!availability) {
-    return "هذه الفئة غير متاحة حاليًا.";
+  if (!availability?.isSelectable) {
+    return "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.";
   }
 
-  const missing: string[] = [];
-
-  if (availability.easyCount < 2) missing.push("200");
-  if (availability.mediumCount < 2) missing.push("400");
-  if (availability.hardCount < 2) missing.push("600");
-
-  if (missing.length > 0) {
-    return `لا يمكن اختيار هذه الفئة لأنها لا تحتوي على ما يكفي من أسئلة ${missing.join(
-      " / "
-    )}.`;
-  }
-
-  return "هذه الفئة غير متاحة حاليًا.";
+  return "لا يمكن اختيار هذه الفئة حاليًا.";
 }
 
 export default function StartGameForm({
@@ -347,7 +311,7 @@ export default function StartGameForm({
                     <span className="font-bold text-white">
                       عشوائي بدون تكرار
                     </span>
-                    . تحت كل فئة يظهر عدد الألعاب المتبقية الممكنة فعليًا.
+                    . يظهر على كل فئة فقط عدد الألعاب المتبقية.
                   </>
                 ) : (
                   <>
@@ -401,8 +365,7 @@ export default function StartGameForm({
               اختر الفئات المناسبة
             </h2>
             <p className="mt-2 text-sm leading-7 text-slate-300 sm:text-base">
-              البطاقات غير الكافية ستظهر بوضوح كغير متاحة، مع توضيح عدد الأسئلة
-              المتوفر لكل مستوى.
+              يظهر على كل بطاقة فقط عدد الألعاب المتبقية أو حالة توفر الفئة.
             </p>
           </div>
 
@@ -594,7 +557,6 @@ function CategoryCard({
   availability: CategoryAvailability;
 }) {
   const badge = getAvailabilityBadge(availability);
-  const hint = getAvailabilityHint(availability);
 
   return (
     <div
@@ -606,10 +568,6 @@ function CategoryCard({
           : "border-red-500/15 bg-slate-950/60 opacity-85"
       }`}
     >
-      <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${theme.glow}`}
-      />
-
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
@@ -619,8 +577,14 @@ function CategoryCard({
         i
       </button>
 
+      <div
+        className={`absolute left-3 top-3 z-20 rounded-full border px-2.5 py-1 text-[11px] font-bold ${badge.className}`}
+      >
+        {badge.text}
+      </div>
+
       {active ? (
-        <div className="absolute left-3 top-3 z-20 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white">
+        <div className="absolute left-3 bottom-[5.25rem] z-20 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white">
           تم الاختيار
         </div>
       ) : null}
@@ -632,6 +596,10 @@ function CategoryCard({
         className="relative block h-full w-full text-right disabled:cursor-not-allowed"
       >
         <div className="relative aspect-[1.02/1] overflow-hidden bg-slate-200/90">
+          <div
+            className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${theme.glow}`}
+          />
+
           {category.image_url ? (
             <img
               src={category.image_url}
@@ -645,7 +613,7 @@ function CategoryCard({
           )}
 
           {!availability.isSelectable ? (
-            <div className="absolute inset-0 bg-slate-950/55" />
+            <div className="absolute inset-0 bg-slate-950/45" />
           ) : null}
 
           {infoOpen ? (
@@ -656,54 +624,14 @@ function CategoryCard({
               <p className="mt-2 text-[11px] leading-6 text-slate-200 sm:text-sm">
                 {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
               </p>
-
-              <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                <p className="text-[11px] font-bold text-white sm:text-sm">
-                  حالة الفئة
-                </p>
-                <p className="mt-2 text-[11px] leading-6 text-slate-300 sm:text-sm">
-                  {hint}
-                </p>
-              </div>
             </div>
           ) : null}
         </div>
 
-        <div className={`relative space-y-3 px-3 py-3 text-center ${theme.chip}`}>
+        <div className={`relative px-3 py-3 text-center ${theme.chip}`}>
           <p className="text-base font-black sm:text-lg">{category.name}</p>
-
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <span
-              className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${badge.className}`}
-            >
-              {badge.text}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 text-[11px]">
-            <StatPill label="200" value={availability.easyCount} />
-            <StatPill label="400" value={availability.mediumCount} />
-            <StatPill label="600" value={availability.hardCount} />
-          </div>
-
-          <p className="text-[11px] leading-5 text-white/85">{hint}</p>
         </div>
       </button>
-    </div>
-  );
-}
-
-function StatPill({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-xl border border-white/15 bg-black/15 px-2 py-2">
-      <p className="text-[10px] text-white/70">{label}</p>
-      <p className="mt-1 text-sm font-black text-white">{value}</p>
     </div>
   );
 }
