@@ -1,232 +1,120 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import AdminPageHeader from "@/components/admin/admin-page-header";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{
-  error?: string;
   success?: string;
+  error?: string;
+  warning?: string;
 }>;
 
-type CategoryRelation =
-  | { name: string; slug: string }
-  | { name: string; slug: string }[]
-  | null;
-
-type CategoryLookupRow = {
-  id: string;
-  name: string;
-  slug: string;
-  category_sections: CategoryRelation;
+type ProfileRow = {
+  role: string | null;
 };
 
-type UploadQuestionRow = {
+type SectionRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  is_active: boolean | null;
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  section_id: string | null;
+  is_active: boolean | null;
+};
+
+type ImportQuestionItem = {
   section?: string;
-  section_name?: string;
   section_slug?: string;
   category?: string;
-  category_name?: string;
   category_slug?: string;
-  points?: number;
-  is_active?: boolean | string;
-  year_tolerance_before?: number;
-  year_tolerance_after?: number;
+  points?: number | string;
+  is_active?: boolean;
+  year_tolerance_before?: number | string | null;
+  year_tolerance_after?: number | string | null;
   question_text?: string;
-  question?: string;
-  question_html?: string;
   answer_text?: string;
-  answer?: string;
-  answer_html?: string;
   question_image_url?: string;
   question_video_url?: string;
   answer_image_url?: string;
   answer_video_url?: string;
 };
 
-type PreparedInsertRow = {
+type InsertQuestionRow = {
   category_id: string;
-  question_text: string;
-  answer_text: string;
   points: number;
   is_active: boolean;
-  is_used: boolean;
   year_tolerance_before: number;
   year_tolerance_after: number;
+  question_text: string;
+  answer_text: string;
+  question_image_url: string;
+  question_video_url: string;
+  answer_image_url: string;
+  answer_video_url: string;
 };
 
-const MAX_IMPORT_QUESTIONS = 1500;
-const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
-const INSERT_CHUNK_SIZE = 100;
+const CHUNK_SIZE = 200;
 
-const sampleJson = JSON.stringify(
-  {
-    questions: [
-      {
-        section: "عام",
-        category: "تاريخ",
-        points: 200,
-        is_active: true,
-        question_text: "<p>في أي سنة سقطت القسطنطينية؟</p>",
-        answer_text: "<p>1453</p>",
-        question_image_url: "",
-        question_video_url: "",
-        answer_image_url: "",
-        answer_video_url: "",
-      },
-      {
-        section: "عام",
-        category: "تاريخ",
-        points: 400,
-        is_active: true,
-        question_text: "<p>ما اسم المعاهدة التي أنهت الحرب العالمية الأولى رسميًا؟</p>",
-        answer_text: "<p>معاهدة فرساي</p>",
-        question_image_url: "",
-        question_video_url: "",
-        answer_image_url: "",
-        answer_video_url: "",
-      },
-    ],
-  },
-  null,
-  2
-);
-
-function getSectionName(section: CategoryRelation) {
-  if (!section) return "";
-  if (Array.isArray(section)) return section[0]?.name ?? "";
-  return section.name;
+function normalizeLookup(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-function getSectionSlug(section: CategoryRelation) {
-  if (!section) return "";
-  if (Array.isArray(section)) return section[0]?.slug ?? "";
-  return section.slug;
+function normalizeSlug(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
-function normalizeString(value: unknown) {
+function normalizeHtml(value: string) {
+  return value
+    .replace(/>\s+</g, "><")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toStringValue(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function normalizeLower(value: unknown) {
-  return normalizeString(value).toLowerCase();
+function toInt(value: unknown, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? Math.trunc(num) : fallback;
 }
 
-function normalizeBool(value: unknown, fallback = true) {
-  if (typeof value === "boolean") return value;
+function chunkArray<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
 
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (["false", "0", "off", "no"].includes(normalized)) return false;
-    if (["true", "1", "on", "yes"].includes(normalized)) return true;
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
   }
 
-  return fallback;
+  return chunks;
 }
 
-function normalizePoints(value: unknown) {
-  const numeric = Number(value ?? 200);
-  if (numeric === 400 || numeric === 600) return numeric;
-  return 200;
+function buildMessage(parts: string[]) {
+  return parts.filter(Boolean).join(" | ");
 }
 
-function normalizeTolerance(value: unknown) {
-  const numeric = Number(value ?? 0);
-  if (!Number.isFinite(numeric) || numeric < 0) return 0;
-  return Math.floor(numeric);
+function makeSafeRedirectMessage(value: string) {
+  return encodeURIComponent(value);
 }
 
-function escapeAttribute(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function toYouTubeEmbed(url: string) {
-  try {
-    const parsed = new URL(url);
-
-    if (parsed.hostname.includes("youtube.com")) {
-      const v = parsed.searchParams.get("v");
-      if (v) return `https://www.youtube.com/embed/${v}`;
-    }
-
-    if (parsed.hostname.includes("youtu.be")) {
-      const id = parsed.pathname.replace("/", "");
-      if (id) return `https://www.youtube.com/embed/${id}`;
-    }
-  } catch {}
-
-  return url;
-}
-
-function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
-  const parts: string[] = [];
-
-  if (baseHtml.trim()) {
-    parts.push(baseHtml.trim());
-  }
-
-  if (imageUrl.trim()) {
-    parts.push(
-      `<figure class="media-image"><img src="${escapeAttribute(
-        imageUrl.trim()
-      )}" alt="image" /></figure>`
-    );
-  }
-
-  if (videoUrl.trim()) {
-    const embed = toYouTubeEmbed(videoUrl.trim());
-
-    if (embed.includes("youtube.com/embed/")) {
-      parts.push(
-        `<div class="video-wrap"><iframe src="${escapeAttribute(
-          embed
-        )}" allowfullscreen></iframe></div>`
-      );
-    } else {
-      parts.push(
-        `<video controls><source src="${escapeAttribute(
-          videoUrl.trim()
-        )}" /></video>`
-      );
-    }
-  }
-
-  return parts.join("\n\n").trim();
-}
-
-function stripHtml(value: string) {
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
-}
-
-function containsLikelyYear(value: string) {
-  return /\b(1[0-9]{3}|20[0-9]{2})\b/.test(value);
-}
-
-function getDefaultTolerance(points: number) {
-  if (points === 600) return 10;
-  if (points === 400) return 5;
-  return 1;
-}
-
-export default async function ImportQuestionsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const resolvedSearchParams = await searchParams;
+async function requireAdmin() {
   const supabase = await getSupabaseServerClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/login");
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -234,439 +122,485 @@ export default async function ImportQuestionsPage({
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") {
+  const typedProfile = profile as ProfileRow | null;
+
+  if (typedProfile?.role !== "admin") {
     redirect("/");
   }
 
-  const { data: categoriesData, error: categoriesError } = await supabase
-    .from("categories")
-    .select("id, name, slug, category_sections ( name, slug )")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
+  return { supabase, user };
+}
 
-  if (categoriesError) {
-    return (
-      <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
-        <div className="mx-auto max-w-6xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-          فشل تحميل الفئات: {categoriesError.message}
-        </div>
-      </main>
-    );
-  }
+export default async function AdminQuestionsImportPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const { supabase } = await requireAdmin();
 
-  const categories = (categoriesData ?? []) as CategoryLookupRow[];
+  const [sectionsResult, categoriesResult] = await Promise.all([
+    supabase
+      .from("category_sections")
+      .select("id, name, slug, is_active")
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("categories")
+      .select("id, name, slug, section_id, is_active")
+      .order("sort_order", { ascending: true }),
+  ]);
 
-  async function importQuestions(formData: FormData) {
+  const sections = (sectionsResult.data ?? []) as SectionRow[];
+  const categories = (categoriesResult.data ?? []) as CategoryRow[];
+
+  async function importQuestionsAction(formData: FormData) {
     "use server";
 
-    const supabase = await getSupabaseServerClient();
+    const { supabase } = await requireAdmin();
 
-    const fileEntry = formData.get("data_file");
+    const file = formData.get("file");
 
-    if (!(fileEntry instanceof File) || fileEntry.size === 0) {
+    if (!(file instanceof File)) {
       redirect(
-        `/admin/questions/import?error=${encodeURIComponent("اختر ملف JSON أولًا.")}`
-      );
-    }
-
-    if (fileEntry.size > MAX_FILE_SIZE_BYTES) {
-      redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "حجم الملف كبير جدًا. ارفع ملفًا أصغر."
-        )}`
+        "/admin/questions/import?error=" +
+          makeSafeRedirectMessage("يرجى اختيار ملف JSON صالح.")
       );
     }
 
     let rawText = "";
+
     try {
-      rawText = await fileEntry.text();
+      rawText = await file.text();
     } catch {
       redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "تعذر قراءة الملف المرفوع."
-        )}`
+        "/admin/questions/import?error=" +
+          makeSafeRedirectMessage("تعذر قراءة الملف المرفوع.")
       );
     }
 
     let parsed: unknown;
+
     try {
       parsed = JSON.parse(rawText);
     } catch {
       redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "تنسيق JSON غير صالح."
-        )}`
+        "/admin/questions/import?error=" +
+          makeSafeRedirectMessage("الملف ليس JSON صالحًا.")
       );
     }
 
-    const rows = Array.isArray(parsed)
-      ? (parsed as UploadQuestionRow[])
-      : Array.isArray((parsed as { questions?: unknown[] })?.questions)
-      ? (((parsed as { questions?: unknown[] }).questions ?? []) as UploadQuestionRow[])
-      : [];
+    const payload = parsed as { questions?: ImportQuestionItem[] };
 
-    if (!rows.length) {
+    if (!payload || !Array.isArray(payload.questions)) {
       redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "الملف لا يحتوي على أسئلة صالحة."
-        )}`
+        "/admin/questions/import?error=" +
+          makeSafeRedirectMessage(
+            'صيغة الملف غير صحيحة. يجب أن يحتوي على مصفوفة باسم "questions".'
+          )
       );
     }
 
-    if (rows.length > MAX_IMPORT_QUESTIONS) {
-      redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          `الحد الأقصى المسموح به في الدفعة الواحدة هو ${MAX_IMPORT_QUESTIONS} سؤال.`
-        )}`
-      );
+    const [sectionsResult, categoriesResult] = await Promise.all([
+      supabase
+        .from("category_sections")
+        .select("id, name, slug, is_active")
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("categories")
+        .select("id, name, slug, section_id, is_active")
+        .order("sort_order", { ascending: true }),
+    ]);
+
+    const sections = (sectionsResult.data ?? []) as SectionRow[];
+    const categories = (categoriesResult.data ?? []) as CategoryRow[];
+
+    const activeSections = sections.filter((item) => item.is_active !== false);
+    const activeCategories = categories.filter((item) => item.is_active !== false);
+
+    const sectionByName = new Map<string, SectionRow>();
+    const sectionBySlug = new Map<string, SectionRow>();
+
+    for (const section of activeSections) {
+      sectionByName.set(normalizeLookup(section.name), section);
+      if (section.slug) {
+        sectionBySlug.set(normalizeLookup(section.slug), section);
+        sectionBySlug.set(normalizeSlug(section.slug), section);
+      }
     }
 
-    const categoryBySlug = new Map<string, CategoryLookupRow>();
-    const categoryByName = new Map<string, CategoryLookupRow[]>();
+    function resolveSection(item: ImportQuestionItem) {
+      const sectionSlug = toStringValue(item.section_slug);
+      const sectionName = toStringValue(item.section);
 
-    for (const category of categories) {
-      categoryBySlug.set(category.slug.toLowerCase(), category);
+      if (sectionSlug) {
+        return (
+          sectionBySlug.get(normalizeLookup(sectionSlug)) ||
+          sectionBySlug.get(normalizeSlug(sectionSlug)) ||
+          null
+        );
+      }
 
-      const key = category.name.toLowerCase();
-      const list = categoryByName.get(key) ?? [];
-      list.push(category);
-      categoryByName.set(key, list);
+      if (sectionName) {
+        return (
+          sectionByName.get(normalizeLookup(sectionName)) ||
+          sectionBySlug.get(normalizeLookup(sectionName)) ||
+          sectionBySlug.get(normalizeSlug(sectionName)) ||
+          null
+        );
+      }
+
+      return null;
     }
 
-    function resolveCategory(row: UploadQuestionRow) {
-      const sectionName = normalizeLower(row.section ?? row.section_name);
-      const sectionSlug = normalizeLower(row.section_slug);
-      const categoryName = normalizeLower(row.category ?? row.category_name);
-      const categorySlug = normalizeLower(row.category_slug);
+    function resolveCategory(item: ImportQuestionItem, sectionId: string | null) {
+      const categorySlug = toStringValue(item.category_slug);
+      const categoryName = toStringValue(item.category);
 
-      if (categorySlug) {
-        const bySlug = categoryBySlug.get(categorySlug);
+      const scoped = sectionId
+        ? activeCategories.filter((cat) => cat.section_id === sectionId)
+        : activeCategories;
+
+      const lookupValues = [
+        categorySlug ? normalizeLookup(categorySlug) : "",
+        categorySlug ? normalizeSlug(categorySlug) : "",
+        categoryName ? normalizeLookup(categoryName) : "",
+        categoryName ? normalizeSlug(categoryName) : "",
+      ].filter(Boolean);
+
+      for (const key of lookupValues) {
+        const bySlug = scoped.find(
+          (cat) =>
+            (cat.slug && normalizeLookup(cat.slug) === key) ||
+            (cat.slug && normalizeSlug(cat.slug) === key)
+        );
         if (bySlug) return bySlug;
+
+        const byName = scoped.find((cat) => normalizeLookup(cat.name) === key);
+        if (byName) return byName;
       }
 
-      if (!categoryName) return null;
+      for (const key of lookupValues) {
+        const globalBySlug = activeCategories.find(
+          (cat) =>
+            (cat.slug && normalizeLookup(cat.slug) === key) ||
+            (cat.slug && normalizeSlug(cat.slug) === key)
+        );
+        if (globalBySlug) return globalBySlug;
 
-      const candidates = categoryByName.get(categoryName) ?? [];
-      if (!candidates.length) return null;
-
-      if (!sectionName && !sectionSlug) {
-        return candidates[0] ?? null;
+        const globalByName = activeCategories.find(
+          (cat) => normalizeLookup(cat.name) === key
+        );
+        if (globalByName) return globalByName;
       }
 
-      return (
-        candidates.find((candidate) => {
-          const currentSectionName = getSectionName(candidate.category_sections).toLowerCase();
-          const currentSectionSlug = getSectionSlug(candidate.category_sections).toLowerCase();
-
-          return (
-            (sectionName && currentSectionName === sectionName) ||
-            (sectionSlug && currentSectionSlug === sectionSlug)
-          );
-        }) ?? null
-      );
+      return null;
     }
 
-    const preparedRows: PreparedInsertRow[] = [];
-    let skippedInvalid = 0;
+    const invalidLines: string[] = [];
+    const duplicateInsideFileLines: string[] = [];
+    const preparedRows: InsertQuestionRow[] = [];
+    const seenQuestionKeys = new Set<string>();
 
-    for (const row of rows) {
-      const resolvedCategory = resolveCategory(row);
+    payload.questions.forEach((item, index) => {
+      const lineNumber = index + 1;
 
-      const rawQuestion =
-        normalizeString(row.question_text) ||
-        normalizeString(row.question) ||
-        normalizeString(row.question_html);
+      const questionTextRaw = toStringValue(item.question_text);
+      const answerTextRaw = toStringValue(item.answer_text);
 
-      const rawAnswer =
-        normalizeString(row.answer_text) ||
-        normalizeString(row.answer) ||
-        normalizeString(row.answer_html);
-
-      if (!resolvedCategory || !rawQuestion || !rawAnswer) {
-        skippedInvalid += 1;
-        continue;
+      if (!questionTextRaw || !answerTextRaw) {
+        invalidLines.push(`السطر ${lineNumber}: السؤال أو الجواب فارغ.`);
+        return;
       }
 
-      const points = normalizePoints(row.points);
+      const normalizedQuestionText = normalizeHtml(questionTextRaw);
+      const duplicateKey = normalizeLookup(
+        questionTextRaw.replace(/<[^>]*>/g, " ").trim()
+      );
 
-      let yearToleranceBefore = normalizeTolerance(row.year_tolerance_before);
-      let yearToleranceAfter = normalizeTolerance(row.year_tolerance_after);
-
-      if (
-        yearToleranceBefore === 0 &&
-        yearToleranceAfter === 0 &&
-        containsLikelyYear(`${rawQuestion} ${rawAnswer}`)
-      ) {
-        const defaultTolerance = getDefaultTolerance(points);
-        yearToleranceBefore = defaultTolerance;
-        yearToleranceAfter = defaultTolerance;
+      if (!duplicateKey) {
+        invalidLines.push(`السطر ${lineNumber}: نص السؤال غير صالح.`);
+        return;
       }
 
-      const questionText = appendMediaHtml(
-        rawQuestion,
-        normalizeString(row.question_image_url),
-        normalizeString(row.question_video_url)
-      );
+      if (seenQuestionKeys.has(duplicateKey)) {
+        duplicateInsideFileLines.push(`السطر ${lineNumber}: سؤال مكرر داخل الملف.`);
+        return;
+      }
 
-      const answerText = appendMediaHtml(
-        rawAnswer,
-        normalizeString(row.answer_image_url),
-        normalizeString(row.answer_video_url)
-      );
+      seenQuestionKeys.add(duplicateKey);
+
+      const section = resolveSection(item);
+      const category = resolveCategory(item, section?.id ?? null);
+
+      if (!category) {
+        invalidLines.push(
+          `السطر ${lineNumber}: تعذر العثور على الفئة أو القسم المرتبط بها.`
+        );
+        return;
+      }
+
+      const points = toInt(item.points, 0);
+
+      if (![200, 400, 600].includes(points)) {
+        invalidLines.push(
+          `السطر ${lineNumber}: النقاط يجب أن تكون 200 أو 400 أو 600.`
+        );
+        return;
+      }
 
       preparedRows.push({
-        category_id: resolvedCategory.id,
-        question_text: questionText,
-        answer_text: answerText,
+        category_id: category.id,
         points,
-        is_active: normalizeBool(row.is_active, true),
-        is_used: false,
-        year_tolerance_before: yearToleranceBefore,
-        year_tolerance_after: yearToleranceAfter,
+        is_active: item.is_active !== false,
+        year_tolerance_before: Math.max(0, toInt(item.year_tolerance_before, 0)),
+        year_tolerance_after: Math.max(0, toInt(item.year_tolerance_after, 0)),
+        question_text: normalizedQuestionText,
+        answer_text: normalizeHtml(answerTextRaw),
+        question_image_url: toStringValue(item.question_image_url),
+        question_video_url: toStringValue(item.question_video_url),
+        answer_image_url: toStringValue(item.answer_image_url),
+        answer_video_url: toStringValue(item.answer_video_url),
       });
-    }
+    });
 
-    if (!preparedRows.length) {
+    if (preparedRows.length === 0) {
       redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "لم يتم العثور على أسئلة صالحة للرفع بعد التحقق من البيانات."
-        )}`
+        "/admin/questions/import?error=" +
+          makeSafeRedirectMessage(
+            buildMessage([
+              "لم يتم العثور على أسئلة صالحة للرفع.",
+              ...invalidLines.slice(0, 8),
+              ...duplicateInsideFileLines.slice(0, 8),
+            ])
+          )
       );
     }
 
-    const categoryIds = Array.from(new Set(preparedRows.map((row) => row.category_id)));
+    const existingQuestionTexts = new Set<string>();
 
-    const { data: existingQuestions, error: existingError } = await supabase
-      .from("questions")
-      .select("category_id, question_text")
-      .in("category_id", categoryIds);
-
-    if (existingError) {
-      redirect(
-        `/admin/questions/import?error=${encodeURIComponent(existingError.message)}`
-      );
-    }
-
-    const existingQuestionSet = new Set(
-      (existingQuestions ?? []).map((item) => {
-        const categoryId =
-          typeof item.category_id === "string" ? item.category_id : "";
-        const questionText =
-          typeof item.question_text === "string" ? item.question_text : "";
-        return `${categoryId}::${stripHtml(questionText)}`;
-      })
-    );
-
-    const fileQuestionSet = new Set<string>();
-    const finalRows: PreparedInsertRow[] = [];
-    let skippedDuplicates = 0;
-
-    for (const row of preparedRows) {
-      const key = `${row.category_id}::${stripHtml(row.question_text)}`;
-
-      if (existingQuestionSet.has(key) || fileQuestionSet.has(key)) {
-        skippedDuplicates += 1;
-        continue;
-      }
-
-      fileQuestionSet.add(key);
-      finalRows.push(row);
-    }
-
-    if (!finalRows.length) {
-      redirect(
-        `/admin/questions/import?error=${encodeURIComponent(
-          "كل الأسئلة مكررة أو غير قابلة للإضافة."
-        )}`
-      );
-    }
-
-    for (let i = 0; i < finalRows.length; i += INSERT_CHUNK_SIZE) {
-      const chunk = finalRows.slice(i, i + INSERT_CHUNK_SIZE);
-
-      const { error } = await supabase.from("questions").insert(chunk);
+    for (const textChunk of chunkArray(
+      preparedRows.map((row) => row.question_text),
+      CHUNK_SIZE
+    )) {
+      const { data, error } = await supabase
+        .from("questions")
+        .select("question_text")
+        .in("question_text", textChunk);
 
       if (error) {
         redirect(
-          `/admin/questions/import?error=${encodeURIComponent(
-            `فشل رفع الدفعة: ${error.message}`
-          )}`
+          "/admin/questions/import?error=" +
+            makeSafeRedirectMessage(
+              error.message || "فشل التحقق من الأسئلة الموجودة مسبقًا."
+            )
         );
+      }
+
+      for (const row of data ?? []) {
+        const questionText =
+          typeof row.question_text === "string" ? row.question_text : "";
+        if (questionText) {
+          existingQuestionTexts.add(questionText);
+        }
       }
     }
 
-    revalidatePath("/admin/questions");
-    revalidatePath("/admin");
-    revalidatePath("/game/start");
-    revalidatePath("/game/board");
-
-    const successMessage = `تم رفع ${finalRows.length} سؤال بنجاح. تم تخطي ${skippedDuplicates} سؤال مكرر و${skippedInvalid} سؤال غير صالح.`;
-
-    redirect(
-      `/admin/questions/import?success=${encodeURIComponent(successMessage)}`
+    const rowsToInsert = preparedRows.filter(
+      (row) => !existingQuestionTexts.has(row.question_text)
     );
+
+    let insertedCount = 0;
+
+    for (const insertChunk of chunkArray(rowsToInsert, CHUNK_SIZE)) {
+      const { data, error } = await supabase
+        .from("questions")
+        .upsert(insertChunk, {
+          onConflict: "question_text",
+          ignoreDuplicates: true,
+        })
+        .select("id");
+
+      if (error) {
+        redirect(
+          "/admin/questions/import?error=" +
+            makeSafeRedirectMessage(
+              error.message || "فشل رفع الدفعة الحالية من الأسئلة."
+            )
+        );
+      }
+
+      insertedCount += data?.length ?? 0;
+    }
+
+    const skippedExistingCount = preparedRows.length - rowsToInsert.length;
+    const skippedInvalidCount = invalidLines.length;
+    const skippedInsideFileCount = duplicateInsideFileLines.length;
+
+    revalidatePath("/admin/questions");
+    revalidatePath("/admin/questions/import");
+    revalidatePath("/game/start");
+
+    const successParts = [
+      `تم رفع ${insertedCount} سؤال بنجاح.`,
+      skippedExistingCount > 0
+        ? `تم تخطي ${skippedExistingCount} سؤال موجود مسبقًا.`
+        : "",
+      skippedInsideFileCount > 0
+        ? `تم تخطي ${skippedInsideFileCount} سؤال مكرر داخل الملف.`
+        : "",
+      skippedInvalidCount > 0
+        ? `تم تخطي ${skippedInvalidCount} سطر غير صالح.`
+        : "",
+    ];
+
+    const warningParts = [
+      ...duplicateInsideFileLines.slice(0, 5),
+      ...invalidLines.slice(0, 5),
+    ];
+
+    const successMessage = buildMessage(successParts);
+    const warningMessage =
+      warningParts.length > 0 ? buildMessage(warningParts) : "";
+
+    const query = new URLSearchParams();
+    query.set("success", successMessage);
+    if (warningMessage) {
+      query.set("warning", warningMessage);
+    }
+
+    redirect(`/admin/questions/import?${query.toString()}`);
   }
 
-  const previewCategories = categories.slice(0, 12);
-
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <AdminPageHeader
-          title="رفع أسئلة بالجملة"
-          description="ارفع ملف JSON منظم لإضافة الأسئلة على دفعات بشكل أخف وأكثر استقرارًا."
-          action={
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={`data:application/json;charset=utf-8,${encodeURIComponent(
-                  sampleJson
-                )}`}
-                download="seenjeem-sample-import.json"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                تحميل ملف مثال
-              </a>
-              <Link
-                href="/admin/questions"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-5 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-400/15"
-              >
-                الرجوع للأسئلة
-              </Link>
-            </div>
-          }
-        />
-
-        {resolvedSearchParams.error ? (
-          <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 p-4 text-red-100">
-            {resolvedSearchParams.error}
-          </div>
-        ) : null}
-
-        {resolvedSearchParams.success ? (
-          <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4 text-emerald-100">
-            {resolvedSearchParams.success}
-          </div>
-        ) : null}
-
-        <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
-          <section className="space-y-6">
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-              <h2 className="text-xl font-black text-white">ملاحظات مهمة</h2>
-              <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-                <li>الرفع يتم فقط بعد التحقق من الفئة ونص السؤال والإجابة.</li>
-                <li>الأسئلة المكررة يتم تخطيها تلقائيًا دون إيقاف العملية.</li>
-                <li>الأسئلة غير الصالحة يتم تجاوزها بدل تعطيل كامل الملف.</li>
-                <li>إذا وُجدت سنة في السؤال أو الجواب ولم تحدد السماحية، يتم ضبطها تلقائيًا حسب النقاط.</li>
-                <li>الدفعات الكبيرة جدًا غير مطلوبة؛ الأفضل الرفع على دفعات متوسطة.</li>
-              </ul>
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-              <h2 className="text-xl font-black text-white">الحدود الحالية</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1.25rem] border border-white/10 bg-slate-900/60 p-4">
-                  <p className="text-xs text-slate-400">الحد الأقصى للأسئلة</p>
-                  <p className="mt-2 text-2xl font-black text-white">
-                    {MAX_IMPORT_QUESTIONS}
-                  </p>
-                </div>
-                <div className="rounded-[1.25rem] border border-white/10 bg-slate-900/60 p-4">
-                  <p className="text-xs text-slate-400">أقصى حجم للملف</p>
-                  <p className="mt-2 text-2xl font-black text-white">8MB</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-              <h2 className="text-xl font-black text-white">عدد الفئات المتاحة</h2>
-              <p className="mt-2 text-sm text-slate-300">
-                الفئات النشطة الحالية داخل النظام:{" "}
-                <span className="font-black text-white">{categories.length}</span>
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {previewCategories.map((category) => (
-                  <span
-                    key={category.id}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-200"
-                  >
-                    {getSectionName(category.category_sections)} / {category.name}
-                  </span>
-                ))}
+    <main
+      dir="rtl"
+      className="min-h-screen bg-slate-950 px-4 py-6 text-white sm:px-6 lg:px-8 lg:py-10"
+    >
+      <div className="mx-auto max-w-6xl space-y-6">
+        <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#020617_0%,#07143a_50%,#020617_100%)] p-5 sm:p-7">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-bold text-cyan-200 sm:text-sm">
+                  إدارة المحتوى
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
+                  رفع أسئلة بالجملة
+                </span>
               </div>
 
-              {categories.length > previewCategories.length ? (
-                <p className="mt-3 text-xs text-slate-500">
-                  تم إظهار جزء من الفئات فقط لتخفيف الصفحة.
-                </p>
-              ) : null}
-            </div>
-          </section>
-
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-            <div className="mb-6">
-              <span className="inline-flex rounded-full border border-orange-400/20 bg-orange-400/10 px-3 py-1.5 text-xs font-bold text-orange-100">
-                JSON Upload
-              </span>
-              <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-                ارفع ملف الأسئلة
-              </h2>
-              <p className="mt-3 text-sm leading-8 text-slate-300">
-                ارفع ملف JSON يحتوي على مصفوفة أسئلة أو كائنًا يحتوي على المفتاح
-                <span className="mx-1 font-black text-white">questions</span>.
+              <h1 className="mt-4 text-3xl font-black sm:text-4xl">
+                رفع أسئلة بصيغة JSON
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
+                هذا الإصدار يتخطى الأسئلة المكررة داخل الملف أو الموجودة مسبقًا في
+                قاعدة البيانات، ويُكمل رفع باقي الأسئلة بدل إيقاف العملية كاملة.
               </p>
             </div>
 
-            <form action={importQuestions} className="space-y-5">
+            <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
+              <p className="text-xs text-slate-400">عدد الفئات المتاحة حاليًا</p>
+              <p className="mt-2 text-2xl font-black text-white">
+                {categories.length}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {params.success ? (
+          <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 px-5 py-4 text-sm text-emerald-100 sm:text-base">
+            {params.success}
+          </div>
+        ) : null}
+
+        {params.warning ? (
+          <div className="rounded-[1.5rem] border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-100 sm:text-base">
+            {params.warning}
+          </div>
+        ) : null}
+
+        {params.error ? (
+          <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
+            {params.error}
+          </div>
+        ) : null}
+
+        <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+            <h2 className="text-2xl font-black text-white">رفع ملف الأسئلة</h2>
+            <p className="mt-2 text-sm leading-8 text-slate-300">
+              ارفع ملف JSON يحتوي على مفتاح باسم{" "}
+              <code className="rounded bg-white/10 px-1.5 py-0.5 text-cyan-200">
+                questions
+              </code>{" "}
+              وبداخله قائمة الأسئلة.
+            </p>
+
+            <form action={importQuestionsAction} className="mt-6 space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  ملف البيانات
+                <label className="mb-2 block text-sm font-semibold text-white">
+                  ملف JSON
                 </label>
                 <input
                   type="file"
-                  name="data_file"
+                  name="file"
                   accept=".json,application/json"
-                  className="block w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-sm text-white file:ml-4 file:rounded-xl file:border-0 file:bg-cyan-400 file:px-4 file:py-2 file:font-black file:text-slate-950"
+                  className="block w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-sm text-white file:ml-4 file:rounded-xl file:border-0 file:bg-cyan-400 file:px-4 file:py-2 file:text-sm file:font-bold file:text-slate-950"
                   required
                 />
               </div>
 
-              <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-4">
-                <p className="text-sm font-bold text-cyan-300">الحقول المدعومة</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {[
-                    "section / section_slug",
-                    "category / category_slug",
-                    "question_text",
-                    "answer_text",
-                    "points",
-                    "is_active",
-                    "year_tolerance_before",
-                    "year_tolerance_after",
-                    "question_image_url",
-                    "question_video_url",
-                    "answer_image_url",
-                    "answer_video_url",
-                  ].map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-200"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
               <button
                 type="submit"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
               >
-                رفع وإضافة الأسئلة
+                ارفع الملف الآن
               </button>
             </form>
-          </section>
-        </div>
+          </div>
+
+          <div className="space-y-6">
+            <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+              <h3 className="text-xl font-black text-white">شروط مهمة</h3>
+              <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
+                <li>• يجب أن تكون الفئة والقسم موجودين مسبقًا داخل الإدارة.</li>
+                <li>• يتم قبول النقاط: 200 أو 400 أو 600 فقط.</li>
+                <li>• أي سؤال مكرر داخل الملف سيتم تخطيه تلقائيًا.</li>
+                <li>• أي سؤال موجود مسبقًا في قاعدة البيانات سيتم تخطيه تلقائيًا.</li>
+                <li>• باقي الأسئلة الصالحة ستُرفع حتى لو وُجدت أخطاء أو تكرارات.</li>
+              </ul>
+            </section>
+
+            <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+              <h3 className="text-xl font-black text-white">الفئات المتوفرة حاليًا</h3>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <span
+                    key={category.id}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 sm:text-sm"
+                  >
+                    {category.name}
+                  </span>
+                ))}
+              </div>
+            </section>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/admin/questions"
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                الرجوع للأسئلة
+              </Link>
+              <Link
+                href="/admin"
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                الرجوع للإدارة
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
