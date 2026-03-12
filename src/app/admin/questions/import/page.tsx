@@ -604,12 +604,9 @@ export default async function AdminQuestionsImportPage({
 
     for (const insertChunk of chunkArray(rowsToInsert, INSERT_CHUNK_SIZE)) {
       const { data, error } = await supabase
-        .from("questions")
-        .upsert(insertChunk, {
-          onConflict: "question_text",
-          ignoreDuplicates: true,
-        })
-        .select("id");
+  .from("questions")
+  .insert(insertChunk)
+  .select("id");
 
       if (error) {
         redirect(
