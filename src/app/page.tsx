@@ -34,17 +34,17 @@ const features: FeatureItem[] = [
   {
     title: "إدارة سهلة وسريعة",
     description:
-      "نظّم الأقسام والفئات والأسئلة من لوحة تحكم واضحة، مع تجربة مناسبة للاستخدام اليومي.",
+      "نظّم الأقسام والفئات والأسئلة من لوحة تحكم واضحة ومناسبة للاستخدام اليومي.",
   },
   {
     title: "لعب مباشر بين فريقين",
     description:
-      "ابدأ الجولة بسرعة، اعرض الأسئلة بشكل منسق، وامنح كل فريق تجربة تنافسية واضحة.",
+      "ابدأ الجولة بسرعة واعرض الأسئلة بشكل واضح وتجربة تنافسية مرتبة.",
   },
   {
     title: "مناسبة للمدارس والفعاليات",
     description:
-      "واجهة منظمة ومريحة للعرض على الشاشات، مناسبة للمسابقات والمناسبات الخاصة.",
+      "واجهة مناسبة للشاشات والعرض المباشر للمسابقات والبرامج الجماعية.",
   },
 ];
 
@@ -57,13 +57,12 @@ const steps: StepItem[] = [
   {
     step: "02",
     title: "أنشئ الجولة",
-    description: "اختر الفئات، سمِّ اللعبة، وحدد الفريقين قبل بدء المنافسة.",
+    description: "اختر الفئات وسمِّ اللعبة وحدد الفريقين قبل بدء المنافسة.",
   },
   {
     step: "03",
     title: "ابدأ العرض",
-    description:
-      "اعرض لوحة اللعب وابدأ التفاعل مباشرة أمام الجمهور أو داخل الصف أو الفعالية.",
+    description: "اعرض لوحة اللعب وابدأ التفاعل مباشرة أمام الجمهور.",
   },
 ];
 
@@ -74,7 +73,7 @@ const useCases: UseCaseItem[] = [
   },
   {
     title: "الفعاليات الخاصة",
-    description: "تشغيل ألعاب أسئلة تفاعلية داخل المناسبات واللقاءات والبرامج الجماعية.",
+    description: "تشغيل ألعاب أسئلة تفاعلية داخل المناسبات واللقاءات الجماعية.",
   },
   {
     title: "النوادي والمبادرات",
@@ -113,7 +112,7 @@ function CheckIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-5 w-5"
+      className="h-4 w-4 sm:h-5 sm:w-5"
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
@@ -127,7 +126,7 @@ function ArrowLeftIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-5 w-5"
+      className="h-4 w-4 sm:h-5 sm:w-5"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -145,7 +144,7 @@ function SparkIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-5 w-5"
+      className="h-4 w-4 sm:h-5 sm:w-5"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -174,7 +173,7 @@ function StatusBadge({
 }) {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+      <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-300 sm:px-4 sm:text-sm">
         جارٍ تحميل بيانات الحساب...
       </div>
     );
@@ -182,14 +181,14 @@ function StatusBadge({
 
   if (!isLoggedIn) {
     return (
-      <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
+      <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-3 text-xs text-cyan-100 sm:px-4 sm:text-sm">
         ابدأ بحساب جديد أو سجّل الدخول لعرض عدد الألعاب المتاحة لك.
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-3 text-xs text-emerald-100 sm:px-4 sm:text-sm">
       أهلًا {username || "بك"} — عدد الألعاب المتبقية:{" "}
       <span className="font-black">{gamesRemaining}</span>
     </div>
@@ -198,47 +197,57 @@ function StatusBadge({
 
 function FeatureCard({ item }: { item: FeatureItem }) {
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-300">
+    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-3 backdrop-blur-sm sm:rounded-[1.5rem] sm:p-5">
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-300 sm:mb-4 sm:h-11 sm:w-11">
         <CheckIcon />
       </div>
-      <h3 className="text-lg font-black text-white">{item.title}</h3>
-      <p className="mt-2 text-sm leading-7 text-slate-300">{item.description}</p>
+      <h3 className="text-sm font-black text-white sm:text-lg">{item.title}</h3>
+      <p className="mt-2 text-[11px] leading-6 text-slate-300 sm:text-sm sm:leading-7">
+        {item.description}
+      </p>
     </div>
   );
 }
 
 function StepCard({ item }: { item: StepItem }) {
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-      <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-200">
+    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-3 sm:rounded-[1.5rem] sm:p-5">
+      <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-black text-cyan-200 sm:px-3 sm:text-xs">
         {item.step}
       </span>
-      <h3 className="mt-4 text-lg font-black text-white">{item.title}</h3>
-      <p className="mt-2 text-sm leading-7 text-slate-300">{item.description}</p>
+      <h3 className="mt-3 text-sm font-black text-white sm:mt-4 sm:text-lg">
+        {item.title}
+      </h3>
+      <p className="mt-2 text-[11px] leading-6 text-slate-300 sm:text-sm sm:leading-7">
+        {item.description}
+      </p>
     </div>
   );
 }
 
 function UseCaseCard({ item }: { item: UseCaseItem }) {
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-5">
-      <h3 className="text-base font-black text-white">{item.title}</h3>
-      <p className="mt-2 text-sm leading-7 text-slate-300">{item.description}</p>
+    <div className="rounded-[1.25rem] border border-white/10 bg-slate-900/60 p-3 sm:rounded-[1.5rem] sm:p-5">
+      <h3 className="text-sm font-black text-white sm:text-base">{item.title}</h3>
+      <p className="mt-2 text-[11px] leading-6 text-slate-300 sm:text-sm sm:leading-7">
+        {item.description}
+      </p>
     </div>
   );
 }
 
 function FaqCard({ item }: { item: FaqItem }) {
   return (
-    <details className="group rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-right text-sm font-bold text-white sm:text-base">
+    <details className="group rounded-[1.1rem] border border-white/10 bg-white/5 p-3 sm:rounded-[1.25rem] sm:p-4">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-right text-[11px] font-bold text-white sm:gap-4 sm:text-sm lg:text-base">
         <span>{item.question}</span>
-        <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-300 transition group-open:rotate-45">
+        <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-slate-300 transition group-open:rotate-45 sm:text-xs">
           +
         </span>
       </summary>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{item.answer}</p>
+      <p className="mt-3 text-[11px] leading-6 text-slate-300 sm:text-sm sm:leading-7">
+        {item.answer}
+      </p>
     </details>
   );
 }
@@ -251,58 +260,64 @@ function PreviewBoard({
   gamesRemaining: number;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[34rem]">
-      <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(15,23,42,0.95),rgba(249,115,22,0.12))] p-3 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-        <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/90 p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-3">
+    <div className="mx-auto w-full max-w-none">
+      <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(15,23,42,0.95),rgba(249,115,22,0.12))] p-2.5 shadow-[0_20px_80px_rgba(0,0,0,0.45)] sm:rounded-[2rem] sm:p-3">
+        <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/90 p-3 sm:rounded-[1.75rem] sm:p-5">
+          <div className="flex items-start justify-between gap-2 sm:gap-3">
             <div>
-              <p className="text-xs text-slate-400">معاينة سريعة</p>
-              <h3 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+              <p className="text-[10px] text-slate-400 sm:text-xs">معاينة سريعة</p>
+              <h3 className="mt-1.5 text-lg font-black text-white sm:mt-2 sm:text-2xl lg:text-3xl">
                 لوحة لعب جاهزة
               </h3>
             </div>
-            <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-bold text-cyan-200">
-              تجربة أنيقة وواضحة
+            <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-bold text-cyan-200 sm:px-3 sm:py-1.5 sm:text-xs">
+              تجربة أنيقة
             </span>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">الفريق الأول</p>
-              <div className="mt-3 text-3xl font-black text-white sm:text-4xl">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
+            <div className="rounded-[1rem] border border-white/10 bg-white/5 p-3 sm:rounded-[1.25rem] sm:p-4">
+              <p className="text-[10px] text-slate-400 sm:text-sm">الفريق الأول</p>
+              <div className="mt-2 text-2xl font-black text-white sm:mt-3 sm:text-3xl lg:text-4xl">
                 200
               </div>
-              <p className="mt-2 text-sm text-slate-300">جاهز لاختيار السؤال التالي</p>
+              <p className="mt-1.5 text-[10px] text-slate-300 sm:mt-2 sm:text-sm">
+                جاهز لاختيار السؤال التالي
+              </p>
             </div>
 
-            <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-              <p className="text-sm text-slate-400">الفريق الثاني</p>
-              <div className="mt-3 text-3xl font-black text-white sm:text-4xl">
+            <div className="rounded-[1rem] border border-white/10 bg-white/5 p-3 sm:rounded-[1.25rem] sm:p-4">
+              <p className="text-[10px] text-slate-400 sm:text-sm">الفريق الثاني</p>
+              <div className="mt-2 text-2xl font-black text-white sm:mt-3 sm:text-3xl lg:text-4xl">
                 300
               </div>
-              <p className="mt-2 text-sm text-slate-300">يتقدم بفارق سؤال واحد</p>
+              <p className="mt-1.5 text-[10px] text-slate-300 sm:mt-2 sm:text-sm">
+                يتقدم بفارق سؤال واحد
+              </p>
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+          <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:mt-4 sm:gap-3">
             {["تاريخ", "رياضة", "جغرافيا", "ثقافة عامة"].map((item) => (
               <div
                 key={item}
-                className="rounded-[1.15rem] border border-white/10 bg-white/5 px-3 py-4"
+                className="rounded-[0.95rem] border border-white/10 bg-white/5 px-2 py-3 sm:rounded-[1.15rem] sm:px-3 sm:py-4"
               >
-                <p className="font-bold text-white">{item}</p>
-                <p className="mt-2 text-sm text-slate-400">100 • 200 • 300</p>
+                <p className="text-xs font-bold text-white sm:text-sm">{item}</p>
+                <p className="mt-1.5 text-[10px] text-slate-400 sm:mt-2 sm:text-sm">
+                  100 • 200 • 300
+                </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-slate-400">الحالة الحالية</p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-slate-900/70 px-3 py-1.5 text-xs font-bold text-white">
+          <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/5 p-3 sm:mt-4 sm:rounded-[1.25rem] sm:p-4">
+            <p className="text-[10px] text-slate-400 sm:text-sm">الحالة الحالية</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:mt-3">
+              <span className="rounded-full border border-white/10 bg-slate-900/70 px-2.5 py-1 text-[10px] font-bold text-white sm:px-3 sm:py-1.5 sm:text-xs">
                 {isLoggedIn ? "الحساب جاهز للعب" : "جرّب المنصة كزائر"}
               </span>
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-200 sm:px-3 sm:py-1.5 sm:text-xs">
                 {isLoggedIn ? `الألعاب المتاحة: ${gamesRemaining}` : "ابدأ من صفحة التسجيل"}
               </span>
             </div>
@@ -369,34 +384,35 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-        <section className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.12),transparent_24%),linear-gradient(135deg,#020617_0%,#071132_42%,#020617_100%)] p-5 sm:p-7 lg:p-8">
-          <div className="grid items-center gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-            <div className="order-2 xl:order-1">
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-bold text-cyan-200 sm:text-sm">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-3 py-4 sm:gap-10 sm:px-6 lg:px-8 lg:py-10">
+        <section className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.12),transparent_24%),linear-gradient(135deg,#020617_0%,#071132_42%,#020617_100%)] p-3 sm:rounded-[2.25rem] sm:p-7 lg:p-8">
+          <div className="grid items-center gap-3 grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] sm:gap-8 xl:grid-cols-[1.05fr_0.95fr]">
+            <div className="min-w-0">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1.5 text-[10px] font-bold text-cyan-200 sm:px-4 sm:py-2 sm:text-xs">
                   منصة عربية لألعاب الأسئلة
                 </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-slate-200 sm:text-sm">
+                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 text-[10px] font-bold text-slate-200 sm:px-4 sm:py-2 sm:text-xs">
                   مناسبة للمدارس والفعاليات
                 </span>
               </div>
 
-              <div className="mt-5 max-w-3xl">
-                <p className="text-sm font-bold text-cyan-300 sm:text-base">
-                  مرحبًا بك في منصة لمّتنا
+              <div className="mt-4 max-w-3xl sm:mt-5">
+                <p className="text-[11px] font-bold text-cyan-300 sm:text-sm lg:text-base">
+                  مرحبًا بك في لمّتنا
                 </p>
-                <h1 className="mt-3 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
+                <h1 className="mt-2 text-xl font-black leading-tight sm:mt-3 sm:text-4xl lg:text-5xl">
                   حوّل أي مسابقة إلى تجربة
                   <span className="block text-cyan-300">منظمة، سريعة، وتفاعلية</span>
                 </h1>
-                <p className="mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
+                <p className="mt-3 text-[11px] leading-6 text-slate-300 sm:mt-5 sm:max-w-2xl sm:text-sm sm:leading-8 lg:text-base">
                   منصة مهيأة لتشغيل ألعاب الأسئلة بين فريقين بطريقة واضحة وأنيقة،
-                  مع تنظيم مرن للفئات والأسئلة جربها الان
+                  مع تنظيم مرن للفئات والأسئلة وتجربة عرض مناسبة للهواتف والشاشات
+                  الكبيرة.
                 </p>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <StatusBadge
                   loading={loading}
                   isLoggedIn={isLoggedIn}
@@ -405,12 +421,12 @@ export default function HomePage() {
                 />
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
                 {isLoggedIn ? (
                   <>
                     <Link
                       href="/game/start"
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-4 py-2.5 text-sm font-black text-slate-950 transition hover:bg-cyan-300 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                     >
                       ابدأ الآن
                       <ArrowLeftIcon />
@@ -418,7 +434,7 @@ export default function HomePage() {
 
                     <Link
                       href="/account"
-                      className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                      className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                     >
                       حسابي
                     </Link>
@@ -427,7 +443,7 @@ export default function HomePage() {
                   <>
                     <Link
                       href="/register"
-                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-4 py-2.5 text-sm font-black text-slate-950 transition hover:bg-cyan-300 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                     >
                       إنشاء حساب جديد
                       <ArrowLeftIcon />
@@ -435,7 +451,7 @@ export default function HomePage() {
 
                     <Link
                       href="/login"
-                      className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                      className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                     >
                       تسجيل الدخول
                     </Link>
@@ -443,80 +459,92 @@ export default function HomePage() {
                 )}
               </div>
 
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs text-slate-400">واجهة مرنة</p>
-                  <p className="mt-2 text-lg font-black text-white">جاهزة للعرض</p>
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-7 sm:gap-3">
+                <div className="rounded-[1rem] border border-white/10 bg-white/5 p-2.5 sm:rounded-[1.25rem] sm:p-4">
+                  <p className="text-[10px] text-slate-400 sm:text-xs">واجهة مرتبة</p>
+                  <p className="mt-1.5 text-xs font-black text-white sm:mt-2 sm:text-lg">
+                    جاهزة للعرض
+                  </p>
                 </div>
-                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs text-slate-400">تنظيم ذكي</p>
-                  <p className="mt-2 text-lg font-black text-white">أقسام وفئات</p>
+                <div className="rounded-[1rem] border border-white/10 bg-white/5 p-2.5 sm:rounded-[1.25rem] sm:p-4">
+                  <p className="text-[10px] text-slate-400 sm:text-xs">تنظيم ذكي</p>
+                  <p className="mt-1.5 text-xs font-black text-white sm:mt-2 sm:text-lg">
+                    أقسام وفئات
+                  </p>
                 </div>
-                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs text-slate-400">تشغيل سريع</p>
-                  <p className="mt-2 text-lg font-black text-white">بدون تعقيد</p>
+                <div className="rounded-[1rem] border border-white/10 bg-white/5 p-2.5 sm:rounded-[1.25rem] sm:p-4">
+                  <p className="text-[10px] text-slate-400 sm:text-xs">تشغيل سريع</p>
+                  <p className="mt-1.5 text-xs font-black text-white sm:mt-2 sm:text-lg">
+                    بدون تعقيد
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="order-1 xl:order-2">
+            <div className="min-w-0">
               <PreviewBoard isLoggedIn={isLoggedIn} gamesRemaining={gamesRemaining} />
             </div>
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
+        <section className="grid grid-cols-3 gap-2 sm:gap-4">
           {features.map((item) => (
             <FeatureCard key={item.title} item={item} />
           ))}
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section className="rounded-[1.8rem] border border-white/10 bg-white/5 p-3 sm:rounded-[2rem] sm:p-6">
+          <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
             <div>
-              <p className="text-sm font-bold text-cyan-300">كيف تبدأ بسرعة؟</p>
-              <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+              <p className="text-[11px] font-bold text-cyan-300 sm:text-sm">
+                كيف تبدأ بسرعة؟
+              </p>
+              <h2 className="mt-1.5 text-lg font-black text-white sm:mt-2 sm:text-2xl lg:text-3xl">
                 3 خطوات واضحة لبدء أي جولة
               </h2>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] text-slate-300 sm:px-4 sm:py-2 sm:text-sm">
               <SparkIcon />
               تجربة مختصرة وخفيفة
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             {steps.map((item) => (
               <StepCard key={item.step} item={item} />
             ))}
           </div>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-            <p className="text-sm font-bold text-cyan-300">استخدامات مناسبة</p>
-            <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+        <section className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-3 sm:rounded-[2rem] sm:p-6">
+            <p className="text-[11px] font-bold text-cyan-300 sm:text-sm">
+              استخدامات مناسبة
+            </p>
+            <h2 className="mt-1.5 text-lg font-black text-white sm:mt-2 sm:text-2xl lg:text-3xl">
               أين يمكن استخدام المنصة؟
             </h2>
-            <p className="mt-3 text-sm leading-8 text-slate-300 sm:text-base">
+            <p className="mt-2 text-[11px] leading-6 text-slate-300 sm:mt-3 sm:text-sm sm:leading-8 lg:text-base">
               صُممت المنصة لتكون عملية ومرنة في أكثر من نوع استخدام، سواء للعروض
               التعليمية أو الترفيهية أو المسابقات الداخلية.
             </p>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="mt-4 grid gap-2 sm:mt-6 sm:gap-4 sm:grid-cols-2">
               {useCases.map((item) => (
                 <UseCaseCard key={item.title} item={item} />
               ))}
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-            <p className="text-sm font-bold text-cyan-300">الأسئلة الشائعة</p>
-            <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+          <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-3 sm:rounded-[2rem] sm:p-6">
+            <p className="text-[11px] font-bold text-cyan-300 sm:text-sm">
+              الأسئلة الشائعة
+            </p>
+            <h2 className="mt-1.5 text-lg font-black text-white sm:mt-2 sm:text-2xl lg:text-3xl">
               معلومات سريعة قبل البدء
             </h2>
 
-            <div className="mt-6 grid gap-3">
+            <div className="mt-4 grid gap-2 sm:mt-6 sm:gap-3">
               {faqs.map((item) => (
                 <FaqCard key={item.question} item={item} />
               ))}
@@ -524,30 +552,32 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-cyan-400/20 bg-cyan-400/10 p-5 sm:p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <section className="rounded-[1.8rem] border border-cyan-400/20 bg-cyan-400/10 p-3 sm:rounded-[2rem] sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-bold text-cyan-200">جاهز للبدء؟</p>
-              <h2 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+              <p className="text-[11px] font-bold text-cyan-200 sm:text-sm">
+                جاهز للبدء؟
+              </p>
+              <h2 className="mt-1.5 text-lg font-black text-white sm:mt-2 sm:text-2xl lg:text-3xl">
                 ابدأ جولتك التالية من هنا
               </h2>
-              <p className="mt-2 text-sm leading-8 text-cyan-50/90 sm:text-base">
+              <p className="mt-2 text-[11px] leading-6 text-cyan-50/90 sm:text-sm sm:leading-8 lg:text-base">
                 اختر الصفحة المناسبة حسب حالتك الحالية، وابدأ بسرعة بدون تعقيد.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               {isLoggedIn ? (
                 <>
                   <Link
                     href="/game/start"
-                    className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-white px-6 py-3 text-base font-black text-slate-950 transition hover:bg-slate-100"
+                    className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-black text-slate-950 transition hover:bg-slate-100 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                   >
                     ابدأ لعبة جديدة
                   </Link>
                   <Link
                     href="/pricing"
-                    className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-base font-bold text-white transition hover:bg-white/15"
+                    className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/15 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                   >
                     استعرض الباقات
                   </Link>
@@ -556,13 +586,13 @@ export default function HomePage() {
                 <>
                   <Link
                     href="/register"
-                    className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-white px-6 py-3 text-base font-black text-slate-950 transition hover:bg-slate-100"
+                    className="inline-flex min-h-10 items-center justify-center rounded-2xl bg-white px-4 py-2.5 text-sm font-black text-slate-950 transition hover:bg-slate-100 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                   >
                     إنشاء حساب
                   </Link>
                   <Link
                     href="/pricing"
-                    className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-base font-bold text-white transition hover:bg-white/15"
+                    className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/15 sm:min-h-12 sm:px-6 sm:py-3 sm:text-base"
                   >
                     استعرض الباقات
                   </Link>
@@ -572,39 +602,47 @@ export default function HomePage() {
           </div>
         </section>
 
-        <footer className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-5 py-6 sm:px-6">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <footer className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-4 py-5 sm:rounded-[2rem] sm:px-6 sm:py-6">
+          <div className="flex flex-col gap-4 sm:gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="text-lg font-black text-white sm:text-xl">لمّتنا</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-300">
+              <h3 className="text-base font-black text-white sm:text-lg lg:text-xl">
+                لمّتنا
+              </h3>
+              <p className="mt-2 max-w-2xl text-[11px] leading-6 text-slate-300 sm:text-sm sm:leading-7">
                 منصة عربية للمسابقات وألعاب الأسئلة، مصممة لتقديم تجربة جميلة،
-                منظمة، وسهلة الاستخدام.
+                منظمة، وسهلة الاستخدام على الهاتف والشاشات الكبيرة.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
               >
                 الرئيسية
               </Link>
               <Link
                 href="/pricing"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
               >
                 الباقات
               </Link>
               <Link
                 href="/game/start"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
               >
-                اللعبة
+                اللعب
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+              >
+                تسجيل الدخول
               </Link>
             </div>
           </div>
 
-          <div className="mt-5 border-t border-white/10 pt-4 text-center text-xs text-slate-500 sm:text-sm">
+          <div className="mt-4 border-t border-white/10 pt-4 text-center text-[10px] text-slate-500 sm:mt-5 sm:text-xs lg:text-sm">
             © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
           </div>
         </footer>
