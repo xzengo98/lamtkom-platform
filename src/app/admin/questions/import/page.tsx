@@ -30,28 +30,26 @@ type CategoryRow = {
   is_active: boolean | null;
 };
 
-type RawImportItem = {
-  [key: string]: unknown;
-};
+type RawImportItem = Record<string, unknown>;
 
-type InsertQuestionRow = {
+type PreparedQuestionRow = {
   category_id: string;
   question_text: string;
   answer_text: string;
   points: number;
   is_active: boolean;
   is_used: boolean;
-  media_type: string;
-  media_url: string;
+  media_type: "image" | "video" | null;
+  media_url: string | null;
   year_tolerance_before: number;
   year_tolerance_after: number;
-  question_image_url: string;
-  question_video_url: string;
-  answer_image_url: string;
-  answer_video_url: string;
+  question_image_url: string | null;
+  question_video_url: string | null;
+  answer_image_url: string | null;
+  answer_video_url: string | null;
 };
 
-const CHUNK_SIZE = 200;
+const INSERT_CHUNK_SIZE = 200;
 
 function normalizeLookup(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -65,12 +63,17 @@ function stripHtml(value: string) {
   return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function normalizeQuestionKey(value: string) {
+  return stripHtml(value).toLowerCase().replace(/\s+/g, " ").trim();
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function ensureHtmlParagraph(value: string) {
@@ -86,6 +89,11 @@ function toStringValue(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function nullableString(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
 function toInt(value: unknown, fallback = 0) {
   const num = Number(value);
   return Number.isFinite(num) ? Math.trunc(num) : fallback;
@@ -93,12 +101,23 @@ function toInt(value: unknown, fallback = 0) {
 
 function toBool(value: unknown, fallback = true) {
   if (typeof value === "boolean") return value;
+
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     if (["true", "1", "yes", "y", "نعم"].includes(normalized)) return true;
     if (["false", "0", "no", "n", "لا"].includes(normalized)) return false;
   }
+
+  if (typeof value === "number") {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+
   return fallback;
+}
+
+function buildMessage(parts: string[]) {
+  return parts.filter(Boolean).join(" | ");
 }
 
 function chunkArray<T>(items: T[], size: number) {
@@ -107,10 +126,6 @@ function chunkArray<T>(items: T[], size: number) {
     chunks.push(items.slice(i, i + size));
   }
   return chunks;
-}
-
-function buildMessage(parts: string[]) {
-  return parts.filter(Boolean).join(" | ");
 }
 
 function firstString(item: RawImportItem, keys: string[]) {
@@ -127,44 +142,42 @@ function resolveMediaFields(params: {
   answerImageUrl: string;
   answerVideoUrl: string;
 }) {
-  const {
-    questionImageUrl,
-    questionVideoUrl,
-    answerImageUrl,
-    answerVideoUrl,
-  } = params;
+  const questionImageUrl = params.questionImageUrl.trim();
+  const questionVideoUrl = params.questionVideoUrl.trim();
+  const answerImageUrl = params.answerImageUrl.trim();
+  const answerVideoUrl = params.answerVideoUrl.trim();
 
   if (questionImageUrl) {
     return {
-      media_type: "image",
+      media_type: "image" as const,
       media_url: questionImageUrl,
     };
   }
 
   if (questionVideoUrl) {
     return {
-      media_type: "video",
+      media_type: "video" as const,
       media_url: questionVideoUrl,
     };
   }
 
   if (answerImageUrl) {
     return {
-      media_type: "image",
+      media_type: "image" as const,
       media_url: answerImageUrl,
     };
   }
 
   if (answerVideoUrl) {
     return {
-      media_type: "video",
+      media_type: "video" as const,
       media_url: answerVideoUrl,
     };
   }
 
   return {
-    media_type: "",
-    media_url: "",
+    media_type: null,
+    media_url: null,
   };
 }
 
@@ -194,12 +207,7 @@ async function requireAdmin() {
   return { supabase, user };
 }
 
-export default async function AdminQuestionsImportPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const params = await searchParams;
+async function getActiveSectionsAndCategories() {
   const { supabase } = await requireAdmin();
 
   const [sectionsResult, categoriesResult] = await Promise.all([
@@ -213,8 +221,185 @@ export default async function AdminQuestionsImportPage({
       .order("sort_order", { ascending: true }),
   ]);
 
-  const sections = (sectionsResult.data ?? []) as SectionRow[];
-  const categories = (categoriesResult.data ?? []) as CategoryRow[];
+  const sections = ((sectionsResult.data ?? []) as SectionRow[]).filter(
+    (item) => item.is_active !== false
+  );
+
+  const categories = ((categoriesResult.data ?? []) as CategoryRow[]).filter(
+    (item) => item.is_active !== false
+  );
+
+  return { sections, categories };
+}
+
+function createResolvers(sections: SectionRow[], categories: CategoryRow[]) {
+  const sectionByLookup = new Map<string, SectionRow>();
+
+  for (const section of sections) {
+    sectionByLookup.set(normalizeLookup(section.name), section);
+
+    if (section.slug) {
+      sectionByLookup.set(normalizeLookup(section.slug), section);
+      sectionByLookup.set(normalizeSlug(section.slug), section);
+    }
+  }
+
+  function resolveSection(rawSection: string) {
+    if (!rawSection) return null;
+    return (
+      sectionByLookup.get(normalizeLookup(rawSection)) ||
+      sectionByLookup.get(normalizeSlug(rawSection)) ||
+      null
+    );
+  }
+
+  function resolveCategory(rawCategory: string, sectionId: string | null) {
+    if (!rawCategory) return null;
+
+    const keyLookup = normalizeLookup(rawCategory);
+    const keySlug = normalizeSlug(rawCategory);
+
+    const scopedCategories = sectionId
+      ? categories.filter((cat) => cat.section_id === sectionId)
+      : categories;
+
+    const scopedMatch =
+      scopedCategories.find((cat) => {
+        const catName = normalizeLookup(cat.name);
+        const catSlugLookup = cat.slug ? normalizeLookup(cat.slug) : "";
+        const catSlug = cat.slug ? normalizeSlug(cat.slug) : "";
+
+        return (
+          catName === keyLookup ||
+          catSlugLookup === keyLookup ||
+          catSlug === keySlug
+        );
+      }) ?? null;
+
+    if (scopedMatch) return scopedMatch;
+
+    return (
+      categories.find((cat) => {
+        const catName = normalizeLookup(cat.name);
+        const catSlugLookup = cat.slug ? normalizeLookup(cat.slug) : "";
+        const catSlug = cat.slug ? normalizeSlug(cat.slug) : "";
+
+        return (
+          catName === keyLookup ||
+          catSlugLookup === keyLookup ||
+          catSlug === keySlug
+        );
+      }) ?? null
+    );
+  }
+
+  return { resolveSection, resolveCategory };
+}
+
+function parseJsonInput(parsed: unknown): RawImportItem[] | null {
+  if (Array.isArray(parsed)) {
+    return parsed as RawImportItem[];
+  }
+
+  if (
+    parsed &&
+    typeof parsed === "object" &&
+    Array.isArray((parsed as { questions?: unknown[] }).questions)
+  ) {
+    return (parsed as { questions: RawImportItem[] }).questions;
+  }
+
+  return null;
+}
+
+function extractQuestionFields(item: RawImportItem) {
+  const sectionName = firstString(item, ["القسم", "section", "Section"]);
+  const categoryName = firstString(item, ["الفئة", "category", "Category"]);
+
+  const questionValue = firstString(item, [
+    "السؤال",
+    "question",
+    "question_text",
+    "Question",
+  ]);
+
+  const answerValue = firstString(item, [
+    "الجواب",
+    "answer",
+    "answer_text",
+    "Answer",
+  ]);
+
+  const questionImageUrl = firstString(item, [
+    "صورة",
+    "question_image_url",
+    "image",
+    "image_url",
+  ]);
+
+  const questionVideoUrl = firstString(item, [
+    "فيديو السؤال",
+    "question_video_url",
+  ]);
+
+  const answerImageUrl = firstString(item, [
+    "صورة الجواب",
+    "answer_image_url",
+  ]);
+
+  const answerVideoUrl = firstString(item, [
+    "فيديو الجواب",
+    "answer_video_url",
+  ]);
+
+  const pointsRaw =
+    item["نقاط السؤال"] ??
+    item["points"] ??
+    item["النقاط"] ??
+    item["Points"] ??
+    0;
+
+  const isActiveRaw =
+    item["نشط"] ??
+    item["is_active"] ??
+    item["active"] ??
+    true;
+
+  const yearToleranceBeforeRaw =
+    item["سماحية قبل"] ??
+    item["year_tolerance_before"] ??
+    item["before_tolerance"] ??
+    0;
+
+  const yearToleranceAfterRaw =
+    item["سماحية بعد"] ??
+    item["year_tolerance_after"] ??
+    item["after_tolerance"] ??
+    0;
+
+  return {
+    sectionName,
+    categoryName,
+    questionValue,
+    answerValue,
+    questionImageUrl,
+    questionVideoUrl,
+    answerImageUrl,
+    answerVideoUrl,
+    pointsRaw,
+    isActiveRaw,
+    yearToleranceBeforeRaw,
+    yearToleranceAfterRaw,
+  };
+}
+
+export default async function AdminQuestionsImportPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  await requireAdmin();
 
   async function importQuestionsAction(formData: FormData) {
     "use server";
@@ -252,21 +437,13 @@ export default async function AdminQuestionsImportPage({
       );
     }
 
-    let items: RawImportItem[] = [];
+    const items = parseJsonInput(parsed);
 
-    if (Array.isArray(parsed)) {
-      items = parsed as RawImportItem[];
-    } else if (
-      parsed &&
-      typeof parsed === "object" &&
-      Array.isArray((parsed as { questions?: unknown[] }).questions)
-    ) {
-      items = (parsed as { questions: RawImportItem[] }).questions;
-    } else {
+    if (!items) {
       redirect(
         "/admin/questions/import?error=" +
           encodeURIComponent(
-            'صيغة الملف غير صحيحة. ارفع إما Array مباشرة أو كائن يحتوي على "questions".'
+            'صيغة الملف غير صحيحة. ارفع Array مباشرة أو كائن يحتوي على "questions".'
           )
       );
     }
@@ -278,143 +455,34 @@ export default async function AdminQuestionsImportPage({
       );
     }
 
-    const [sectionsResult, categoriesResult] = await Promise.all([
-      supabase
-        .from("category_sections")
-        .select("id, name, slug, is_active")
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("categories")
-        .select("id, name, slug, section_id, is_active")
-        .order("sort_order", { ascending: true }),
-    ]);
-
-    const sections = (sectionsResult.data ?? []) as SectionRow[];
-    const categories = (categoriesResult.data ?? []) as CategoryRow[];
-
-    const activeSections = sections.filter((item) => item.is_active !== false);
-    const activeCategories = categories.filter((item) => item.is_active !== false);
-
-    const sectionByName = new Map<string, SectionRow>();
-    const sectionBySlug = new Map<string, SectionRow>();
-
-    for (const section of activeSections) {
-      sectionByName.set(normalizeLookup(section.name), section);
-
-      if (section.slug) {
-        sectionBySlug.set(normalizeLookup(section.slug), section);
-        sectionBySlug.set(normalizeSlug(section.slug), section);
-      }
-    }
-
-    function resolveSection(rawSection: string) {
-      if (!rawSection) return null;
-
-      return (
-        sectionByName.get(normalizeLookup(rawSection)) ||
-        sectionBySlug.get(normalizeLookup(rawSection)) ||
-        sectionBySlug.get(normalizeSlug(rawSection)) ||
-        null
-      );
-    }
-
-    function resolveCategory(rawCategory: string, sectionId: string | null) {
-      if (!rawCategory) return null;
-
-      const scoped = sectionId
-        ? activeCategories.filter((cat) => cat.section_id === sectionId)
-        : activeCategories;
-
-      const keyLookup = normalizeLookup(rawCategory);
-      const keySlug = normalizeSlug(rawCategory);
-
-      const scopedMatch =
-        scoped.find(
-          (cat) =>
-            normalizeLookup(cat.name) === keyLookup ||
-            (cat.slug && normalizeLookup(cat.slug) === keyLookup) ||
-            (cat.slug && normalizeSlug(cat.slug) === keySlug)
-        ) ?? null;
-
-      if (scopedMatch) return scopedMatch;
-
-      return (
-        activeCategories.find(
-          (cat) =>
-            normalizeLookup(cat.name) === keyLookup ||
-            (cat.slug && normalizeLookup(cat.slug) === keyLookup) ||
-            (cat.slug && normalizeSlug(cat.slug) === keySlug)
-        ) ?? null
-      );
-    }
+    const { sections, categories } = await getActiveSectionsAndCategories();
+    const { resolveSection, resolveCategory } = createResolvers(
+      sections,
+      categories
+    );
 
     const invalidLines: string[] = [];
     const duplicateInsideFileLines: string[] = [];
-    const preparedRows: InsertQuestionRow[] = [];
     const seenQuestionsInFile = new Set<string>();
+    const preparedRows: PreparedQuestionRow[] = [];
 
     items.forEach((item, index) => {
       const lineNumber = index + 1;
 
-      const sectionName = firstString(item, ["القسم", "section", "Section"]);
-      const categoryName = firstString(item, ["الفئة", "category", "Category"]);
-      const questionValue = firstString(item, [
-        "السؤال",
-        "question",
-        "question_text",
-      ]);
-      const answerValue = firstString(item, [
-        "الجواب",
-        "answer",
-        "answer_text",
-      ]);
-
-      const questionImageUrl = firstString(item, [
-        "صورة",
-        "question_image_url",
-        "image",
-        "image_url",
-      ]);
-
-      const questionVideoUrl = firstString(item, [
-        "فيديو السؤال",
-        "question_video_url",
-      ]);
-
-      const answerImageUrl = firstString(item, [
-        "صورة الجواب",
-        "answer_image_url",
-      ]);
-
-      const answerVideoUrl = firstString(item, [
-        "فيديو الجواب",
-        "answer_video_url",
-      ]);
-
-      const pointsRaw =
-        item["نقاط السؤال"] ??
-        item["points"] ??
-        item["النقاط"] ??
-        item["Points"] ??
-        0;
-
-      const isActiveRaw =
-        item["نشط"] ??
-        item["is_active"] ??
-        item["active"] ??
-        true;
-
-      const yearToleranceBeforeRaw =
-        item["سماحية قبل"] ??
-        item["year_tolerance_before"] ??
-        item["before_tolerance"] ??
-        0;
-
-      const yearToleranceAfterRaw =
-        item["سماحية بعد"] ??
-        item["year_tolerance_after"] ??
-        item["after_tolerance"] ??
-        0;
+      const {
+        sectionName,
+        categoryName,
+        questionValue,
+        answerValue,
+        questionImageUrl,
+        questionVideoUrl,
+        answerImageUrl,
+        answerVideoUrl,
+        pointsRaw,
+        isActiveRaw,
+        yearToleranceBeforeRaw,
+        yearToleranceAfterRaw,
+      } = extractQuestionFields(item);
 
       if (!sectionName || !categoryName || !questionValue || !answerValue) {
         invalidLines.push(
@@ -423,28 +491,21 @@ export default async function AdminQuestionsImportPage({
         return;
       }
 
-      const plainQuestionKey = normalizeLookup(stripHtml(questionValue));
+      const normalizedQuestion = normalizeQuestionKey(questionValue);
 
-      if (!plainQuestionKey) {
+      if (!normalizedQuestion) {
         invalidLines.push(`السطر ${lineNumber}: نص السؤال غير صالح.`);
         return;
       }
 
-      if (seenQuestionsInFile.has(plainQuestionKey)) {
-        duplicateInsideFileLines.push(`السطر ${lineNumber}: سؤال مكرر داخل الملف.`);
-        return;
-      }
-
-      seenQuestionsInFile.add(plainQuestionKey);
-
-      const points = toInt(pointsRaw, 0);
-
-      if (![200, 400, 600].includes(points)) {
-        invalidLines.push(
-          `السطر ${lineNumber}: نقاط السؤال يجب أن تكون 200 أو 400 أو 600.`
+      if (seenQuestionsInFile.has(normalizedQuestion)) {
+        duplicateInsideFileLines.push(
+          `السطر ${lineNumber}: سؤال مكرر داخل الملف.`
         );
         return;
       }
+
+      seenQuestionsInFile.add(normalizedQuestion);
 
       const section = resolveSection(sectionName);
       if (!section) {
@@ -456,6 +517,14 @@ export default async function AdminQuestionsImportPage({
       if (!category) {
         invalidLines.push(
           `السطر ${lineNumber}: الفئة "${categoryName}" غير موجودة داخل القسم "${sectionName}".`
+        );
+        return;
+      }
+
+      const points = toInt(pointsRaw, 0);
+      if (![200, 400, 600].includes(points)) {
+        invalidLines.push(
+          `السطر ${lineNumber}: نقاط السؤال يجب أن تكون 200 أو 400 أو 600.`
         );
         return;
       }
@@ -478,36 +547,34 @@ export default async function AdminQuestionsImportPage({
         media_url: media.media_url,
         year_tolerance_before: Math.max(0, toInt(yearToleranceBeforeRaw, 0)),
         year_tolerance_after: Math.max(0, toInt(yearToleranceAfterRaw, 0)),
-        question_image_url: questionImageUrl,
-        question_video_url: questionVideoUrl,
-        answer_image_url: answerImageUrl,
-        answer_video_url: answerVideoUrl,
+        question_image_url: nullableString(questionImageUrl),
+        question_video_url: nullableString(questionVideoUrl),
+        answer_image_url: nullableString(answerImageUrl),
+        answer_video_url: nullableString(answerVideoUrl),
       });
     });
 
     if (preparedRows.length === 0) {
+      const errorMessage = buildMessage([
+        "لم يتم العثور على أسئلة صالحة للرفع.",
+        ...invalidLines.slice(0, 8),
+        ...duplicateInsideFileLines.slice(0, 8),
+      ]);
+
       redirect(
-        "/admin/questions/import?error=" +
-          encodeURIComponent(
-            buildMessage([
-              "لم يتم العثور على أسئلة صالحة للرفع.",
-              ...invalidLines.slice(0, 8),
-              ...duplicateInsideFileLines.slice(0, 8),
-            ])
-          )
+        "/admin/questions/import?error=" + encodeURIComponent(errorMessage)
       );
     }
 
-    const existingQuestionTexts = new Set<string>();
+    const categoryIds = Array.from(new Set(preparedRows.map((row) => row.category_id)));
 
-    for (const textChunk of chunkArray(
-      preparedRows.map((row) => row.question_text),
-      CHUNK_SIZE
-    )) {
+    const existingNormalizedQuestions = new Set<string>();
+
+    for (const categoryChunk of chunkArray(categoryIds, 50)) {
       const { data, error } = await supabase
         .from("questions")
-        .select("question_text")
-        .in("question_text", textChunk);
+        .select("question_text, category_id")
+        .in("category_id", categoryChunk);
 
       if (error) {
         redirect(
@@ -519,40 +586,46 @@ export default async function AdminQuestionsImportPage({
       }
 
       for (const row of data ?? []) {
-        const questionText =
+        const text =
           typeof row.question_text === "string" ? row.question_text : "";
-        if (questionText) {
-          existingQuestionTexts.add(questionText);
+        const normalized = normalizeQuestionKey(text);
+        if (normalized) {
+          existingNormalizedQuestions.add(normalized);
         }
       }
     }
 
-    const rowsToInsert = preparedRows.filter(
-      (row) => !existingQuestionTexts.has(row.question_text)
-    );
+    const rowsToInsert = preparedRows.filter((row) => {
+      const key = normalizeQuestionKey(row.question_text);
+      return !existingNormalizedQuestions.has(key);
+    });
 
     let insertedCount = 0;
 
-    for (const insertChunk of chunkArray(rowsToInsert, CHUNK_SIZE)) {
-  const { data, error } = await supabase
-    .from("questions")
-    .insert(insertChunk)
-    .select("id");
+    for (const insertChunk of chunkArray(rowsToInsert, INSERT_CHUNK_SIZE)) {
+      const { data, error } = await supabase
+        .from("questions")
+        .upsert(insertChunk, {
+          onConflict: "question_text",
+          ignoreDuplicates: true,
+        })
+        .select("id");
 
-  if (error) {
-    redirect(
-      "/admin/questions/import?error=" +
-        encodeURIComponent(error.message || "فشل رفع دفعة من الأسئلة.")
-    );
-  }
+      if (error) {
+        redirect(
+          "/admin/questions/import?error=" +
+            encodeURIComponent(error.message || "فشل رفع دفعة من الأسئلة.")
+        );
+      }
 
-  insertedCount += data?.length ?? 0;
-}
+      insertedCount += data?.length ?? 0;
+    }
 
     const skippedExistingCount = preparedRows.length - rowsToInsert.length;
 
     revalidatePath("/admin/questions");
     revalidatePath("/admin/questions/import");
+    revalidatePath("/admin/games");
     revalidatePath("/game/start");
 
     const successMessage = buildMessage([
@@ -575,6 +648,7 @@ export default async function AdminQuestionsImportPage({
 
     const query = new URLSearchParams();
     query.set("success", successMessage);
+
     if (warningMessage) {
       query.set("warning", warningMessage);
     }
@@ -582,7 +656,7 @@ export default async function AdminQuestionsImportPage({
     redirect(`/admin/questions/import?${query.toString()}`);
   }
 
-  const sampleJson = `[
+  const sampleSimpleJson = `[
   {
     "القسم": "عام",
     "الفئة": "أمثال شعبية",
@@ -600,6 +674,25 @@ export default async function AdminQuestionsImportPage({
     "صورة": "https://example.com/logo.png"
   }
 ]`;
+
+  const sampleFullJson = `{
+  "questions": [
+    {
+      "section": "عام",
+      "category": "ألغاز",
+      "points": 200,
+      "is_active": true,
+      "year_tolerance_before": 0,
+      "year_tolerance_after": 0,
+      "question_text": "<p>ما الشيء الذي يكتب ولا يقرأ؟</p>",
+      "answer_text": "<p>القلم</p>",
+      "question_image_url": "",
+      "question_video_url": "",
+      "answer_image_url": "",
+      "answer_video_url": ""
+    }
+  ]
+}`;
 
   return (
     <main
@@ -620,18 +713,19 @@ export default async function AdminQuestionsImportPage({
               </div>
 
               <h1 className="mt-4 text-3xl font-black sm:text-4xl">
-                رفع مبسط ومتوافق مع الجدول الحالي
+                رفع ملفات الأسئلة
               </h1>
+
               <p className="mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                الرفع الآن يعتمد على الأعمدة الموجودة فعليًا داخل جدول
-                <span className="mx-1 font-bold text-white">questions</span>
-                ويدعم الصور والفيديو والسماحية الزمنية إذا احتجتها.
+                صفحة مبنية من الصفر، تدعم الصيغة العربية المبسطة وصيغة 1199،
+                وتتعامل مع الصور والفيديو بشكل صحيح، وتتخطى المكرر داخل الملف
+                أو الموجود مسبقًا في قاعدة البيانات.
               </p>
             </div>
 
             <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
-              <p className="text-xs text-slate-400">الصيغة المطلوبة</p>
-              <p className="mt-2 text-2xl font-black text-white">JSON بسيط</p>
+              <p className="text-xs text-slate-400">الحالة</p>
+              <p className="mt-2 text-2xl font-black text-white">جاهز للرفع</p>
             </div>
           </div>
         </section>
@@ -654,11 +748,12 @@ export default async function AdminQuestionsImportPage({
           </div>
         ) : null}
 
-        <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
             <h2 className="text-2xl font-black text-white">رفع الملف</h2>
             <p className="mt-2 text-sm leading-8 text-slate-300">
-              اختر ملف JSON ثم اضغط رفع.
+              ارفع ملف JSON، والصفحة ستتحقق من الصيغة، الأقسام، الفئات، النقاط،
+              التكرار، والوسائط قبل الإدخال.
             </p>
 
             <form action={importQuestionsAction} className="mt-6 space-y-4">
@@ -682,51 +777,63 @@ export default async function AdminQuestionsImportPage({
                 ارفع الملف الآن
               </button>
             </form>
+
+            <div className="mt-6 rounded-[1.5rem] border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100">
+              ما الذي يتم التحقق منه؟
+              <ul className="mt-3 space-y-2 text-sm">
+                <li>وجود القسم والفئة والسؤال والجواب</li>
+                <li>أن النقاط 200 أو 400 أو 600 فقط</li>
+                <li>التأكد من القسم والفئة داخل قاعدة البيانات</li>
+                <li>تخطي المكرر داخل الملف</li>
+                <li>تخطي السؤال الموجود مسبقًا</li>
+                <li>مطابقة الوسائط مع media_type و media_url بشكل صحيح</li>
+              </ul>
+            </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
-            <h3 className="text-xl font-black text-white">مثال جاهز</h3>
+          <div className="space-y-6">
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+              <h3 className="text-xl font-black text-white">مثال الصيغة المبسطة</h3>
 
-            <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4">
-              <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-7 text-slate-200 sm:text-sm">
-                {sampleJson}
-              </pre>
-            </div>
-
-            <div className="mt-5 rounded-[1.5rem] border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm leading-7 text-cyan-100">
-              الحقول الأساسية:
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  "القسم",
-                  "الفئة",
-                  "السؤال",
-                  "الجواب",
-                  "نقاط السؤال",
-                  "صورة",
-                ].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-cyan-300/20 bg-slate-950/40 px-3 py-1 text-xs font-bold text-cyan-100"
-                  >
-                    {item}
-                  </span>
-                ))}
+              <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4">
+                <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-7 text-slate-200 sm:text-sm">
+                  {sampleSimpleJson}
+                </pre>
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link
-                href="/admin/questions"
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                الرجوع للأسئلة
-              </Link>
-              <Link
-                href="/admin"
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                الرجوع للإدارة
-              </Link>
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+              <h3 className="text-xl font-black text-white">مثال صيغة 1199</h3>
+
+              <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-4">
+                <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-7 text-slate-200 sm:text-sm">
+                  {sampleFullJson}
+                </pre>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+              <h3 className="text-xl font-black text-white">تنبيه مهم</h3>
+              <p className="mt-3 text-sm leading-8 text-slate-300">
+                إذا لم توجد صورة أو فيديو، سيتم حفظ حقول الوسائط كـ null وليس
+                كنص فارغ، وهذا مهم جدًا لتفادي مشاكل check constraint.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href="/admin/questions"
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  الرجوع للأسئلة
+                </Link>
+
+                <Link
+                  href="/admin"
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  الرجوع للإدارة
+                </Link>
+              </div>
             </div>
           </div>
         </section>
