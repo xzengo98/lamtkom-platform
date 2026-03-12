@@ -121,7 +121,7 @@ export default function Navbar() {
           الباقات
         </Link>
         <Link href="/game/start" className={linkClasses("/game/start")}>
-         اللعبة
+          اللعب
         </Link>
         {authState.isLoggedIn ? (
           <Link href="/account" className={linkClasses("/account")}>
@@ -152,7 +152,7 @@ export default function Navbar() {
 
           <Link
             href="/"
-            className="flex items-center gap-3 rounded-2xl transition hover:opacity-95"
+            className="flex items-center rounded-2xl transition hover:opacity-95"
           >
             <img
               src={LOGO_URL}
@@ -161,9 +161,6 @@ export default function Navbar() {
               loading="eager"
               decoding="async"
             />
-            <span className="hidden text-xl font-black tracking-tight text-white sm:block md:text-2xl">
-              لمّتنا
-            </span>
           </Link>
         </div>
 
@@ -221,18 +218,15 @@ export default function Navbar() {
           <div className="mb-4 flex items-center justify-center">
             <Link
               href="/"
-              className="flex items-center gap-3 rounded-2xl transition hover:opacity-95"
+              className="flex items-center rounded-2xl transition hover:opacity-95"
             >
               <img
                 src={LOGO_URL}
-                alt=""
+                alt="لمّتنا"
                 className="h-16 w-auto object-contain"
                 loading="eager"
                 decoding="async"
               />
-              <span className="text-xl font-black tracking-tight text-white">
-               
-              </span>
             </Link>
           </div>
 

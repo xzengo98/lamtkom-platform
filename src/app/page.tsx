@@ -378,13 +378,13 @@ export default function HomePage() {
                   منصة عربية لألعاب الأسئلة
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-slate-200 sm:text-sm">
-                مناسبة لكافة التجمعات
+                  مناسبة للمدارس والفعاليات
                 </span>
               </div>
 
               <div className="mt-5 max-w-3xl">
                 <p className="text-sm font-bold text-cyan-300 sm:text-base">
-                  مرحبًا بك في منصة لمّتنا
+                  مرحبًا بك في لمّتنا
                 </p>
                 <h1 className="mt-3 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
                   حوّل أي مسابقة إلى تجربة
@@ -446,7 +446,7 @@ export default function HomePage() {
 
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs text-slate-400">واجهة سهلة</p>
+                  <p className="text-xs text-slate-400">واجهة مرتبة</p>
                   <p className="mt-2 text-lg font-black text-white">جاهزة للعرض</p>
                 </div>
                 <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
@@ -572,6 +572,49 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <footer className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] px-5 py-6 sm:px-6">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="text-lg font-black text-white sm:text-xl">لمّتنا</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-300">
+                منصة عربية للمسابقات وألعاب الأسئلة، مصممة لتقديم تجربة جميلة،
+                منظمة، وسهلة الاستخدام.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+              >
+                الرئيسية
+              </Link>
+              <Link
+                href="/pricing"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+              >
+                الباقات
+              </Link>
+              <Link
+                href="/game/start"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+              >
+                اللعب
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 hover:text-white"
+              >
+                تسجيل الدخول
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-white/10 pt-4 text-center text-xs text-slate-500 sm:text-sm">
+            © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
+          </div>
+        </footer>
       </div>
     </main>
   );
