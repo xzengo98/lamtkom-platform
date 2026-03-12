@@ -384,7 +384,7 @@ export default function HomePage() {
 
               <div className="mt-5 max-w-3xl">
                 <p className="text-sm font-bold text-cyan-300 sm:text-base">
-                  مرحبًا بك في لمّتنا
+                  مرحبًا بك في منصة لمّتنا
                 </p>
                 <h1 className="mt-3 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
                   حوّل أي مسابقة إلى تجربة
@@ -392,8 +392,7 @@ export default function HomePage() {
                 </h1>
                 <p className="mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
                   منصة مهيأة لتشغيل ألعاب الأسئلة بين فريقين بطريقة واضحة وأنيقة،
-                  مع تنظيم مرن للفئات والأسئلة وتجربة عرض مناسبة للهواتف والشاشات
-                  الكبيرة.
+                  مع تنظيم مرن للفئات والأسئلة جربها الان
                 </p>
               </div>
 
@@ -446,7 +445,7 @@ export default function HomePage() {
 
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs text-slate-400">واجهة مرتبة</p>
+                  <p className="text-xs text-slate-400">واجهة مرنة</p>
                   <p className="mt-2 text-lg font-black text-white">جاهزة للعرض</p>
                 </div>
                 <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
