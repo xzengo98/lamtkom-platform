@@ -121,7 +121,7 @@ export default function Navbar() {
           الباقات
         </Link>
         <Link href="/game/start" className={linkClasses("/game/start")}>
-         العبة
+         اللعبة
         </Link>
         {authState.isLoggedIn ? (
           <Link href="/account" className={linkClasses("/account")}>
@@ -231,7 +231,7 @@ export default function Navbar() {
                 decoding="async"
               />
               <span className="text-xl font-black tracking-tight text-white">
-                لمّتنا
+               
               </span>
             </Link>
           </div>
