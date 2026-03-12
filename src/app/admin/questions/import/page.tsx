@@ -43,9 +43,6 @@ type InsertQuestionRow = {
   question_text: string;
   answer_text: string;
   question_image_url: string;
-  question_video_url: string;
-  answer_image_url: string;
-  answer_video_url: string;
 };
 
 const CHUNK_SIZE = 200;
@@ -373,9 +370,6 @@ export default async function AdminQuestionsImportPage({
         question_text: ensureHtmlParagraph(questionValue),
         answer_text: ensureHtmlParagraph(answerValue),
         question_image_url: imageValue,
-        question_video_url: "",
-        answer_image_url: "",
-        answer_video_url: "",
       });
     });
 
@@ -487,14 +481,6 @@ export default async function AdminQuestionsImportPage({
     "الجواب": "ماتوا",
     "نقاط السؤال": 200,
     "صورة": ""
-  },
-  {
-    "القسم": "عام",
-    "الفئة": "أمثال شعبية",
-    "السؤال": "أكمل المثل الشعبي: اسأل مجرب ولا تسأل ...",
-    "الجواب": "طبيب",
-    "نقاط السؤال": 200,
-    "صورة": ""
   }
 ]`;
 
@@ -520,13 +506,8 @@ export default async function AdminQuestionsImportPage({
                 رفع بسيط جدًا للأسئلة
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                ارفع ملف JSON بسيط يحتوي فقط على:
-                <span className="mx-1 font-bold text-white">القسم</span>،
-                <span className="mx-1 font-bold text-white">الفئة</span>،
-                <span className="mx-1 font-bold text-white">السؤال</span>،
-                <span className="mx-1 font-bold text-white">الجواب</span>،
-                <span className="mx-1 font-bold text-white">نقاط السؤال</span>،
-                <span className="mx-1 font-bold text-white">صورة</span> إن وجدت.
+                ارفع ملف JSON بسيط يحتوي فقط على: القسم، الفئة، السؤال، الجواب،
+                نقاط السؤال، وصورة إن وجدت.
               </p>
             </div>
 
