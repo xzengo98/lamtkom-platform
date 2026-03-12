@@ -36,13 +36,19 @@ type RawImportItem = {
 
 type InsertQuestionRow = {
   category_id: string;
-  points: number;
-  is_active: boolean;
-  year_tolerance_before: number;
-  year_tolerance_after: number;
   question_text: string;
   answer_text: string;
+  points: number;
+  is_active: boolean;
+  is_used: boolean;
+  media_type: string;
+  media_url: string;
+  year_tolerance_before: number;
+  year_tolerance_after: number;
   question_image_url: string;
+  question_video_url: string;
+  answer_image_url: string;
+  answer_video_url: string;
 };
 
 const CHUNK_SIZE = 200;
@@ -85,6 +91,16 @@ function toInt(value: unknown, fallback = 0) {
   return Number.isFinite(num) ? Math.trunc(num) : fallback;
 }
 
+function toBool(value: unknown, fallback = true) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "y", "نعم"].includes(normalized)) return true;
+    if (["false", "0", "no", "n", "لا"].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
 function chunkArray<T>(items: T[], size: number) {
   const chunks: T[][] = [];
   for (let i = 0; i < items.length; i += size) {
@@ -103,6 +119,53 @@ function firstString(item: RawImportItem, keys: string[]) {
     if (value) return value;
   }
   return "";
+}
+
+function resolveMediaFields(params: {
+  questionImageUrl: string;
+  questionVideoUrl: string;
+  answerImageUrl: string;
+  answerVideoUrl: string;
+}) {
+  const {
+    questionImageUrl,
+    questionVideoUrl,
+    answerImageUrl,
+    answerVideoUrl,
+  } = params;
+
+  if (questionImageUrl) {
+    return {
+      media_type: "image",
+      media_url: questionImageUrl,
+    };
+  }
+
+  if (questionVideoUrl) {
+    return {
+      media_type: "video",
+      media_url: questionVideoUrl,
+    };
+  }
+
+  if (answerImageUrl) {
+    return {
+      media_type: "image",
+      media_url: answerImageUrl,
+    };
+  }
+
+  if (answerVideoUrl) {
+    return {
+      media_type: "video",
+      media_url: answerVideoUrl,
+    };
+  }
+
+  return {
+    media_type: "",
+    media_url: "",
+  };
 }
 
 async function requireAdmin() {
@@ -237,6 +300,7 @@ export default async function AdminQuestionsImportPage({
 
     for (const section of activeSections) {
       sectionByName.set(normalizeLookup(section.name), section);
+
       if (section.slug) {
         sectionBySlug.set(normalizeLookup(section.slug), section);
         sectionBySlug.set(normalizeSlug(section.slug), section);
@@ -245,6 +309,7 @@ export default async function AdminQuestionsImportPage({
 
     function resolveSection(rawSection: string) {
       if (!rawSection) return null;
+
       return (
         sectionByName.get(normalizeLookup(rawSection)) ||
         sectionBySlug.get(normalizeLookup(rawSection)) ||
@@ -303,11 +368,27 @@ export default async function AdminQuestionsImportPage({
         "answer",
         "answer_text",
       ]);
-      const imageValue = firstString(item, [
+
+      const questionImageUrl = firstString(item, [
         "صورة",
+        "question_image_url",
         "image",
         "image_url",
-        "question_image_url",
+      ]);
+
+      const questionVideoUrl = firstString(item, [
+        "فيديو السؤال",
+        "question_video_url",
+      ]);
+
+      const answerImageUrl = firstString(item, [
+        "صورة الجواب",
+        "answer_image_url",
+      ]);
+
+      const answerVideoUrl = firstString(item, [
+        "فيديو الجواب",
+        "answer_video_url",
       ]);
 
       const pointsRaw =
@@ -315,6 +396,24 @@ export default async function AdminQuestionsImportPage({
         item["points"] ??
         item["النقاط"] ??
         item["Points"] ??
+        0;
+
+      const isActiveRaw =
+        item["نشط"] ??
+        item["is_active"] ??
+        item["active"] ??
+        true;
+
+      const yearToleranceBeforeRaw =
+        item["سماحية قبل"] ??
+        item["year_tolerance_before"] ??
+        item["before_tolerance"] ??
+        0;
+
+      const yearToleranceAfterRaw =
+        item["سماحية بعد"] ??
+        item["year_tolerance_after"] ??
+        item["after_tolerance"] ??
         0;
 
       if (!sectionName || !categoryName || !questionValue || !answerValue) {
@@ -361,15 +460,28 @@ export default async function AdminQuestionsImportPage({
         return;
       }
 
+      const media = resolveMediaFields({
+        questionImageUrl,
+        questionVideoUrl,
+        answerImageUrl,
+        answerVideoUrl,
+      });
+
       preparedRows.push({
         category_id: category.id,
-        points,
-        is_active: true,
-        year_tolerance_before: 0,
-        year_tolerance_after: 0,
         question_text: ensureHtmlParagraph(questionValue),
         answer_text: ensureHtmlParagraph(answerValue),
-        question_image_url: imageValue,
+        points,
+        is_active: toBool(isActiveRaw, true),
+        is_used: false,
+        media_type: media.media_type,
+        media_url: media.media_url,
+        year_tolerance_before: Math.max(0, toInt(yearToleranceBeforeRaw, 0)),
+        year_tolerance_after: Math.max(0, toInt(yearToleranceAfterRaw, 0)),
+        question_image_url: questionImageUrl,
+        question_video_url: questionVideoUrl,
+        answer_image_url: answerImageUrl,
+        answer_video_url: answerVideoUrl,
       });
     });
 
@@ -407,10 +519,10 @@ export default async function AdminQuestionsImportPage({
       }
 
       for (const row of data ?? []) {
-        const text =
+        const questionText =
           typeof row.question_text === "string" ? row.question_text : "";
-        if (text) {
-          existingQuestionTexts.add(text);
+        if (questionText) {
+          existingQuestionTexts.add(questionText);
         }
       }
     }
@@ -481,6 +593,14 @@ export default async function AdminQuestionsImportPage({
     "الجواب": "ماتوا",
     "نقاط السؤال": 200,
     "صورة": ""
+  },
+  {
+    "القسم": "عام",
+    "الفئة": "شعارات",
+    "السؤال": "هذا الشعار يعود لأي تطبيق؟",
+    "الجواب": "واتساب",
+    "نقاط السؤال": 400,
+    "صورة": "https://example.com/logo.png"
   }
 ]`;
 
@@ -503,11 +623,12 @@ export default async function AdminQuestionsImportPage({
               </div>
 
               <h1 className="mt-4 text-3xl font-black sm:text-4xl">
-                رفع بسيط جدًا للأسئلة
+                رفع مبسط ومتوافق مع الجدول الحالي
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                ارفع ملف JSON بسيط يحتوي فقط على: القسم، الفئة، السؤال، الجواب،
-                نقاط السؤال، وصورة إن وجدت.
+                الرفع الآن يعتمد على الأعمدة الموجودة فعليًا داخل جدول
+                <span className="mx-1 font-bold text-white">questions</span>
+                ويدعم الصور والفيديو والسماحية الزمنية إذا احتجتها.
               </p>
             </div>
 
@@ -576,7 +697,7 @@ export default async function AdminQuestionsImportPage({
             </div>
 
             <div className="mt-5 rounded-[1.5rem] border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm leading-7 text-cyan-100">
-              الحقول المطلوبة فقط:
+              الحقول الأساسية:
               <div className="mt-2 flex flex-wrap gap-2">
                 {[
                   "القسم",
