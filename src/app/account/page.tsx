@@ -250,7 +250,7 @@ export default function AccountPage() {
               بيانات الحساب
             </h2>
             <p className="mt-2 text-sm leading-7 text-slate-300">
-              معلوماتك الأساسية وحالة الحساب الحالية.
+              معلوماتك الأساسية تجدها هنا .
             </p>
           </div>
 
@@ -258,7 +258,7 @@ export default function AccountPage() {
             <InfoCard label="اسم المستخدم" value={profile?.username || "-"} />
             <InfoCard label="البريد الإلكتروني" value={profile?.email || "-"} />
             <InfoCard label="رقم الهاتف" value={profile?.phone || "-"} />
-            <InfoCard label="الدور الداخلي" value={profile?.role || "user"} />
+            <InfoCard label="الرتبة" value={profile?.role || "user"} />
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
