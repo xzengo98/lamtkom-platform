@@ -25,6 +25,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>({
     loading: true,
@@ -90,9 +91,8 @@ export default function Navbar() {
   }, [loadUser, router, supabase]);
 
   useEffect(() => {
-    void loadUser();
     setMenuOpen(false);
-  }, [pathname, loadUser]);
+  }, [pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -102,6 +102,7 @@ export default function Navbar() {
 
   function linkClasses(href: string) {
     const isActive = pathname === href;
+
     return [
       "rounded-2xl px-3 py-2 text-sm font-bold transition",
       isActive
@@ -151,16 +152,16 @@ export default function Navbar() {
 
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-2xl transition hover:opacity-95 sm:gap-3"
+            className="flex items-center gap-3 rounded-2xl transition hover:opacity-95"
           >
             <img
               src={LOGO_URL}
               alt="لمّتنا"
-              className="h-10 w-auto object-contain sm:h-11 md:h-12 lg:h-12"
+              className="h-14 w-auto object-contain sm:h-16 md:h-[4.5rem] lg:h-[4.75rem]"
               loading="eager"
               decoding="async"
             />
-            <span className="hidden text-lg font-black tracking-tight text-white sm:block md:text-xl">
+            <span className="hidden text-xl font-black tracking-tight text-white sm:block md:text-2xl">
               لمّتنا
             </span>
           </Link>
@@ -217,6 +218,24 @@ export default function Navbar() {
 
       {menuOpen ? (
         <div className="border-t border-white/10 bg-slate-950/95 px-4 py-4 lg:hidden sm:px-6">
+          <div className="mb-4 flex items-center justify-center">
+            <Link
+              href="/"
+              className="flex items-center gap-3 rounded-2xl transition hover:opacity-95"
+            >
+              <img
+                src={LOGO_URL}
+                alt="لمّتنا"
+                className="h-16 w-auto object-contain"
+                loading="eager"
+                decoding="async"
+              />
+              <span className="text-xl font-black tracking-tight text-white">
+                لمّتنا
+              </span>
+            </Link>
+          </div>
+
           <div className="flex flex-col gap-2">
             <NavLinks />
 
