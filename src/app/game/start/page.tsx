@@ -535,38 +535,6 @@ export default async function GameStartPage({
       );
     }
 
-    if (shouldPreventRepeat) {
-      const historyRows = built.rows.map((row) => ({
-        user_id: user.id,
-        question_id: row.question_id,
-        category_id: row.category_id,
-        session_id: insertedSession.id,
-      }));
-
-      const { error: historyInsertError } = await supabase
-        .from("user_question_history")
-        .upsert(historyRows, {
-          onConflict: "user_id,question_id",
-          ignoreDuplicates: true,
-        });
-
-      if (historyInsertError) {
-        await supabase
-          .from("game_session_questions")
-          .delete()
-          .eq("session_id", insertedSession.id);
-
-        await supabase.from("game_sessions").delete().eq("id", insertedSession.id);
-
-        redirect(
-          "/game/start?error=" +
-            encodeURIComponent(
-              historyInsertError.message || "فشل تحديث سجل عدم التكرار"
-            )
-        );
-      }
-    }
-
     const { error: decrementError } = await supabase
       .from("profiles")
       .update({
@@ -575,11 +543,6 @@ export default async function GameStartPage({
       .eq("id", user.id);
 
     if (decrementError) {
-      await supabase
-        .from("user_question_history")
-        .delete()
-        .eq("session_id", insertedSession.id);
-
       await supabase
         .from("game_session_questions")
         .delete()

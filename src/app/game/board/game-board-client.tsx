@@ -1140,14 +1140,16 @@ export default function GameBoardClient({
     }, 180);
   }
 
-  function awardPoints(winner: "teamOne" | "teamTwo" | "none") {
+  async function awardPoints(winner: "teamOne" | "teamTwo" | "none") {
     if (!openQuestion || modalBusy) return;
 
+    const consumedQuestion = openQuestion;
+
     const nextTeamOneScore =
-      winner === "teamOne" ? teamOneScore + openQuestion.points : teamOneScore;
+      winner === "teamOne" ? teamOneScore + consumedQuestion.points : teamOneScore;
     const nextTeamTwoScore =
-      winner === "teamTwo" ? teamTwoScore + openQuestion.points : teamTwoScore;
-    const nextUsedQuestionIds = [...usedQuestionIds, openQuestion.id];
+      winner === "teamTwo" ? teamTwoScore + consumedQuestion.points : teamTwoScore;
+    const nextUsedQuestionIds = [...usedQuestionIds, consumedQuestion.id];
 
     const nextState: BoardState = {
       teamOneScore: nextTeamOneScore,
@@ -1172,6 +1174,27 @@ export default function GameBoardClient({
     setTimeLeft(QUESTION_TIMER_SECONDS);
 
     queuePersist(nextState, true);
+
+    const { error: historyError } = await supabase
+      .from("user_question_history")
+      .upsert(
+        [
+          {
+            user_id: userId,
+            question_id: consumedQuestion.id,
+            category_id: consumedQuestion.category_id,
+            session_id: sessionId,
+          },
+        ],
+        {
+          onConflict: "user_id,question_id",
+          ignoreDuplicates: true,
+        }
+      );
+
+    if (historyError) {
+      console.error("Failed to save used question history:", historyError.message);
+    }
 
     setTimeout(() => {
       setModalBusy(false);
@@ -1262,7 +1285,7 @@ export default function GameBoardClient({
         <header className="mb-4 rounded-[1.8rem] border border-white/10 bg-[linear-gradient(135deg,#020617_0%,#08122f_50%,#020617_100%)] px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-bold text-cyan-300">SeenJeem</p>
+              <p className="text-sm font-bold text-cyan-300">لمّتنا</p>
               <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
                 {gameName}
               </h1>
