@@ -121,7 +121,7 @@ export default function Navbar() {
           الباقات
         </Link>
         <Link href="/game/start" className={linkClasses("/game/start")}>
-          اللعب
+          اللعبة
         </Link>
         {authState.isLoggedIn ? (
           <Link href="/account" className={linkClasses("/account")}>
