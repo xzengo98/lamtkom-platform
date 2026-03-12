@@ -42,7 +42,7 @@ const features: FeatureItem[] = [
       "ابدأ الجولة بسرعة، اعرض الأسئلة بشكل منسق، وامنح كل فريق تجربة تنافسية واضحة.",
   },
   {
-    title: "مناسبة للمدارس والفعاليات",
+    title: "مناسبة لجميع التجمعاتgit add . && git commit -m "Update site" && git push origin main && npm run deploy",
     description:
       "واجهة منظمة ومريحة للعرض على الشاشات، مناسبة للمسابقات والمناسبات الخاصة.",
   },
