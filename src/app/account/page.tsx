@@ -85,6 +85,8 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -100,6 +102,8 @@ export default function AccountPage() {
         router.replace("/login");
         return;
       }
+
+      setCurrentUserId(user.id);
 
       const [{ data: profileData }, { data: sessionsData }] = await Promise.all([
         supabase
@@ -136,6 +140,7 @@ export default function AccountPage() {
       if (!session) {
         router.replace("/login");
       } else {
+        setCurrentUserId(session.user.id);
         loadAccount();
       }
     });
@@ -149,6 +154,38 @@ export default function AccountPage() {
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/");
+    router.refresh();
+  }
+
+  async function handleDeleteSession(sessionId: string) {
+    if (!currentUserId || deletingSessionId) return;
+
+    const confirmed = window.confirm(
+      "هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟ لا يمكن التراجع بعد الحذف."
+    );
+
+    if (!confirmed) return;
+
+    setDeletingSessionId(sessionId);
+
+    const { error } = await supabase
+      .from("game_sessions")
+      .delete()
+      .eq("id", sessionId)
+      .eq("user_id", currentUserId);
+
+    if (error) {
+      setDeletingSessionId(null);
+      window.alert("تعذر حذف اللعبة. حاول مرة أخرى.");
+      return;
+    }
+
+    try {
+      window.localStorage.removeItem(`seenjeem-board-state:${sessionId}`);
+    } catch {}
+
+    setActiveSessions((prev) => prev.filter((session) => session.id !== sessionId));
+    setDeletingSessionId(null);
     router.refresh();
   }
 
@@ -246,45 +283,60 @@ export default function AccountPage() {
               الألعاب غير المكتملة
             </h2>
             <p className="mt-2 text-sm leading-7 text-slate-300">
-              يمكنك الرجوع لأي لعبة لم تنتهِ بعد وإكمالها من نفس المكان.
+              يمكنك الرجوع لأي لعبة لم تنتهِ بعد وإكمالها من نفس المكان أو حذفها نهائيًا.
             </p>
           </div>
 
           {activeSessions.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-2">
-              {activeSessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-5"
-                >
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <p className="text-xs text-cyan-300 sm:text-sm">لعبة محفوظة</p>
-                      <h3 className="mt-2 text-xl font-black text-white">
-                        {session.game_name}
-                      </h3>
-                    </div>
+              {activeSessions.map((session) => {
+                const isDeleting = deletingSessionId === session.id;
 
-                    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                      <p className="text-sm text-slate-300">
-                        {session.team_one_name} ({session.team_one_score ?? 0}) ×{" "}
-                        {session.team_two_name} ({session.team_two_score ?? 0})
-                      </p>
-                      <p className="mt-2 text-xs text-slate-400">
-                        تاريخ الإنشاء: {formatDate(session.created_at)}
-                      </p>
-                      <p className="mt-1 text-xs text-emerald-300">الحالة: نشطة</p>
-                    </div>
+                return (
+                  <div
+                    key={session.id}
+                    className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-5"
+                  >
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <p className="text-xs text-cyan-300 sm:text-sm">لعبة محفوظة</p>
+                        <h3 className="mt-2 text-xl font-black text-white">
+                          {session.game_name}
+                        </h3>
+                      </div>
 
-                    <Link
-                      href={`/game/board?sessionId=${session.id}`}
-                      className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
-                    >
-                      متابعة اللعبة
-                    </Link>
+                      <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
+                        <p className="text-sm text-slate-300">
+                          {session.team_one_name} ({session.team_one_score ?? 0}) ×{" "}
+                          {session.team_two_name} ({session.team_two_score ?? 0})
+                        </p>
+                        <p className="mt-2 text-xs text-slate-400">
+                          تاريخ الإنشاء: {formatDate(session.created_at)}
+                        </p>
+                        <p className="mt-1 text-xs text-emerald-300">الحالة: نشطة</p>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Link
+                          href={`/game/board?sessionId=${session.id}`}
+                          className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                        >
+                          متابعة اللعبة
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSession(session.id)}
+                          disabled={isDeleting}
+                          className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-base font-bold text-red-300 transition hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isDeleting ? "جارٍ الحذف..." : "حذف اللعبة"}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-6 text-center text-slate-300">
