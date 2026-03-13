@@ -570,11 +570,26 @@ export default function HomePage() {
                 الباقات
               </Link>
               <Link
-                href="/game/start"
+                href="/terms"
                 className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
               >
-                اللعبة
+               الشروط والأحكام
               </Link>
+
+              <Link
+                href="/privacy"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+              >
+              الخصوصية
+              </Link>
+
+        <Link
+                href="/about"
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+              >
+             من نحن
+              </Link>
+              
               
             </div>
           </div>
