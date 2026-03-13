@@ -99,7 +99,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-5 text-sm text-slate-300 md:mt-6">
-              ليس لديك حساب؟{" "}
+              ليس لديك حساب ؟{" "}
               <Link href="/register" className="font-bold text-cyan-300">
                 إنشاء حساب جديد
               </Link>
