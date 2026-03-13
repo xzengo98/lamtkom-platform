@@ -24,7 +24,7 @@ const plans = [
   {
     name: "بريميوم",
     badge: "الأكثر طلبًا",
-    price: "5 JD",
+    price: "5",
     period: "مدى الحياة",
     description: "أفضل خيار للمستخدمين النشطين الذين يريدون مرونة أكبر وتجربة أقوى.",
     features: [
@@ -42,7 +42,7 @@ const plans = [
   {
     name: "VIP",
     badge: "للمجموعات والفعاليات",
-    price: "10 JD",
+    price: "10",
     period: "مدى الحياة",
     description: "مناسب للجهات، المناسبات، والمستخدمين الذين يحتاجون أعلى سعة وتجربة مميزة.",
     features: [
@@ -113,7 +113,7 @@ export default function PricingPage() {
 
               <div className="mt-6 flex items-end gap-2">
                 <span className="text-4xl font-extrabold">{plan.price}</span>
-                <span className="mb-1 text-white/70">AED</span>
+                <span className="mb-1 text-white/70">JD</span>
               </div>
               <p className="mt-1 text-sm text-white/50">{plan.period}</p>
 
