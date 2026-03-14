@@ -156,7 +156,6 @@ function readLocalBoardState(storageKey: string): BoardState | null {
   try {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return null;
-
     const parsed = JSON.parse(raw) as Record<string, unknown>;
     return normalizeBoardState(parsed);
   } catch {
@@ -183,7 +182,7 @@ function RichContent({
 
   if (!safeHtml) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-white/70">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-white/70 md:rounded-3xl md:p-6">
         لا يوجد محتوى محفوظ.
       </div>
     );
@@ -193,12 +192,21 @@ function RichContent({
     <div className="flex justify-center">
       <div
         className={[
-          "prose prose-invert max-w-none text-center prose-headings:text-white prose-p:text-white/90 prose-strong:text-white prose-li:text-white/85 prose-blockquote:text-white/80",
-          "prose-p:text-center prose-headings:text-center prose-li:text-right",
-          large ? "prose-lg md:prose-xl" : "prose-base md:prose-lg",
-          "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[240px] md:[&_img]:max-h-[340px] [&_img]:object-contain",
-          "[&_figure]:mx-auto [&_figure]:text-center [&_figure_img]:mx-auto",
-          "[&_iframe]:mx-auto [&_video]:mx-auto",
+          "prose prose-invert max-w-none text-center",
+          "prose-headings:text-white prose-p:text-white/90 prose-strong:text-white prose-li:text-white/85 prose-blockquote:text-white/80",
+          "prose-p:text-center prose-headings:text-center prose-figcaption:text-center",
+          large ? "prose-base md:prose-xl" : "prose-sm md:prose-lg",
+          "[&_p]:my-4 md:[&_p]:my-5",
+          "[&_h1]:mb-5 [&_h2]:mb-5 [&_h3]:mb-4",
+          "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full",
+          "[&_img]:max-h-[180px] md:[&_img]:max-h-[320px]",
+          "[&_img]:object-contain [&_img]:rounded-2xl",
+          "[&_img]:my-5 md:[&_img]:my-7",
+          "[&_figure]:mx-auto [&_figure]:my-5 md:[&_figure]:my-7 [&_figure]:text-center",
+          "[&_figure_img]:mx-auto",
+          "[&_iframe]:mx-auto [&_iframe]:my-5",
+          "[&_video]:mx-auto [&_video]:my-5",
+          "[&_ul]:my-4 [&_ol]:my-4",
         ].join(" ")}
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
@@ -214,12 +222,12 @@ function CategoryHeader({
   const visual = getVisualBySlug(category.slug);
 
   return (
-    <div className="relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#0c1431] px-2 pb-3 pt-3 shadow-[0_14px_40px_rgba(0,0,0,0.25)] md:rounded-[1.6rem] md:px-3 md:pb-4">
+    <div className="relative overflow-hidden rounded-[1rem] border border-white/10 bg-[#0c1431] px-1.5 pb-2 pt-2 shadow-[0_10px_24px_rgba(0,0,0,0.22)] md:rounded-[1.6rem] md:px-3 md:pb-4 md:pt-3">
       <div
         className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${visual.glow}`}
       />
-      <div className="relative flex flex-col items-center gap-2 md:gap-3">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-inner md:h-16 md:w-16 md:rounded-2xl">
+      <div className="relative flex flex-col items-center gap-1.5 md:gap-3">
+        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-inner md:h-16 md:w-16 md:rounded-2xl">
           {category.image_url ? (
             <img
               src={category.image_url}
@@ -227,12 +235,12 @@ function CategoryHeader({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-xl text-white/60 md:text-2xl">?</span>
+            <span className="text-base text-white/60 md:text-2xl">?</span>
           )}
         </div>
 
-        <div className="min-h-[42px] text-center md:min-h-[52px]">
-          <h3 className="line-clamp-2 text-sm font-black leading-5 text-white md:text-lg md:leading-6">
+        <div className="min-h-[32px] text-center md:min-h-[52px]">
+          <h3 className="line-clamp-2 text-[11px] font-black leading-4 text-white md:text-lg md:leading-6">
             {category.name}
           </h3>
         </div>
@@ -260,7 +268,7 @@ function QuestionCell({
       onClick={onOpen}
       disabled={!slot.question || isUsed}
       className={[
-        "group relative flex h-[56px] items-center justify-center overflow-hidden rounded-[1rem] border text-center transition-all duration-200 md:h-[74px] md:rounded-[1.25rem]",
+        "group relative flex h-[40px] items-center justify-center overflow-hidden rounded-[0.9rem] border text-center transition-all duration-200 md:h-[74px] md:rounded-[1.25rem]",
         slot.question && !isUsed
           ? `border-white/10 bg-[#101b42] text-white hover:-translate-y-0.5 hover:bg-[#15245b] ${visual.ring}`
           : "cursor-not-allowed border-white/5 bg-[#0b1230] text-slate-500",
@@ -269,10 +277,10 @@ function QuestionCell({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]" />
 
       <div className="relative flex flex-col items-center">
-        <span className="text-[1.45rem] font-black leading-none tracking-tight md:text-[2.15rem]">
+        <span className="text-[1.05rem] font-black leading-none tracking-tight md:text-[2.15rem]">
           {slot.points}
         </span>
-        <span className="mt-1 hidden text-[11px] text-white/40 md:block">
+        <span className="mt-0.5 hidden text-[10px] text-white/40 md:block">
           {!slot.question ? "غير متاح" : isUsed ? "تم الاستخدام" : "افتح السؤال"}
         </span>
       </div>
@@ -398,46 +406,137 @@ function BoardSidebar({
 }) {
   const leaderText =
     leadingTeam === "tie"
-      ? "لا يوجد متصدر الآن"
-      : `المتصدر الآن: ${leadingTeam === "teamOne" ? teamOne : teamTwo}`;
+      ? "لا يوجد متصدر"
+      : `المتصدر: ${leadingTeam === "teamOne" ? teamOne : teamTwo}`;
 
   return (
-    <div className="flex h-full flex-col gap-3 md:gap-4">
-      <div className="rounded-[1.5rem] border border-white/10 bg-[#0b1230] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] md:rounded-[1.8rem] md:p-4">
-        <div className="text-xs text-white/50">لوحة اللعبة</div>
-        <h2 className="mt-2 text-xl font-black text-white md:text-2xl">
-          {gameName}
-        </h2>
-        <p className="mt-2 text-sm text-white/65">{leaderText}</p>
+    <>
+      <div className="grid gap-2 xl:hidden">
+        <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-3">
+          <div className="text-[11px] text-white/50">لوحة اللعبة</div>
+          <div className="mt-1 text-xl font-black text-white">{gameName}</div>
+          <div className="mt-1 text-xs text-white/60">{leaderText}</div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-[1.2rem] border border-cyan-300/15 bg-cyan-400/10 p-2.5">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
+                {teamOne}
+              </span>
+              {leadingTeam === "teamOne" ? (
+                <span className="text-[10px] text-cyan-100">متصدر</span>
+              ) : null}
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={onDecTeamOne}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-lg font-black text-cyan-100"
+              >
+                −
+              </button>
+
+              <div className="text-center">
+                <div className="text-2xl font-black text-white">
+                  {teamOneScore}
+                </div>
+                <div className="text-[10px] text-white/50">نقطة</div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onIncTeamOne}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-lg font-black text-cyan-100"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-[1.2rem] border border-orange-300/15 bg-orange-400/10 p-2.5">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="rounded-full border border-orange-300/20 bg-orange-400/10 px-2 py-0.5 text-[10px] font-bold text-orange-100">
+                {teamTwo}
+              </span>
+              {leadingTeam === "teamTwo" ? (
+                <span className="text-[10px] text-orange-100">متصدر</span>
+              ) : null}
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={onDecTeamTwo}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-orange-300/20 bg-orange-400/10 text-lg font-black text-orange-100"
+              >
+                −
+              </button>
+
+              <div className="text-center">
+                <div className="text-2xl font-black text-white">
+                  {teamTwoScore}
+                </div>
+                <div className="text-[10px] text-white/50">نقطة</div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onIncTeamTwo}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-orange-300/20 bg-orange-400/10 text-lg font-black text-orange-100"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-2.5">
+          <Link
+            href="/account"
+            className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"
+          >
+            الرجوع للحساب
+          </Link>
+        </div>
       </div>
 
-      <ScoreCard
-        teamName={teamOne}
-        score={teamOneScore}
-        isLeading={leadingTeam === "teamOne"}
-        onIncrease={onIncTeamOne}
-        onDecrease={onDecTeamOne}
-        accent="cyan"
-      />
+      <div className="hidden xl:flex xl:h-full xl:flex-col xl:gap-4">
+        <div className="rounded-[1.8rem] border border-white/10 bg-[#0b1230] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
+          <div className="text-xs text-white/50">لوحة اللعبة</div>
+          <h2 className="mt-2 text-2xl font-black text-white">{gameName}</h2>
+          <p className="mt-2 text-sm text-white/65">{leaderText}</p>
+        </div>
 
-      <ScoreCard
-        teamName={teamTwo}
-        score={teamTwoScore}
-        isLeading={leadingTeam === "teamTwo"}
-        onIncrease={onIncTeamTwo}
-        onDecrease={onDecTeamTwo}
-        accent="orange"
-      />
+        <ScoreCard
+          teamName={teamOne}
+          score={teamOneScore}
+          isLeading={leadingTeam === "teamOne"}
+          onIncrease={onIncTeamOne}
+          onDecrease={onDecTeamOne}
+          accent="cyan"
+        />
 
-      <div className="rounded-[1.4rem] border border-white/10 bg-[#0b1230] p-3 md:rounded-[1.6rem]">
-        <Link
-          href="/account"
-          className="flex w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10 md:rounded-[1.1rem]"
-        >
-          الرجوع للحساب
-        </Link>
+        <ScoreCard
+          teamName={teamTwo}
+          score={teamTwoScore}
+          isLeading={leadingTeam === "teamTwo"}
+          onIncrease={onIncTeamTwo}
+          onDecrease={onDecTeamTwo}
+          accent="orange"
+        />
+
+        <div className="rounded-[1.6rem] border border-white/10 bg-[#0b1230] p-3">
+          <Link
+            href="/account"
+            className="flex w-full items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+          >
+            الرجوع للحساب
+          </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -487,7 +586,7 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020617]/80 p-2 backdrop-blur-md md:p-4">
-      <div className="relative flex h-[96vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#071126] shadow-[0_30px_120px_rgba(0,0,0,0.55)] md:h-[92vh] md:rounded-[2rem]">
+      <div className="relative flex h-[97vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.1rem] border border-white/10 bg-[#071126] shadow-[0_30px_120px_rgba(0,0,0,0.55)] md:h-[92vh] md:rounded-[2rem]">
         <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_45%)] px-4 py-4 sm:px-6 md:px-7">
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200">
@@ -553,7 +652,7 @@ function QuestionOverlay({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 md:px-7">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 md:px-7">
           {!showAnswer && !showWinnerPicker ? (
             <div className="flex min-h-full items-center justify-center">
               <div className="w-full">
@@ -694,10 +793,9 @@ export default function GameBoardClient({
   const [modalBusy, setModalBusy] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
 
-  const [boardState, setBoardState] = useState<BoardState>(() => {
-    const normalized = normalizeBoardState(initialBoardState);
-    return normalized;
-  });
+  const [boardState, setBoardState] = useState<BoardState>(() =>
+    normalizeBoardState(initialBoardState),
+  );
 
   useEffect(() => {
     const localState = readLocalBoardState(storageKey);
@@ -869,7 +967,6 @@ export default function GameBoardClient({
       showWinnerPicker: false,
       timeLeft: QUESTION_TIMER_SECONDS,
     }));
-
     setTimerRunning(false);
   }
 
@@ -952,43 +1049,48 @@ export default function GameBoardClient({
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#03091c] text-white">
-      <div className="mx-auto max-w-[1800px] px-2 py-3 md:px-5 md:py-6">
-        <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,#071126_0%,#03081b_100%)] p-2 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:rounded-[2rem] md:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto max-w-[1800px] px-1.5 py-2 md:px-5 md:py-6">
+        <div className="overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,#071126_0%,#03081b_100%)] p-1.5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:rounded-[2rem] md:p-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 md:mb-4 md:gap-3">
             <div>
-              <div className="text-xs text-cyan-200/70">لوحة اللعب</div>
-              <h1 className="mt-1 text-xl font-black md:text-3xl">
+              <div className="text-[11px] text-cyan-200/70 md:text-xs">
+                لوحة اللعب
+              </div>
+              <h1 className="mt-1 text-lg font-black md:text-3xl">
                 {gameName}
               </h1>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-white/70 md:px-3 md:py-1.5 md:text-xs">
                 {categories.length} فئات
               </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-white/70 md:px-3 md:py-1.5 md:text-xs">
                 {questions.length} سؤال
               </span>
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="min-w-0">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="order-2 min-w-0 xl:order-1">
               <div
-                className="grid gap-2 md:gap-4"
+                className="grid gap-1.5 md:gap-4"
                 style={{
                   gridTemplateColumns: `repeat(${Math.max(categories.length, 1)}, minmax(0, 1fr))`,
                 }}
               >
                 {grouped.map((category) => (
-                  <div key={category.id} className="flex min-w-0 flex-col gap-2.5 md:gap-3">
+                  <div
+                    key={category.id}
+                    className="flex min-w-0 flex-col gap-1.5 md:gap-3"
+                  >
                     <CategoryHeader category={category} />
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5 md:gap-2">
                       {category.rows.map((row) => (
                         <div
                           key={`${category.id}-${row.points}`}
-                          className="grid gap-2"
+                          className="grid gap-1.5 md:gap-2"
                           style={{
                             gridTemplateColumns: `repeat(${Math.max(row.slots.length, 1)}, minmax(0, 1fr))`,
                           }}
@@ -1027,18 +1129,20 @@ export default function GameBoardClient({
               </div>
             </div>
 
-            <BoardSidebar
-              gameName={gameName}
-              teamOne={teamOne}
-              teamTwo={teamTwo}
-              teamOneScore={boardState.teamOneScore}
-              teamTwoScore={boardState.teamTwoScore}
-              leadingTeam={leadingTeam}
-              onIncTeamOne={() => updateScore("teamOne", 100)}
-              onDecTeamOne={() => updateScore("teamOne", -100)}
-              onIncTeamTwo={() => updateScore("teamTwo", 100)}
-              onDecTeamTwo={() => updateScore("teamTwo", -100)}
-            />
+            <div className="order-1 xl:order-2">
+              <BoardSidebar
+                gameName={gameName}
+                teamOne={teamOne}
+                teamTwo={teamTwo}
+                teamOneScore={boardState.teamOneScore}
+                teamTwoScore={boardState.teamTwoScore}
+                leadingTeam={leadingTeam}
+                onIncTeamOne={() => updateScore("teamOne", 100)}
+                onDecTeamOne={() => updateScore("teamOne", -100)}
+                onIncTeamTwo={() => updateScore("teamTwo", 100)}
+                onDecTeamTwo={() => updateScore("teamTwo", -100)}
+              />
+            </div>
           </div>
         </div>
       </div>
