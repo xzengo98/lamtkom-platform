@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Category = {
@@ -39,69 +40,48 @@ type OpenQuestion = QuestionRow & {
   slotIndex: number;
 };
 
-type QuestionSlot = {
-  question: QuestionRow | null;
-  slotIndex: number;
-  points: number;
-};
-
-type GroupedCategory = Category & {
-  rows: Array<{
-    points: number;
-    slots: QuestionSlot[];
-  }>;
-};
-
 type BoardState = {
   teamOneScore: number;
   teamTwoScore: number;
   usedQuestionIds: string[];
   openQuestionId: string | null;
-  openQuestionCategoryName: string | null;
-  openQuestionSlotIndex: number | null;
   showAnswer: boolean;
   showWinnerPicker: boolean;
   timeLeft: number;
   savedAt: number;
 };
 
-const QUESTION_TIMER_SECONDS = 30;
-const POINT_ROWS = [200, 400, 600] as const;
+type CategoryColumn = {
+  category: Category;
+  questions200: QuestionRow[];
+  questions400: QuestionRow[];
+  questions600: QuestionRow[];
+};
 
-const categoryVisuals: Record<
-  string,
-  {
-    glow: string;
-    ring: string;
-  }
-> = {
+const QUESTION_TIMER_SECONDS = 30;
+const MOBILE_BREAKPOINT = 1024;
+
+const categoryVisuals: Record<string, { gradient: string }> = {
   history: {
-    glow: "from-amber-400/30 via-orange-400/10 to-transparent",
-    ring: "hover:border-amber-300/40",
+    gradient: "from-amber-300/20 via-orange-400/10 to-transparent",
   },
   sports: {
-    glow: "from-emerald-400/30 via-green-400/10 to-transparent",
-    ring: "hover:border-emerald-300/40",
+    gradient: "from-emerald-300/20 via-green-400/10 to-transparent",
   },
   geography: {
-    glow: "from-sky-400/30 via-cyan-400/10 to-transparent",
-    ring: "hover:border-sky-300/40",
+    gradient: "from-sky-300/20 via-cyan-400/10 to-transparent",
   },
   science: {
-    glow: "from-violet-400/30 via-fuchsia-400/10 to-transparent",
-    ring: "hover:border-violet-300/40",
+    gradient: "from-violet-300/20 via-fuchsia-400/10 to-transparent",
   },
   movies: {
-    glow: "from-pink-400/30 via-rose-400/10 to-transparent",
-    ring: "hover:border-pink-300/40",
+    gradient: "from-rose-300/20 via-pink-400/10 to-transparent",
   },
   islamic: {
-    glow: "from-yellow-300/30 via-amber-400/10 to-transparent",
-    ring: "hover:border-yellow-300/40",
+    gradient: "from-yellow-300/20 via-amber-400/10 to-transparent",
   },
   default: {
-    glow: "from-slate-300/20 via-slate-400/10 to-transparent",
-    ring: "hover:border-cyan-300/30",
+    gradient: "from-slate-300/20 via-slate-400/10 to-transparent",
   },
 };
 
@@ -122,31 +102,21 @@ function normalizeBoardState(
 ): BoardState {
   return {
     teamOneScore:
-      typeof raw?.teamOneScore === "number" ? (raw.teamOneScore as number) : 0,
+      typeof raw?.teamOneScore === "number" ? raw.teamOneScore : 0,
     teamTwoScore:
-      typeof raw?.teamTwoScore === "number" ? (raw.teamTwoScore as number) : 0,
+      typeof raw?.teamTwoScore === "number" ? raw.teamTwoScore : 0,
     usedQuestionIds: Array.isArray(raw?.usedQuestionIds)
       ? raw.usedQuestionIds.map((value) => String(value))
       : [],
     openQuestionId:
-      typeof raw?.openQuestionId === "string"
-        ? (raw.openQuestionId as string)
-        : null,
-    openQuestionCategoryName:
-      typeof raw?.openQuestionCategoryName === "string"
-        ? (raw.openQuestionCategoryName as string)
-        : null,
-    openQuestionSlotIndex:
-      typeof raw?.openQuestionSlotIndex === "number"
-        ? (raw.openQuestionSlotIndex as number)
-        : null,
+      typeof raw?.openQuestionId === "string" ? raw.openQuestionId : null,
     showAnswer: Boolean(raw?.showAnswer ?? false),
     showWinnerPicker: Boolean(raw?.showWinnerPicker ?? false),
     timeLeft:
-      typeof raw?.timeLeft === "number" && (raw.timeLeft as number) >= 0
-        ? (raw.timeLeft as number)
+      typeof raw?.timeLeft === "number" && raw.timeLeft >= 0
+        ? raw.timeLeft
         : QUESTION_TIMER_SECONDS,
-    savedAt: typeof raw?.savedAt === "number" ? (raw.savedAt as number) : 0,
+    savedAt: typeof raw?.savedAt === "number" ? raw.savedAt : 0,
   };
 }
 
@@ -206,85 +176,10 @@ function RichContent({
           "[&_figure_img]:mx-auto",
           "[&_iframe]:mx-auto [&_iframe]:my-5",
           "[&_video]:mx-auto [&_video]:my-5",
-          "[&_ul]:my-4 [&_ol]:my-4",
         ].join(" ")}
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
     </div>
-  );
-}
-
-function CategoryHeader({
-  category,
-}: {
-  category: Category;
-}) {
-  const visual = getVisualBySlug(category.slug);
-
-  return (
-    <div className="relative overflow-hidden rounded-[1rem] border border-white/10 bg-[#0c1431] px-1.5 pb-2 pt-2 shadow-[0_10px_24px_rgba(0,0,0,0.22)] md:rounded-[1.6rem] md:px-3 md:pb-4 md:pt-3">
-      <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${visual.glow}`}
-      />
-      <div className="relative flex flex-col items-center gap-1.5 md:gap-3">
-        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-inner md:h-16 md:w-16 md:rounded-2xl">
-          {category.image_url ? (
-            <img
-              src={category.image_url}
-              alt={category.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="text-base text-white/60 md:text-2xl">?</span>
-          )}
-        </div>
-
-        <div className="min-h-[32px] text-center md:min-h-[52px]">
-          <h3 className="line-clamp-2 text-[11px] font-black leading-4 text-white md:text-lg md:leading-6">
-            {category.name}
-          </h3>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function QuestionCell({
-  slot,
-  isUsed,
-  onOpen,
-  accentSlug,
-}: {
-  slot: QuestionSlot;
-  isUsed: boolean;
-  onOpen?: () => void;
-  accentSlug: string;
-}) {
-  const visual = getVisualBySlug(accentSlug);
-
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      disabled={!slot.question || isUsed}
-      className={[
-        "group relative flex h-[40px] items-center justify-center overflow-hidden rounded-[0.9rem] border text-center transition-all duration-200 md:h-[74px] md:rounded-[1.25rem]",
-        slot.question && !isUsed
-          ? `border-white/10 bg-[#101b42] text-white hover:-translate-y-0.5 hover:bg-[#15245b] ${visual.ring}`
-          : "cursor-not-allowed border-white/5 bg-[#0b1230] text-slate-500",
-      ].join(" ")}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]" />
-
-      <div className="relative flex flex-col items-center">
-        <span className="text-[1.05rem] font-black leading-none tracking-tight md:text-[2.15rem]">
-          {slot.points}
-        </span>
-        <span className="mt-0.5 hidden text-[10px] text-white/40 md:block">
-          {!slot.question ? "غير متاح" : isUsed ? "تم الاستخدام" : "افتح السؤال"}
-        </span>
-      </div>
-    </button>
   );
 }
 
@@ -294,83 +189,72 @@ function ScoreCard({
   isLeading,
   onIncrease,
   onDecrease,
-  accent,
+  compact = false,
 }: {
   teamName: string;
   score: number;
   isLeading: boolean;
   onIncrease: () => void;
   onDecrease: () => void;
-  accent: "cyan" | "orange";
+  compact?: boolean;
 }) {
-  const accentClasses =
-    accent === "cyan"
-      ? {
-          chip: "bg-cyan-400/15 text-cyan-200 border-cyan-300/20",
-          box: "border-cyan-300/20 bg-cyan-400/10",
-          btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/20",
-        }
-      : {
-          chip: "bg-orange-400/15 text-orange-200 border-orange-300/20",
-          box: "border-orange-300/20 bg-orange-400/10",
-          btn: "border-orange-300/20 bg-orange-400/10 text-orange-200 hover:bg-orange-400/20",
-        };
-
   return (
     <div
       className={[
-        "rounded-[1.5rem] border bg-[#0b1230] p-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] md:rounded-[1.8rem] md:p-4",
+        "rounded-[1.5rem] border bg-[#0b1230] shadow-[0_18px_40px_rgba(0,0,0,0.28)]",
+        compact ? "p-2.5" : "p-4",
         isLeading ? "border-white/15" : "border-white/10",
       ].join(" ")}
     >
-      <div className="mb-3 flex items-center justify-between gap-3 md:mb-4">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <span
           className={[
-            "rounded-full border px-3 py-1 text-xs font-bold",
-            accentClasses.chip,
+            "rounded-full border px-2.5 py-1 font-bold",
+            compact ? "text-[10px]" : "text-xs",
+            "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
           ].join(" ")}
         >
           {teamName}
         </span>
 
         {isLeading ? (
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white/70">
             متصدر
           </span>
         ) : null}
       </div>
 
-      <div
-        className={[
-          "rounded-[1.2rem] border px-3 py-4 text-center md:rounded-[1.4rem] md:py-5",
-          accentClasses.box,
-        ].join(" ")}
-      >
-        <div className="flex items-center justify-between gap-3">
+      <div className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-3 py-3 text-center">
+        <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={onDecrease}
             className={[
-              "flex h-9 w-9 items-center justify-center rounded-full border text-xl font-black transition md:h-11 md:w-11 md:text-2xl",
-              accentClasses.btn,
+              "flex items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+              compact ? "h-8 w-8 text-lg" : "h-11 w-11 text-2xl",
             ].join(" ")}
           >
             −
           </button>
 
           <div>
-            <div className="text-3xl font-black tracking-tight text-white md:text-5xl">
+            <div
+              className={[
+                "font-black tracking-tight text-white",
+                compact ? "text-2xl" : "text-5xl",
+              ].join(" ")}
+            >
               {score}
             </div>
-            <div className="mt-1 text-xs text-white/50">نقطة</div>
+            <div className="text-[10px] text-white/50">نقطة</div>
           </div>
 
           <button
             type="button"
             onClick={onIncrease}
             className={[
-              "flex h-9 w-9 items-center justify-center rounded-full border text-xl font-black transition md:h-11 md:w-11 md:text-2xl",
-              accentClasses.btn,
+              "flex items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+              compact ? "h-8 w-8 text-lg" : "h-11 w-11 text-2xl",
             ].join(" ")}
           >
             +
@@ -381,162 +265,49 @@ function ScoreCard({
   );
 }
 
-function BoardSidebar({
-  gameName,
-  teamOne,
-  teamTwo,
-  teamOneScore,
-  teamTwoScore,
-  leadingTeam,
-  onIncTeamOne,
-  onDecTeamOne,
-  onIncTeamTwo,
-  onDecTeamTwo,
+function QuestionCell({
+  question,
+  points,
+  used,
+  onOpen,
+  mobile = false,
 }: {
-  gameName: string;
-  teamOne: string;
-  teamTwo: string;
-  teamOneScore: number;
-  teamTwoScore: number;
-  leadingTeam: "teamOne" | "teamTwo" | "tie";
-  onIncTeamOne: () => void;
-  onDecTeamOne: () => void;
-  onIncTeamTwo: () => void;
-  onDecTeamTwo: () => void;
+  question: QuestionRow | null;
+  points: number;
+  used: boolean;
+  onOpen?: () => void;
+  mobile?: boolean;
 }) {
-  const leaderText =
-    leadingTeam === "tie"
-      ? "لا يوجد متصدر"
-      : `المتصدر: ${leadingTeam === "teamOne" ? teamOne : teamTwo}`;
-
   return (
-    <>
-      <div className="grid gap-2 xl:hidden">
-        <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-3">
-          <div className="text-[11px] text-white/50">لوحة اللعبة</div>
-          <div className="mt-1 text-xl font-black text-white">{gameName}</div>
-          <div className="mt-1 text-xs text-white/60">{leaderText}</div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-[1.2rem] border border-cyan-300/15 bg-cyan-400/10 p-2.5">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-100">
-                {teamOne}
-              </span>
-              {leadingTeam === "teamOne" ? (
-                <span className="text-[10px] text-cyan-100">متصدر</span>
-              ) : null}
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={onDecTeamOne}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-lg font-black text-cyan-100"
-              >
-                −
-              </button>
-
-              <div className="text-center">
-                <div className="text-2xl font-black text-white">
-                  {teamOneScore}
-                </div>
-                <div className="text-[10px] text-white/50">نقطة</div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onIncTeamOne}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-lg font-black text-cyan-100"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="rounded-[1.2rem] border border-orange-300/15 bg-orange-400/10 p-2.5">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="rounded-full border border-orange-300/20 bg-orange-400/10 px-2 py-0.5 text-[10px] font-bold text-orange-100">
-                {teamTwo}
-              </span>
-              {leadingTeam === "teamTwo" ? (
-                <span className="text-[10px] text-orange-100">متصدر</span>
-              ) : null}
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={onDecTeamTwo}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-orange-300/20 bg-orange-400/10 text-lg font-black text-orange-100"
-              >
-                −
-              </button>
-
-              <div className="text-center">
-                <div className="text-2xl font-black text-white">
-                  {teamTwoScore}
-                </div>
-                <div className="text-[10px] text-white/50">نقطة</div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onIncTeamTwo}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-orange-300/20 bg-orange-400/10 text-lg font-black text-orange-100"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-2.5">
-          <Link
-            href="/account"
-            className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"
-          >
-            الرجوع للحساب
-          </Link>
-        </div>
+    <button
+      type="button"
+      onClick={onOpen}
+      disabled={!question || used}
+      className={[
+        "group relative flex items-center justify-center overflow-hidden rounded-[1rem] border text-center transition-all duration-200",
+        mobile ? "h-[42px]" : "h-[88px]",
+        question && !used
+          ? "border-white/10 bg-white/5 text-white hover:border-cyan-300/40 hover:bg-cyan-400/10"
+          : "cursor-not-allowed border-white/5 bg-slate-900/50 text-slate-500",
+      ].join(" ")}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]" />
+      <div className="relative flex flex-col items-center">
+        <span
+          className={[
+            "font-black leading-none tracking-tight",
+            mobile ? "text-[1rem]" : "text-[2.15rem]",
+          ].join(" ")}
+        >
+          {points}
+        </span>
+        {!mobile ? (
+          <span className="mt-1 text-[10px] text-white/40">
+            {question ? (used ? "تم الاستخدام" : "افتح السؤال") : "غير متاح"}
+          </span>
+        ) : null}
       </div>
-
-      <div className="hidden xl:flex xl:h-full xl:flex-col xl:gap-4">
-        <div className="rounded-[1.8rem] border border-white/10 bg-[#0b1230] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
-          <div className="text-xs text-white/50">لوحة اللعبة</div>
-          <h2 className="mt-2 text-2xl font-black text-white">{gameName}</h2>
-          <p className="mt-2 text-sm text-white/65">{leaderText}</p>
-        </div>
-
-        <ScoreCard
-          teamName={teamOne}
-          score={teamOneScore}
-          isLeading={leadingTeam === "teamOne"}
-          onIncrease={onIncTeamOne}
-          onDecrease={onDecTeamOne}
-          accent="cyan"
-        />
-
-        <ScoreCard
-          teamName={teamTwo}
-          score={teamTwoScore}
-          isLeading={leadingTeam === "teamTwo"}
-          onIncrease={onIncTeamTwo}
-          onDecrease={onDecTeamTwo}
-          accent="orange"
-        />
-
-        <div className="rounded-[1.6rem] border border-white/10 bg-[#0b1230] p-3">
-          <Link
-            href="/account"
-            className="flex w-full items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-          >
-            الرجوع للحساب
-          </Link>
-        </div>
-      </div>
-    </>
+    </button>
   );
 }
 
@@ -648,7 +419,11 @@ function QuestionOverlay({
                   </button>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="text-sm text-white/60">
+                {showWinnerPicker ? "تحديد الفريق الفائز" : "عرض الإجابة"}
+              </div>
+            )}
           </div>
         </div>
 
@@ -678,7 +453,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.5rem] border border-cyan-300/20 bg-cyan-500/15 px-5 py-8 text-2xl font-black text-cyan-100 transition hover:bg-cyan-500/25 disabled:opacity-50"
+                  className="rounded-[1.5rem] bg-rose-600 px-5 py-6 text-xl font-black text-white transition hover:bg-rose-500 disabled:opacity-50 sm:text-2xl"
                 >
                   {teamOne}
                 </button>
@@ -687,7 +462,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.5rem] border border-orange-300/20 bg-orange-500/15 px-5 py-8 text-2xl font-black text-orange-100 transition hover:bg-orange-500/25 disabled:opacity-50"
+                  className="rounded-[1.5rem] bg-cyan-600 px-5 py-6 text-xl font-black text-white transition hover:bg-cyan-500 disabled:opacity-50 sm:text-2xl"
                 >
                   {teamTwo}
                 </button>
@@ -697,7 +472,7 @@ function QuestionOverlay({
                 type="button"
                 onClick={() => onAwardPoints("none")}
                 disabled={modalBusy}
-                className="mx-auto mt-4 block w-full max-w-md rounded-[1.4rem] border border-white/10 bg-white/5 px-5 py-5 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
+                className="mt-3 w-full rounded-[1.5rem] bg-slate-600 px-5 py-5 text-lg font-black text-white transition hover:bg-slate-500 disabled:opacity-50 sm:max-w-md sm:text-xl"
               >
                 ولا أحد
               </button>
@@ -786,12 +561,15 @@ export default function GameBoardClient({
   categories,
   questions,
 }: Props) {
+  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const storageKey = `lammatna-board-${sessionId}`;
   const saveTimeoutRef = useRef<number | null>(null);
 
   const [modalBusy, setModalBusy] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isRedirectingToResult, setIsRedirectingToResult] = useState(false);
 
   const [boardState, setBoardState] = useState<BoardState>(() =>
     normalizeBoardState(initialBoardState),
@@ -807,38 +585,37 @@ export default function GameBoardClient({
     setBoardState(normalizeBoardState(initialBoardState));
   }, [initialBoardState, storageKey]);
 
-  const grouped = useMemo<GroupedCategory[]>(() => {
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
+  const grouped = useMemo<CategoryColumn[]>(() => {
     return categories.map((category) => {
       const categoryQuestions = questions
-        .filter((question) => question.category_id === category.id)
+        .filter(
+          (question) => question.category_id === category.id && question.is_active,
+        )
         .sort((a, b) => a.points - b.points);
 
-      const rows = POINT_ROWS.map((pointsValue) => {
-        const samePoints = categoryQuestions.filter(
-          (question) => question.points === pointsValue,
-        );
-
-        const slots: QuestionSlot[] =
-          samePoints.length > 0
-            ? samePoints.map((question, index) => ({
-                question,
-                slotIndex: index,
-                points: pointsValue,
-              }))
-            : [{ question: null, slotIndex: 0, points: pointsValue }];
-
-        return {
-          points: pointsValue,
-          slots,
-        };
-      });
-
       return {
-        ...category,
-        rows,
+        category,
+        questions200: categoryQuestions.filter((q) => q.points === 200),
+        questions400: categoryQuestions.filter((q) => q.points === 400),
+        questions600: categoryQuestions.filter((q) => q.points === 600),
       };
     });
   }, [categories, questions]);
+
+  const totalPlayableQuestions = useMemo(
+    () => questions.filter((question) => question.is_active).length,
+    [questions],
+  );
 
   const openQuestion = useMemo<OpenQuestion | null>(() => {
     if (!boardState.openQuestionId) return null;
@@ -849,17 +626,14 @@ export default function GameBoardClient({
 
     if (!found) return null;
 
+    const category = categories.find((item) => item.id === found.category_id);
+
     return {
       ...found,
-      categoryName: boardState.openQuestionCategoryName ?? "السؤال",
-      slotIndex: boardState.openQuestionSlotIndex ?? 0,
+      categoryName: category?.name ?? "السؤال",
+      slotIndex: 0,
     };
-  }, [
-    boardState.openQuestionCategoryName,
-    boardState.openQuestionId,
-    boardState.openQuestionSlotIndex,
-    questions,
-  ]);
+  }, [boardState.openQuestionId, questions, categories]);
 
   const leadingTeam = useMemo<"teamOne" | "teamTwo" | "tie">(() => {
     if (boardState.teamOneScore > boardState.teamTwoScore) return "teamOne";
@@ -922,6 +696,36 @@ export default function GameBoardClient({
     }
   }, [openQuestion]);
 
+  useEffect(() => {
+    if (isRedirectingToResult) return;
+    if (totalPlayableQuestions === 0) return;
+    if (boardState.usedQuestionIds.length < totalPlayableQuestions) return;
+
+    setIsRedirectingToResult(true);
+
+    const params = new URLSearchParams({
+      sessionId,
+      gameName,
+      teamOne,
+      teamTwo,
+      teamOneScore: String(boardState.teamOneScore),
+      teamTwoScore: String(boardState.teamTwoScore),
+    });
+
+    router.push(`/game/result?${params.toString()}`);
+  }, [
+    boardState.teamOneScore,
+    boardState.teamTwoScore,
+    boardState.usedQuestionIds.length,
+    gameName,
+    isRedirectingToResult,
+    router,
+    sessionId,
+    teamOne,
+    teamTwo,
+    totalPlayableQuestions,
+  ]);
+
   function updateScore(team: "teamOne" | "teamTwo", delta: number) {
     setBoardState((prev) => {
       const nextValue =
@@ -937,18 +741,12 @@ export default function GameBoardClient({
     });
   }
 
-  function openSlotQuestion(
-    question: QuestionRow,
-    categoryName: string,
-    slotIndex: number,
-  ) {
+  function openSlotQuestion(question: QuestionRow) {
     if (boardState.usedQuestionIds.includes(question.id)) return;
 
     setBoardState((prev) => ({
       ...prev,
       openQuestionId: question.id,
-      openQuestionCategoryName: categoryName,
-      openQuestionSlotIndex: slotIndex,
       showAnswer: false,
       showWinnerPicker: false,
       timeLeft: QUESTION_TIMER_SECONDS,
@@ -961,8 +759,6 @@ export default function GameBoardClient({
     setBoardState((prev) => ({
       ...prev,
       openQuestionId: null,
-      openQuestionCategoryName: null,
-      openQuestionSlotIndex: null,
       showAnswer: false,
       showWinnerPicker: false,
       timeLeft: QUESTION_TIMER_SECONDS,
@@ -1033,8 +829,6 @@ export default function GameBoardClient({
               ? prev.teamTwoScore + openQuestion.points
               : prev.teamTwoScore,
           openQuestionId: null,
-          openQuestionCategoryName: null,
-          openQuestionSlotIndex: null,
           showAnswer: false,
           showWinnerPicker: false,
           timeLeft: QUESTION_TIMER_SECONDS,
@@ -1049,8 +843,8 @@ export default function GameBoardClient({
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#03091c] text-white">
-      <div className="mx-auto max-w-[1800px] px-1.5 py-2 md:px-5 md:py-6">
-        <div className="overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,#071126_0%,#03081b_100%)] p-1.5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:rounded-[2rem] md:p-5">
+      <div className="mx-auto max-w-[1800px] px-2 py-3 md:px-5 md:py-6">
+        <div className="overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,#071126_0%,#03081b_100%)] p-2 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:rounded-[2rem] md:p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2 md:mb-4 md:gap-3">
             <div>
               <div className="text-[11px] text-cyan-200/70 md:text-xs">
@@ -1066,82 +860,216 @@ export default function GameBoardClient({
                 {categories.length} فئات
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-white/70 md:px-3 md:py-1.5 md:text-xs">
-                {questions.length} سؤال
+                {totalPlayableQuestions} سؤال
               </span>
             </div>
           </div>
 
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="order-2 min-w-0 xl:order-1">
-              <div
-                className="grid gap-1.5 md:gap-4"
-                style={{
-                  gridTemplateColumns: `repeat(${Math.max(categories.length, 1)}, minmax(0, 1fr))`,
-                }}
-              >
-                {grouped.map((category) => (
-                  <div
-                    key={category.id}
-                    className="flex min-w-0 flex-col gap-1.5 md:gap-3"
-                  >
-                    <CategoryHeader category={category} />
-
-                    <div className="flex flex-col gap-1.5 md:gap-2">
-                      {category.rows.map((row) => (
-                        <div
-                          key={`${category.id}-${row.points}`}
-                          className="grid gap-1.5 md:gap-2"
-                          style={{
-                            gridTemplateColumns: `repeat(${Math.max(row.slots.length, 1)}, minmax(0, 1fr))`,
-                          }}
-                        >
-                          {row.slots.map((slot) => {
-                            const isUsed = !slot.question
-                              ? true
-                              : boardState.usedQuestionIds.includes(
-                                  slot.question.id,
-                                );
-
-                            return (
-                              <QuestionCell
-                                key={`${category.id}-${row.points}-${slot.slotIndex}-${slot.question?.id ?? "empty"}`}
-                                slot={slot}
-                                isUsed={isUsed}
-                                accentSlug={category.slug}
-                                onOpen={
-                                  slot.question && !isUsed
-                                    ? () =>
-                                        openSlotQuestion(
-                                          slot.question as QuestionRow,
-                                          category.name,
-                                          slot.slotIndex,
-                                        )
-                                    : undefined
-                                }
-                              />
-                            );
-                          })}
-                        </div>
-                      ))}
+          <div className="grid gap-3 xl:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="order-1">
+              {isMobile ? (
+                <div className="space-y-2">
+                  <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-3">
+                    <div className="text-[11px] text-white/50">لوحة اللعبة</div>
+                    <div className="mt-1 text-xl font-black text-white">
+                      {gameName}
+                    </div>
+                    <div className="mt-1 text-xs text-white/60">
+                      {leadingTeam === "tie"
+                        ? "لا يوجد متصدر"
+                        : `المتصدر: ${leadingTeam === "teamOne" ? teamOne : teamTwo}`}
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <ScoreCard
+                      teamName={teamOne}
+                      score={boardState.teamOneScore}
+                      isLeading={leadingTeam === "teamOne"}
+                      onIncrease={() => updateScore("teamOne", 100)}
+                      onDecrease={() => updateScore("teamOne", -100)}
+                      compact
+                    />
+                    <ScoreCard
+                      teamName={teamTwo}
+                      score={boardState.teamTwoScore}
+                      isLeading={leadingTeam === "teamTwo"}
+                      onIncrease={() => updateScore("teamTwo", 100)}
+                      onDecrease={() => updateScore("teamTwo", -100)}
+                      compact
+                    />
+                  </div>
+
+                  <div className="rounded-[1.2rem] border border-white/10 bg-[#0b1230] p-2.5">
+                    <Link
+                      href="/account"
+                      className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"
+                    >
+                      الرجوع للحساب
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-[1.8rem] border border-white/10 bg-[#0b1230] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
+                    <div className="text-xs text-white/50">لوحة اللعبة</div>
+                    <h2 className="mt-2 text-2xl font-black text-white">
+                      {gameName}
+                    </h2>
+                    <p className="mt-2 text-sm text-white/65">
+                      {leadingTeam === "tie"
+                        ? "لا يوجد متصدر حاليًا"
+                        : `المتصدر الآن: ${leadingTeam === "teamOne" ? teamOne : teamTwo}`}
+                    </p>
+                  </div>
+
+                  <ScoreCard
+                    teamName={teamOne}
+                    score={boardState.teamOneScore}
+                    isLeading={leadingTeam === "teamOne"}
+                    onIncrease={() => updateScore("teamOne", 100)}
+                    onDecrease={() => updateScore("teamOne", -100)}
+                  />
+
+                  <ScoreCard
+                    teamName={teamTwo}
+                    score={boardState.teamTwoScore}
+                    isLeading={leadingTeam === "teamTwo"}
+                    onIncrease={() => updateScore("teamTwo", 100)}
+                    onDecrease={() => updateScore("teamTwo", -100)}
+                  />
+
+                  <div className="rounded-[1.6rem] border border-white/10 bg-[#0b1230] p-3">
+                    <Link
+                      href="/account"
+                      className="flex w-full items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+                    >
+                      الرجوع للحساب
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="order-1 xl:order-2">
-              <BoardSidebar
-                gameName={gameName}
-                teamOne={teamOne}
-                teamTwo={teamTwo}
-                teamOneScore={boardState.teamOneScore}
-                teamTwoScore={boardState.teamTwoScore}
-                leadingTeam={leadingTeam}
-                onIncTeamOne={() => updateScore("teamOne", 100)}
-                onDecTeamOne={() => updateScore("teamOne", -100)}
-                onIncTeamTwo={() => updateScore("teamTwo", 100)}
-                onDecTeamTwo={() => updateScore("teamTwo", -100)}
-              />
+            <div className="order-2 min-w-0">
+              <div
+                className="grid gap-2 md:gap-4"
+                style={{
+                  gridTemplateColumns: `repeat(${Math.max(grouped.length, 1)}, minmax(0, 1fr))`,
+                }}
+              >
+                {grouped.map((column) => {
+                  const visual = getVisualBySlug(column.category.slug);
+
+                  return (
+                    <div
+                      key={column.category.id}
+                      className="flex min-w-0 flex-col gap-1.5 md:gap-3"
+                    >
+                      <div className="relative overflow-hidden rounded-[1rem] border border-white/10 bg-[#0c1431] px-1.5 pb-2 pt-2 shadow-[0_10px_24px_rgba(0,0,0,0.22)] md:rounded-[1.6rem] md:px-3 md:pb-4 md:pt-3">
+                        <div
+                          className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${visual.gradient}`}
+                        />
+                        <div className="relative flex flex-col items-center gap-1.5 md:gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-inner md:h-16 md:w-16 md:rounded-2xl">
+                            {column.category.image_url ? (
+                              <img
+                                src={column.category.image_url}
+                                alt={column.category.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-base text-white/60 md:text-2xl">
+                                ?
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="min-h-[32px] text-center md:min-h-[52px]">
+                            <h3 className="line-clamp-2 text-[11px] font-black leading-4 text-white md:text-lg md:leading-6">
+                              {column.category.name}
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-1.5 md:gap-3">
+                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions200.length, 1)}, minmax(0, 1fr))` }}>
+                          {(column.questions200.length
+                            ? column.questions200
+                            : [null]
+                          ).map((question, index) => (
+                            <QuestionCell
+                              key={`200-${column.category.id}-${question?.id ?? index}`}
+                              question={question}
+                              points={200}
+                              used={
+                                question
+                                  ? boardState.usedQuestionIds.includes(question.id)
+                                  : true
+                              }
+                              onOpen={
+                                question
+                                  ? () => openSlotQuestion(question)
+                                  : undefined
+                              }
+                              mobile={isMobile}
+                            />
+                          ))}
+                        </div>
+
+                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions400.length, 1)}, minmax(0, 1fr))` }}>
+                          {(column.questions400.length
+                            ? column.questions400
+                            : [null]
+                          ).map((question, index) => (
+                            <QuestionCell
+                              key={`400-${column.category.id}-${question?.id ?? index}`}
+                              question={question}
+                              points={400}
+                              used={
+                                question
+                                  ? boardState.usedQuestionIds.includes(question.id)
+                                  : true
+                              }
+                              onOpen={
+                                question
+                                  ? () => openSlotQuestion(question)
+                                  : undefined
+                              }
+                              mobile={isMobile}
+                            />
+                          ))}
+                        </div>
+
+                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions600.length, 1)}, minmax(0, 1fr))` }}>
+                          {(column.questions600.length
+                            ? column.questions600
+                            : [null]
+                          ).map((question, index) => (
+                            <QuestionCell
+                              key={`600-${column.category.id}-${question?.id ?? index}`}
+                              question={question}
+                              points={600}
+                              used={
+                                question
+                                  ? boardState.usedQuestionIds.includes(question.id)
+                                  : true
+                              }
+                              onOpen={
+                                question
+                                  ? () => openSlotQuestion(question)
+                                  : undefined
+                              }
+                              mobile={isMobile}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
