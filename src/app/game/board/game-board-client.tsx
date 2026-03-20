@@ -37,7 +37,6 @@ type Props = {
 
 type OpenQuestion = QuestionRow & {
   categoryName: string;
-  slotIndex: number;
 };
 
 type BoardState = {
@@ -53,9 +52,10 @@ type BoardState = {
 
 type CategoryColumn = {
   category: Category;
-  questions200: QuestionRow[];
-  questions400: QuestionRow[];
-  questions600: QuestionRow[];
+  rows: {
+    points: 200 | 400 | 600;
+    questions: QuestionRow[];
+  }[];
 };
 
 const QUESTION_TIMER_SECONDS = 30;
@@ -159,23 +159,23 @@ function RichContent({
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <div
         className={[
           "prose prose-invert max-w-none text-center",
           "prose-headings:text-white prose-p:text-white/90 prose-strong:text-white prose-li:text-white/85 prose-blockquote:text-white/80",
           "prose-p:text-center prose-headings:text-center prose-figcaption:text-center",
           large ? "prose-base md:prose-xl" : "prose-sm md:prose-lg",
-          "[&_p]:my-4 md:[&_p]:my-5",
-          "[&_h1]:mb-5 [&_h2]:mb-5 [&_h3]:mb-4",
+          "[&_p]:my-2 sm:[&_p]:my-3 md:[&_p]:my-4",
+          "[&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-3",
           "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full",
-          "[&_img]:max-h-[180px] md:[&_img]:max-h-[320px]",
+          "[&_img]:max-h-[18vh] sm:[&_img]:max-h-[22vh] md:[&_img]:max-h-[34vh]",
           "[&_img]:object-contain [&_img]:rounded-2xl",
-          "[&_img]:my-5 md:[&_img]:my-7",
-          "[&_figure]:mx-auto [&_figure]:my-5 md:[&_figure]:my-7 [&_figure]:text-center",
+          "[&_img]:my-3 md:[&_img]:my-5",
+          "[&_figure]:mx-auto [&_figure]:my-3 md:[&_figure]:my-5 [&_figure]:text-center",
           "[&_figure_img]:mx-auto",
-          "[&_iframe]:mx-auto [&_iframe]:my-5",
-          "[&_video]:mx-auto [&_video]:my-5",
+          "[&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:max-h-[20vh] [&_iframe]:w-full",
+          "[&_video]:mx-auto [&_video]:my-3 [&_video]:max-h-[20vh]",
         ].join(" ")}
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
@@ -190,6 +190,7 @@ function ScoreCard({
   onIncrease,
   onDecrease,
   compact = false,
+  accent = "cyan",
 }: {
   teamName: string;
   score: number;
@@ -197,7 +198,21 @@ function ScoreCard({
   onIncrease: () => void;
   onDecrease: () => void;
   compact?: boolean;
+  accent?: "cyan" | "orange";
 }) {
+  const classes =
+    accent === "orange"
+      ? {
+          chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
+          box: "border-orange-300/20 bg-orange-400/10",
+          btn: "border-orange-300/20 bg-orange-400/10 text-orange-100",
+        }
+      : {
+          chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+          box: "border-cyan-300/20 bg-cyan-400/10",
+          btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+        };
+
   return (
     <div
       className={[
@@ -211,7 +226,7 @@ function ScoreCard({
           className={[
             "rounded-full border px-2.5 py-1 font-bold",
             compact ? "text-[10px]" : "text-xs",
-            "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+            classes.chip,
           ].join(" ")}
         >
           {teamName}
@@ -224,13 +239,19 @@ function ScoreCard({
         ) : null}
       </div>
 
-      <div className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-3 py-3 text-center">
+      <div
+        className={[
+          "rounded-[1.2rem] border px-3 py-3 text-center",
+          classes.box,
+        ].join(" ")}
+      >
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={onDecrease}
             className={[
-              "flex items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+              "flex items-center justify-center rounded-full border",
+              classes.btn,
               compact ? "h-8 w-8 text-lg" : "h-11 w-11 text-2xl",
             ].join(" ")}
           >
@@ -253,7 +274,8 @@ function ScoreCard({
             type="button"
             onClick={onIncrease}
             className={[
-              "flex items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+              "flex items-center justify-center rounded-full border",
+              classes.btn,
               compact ? "h-8 w-8 text-lg" : "h-11 w-11 text-2xl",
             ].join(" ")}
           >
@@ -356,27 +378,29 @@ function QuestionOverlay({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020617]/80 p-2 backdrop-blur-md md:p-4">
-      <div className="relative flex h-[97vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.1rem] border border-white/10 bg-[#071126] shadow-[0_30px_120px_rgba(0,0,0,0.55)] md:h-[92vh] md:rounded-[2rem]">
-        <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_45%)] px-4 py-4 sm:px-6 md:px-7">
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200">
-              {openQuestion.categoryName}
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-white/80">
-              {openQuestion.points} نقطة
-            </span>
-            {toleranceVisible ? (
-              <span className="rounded-full border border-yellow-300/20 bg-yellow-400/10 px-3 py-1 text-xs font-bold text-yellow-200">
-                السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                {openQuestion.year_tolerance_after ?? 0}
+    <div className="fixed inset-0 z-50 bg-[#020617]/88 backdrop-blur-md">
+      <div className="mx-auto flex h-[100dvh] w-full max-w-5xl flex-col overflow-hidden border-x border-white/10 bg-[#071126] md:h-[100dvh]">
+        <div className="shrink-0 border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_45%)] px-3 py-2.5 sm:px-5 md:px-7 md:py-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-bold text-cyan-200 sm:text-xs">
+                {openQuestion.categoryName}
               </span>
-            ) : null}
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold text-white/80 sm:text-xs">
+                {openQuestion.points} نقطة
+              </span>
+              {toleranceVisible ? (
+                <span className="rounded-full border border-yellow-300/20 bg-yellow-400/10 px-3 py-1 text-[11px] font-bold text-yellow-200 sm:text-xs">
+                  السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                  {openQuestion.year_tolerance_after ?? 0}
+                </span>
+              ) : null}
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="text-center lg:text-right">
-              <h2 className="text-2xl font-black text-white sm:text-3xl">
+          <div className="grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
+            <div className="text-center md:text-right">
+              <h2 className="text-2xl font-black text-white sm:text-4xl md:text-5xl">
                 {!showAnswer && !showWinnerPicker
                   ? "السؤال"
                   : showAnswer && !showWinnerPicker
@@ -386,8 +410,8 @@ function QuestionOverlay({
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="w-full max-w-sm lg:min-w-[240px]">
-                <div className="mb-2 flex items-center justify-between text-sm text-white/70">
+              <div className="w-full md:w-[360px]">
+                <div className="mb-1 flex items-center justify-between text-[11px] text-white/70 sm:text-sm">
                   <span>المؤقت</span>
                   <span className="font-black text-white">
                     {formatCountdown(timeLeft)}
@@ -401,11 +425,11 @@ function QuestionOverlay({
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex gap-2">
                   <button
                     type="button"
                     onClick={onToggleTimer}
-                    className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-100 transition hover:bg-cyan-400/20"
+                    className="flex-1 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-xs font-bold text-cyan-100 transition hover:bg-cyan-400/20 sm:text-sm"
                   >
                     {timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
                   </button>
@@ -413,47 +437,47 @@ function QuestionOverlay({
                   <button
                     type="button"
                     onClick={onResetTimer}
-                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/10"
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/10 sm:text-sm"
                   >
                     إعادة المؤقت
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-white/60">
-                {showWinnerPicker ? "تحديد الفريق الفائز" : "عرض الإجابة"}
+              <div className="text-center text-xs text-white/60 md:text-sm">
+                {showWinnerPicker ? "حدد الفريق الفائز" : "عرض الإجابة"}
               </div>
             )}
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 md:px-7">
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-3 py-2 sm:px-5 md:px-7">
           {!showAnswer && !showWinnerPicker ? (
-            <div className="flex min-h-full items-center justify-center">
-              <div className="w-full">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden">
+              <div className="max-h-full w-full overflow-hidden">
                 <RichContent html={openQuestion.question_text} large />
               </div>
             </div>
           ) : showAnswer && !showWinnerPicker ? (
-            <div className="flex min-h-full items-center justify-center">
-              <div className="w-full">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden">
+              <div className="max-h-full w-full overflow-hidden">
                 <RichContent html={openQuestion.answer_text} large />
               </div>
             </div>
           ) : (
-            <div className="py-4">
-              <div className="mb-6 text-center">
+            <div className="w-full max-w-2xl py-2">
+              <div className="mb-4 text-center">
                 <h3 className="text-2xl font-black text-white sm:text-3xl">
                   أي فريق جاوب صح؟
                 </h3>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.5rem] bg-rose-600 px-5 py-6 text-xl font-black text-white transition hover:bg-rose-500 disabled:opacity-50 sm:text-2xl"
+                  className="rounded-[1.3rem] bg-rose-600 px-5 py-5 text-xl font-black text-white transition hover:bg-rose-500 disabled:opacity-50"
                 >
                   {teamOne}
                 </button>
@@ -462,7 +486,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.5rem] bg-cyan-600 px-5 py-6 text-xl font-black text-white transition hover:bg-cyan-500 disabled:opacity-50 sm:text-2xl"
+                  className="rounded-[1.3rem] bg-cyan-600 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-500 disabled:opacity-50"
                 >
                   {teamTwo}
                 </button>
@@ -472,7 +496,7 @@ function QuestionOverlay({
                 type="button"
                 onClick={() => onAwardPoints("none")}
                 disabled={modalBusy}
-                className="mt-3 w-full rounded-[1.5rem] bg-slate-600 px-5 py-5 text-lg font-black text-white transition hover:bg-slate-500 disabled:opacity-50 sm:max-w-md sm:text-xl"
+                className="mx-auto mt-3 block w-full max-w-md rounded-[1.3rem] bg-slate-600 px-5 py-4 text-lg font-black text-white transition hover:bg-slate-500 disabled:opacity-50"
               >
                 ولا أحد
               </button>
@@ -480,17 +504,9 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-white/5 px-4 py-4 sm:px-6 md:px-7">
+        <div className="shrink-0 border-t border-white/10 bg-white/5 px-3 py-3 sm:px-5 md:px-7">
           {!showAnswer && !showWinnerPicker ? (
-            <>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                إغلاق
-              </button>
-
+            <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={onRevealAnswer}
@@ -498,18 +514,34 @@ function QuestionOverlay({
               >
                 إظهار الإجابة
               </button>
-            </>
-          ) : showAnswer && !showWinnerPicker ? (
-            <>
+
               <button
                 type="button"
-                onClick={onBackToQuestion}
+                onClick={onClose}
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
               >
-                ارجع للسؤال
+                إغلاق
+              </button>
+            </div>
+          ) : showAnswer && !showWinnerPicker ? (
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={onGoToWinnerPicker}
+                className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-2.5 text-sm font-bold text-emerald-100 transition hover:bg-emerald-400/20"
+              >
+                أي فريق؟
               </button>
 
               <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onBackToQuestion}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  ارجع للسؤال
+                </button>
+
                 <button
                   type="button"
                   onClick={onClose}
@@ -517,18 +549,10 @@ function QuestionOverlay({
                 >
                   إغلاق
                 </button>
-
-                <button
-                  type="button"
-                  onClick={onGoToWinnerPicker}
-                  className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-2.5 text-sm font-bold text-emerald-100 transition hover:bg-emerald-400/20"
-                >
-                  أي فريق؟
-                </button>
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={onBackToAnswer}
@@ -544,7 +568,7 @@ function QuestionOverlay({
               >
                 إغلاق
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -605,9 +629,20 @@ export default function GameBoardClient({
 
       return {
         category,
-        questions200: categoryQuestions.filter((q) => q.points === 200),
-        questions400: categoryQuestions.filter((q) => q.points === 400),
-        questions600: categoryQuestions.filter((q) => q.points === 600),
+        rows: [
+          {
+            points: 200,
+            questions: categoryQuestions.filter((q) => q.points === 200),
+          },
+          {
+            points: 400,
+            questions: categoryQuestions.filter((q) => q.points === 400),
+          },
+          {
+            points: 600,
+            questions: categoryQuestions.filter((q) => q.points === 600),
+          },
+        ],
       };
     });
   }, [categories, questions]);
@@ -631,7 +666,6 @@ export default function GameBoardClient({
     return {
       ...found,
       categoryName: category?.name ?? "السؤال",
-      slotIndex: 0,
     };
   }, [boardState.openQuestionId, questions, categories]);
 
@@ -889,6 +923,7 @@ export default function GameBoardClient({
                       onIncrease={() => updateScore("teamOne", 100)}
                       onDecrease={() => updateScore("teamOne", -100)}
                       compact
+                      accent="cyan"
                     />
                     <ScoreCard
                       teamName={teamTwo}
@@ -897,6 +932,7 @@ export default function GameBoardClient({
                       onIncrease={() => updateScore("teamTwo", 100)}
                       onDecrease={() => updateScore("teamTwo", -100)}
                       compact
+                      accent="orange"
                     />
                   </div>
 
@@ -929,6 +965,7 @@ export default function GameBoardClient({
                     isLeading={leadingTeam === "teamOne"}
                     onIncrease={() => updateScore("teamOne", 100)}
                     onDecrease={() => updateScore("teamOne", -100)}
+                    accent="cyan"
                   />
 
                   <ScoreCard
@@ -937,6 +974,7 @@ export default function GameBoardClient({
                     isLeading={leadingTeam === "teamTwo"}
                     onIncrease={() => updateScore("teamTwo", 100)}
                     onDecrease={() => updateScore("teamTwo", -100)}
+                    accent="orange"
                   />
 
                   <div className="rounded-[1.6rem] border border-white/10 bg-[#0b1230] p-3">
@@ -994,77 +1032,38 @@ export default function GameBoardClient({
                       </div>
 
                       <div className="grid gap-1.5 md:gap-3">
-                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions200.length, 1)}, minmax(0, 1fr))` }}>
-                          {(column.questions200.length
-                            ? column.questions200
-                            : [null]
-                          ).map((question, index) => (
-                            <QuestionCell
-                              key={`200-${column.category.id}-${question?.id ?? index}`}
-                              question={question}
-                              points={200}
-                              used={
-                                question
-                                  ? boardState.usedQuestionIds.includes(question.id)
-                                  : true
-                              }
-                              onOpen={
-                                question
-                                  ? () => openSlotQuestion(question)
-                                  : undefined
-                              }
-                              mobile={isMobile}
-                            />
-                          ))}
-                        </div>
-
-                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions400.length, 1)}, minmax(0, 1fr))` }}>
-                          {(column.questions400.length
-                            ? column.questions400
-                            : [null]
-                          ).map((question, index) => (
-                            <QuestionCell
-                              key={`400-${column.category.id}-${question?.id ?? index}`}
-                              question={question}
-                              points={400}
-                              used={
-                                question
-                                  ? boardState.usedQuestionIds.includes(question.id)
-                                  : true
-                              }
-                              onOpen={
-                                question
-                                  ? () => openSlotQuestion(question)
-                                  : undefined
-                              }
-                              mobile={isMobile}
-                            />
-                          ))}
-                        </div>
-
-                        <div className="grid gap-1.5 md:gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(column.questions600.length, 1)}, minmax(0, 1fr))` }}>
-                          {(column.questions600.length
-                            ? column.questions600
-                            : [null]
-                          ).map((question, index) => (
-                            <QuestionCell
-                              key={`600-${column.category.id}-${question?.id ?? index}`}
-                              question={question}
-                              points={600}
-                              used={
-                                question
-                                  ? boardState.usedQuestionIds.includes(question.id)
-                                  : true
-                              }
-                              onOpen={
-                                question
-                                  ? () => openSlotQuestion(question)
-                                  : undefined
-                              }
-                              mobile={isMobile}
-                            />
-                          ))}
-                        </div>
+                        {column.rows.map((row) => (
+                          <div
+                            key={`${column.category.id}-${row.points}`}
+                            className="grid gap-1.5 md:gap-2"
+                            style={{
+                              gridTemplateColumns: `repeat(${Math.max(row.questions.length, 1)}, minmax(0, 1fr))`,
+                            }}
+                          >
+                            {(row.questions.length ? row.questions : [null]).map(
+                              (question, index) => (
+                                <QuestionCell
+                                  key={`${row.points}-${column.category.id}-${question?.id ?? index}`}
+                                  question={question}
+                                  points={row.points}
+                                  used={
+                                    question
+                                      ? boardState.usedQuestionIds.includes(
+                                          question.id,
+                                        )
+                                      : true
+                                  }
+                                  onOpen={
+                                    question
+                                      ? () => openSlotQuestion(question)
+                                      : undefined
+                                  }
+                                  mobile={isMobile}
+                                />
+                              ),
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );
