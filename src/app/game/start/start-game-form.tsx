@@ -6,6 +6,7 @@ import {
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import type { CategoryAvailability } from "./page";
 
 type Category = {
   id: string;
@@ -26,15 +27,6 @@ type CategorySection = {
   is_active: boolean;
 };
 
-type CategoryAvailability = {
-  availableGames: number;
-  isSelectable: boolean;
-  mode: "fixed" | "dynamic";
-  easyCount: number;
-  mediumCount: number;
-  hardCount: number;
-};
-
 type Props = {
   sections?: CategorySection[];
   categories?: Category[];
@@ -42,6 +34,7 @@ type Props = {
   action: (formData: FormData) => void | Promise<void>;
   categoryAvailability: Record<string, CategoryAvailability>;
   selectionMode: "fixed" | "dynamic";
+  errorMessage?: string;
 };
 
 const REQUIRED_CATEGORY_COUNT = 6;
@@ -50,46 +43,45 @@ const sectionStyles: Record<
   string,
   {
     badge: string;
-    ring: string;
-    glow: string;
-    chip: string;
+    title: string;
+    description: string;
+    cardGlow: string;
   }
 > = {
   general: {
-    badge: "bg-orange-500/15 text-orange-200 border-orange-400/30",
-    ring: "group-hover:border-orange-300/40",
-    glow: "from-orange-400/20 via-orange-300/10 to-transparent",
-    chip: "bg-orange-500 text-white",
+    badge: "border-orange-400/30 bg-orange-500/10 text-orange-200",
+    title: "text-orange-100",
+    description: "text-orange-100/70",
+    cardGlow: "from-orange-400/10 via-orange-300/5 to-transparent",
   },
   islamic: {
-    badge: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
-    ring: "group-hover:border-emerald-300/40",
-    glow: "from-emerald-400/20 via-lime-300/10 to-transparent",
-    chip: "bg-emerald-500 text-white",
+    badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    title: "text-emerald-100",
+    description: "text-emerald-100/70",
+    cardGlow: "from-emerald-400/10 via-lime-300/5 to-transparent",
   },
   entertainment: {
-    badge: "bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-400/30",
-    ring: "group-hover:border-fuchsia-300/40",
-    glow: "from-fuchsia-400/20 via-pink-300/10 to-transparent",
-    chip: "bg-fuchsia-500 text-white",
+    badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
+    title: "text-fuchsia-100",
+    description: "text-fuchsia-100/70",
+    cardGlow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
   },
   sports: {
-    badge: "bg-cyan-500/15 text-cyan-200 border-cyan-400/30",
-    ring: "group-hover:border-cyan-300/40",
-    glow: "from-cyan-400/20 via-sky-300/10 to-transparent",
-    chip: "bg-cyan-500 text-slate-950",
+    badge: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
+    title: "text-cyan-100",
+    description: "text-cyan-100/70",
+    cardGlow: "from-cyan-400/10 via-sky-300/5 to-transparent",
+  },
+  default: {
+    badge: "border-white/15 bg-white/5 text-white/85",
+    title: "text-white",
+    description: "text-white/65",
+    cardGlow: "from-slate-400/10 via-slate-300/5 to-transparent",
   },
 };
 
 function getSectionTheme(slug: string) {
-  return (
-    sectionStyles[slug] ?? {
-      badge: "bg-white/10 text-white border-white/15",
-      ring: "group-hover:border-white/25",
-      glow: "from-slate-400/20 via-slate-300/10 to-transparent",
-      chip: "bg-slate-200 text-slate-950",
-    }
-  );
+  return sectionStyles[slug] ?? sectionStyles.default;
 }
 
 function formatAvailableGamesLabel(count: number) {
@@ -121,7 +113,7 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
     text: formatAvailableGamesLabel(availability.availableGames),
     className:
       "border-emerald-400/30 bg-slate-950/95 text-emerald-200 shadow-lg shadow-emerald-900/20",
-  };
+    };
 }
 
 function getSelectionError(availability: CategoryAvailability | undefined) {
@@ -132,6 +124,44 @@ function getSelectionError(availability: CategoryAvailability | undefined) {
   return "لا يمكن اختيار هذه الفئة حاليًا.";
 }
 
+function SummaryCard({
+  label,
+  value,
+  accent = "default",
+}: {
+  label: string;
+  value: string;
+  accent?: "default" | "cyan";
+}) {
+  return (
+    <div
+      className={[
+        "rounded-[1.6rem] border p-4",
+        accent === "cyan"
+          ? "border-cyan-400/20 bg-cyan-400/10"
+          : "border-white/10 bg-white/5",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "text-sm",
+          accent === "cyan" ? "text-cyan-100/80" : "text-white/60",
+        ].join(" ")}
+      >
+        {label}
+      </div>
+      <div
+        className={[
+          "mt-1 text-2xl font-black",
+          accent === "cyan" ? "text-cyan-100" : "text-white",
+        ].join(" ")}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
 export default function StartGameForm({
   sections = [],
   categories = [],
@@ -139,12 +169,13 @@ export default function StartGameForm({
   action,
   categoryAvailability,
   selectionMode,
+  errorMessage = "",
 }: Props) {
   const [gameName, setGameName] = useState("");
   const [teamOne, setTeamOne] = useState("");
   const [teamTwo, setTeamTwo] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [localError, setLocalError] = useState("");
   const [openInfoId, setOpenInfoId] = useState<string | null>(null);
 
   const safeSections = Array.isArray(sections) ? sections : [];
@@ -165,11 +196,15 @@ export default function StartGameForm({
     return safeCategories.filter((category) => !category.section_id);
   }, [safeCategories]);
 
+  const selectedCount = selectedCategories.length;
+  const remainingToSelect = Math.max(REQUIRED_CATEGORY_COUNT - selectedCount, 0);
+  const isReadyToSubmit = selectedCount === REQUIRED_CATEGORY_COUNT;
+
   function toggleCategory(id: string) {
     const availability = categoryAvailability[id];
 
     if (!availability?.isSelectable) {
-      setErrorMessage(getSelectionError(availability));
+      setLocalError(getSelectionError(availability));
       return;
     }
 
@@ -177,24 +212,21 @@ export default function StartGameForm({
       const isSelected = prev.includes(id);
 
       if (isSelected) {
-        setErrorMessage("");
+        setLocalError("");
         return prev.filter((item) => item !== id);
       }
 
       if (prev.length >= REQUIRED_CATEGORY_COUNT) {
-        setErrorMessage(`يمكنك اختيار ${REQUIRED_CATEGORY_COUNT} فئات فقط.`);
+        setLocalError(`يمكنك اختيار ${REQUIRED_CATEGORY_COUNT} فئات فقط.`);
         return prev;
       }
 
-      setErrorMessage("");
+      setLocalError("");
       return [...prev, id];
     });
   }
 
-  function handleInfoClick(
-    event: ReactMouseEvent,
-    categoryId: string,
-  ) {
+  function handleInfoClick(event: ReactMouseEvent, categoryId: string) {
     event.preventDefault();
     event.stopPropagation();
     setOpenInfoId((prev) => (prev === categoryId ? null : categoryId));
@@ -207,13 +239,13 @@ export default function StartGameForm({
 
     if (!cleanGameName || !cleanTeamOne || !cleanTeamTwo) {
       event.preventDefault();
-      setErrorMessage("اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة.");
+      setLocalError("اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة.");
       return;
     }
 
     if (selectedCategories.length !== REQUIRED_CATEGORY_COUNT) {
       event.preventDefault();
-      setErrorMessage(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`);
+      setLocalError(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`);
       return;
     }
 
@@ -223,7 +255,7 @@ export default function StartGameForm({
 
     if (invalidSelection) {
       event.preventDefault();
-      setErrorMessage(
+      setLocalError(
         "هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.",
       );
       return;
@@ -231,14 +263,14 @@ export default function StartGameForm({
 
     if (gamesRemaining <= 0) {
       event.preventDefault();
-      setErrorMessage("لا توجد ألعاب متبقية في حسابك.");
+      setLocalError("لا توجد ألعاب متبقية في حسابك.");
       return;
     }
 
-    setErrorMessage("");
+    setLocalError("");
   }
 
-  const isReadyToSubmit = selectedCategories.length === REQUIRED_CATEGORY_COUNT;
+  const visibleError = localError || errorMessage;
 
   return (
     <form action={action} onSubmit={validateBeforeSubmit} className="space-y-6">
@@ -248,9 +280,40 @@ export default function StartGameForm({
         value={selectedCategories.join(",")}
       />
 
-      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0">
+            <div className="text-cyan-300">إعداد لعبة جديدة</div>
+            <h1 className="mt-2 text-3xl font-black text-white md:text-5xl">
+              جهّز اللعبة خلال دقائق
+            </h1>
+            <p className="mt-3 max-w-3xl text-base leading-8 text-white/75 md:text-lg">
+              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
+              مباشرة.
+            </p>
+          </div>
+
+          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[460px]">
+            <SummaryCard
+              label="الألعاب المتبقية"
+              value={String(gamesRemaining)}
+            />
+            <SummaryCard
+              label="الفئات المطلوبة"
+              value={String(REQUIRED_CATEGORY_COUNT)}
+            />
+            <SummaryCard
+              label="نمط الأسئلة"
+              value={selectionMode === "dynamic" ? "بدون تكرار" : "قابلة للتكرار"}
+              accent="cyan"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          <div className="mb-4">
+          <div className="mb-5">
             <div className="text-cyan-300">الخطوة الأولى</div>
             <h2 className="mt-2 text-3xl font-black text-white">
               اختر اسم اللعبة وأسماء الفرق
@@ -267,7 +330,7 @@ export default function StartGameForm({
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}
                 placeholder="مثال: تحدي الأذكياء"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
               />
             </div>
 
@@ -281,7 +344,7 @@ export default function StartGameForm({
                   value={teamOne}
                   onChange={(e) => setTeamOne(e.target.value)}
                   placeholder="اسم الفريق الأول"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
                 />
               </div>
 
@@ -294,7 +357,7 @@ export default function StartGameForm({
                   value={teamTwo}
                   onChange={(e) => setTeamTwo(e.target.value)}
                   placeholder="اسم الفريق الثاني"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
                 />
               </div>
             </div>
@@ -306,22 +369,20 @@ export default function StartGameForm({
           <h2 className="mt-2 text-3xl font-black text-white">جاهزية اللعبة</h2>
 
           <div className="mt-5 space-y-4">
-            <InfoBox
+            <SummaryCard
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
             />
-
-            <InfoBox
+            <SummaryCard
               label="حالة الاختيار"
               value={isReadyToSubmit ? "جاهز للبدء" : "أكمل اختيار الفئات"}
             />
-
-            <InfoBox
+            <SummaryCard
               label="نوع السحب"
               value={
                 selectionMode === "dynamic"
                   ? "بدون تكرار للبريميوم"
-                  : "قابل للتكرار للحساب المجاني"
+                  : "قابل للتكرار للمجاني"
               }
             />
           </div>
@@ -330,8 +391,8 @@ export default function StartGameForm({
             {selectionMode === "dynamic" ? (
               <p className="leading-8">
                 حسابك يعمل الآن بنمط <strong className="text-white">عشوائي بدون تكرار</strong>.
-                يظهر على كل فئة عدد الألعاب المتبقية بشكل واضح، ولن تُستخدم نفس
-                الأسئلة مرة أخرى.
+                كل فئة تُظهر عدد الألعاب المتبقية الفعلي، ولن تُستخدم نفس الأسئلة
+                مرة أخرى.
               </p>
             ) : (
               <p className="leading-8">
@@ -345,28 +406,28 @@ export default function StartGameForm({
             <div className="text-lg font-black text-cyan-100">
               {isReadyToSubmit
                 ? "تم اختيار العدد المطلوب. يمكنك الآن بدء اللعبة."
-                : `اختر ${REQUIRED_CATEGORY_COUNT - selectedCategories.length} فئات إضافية للمتابعة.`}
+                : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
             </div>
           </div>
         </section>
       </section>
 
       <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="text-cyan-300">الخطوة الثانية</div>
             <h2 className="mt-2 text-3xl font-black text-white">
               اختر {REQUIRED_CATEGORY_COUNT} فئات
             </h2>
             <p className="mt-3 text-white/70">
-              يظهر على كل بطاقة عدد الألعاب المتبقية أو حالة الفئة بشكل واضح.
+              تظهر حالة كل فئة بوضوح، سواء كانت متاحة الآن أو بعدد ألعاب متبقٍ.
             </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
             <div className="text-sm text-white/60">الفئات المختارة</div>
             <div className="mt-1 text-2xl font-black text-white">
-              {selectedCategories.length} / {REQUIRED_CATEGORY_COUNT}
+              {selectedCount} / {REQUIRED_CATEGORY_COUNT}
             </div>
           </div>
         </div>
@@ -387,7 +448,7 @@ export default function StartGameForm({
                     >
                       {section.name}
                     </div>
-                    <p className="mt-2 text-white/65">
+                    <p className={["mt-2", theme.description].join(" ")}>
                       {section.description || "قسم رئيسي للفئات"}
                     </p>
                   </div>
@@ -457,7 +518,7 @@ export default function StartGameForm({
                       infoOpen={openInfoId === category.id}
                       onToggle={() => toggleCategory(category.id)}
                       onInfoClick={handleInfoClick}
-                      theme={getSectionTheme("default")}
+                      theme={sectionStyles.default}
                       availability={
                         categoryAvailability[category.id] ?? {
                           availableGames: 0,
@@ -474,17 +535,11 @@ export default function StartGameForm({
               </div>
             </section>
           ) : null}
-
-          {groupedSections.length === 0 && uncategorized.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
-              لا توجد أقسام أو فئات جاهزة حاليًا.
-            </div>
-          ) : null}
         </div>
 
-        {errorMessage ? (
+        {visibleError ? (
           <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {errorMessage}
+            {visibleError}
           </div>
         ) : null}
       </section>
@@ -496,8 +551,8 @@ export default function StartGameForm({
             جاهز لبدء اللعبة؟
           </h3>
           <p className="mt-3 text-white/70">
-            بعد التأكد من اسم اللعبة، أسماء الفرق، واختيار 6 فئات، يمكنك بدء
-            الجولة مباشرة.
+            بعد التأكد من اسم اللعبة وأسماء الفرق واختيار 6 فئات، يمكنك بدء الجولة
+            مباشرة.
           </p>
         </div>
 
@@ -510,15 +565,6 @@ export default function StartGameForm({
         </button>
       </section>
     </form>
-  );
-}
-
-function InfoBox({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-      <div className="text-sm text-white/60">{label}</div>
-      <div className="mt-1 text-xl font-black text-white">{value}</div>
-    </div>
   );
 }
 
@@ -535,15 +581,12 @@ function CategoryCard({
   active: boolean;
   infoOpen: boolean;
   onToggle: () => void;
-  onInfoClick: (
-    event: ReactMouseEvent,
-    categoryId: string,
-  ) => void;
+  onInfoClick: (event: ReactMouseEvent, categoryId: string) => void;
   theme: {
     badge: string;
-    ring: string;
-    glow: string;
-    chip: string;
+    title: string;
+    description: string;
+    cardGlow: string;
   };
   availability: CategoryAvailability;
 }) {
@@ -558,11 +601,13 @@ function CategoryCard({
         "bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)]",
         active
           ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
-          : `border-white/10 ${theme.ring}`,
-        !availability.isSelectable ? "opacity-75" : "hover:-translate-y-0.5",
+          : "border-white/10 hover:-translate-y-0.5 hover:border-white/20",
+        !availability.isSelectable ? "opacity-80" : "",
       ].join(" ")}
     >
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.glow}`} />
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.cardGlow}`}
+      />
 
       <button
         type="button"
@@ -583,7 +628,7 @@ function CategoryCard({
       </div>
 
       {active ? (
-        <div className="absolute bottom-[4.6rem] left-3 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
+        <div className="absolute bottom-[4.7rem] left-3 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
           تم الاختيار
         </div>
       ) : null}
@@ -613,19 +658,11 @@ function CategoryCard({
             <p className="mt-2 text-sm leading-7 text-white/75">
               {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
             </p>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <InfoBox
-                label="200"
-                value={String(availability.easyCount)}
-              />
-              <InfoBox
-                label="400"
-                value={String(availability.mediumCount)}
-              />
-              <InfoBox
-                label="600"
-                value={String(availability.hardCount)}
-              />
+
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <MiniInfo label="200" value={String(availability.easyCount)} />
+              <MiniInfo label="400" value={String(availability.mediumCount)} />
+              <MiniInfo label="600" value={String(availability.hardCount)} />
             </div>
           </div>
         ) : null}
@@ -635,5 +672,14 @@ function CategoryCard({
         <div className="text-2xl font-black text-white">{category.name}</div>
       </div>
     </button>
+  );
+}
+
+function MiniInfo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+      <div className="text-xs text-white/60">{label}</div>
+      <div className="mt-1 text-base font-black text-white">{value}</div>
+    </div>
   );
 }

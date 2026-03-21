@@ -48,7 +48,7 @@ type SessionQuestionInsertRow = {
   slot_index: number;
 };
 
-type CategoryAvailability = {
+export type CategoryAvailability = {
   availableGames: number;
   isSelectable: boolean;
   mode: "fixed" | "dynamic";
@@ -438,13 +438,13 @@ export default async function GameStartPage({
       );
     }
 
-    const { data: profileData } = await supabase
+    const { data: freshProfileData } = await supabase
       .from("profiles")
       .select("games_remaining, account_tier, role")
       .eq("id", user.id)
       .single();
 
-    const freshProfile = profileData as ProfileForSession | null;
+    const freshProfile = freshProfileData as ProfileForSession | null;
 
     if (!freshProfile || (freshProfile.games_remaining ?? 0) <= 0) {
       redirect(
@@ -456,7 +456,7 @@ export default async function GameStartPage({
       freshProfile.role === "admin" || freshProfile.account_tier === "premium";
 
     const {
-      data: allQuestionsData,
+      data: selectedQuestionsData,
       error: questionsError,
     } = await fetchAllQuestionsPaged(supabase, selectedCategoryIds);
 
@@ -467,9 +467,9 @@ export default async function GameStartPage({
       );
     }
 
-    const selectedQuestions = (allQuestionsData ?? []) as QuestionCandidate[];
+    const selectedQuestions = (selectedQuestionsData ?? []) as QuestionCandidate[];
 
-    let usedQuestionIds = new Set<string>();
+    let currentUsedQuestionIds = new Set<string>();
 
     if (preventRepeat) {
       const { data: historyData, error: historyError } =
@@ -482,7 +482,7 @@ export default async function GameStartPage({
         );
       }
 
-      usedQuestionIds = new Set(
+      currentUsedQuestionIds = new Set(
         (historyData ?? []).map((item) => String(item.question_id)),
       );
     }
@@ -494,7 +494,7 @@ export default async function GameStartPage({
     const selectedAvailability = buildCategoryAvailability({
       categories: selectedCategories,
       questions: selectedQuestions,
-      usedQuestionIds,
+      usedQuestionIds: currentUsedQuestionIds,
       mode: preventRepeat ? "dynamic" : "fixed",
     });
 
@@ -519,7 +519,7 @@ export default async function GameStartPage({
     const built = buildSessionQuestions({
       selectedCategoryIds,
       allQuestions: selectedQuestions,
-      usedQuestionIds,
+      usedQuestionIds: currentUsedQuestionIds,
       shouldRandomize: preventRepeat,
       categories,
     });
@@ -587,9 +587,13 @@ export default async function GameStartPage({
     }
 
     if (preventRepeat) {
-      const historyRows = built.rows.map((row) => ({
+      const uniqueQuestionIds = Array.from(
+        new Set(built.rows.map((row) => row.question_id)),
+      );
+
+      const historyRows = uniqueQuestionIds.map((questionId) => ({
         user_id: user.id,
-        question_id: row.question_id,
+        question_id: questionId,
       }));
 
       const { error: historyInsertError } = await supabase
@@ -631,14 +635,15 @@ export default async function GameStartPage({
       await supabase.from("game_sessions").delete().eq("id", insertedSession.id);
 
       if (preventRepeat) {
+        const uniqueQuestionIds = Array.from(
+          new Set(built.rows.map((row) => row.question_id)),
+        );
+
         await supabase
           .from("user_question_history")
           .delete()
           .eq("user_id", user.id)
-          .in(
-            "question_id",
-            built.rows.map((row) => row.question_id),
-          );
+          .in("question_id", uniqueQuestionIds);
       }
 
       redirect(
@@ -651,61 +656,14 @@ export default async function GameStartPage({
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="text-cyan-300">إعداد لعبة جديدة</div>
-            <h1 className="mt-2 text-4xl font-black text-white">
-              جهّز اللعبة خلال دقائق
-            </h1>
-            <p className="mt-3 text-lg leading-8 text-white/75">
-              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدّد ست فئات لتبدأ الجولة
-              مباشرة.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
-              <div className="text-sm text-white/60">الألعاب المتبقية</div>
-              <div className="mt-1 text-2xl font-black text-white">
-                {profile.games_remaining ?? 0}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
-              <div className="text-sm text-white/60">الفئات المطلوبة</div>
-              <div className="mt-1 text-2xl font-black text-white">
-                {REQUIRED_CATEGORY_COUNT}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-5 py-3 text-center">
-              <div className="text-sm text-cyan-100/80">نمط الأسئلة</div>
-              <div className="mt-1 text-xl font-black text-cyan-100">
-                {selectionMode === "dynamic"
-                  ? "بدون تكرار"
-                  : "ثابتة وقابلة للتكرار"}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {params.error ? (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {params.error}
-          </div>
-        ) : null}
-      </section>
-
-      <StartGameForm
-        sections={sections}
-        categories={categories}
-        gamesRemaining={profile.games_remaining ?? 0}
-        action={createGameSession}
-        categoryAvailability={categoryAvailability}
-        selectionMode={selectionMode}
-      />
-    </div>
+    <StartGameForm
+      sections={sections}
+      categories={categories}
+      gamesRemaining={profile.games_remaining ?? 0}
+      action={createGameSession}
+      categoryAvailability={categoryAvailability}
+      selectionMode={selectionMode}
+      errorMessage={params.error ?? ""}
+    />
   );
 }
