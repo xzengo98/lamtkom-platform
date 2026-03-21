@@ -65,6 +65,7 @@ type ServerSupabase = Awaited<ReturnType<typeof getSupabaseServerClient>>;
 
 const REQUIRED_CATEGORY_COUNT = 6;
 const QUESTIONS_PER_GAME_PER_LEVEL = 2;
+const QUESTION_TIMER_SECONDS = 30;
 const PAGE_SIZE = 1000;
 
 function shuffleArray<T>(items: T[]) {
@@ -81,12 +82,12 @@ function shuffleArray<T>(items: T[]) {
 function calculateAvailableGames(
   easyCount: number,
   mediumCount: number,
-  hardCount: number
+  hardCount: number,
 ) {
   return Math.min(
     Math.floor(easyCount / QUESTIONS_PER_GAME_PER_LEVEL),
     Math.floor(mediumCount / QUESTIONS_PER_GAME_PER_LEVEL),
-    Math.floor(hardCount / QUESTIONS_PER_GAME_PER_LEVEL)
+    Math.floor(hardCount / QUESTIONS_PER_GAME_PER_LEVEL),
   );
 }
 
@@ -106,23 +107,24 @@ function buildSessionQuestions(params: {
   } = params;
 
   const rows: SessionQuestionInsertRow[] = [];
+
   const slotStarts = [
     { points: 200, startSlot: 0 },
     { points: 400, startSlot: 2 },
     { points: 600, startSlot: 4 },
-  ];
+  ] as const;
 
   for (const categoryId of selectedCategoryIds) {
     const categoryName =
       categories.find((item) => item.id === categoryId)?.name ?? "فئة غير معروفة";
 
     const categoryQuestions = allQuestions.filter(
-      (question) => question.category_id === categoryId
+      (question) => question.category_id === categoryId,
     );
 
     for (const slotGroup of slotStarts) {
       let pool = categoryQuestions.filter(
-        (question) => question.points === slotGroup.points
+        (question) => question.points === slotGroup.points,
       );
 
       if (shouldRandomize) {
@@ -130,7 +132,9 @@ function buildSessionQuestions(params: {
         pool = shuffleArray(pool);
       } else {
         pool = [...pool].sort((a, b) => {
-          const dateCompare = (a.created_at ?? "").localeCompare(b.created_at ?? "");
+          const dateCompare = (a.created_at ?? "").localeCompare(
+            b.created_at ?? "",
+          );
           if (dateCompare !== 0) return dateCompare;
           return a.id.localeCompare(b.id);
         });
@@ -168,11 +172,12 @@ function buildCategoryAvailability(params: {
   mode: "fixed" | "dynamic";
 }) {
   const { categories, questions, usedQuestionIds, mode } = params;
+
   const availabilityMap: Record<string, CategoryAvailability> = {};
 
   for (const category of categories) {
     const categoryQuestions = questions.filter(
-      (question) => question.category_id === category.id
+      (question) => question.category_id === category.id,
     );
 
     const filtered =
@@ -187,7 +192,7 @@ function buildCategoryAvailability(params: {
     const availableGames = calculateAvailableGames(
       easyCount,
       mediumCount,
-      hardCount
+      hardCount,
     );
 
     availabilityMap[category.id] = {
@@ -205,7 +210,7 @@ function buildCategoryAvailability(params: {
 
 async function fetchAllQuestionsPaged(
   supabase: ServerSupabase,
-  categoryIds: string[]
+  categoryIds: string[],
 ) {
   if (categoryIds.length === 0) {
     return { data: [] as QuestionCandidate[], error: null };
@@ -229,10 +234,7 @@ async function fetchAllQuestionsPaged(
     const rows = (data ?? []) as QuestionCandidate[];
     allRows.push(...rows);
 
-    if (rows.length < PAGE_SIZE) {
-      break;
-    }
-
+    if (rows.length < PAGE_SIZE) break;
     from += PAGE_SIZE;
   }
 
@@ -241,7 +243,7 @@ async function fetchAllQuestionsPaged(
 
 async function fetchAllUserHistoryPaged(
   supabase: ServerSupabase,
-  userId: string
+  userId: string,
 ) {
   let from = 0;
   const allRows: HistoryRow[] = [];
@@ -260,10 +262,7 @@ async function fetchAllUserHistoryPaged(
     const rows = (data ?? []) as HistoryRow[];
     allRows.push(...rows);
 
-    if (rows.length < PAGE_SIZE) {
-      break;
-    }
-
+    if (rows.length < PAGE_SIZE) break;
     from += PAGE_SIZE;
   }
 
@@ -282,9 +281,7 @@ export default async function GameStartPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: profileData } = await supabase
     .from("profiles")
@@ -296,28 +293,21 @@ export default async function GameStartPage({
 
   if (!profile || (profile.games_remaining ?? 0) <= 0) {
     return (
-      <main
-        dir="rtl"
-        className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 text-center sm:p-10">
-          <h1 className="text-2xl font-black sm:text-4xl">
-            لا توجد ألعاب متبقية
-          </h1>
-          <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-lg">
-            تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن
-            حسابك للمتابعة.
-          </p>
-          <div className="mt-6">
-            <Link
-              href="/"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-300"
-            >
-              الرجوع للرئيسية
-            </Link>
-          </div>
+      <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <h1 className="text-3xl font-black">لا توجد ألعاب متبقية</h1>
+        <p className="mt-4 text-white/75">
+          تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن حسابك
+          للمتابعة.
+        </p>
+        <div className="mt-6">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400"
+          >
+            الرجوع للرئيسية
+          </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -342,57 +332,42 @@ export default async function GameStartPage({
       sectionsError?.message ?? categoriesError?.message ?? "Unknown error";
 
     return (
-      <main
-        dir="rtl"
-        className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-center sm:p-10">
-          <h1 className="text-2xl font-black sm:text-4xl">
-            فشل تحميل بيانات الإعداد
-          </h1>
-          <p className="mt-4 text-sm leading-7 text-red-100 sm:text-lg">
-            {message}
-          </p>
-        </div>
-      </main>
+      <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+        <h1 className="text-3xl font-black">فشل تحميل بيانات الإعداد</h1>
+        <p className="mt-4">{message}</p>
+      </div>
     );
   }
 
   const sections: CategorySection[] = Array.isArray(sectionsData)
     ? (sectionsData as CategorySection[])
     : [];
+
   const categories: Category[] = Array.isArray(categoriesData)
     ? (categoriesData as Category[])
     : [];
 
-  const selectionMode: "fixed" | "dynamic" =
-    profile.role === "admin" ||
-    profile.account_tier === "premium" ||
-    (profile.games_remaining ?? 0) >= 2
-      ? "dynamic"
-      : "fixed";
+  const shouldPreventRepeat =
+    profile.role === "admin" || profile.account_tier === "premium";
+
+  const selectionMode: "fixed" | "dynamic" = shouldPreventRepeat
+    ? "dynamic"
+    : "fixed";
 
   const {
     data: allQuestionsData,
     error: allQuestionsError,
   } = await fetchAllQuestionsPaged(
     supabase,
-    categories.map((category) => category.id)
+    categories.map((category) => category.id),
   );
 
   if (allQuestionsError) {
     return (
-      <main
-        dir="rtl"
-        className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-center sm:p-10">
-          <h1 className="text-2xl font-black sm:text-4xl">فشل تحميل الأسئلة</h1>
-          <p className="mt-4 text-sm leading-7 text-red-100 sm:text-lg">
-            {allQuestionsError.message}
-          </p>
-        </div>
-      </main>
+      <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+        <h1 className="text-3xl font-black">فشل تحميل الأسئلة</h1>
+        <p className="mt-4">{allQuestionsError.message}</p>
+      </div>
     );
   }
 
@@ -400,32 +375,21 @@ export default async function GameStartPage({
 
   let usedQuestionIds = new Set<string>();
 
-  if (selectionMode === "dynamic") {
-    const {
-      data: historyData,
-      error: historyError,
-    } = await fetchAllUserHistoryPaged(supabase, user.id);
+  if (shouldPreventRepeat) {
+    const { data: historyData, error: historyError } =
+      await fetchAllUserHistoryPaged(supabase, user.id);
 
     if (historyError) {
       return (
-        <main
-          dir="rtl"
-          className="min-h-screen bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8"
-        >
-          <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 text-center sm:p-10">
-            <h1 className="text-2xl font-black sm:text-4xl">
-              فشل تحميل سجل الأسئلة
-            </h1>
-            <p className="mt-4 text-sm leading-7 text-red-100 sm:text-lg">
-              {historyError.message}
-            </p>
-          </div>
-        </main>
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+          <h1 className="text-3xl font-black">فشل تحميل سجل الأسئلة</h1>
+          <p className="mt-4">{historyError.message}</p>
+        </div>
       );
     }
 
     usedQuestionIds = new Set(
-      (historyData ?? []).map((item) => String(item.question_id))
+      (historyData ?? []).map((item) => String(item.question_id)),
     );
   }
 
@@ -445,9 +409,7 @@ export default async function GameStartPage({
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      redirect("/login");
-    }
+    if (!user) redirect("/login");
 
     const gameName = formData.get("gameName")?.toString().trim() || "";
     const teamOne = formData.get("teamOne")?.toString().trim() || "";
@@ -464,15 +426,15 @@ export default async function GameStartPage({
       redirect(
         "/game/start?error=" +
           encodeURIComponent(
-            "اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة."
-          )
+            "اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة.",
+          ),
       );
     }
 
     if (selectedCategoryIds.length !== REQUIRED_CATEGORY_COUNT) {
       redirect(
         "/game/start?error=" +
-          encodeURIComponent(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`)
+          encodeURIComponent(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`),
       );
     }
 
@@ -482,34 +444,16 @@ export default async function GameStartPage({
       .eq("id", user.id)
       .single();
 
-    const profile = profileData as ProfileForSession | null;
+    const freshProfile = profileData as ProfileForSession | null;
 
-    if (!profile || (profile.games_remaining ?? 0) <= 0) {
+    if (!freshProfile || (freshProfile.games_remaining ?? 0) <= 0) {
       redirect(
-        "/game/start?error=" + encodeURIComponent("لا توجد ألعاب متبقية")
+        "/game/start?error=" + encodeURIComponent("لا توجد ألعاب متبقية"),
       );
     }
 
-    let effectiveTier = profile.account_tier ?? "free";
-
-    if (effectiveTier !== "premium" && (profile.games_remaining ?? 0) >= 2) {
-      const { error: promoteError } = await supabase
-        .from("profiles")
-        .update({ account_tier: "premium" })
-        .eq("id", user.id);
-
-      if (promoteError) {
-        redirect(
-          "/game/start?error=" +
-            encodeURIComponent(promoteError.message || "فشل تحديث نوع الحساب")
-        );
-      }
-
-      effectiveTier = "premium";
-    }
-
-    const shouldPreventRepeat =
-      profile.role === "admin" || effectiveTier === "premium";
+    const preventRepeat =
+      freshProfile.role === "admin" || freshProfile.account_tier === "premium";
 
     const {
       data: allQuestionsData,
@@ -519,40 +463,39 @@ export default async function GameStartPage({
     if (questionsError) {
       redirect(
         "/game/start?error=" +
-          encodeURIComponent(questionsError.message || "فشل تحميل الأسئلة")
+          encodeURIComponent(questionsError.message || "فشل تحميل الأسئلة"),
       );
     }
 
-    const allQuestions = (allQuestionsData ?? []) as QuestionCandidate[];
+    const selectedQuestions = (allQuestionsData ?? []) as QuestionCandidate[];
+
     let usedQuestionIds = new Set<string>();
 
-    if (shouldPreventRepeat) {
-      const {
-        data: historyData,
-        error: historyError,
-      } = await fetchAllUserHistoryPaged(supabase, user.id);
+    if (preventRepeat) {
+      const { data: historyData, error: historyError } =
+        await fetchAllUserHistoryPaged(supabase, user.id);
 
       if (historyError) {
         redirect(
           "/game/start?error=" +
-            encodeURIComponent(historyError.message || "فشل تحميل سجل الأسئلة")
+            encodeURIComponent(historyError.message || "فشل تحميل سجل الأسئلة"),
         );
       }
 
       usedQuestionIds = new Set(
-        (historyData ?? []).map((item) => String(item.question_id))
+        (historyData ?? []).map((item) => String(item.question_id)),
       );
     }
 
     const selectedCategories = categories.filter((category) =>
-      selectedCategoryIds.includes(category.id)
+      selectedCategoryIds.includes(category.id),
     );
 
     const selectedAvailability = buildCategoryAvailability({
       categories: selectedCategories,
-      questions: allQuestions,
+      questions: selectedQuestions,
       usedQuestionIds,
-      mode: shouldPreventRepeat ? "dynamic" : "fixed",
+      mode: preventRepeat ? "dynamic" : "fixed",
     });
 
     const invalidCategory = selectedCategoryIds.find((categoryId) => {
@@ -568,23 +511,23 @@ export default async function GameStartPage({
       redirect(
         "/game/start?error=" +
           encodeURIComponent(
-            `الفئة "${categoryName}" لا تحتوي حاليًا على عدد كافٍ من الأسئلة لبدء لعبة كاملة.`
-          )
+            `الفئة "${categoryName}" لا تحتوي حاليًا على عدد كافٍ من الأسئلة لبدء لعبة كاملة.`,
+          ),
       );
     }
 
     const built = buildSessionQuestions({
       selectedCategoryIds,
-      allQuestions,
+      allQuestions: selectedQuestions,
       usedQuestionIds,
-      shouldRandomize: shouldPreventRepeat,
+      shouldRandomize: preventRepeat,
       categories,
     });
 
     if (built.error || built.rows.length === 0) {
       redirect(
         "/game/start?error=" +
-          encodeURIComponent(built.error || "تعذر تجهيز أسئلة الجلسة")
+          encodeURIComponent(built.error || "تعذر تجهيز أسئلة الجلسة"),
       );
     }
 
@@ -595,6 +538,8 @@ export default async function GameStartPage({
       openQuestionId: null,
       showAnswer: false,
       showWinnerPicker: false,
+      timeLeft: QUESTION_TIMER_SECONDS,
+      savedAt: Date.now(),
     };
 
     const { data: insertedSession, error: insertSessionError } = await supabase
@@ -614,7 +559,7 @@ export default async function GameStartPage({
     if (insertSessionError || !insertedSession) {
       redirect(
         "/game/start?error=" +
-          encodeURIComponent(insertSessionError?.message || "فشل إنشاء الجلسة")
+          encodeURIComponent(insertSessionError?.message || "فشل إنشاء الجلسة"),
       );
     }
 
@@ -636,15 +581,44 @@ export default async function GameStartPage({
       redirect(
         "/game/start?error=" +
           encodeURIComponent(
-            sessionQuestionsError.message || "فشل حفظ أسئلة الجلسة"
-          )
+            sessionQuestionsError.message || "فشل حفظ أسئلة الجلسة",
+          ),
       );
     }
+
+    if (preventRepeat) {
+      const historyRows = built.rows.map((row) => ({
+        user_id: user.id,
+        question_id: row.question_id,
+      }));
+
+      const { error: historyInsertError } = await supabase
+        .from("user_question_history")
+        .insert(historyRows);
+
+      if (historyInsertError) {
+        await supabase
+          .from("game_session_questions")
+          .delete()
+          .eq("session_id", insertedSession.id);
+
+        await supabase.from("game_sessions").delete().eq("id", insertedSession.id);
+
+        redirect(
+          "/game/start?error=" +
+            encodeURIComponent(
+              historyInsertError.message || "فشل حفظ سجل الأسئلة",
+            ),
+        );
+      }
+    }
+
+    const nextRemaining = Math.max((freshProfile.games_remaining ?? 0) - 1, 0);
 
     const { error: decrementError } = await supabase
       .from("profiles")
       .update({
-        games_remaining: Math.max((profile.games_remaining ?? 0) - 1, 0),
+        games_remaining: nextRemaining,
       })
       .eq("id", user.id);
 
@@ -656,9 +630,20 @@ export default async function GameStartPage({
 
       await supabase.from("game_sessions").delete().eq("id", insertedSession.id);
 
+      if (preventRepeat) {
+        await supabase
+          .from("user_question_history")
+          .delete()
+          .eq("user_id", user.id)
+          .in(
+            "question_id",
+            built.rows.map((row) => row.question_id),
+          );
+      }
+
       redirect(
         "/game/start?error=" +
-          encodeURIComponent(decrementError.message || "فشل خصم لعبة")
+          encodeURIComponent(decrementError.message || "فشل خصم لعبة"),
       );
     }
 
@@ -666,69 +651,61 @@ export default async function GameStartPage({
   }
 
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-slate-950 px-4 py-6 text-white sm:px-6 lg:px-8 lg:py-10"
-    >
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,#020617_0%,#07143a_50%,#020617_100%)] p-5 sm:p-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-bold text-cyan-200 sm:text-sm">
-                  إعداد لعبة جديدة
-                </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                  اختر 6 فئات بالضبط
-                </span>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200 sm:text-sm">
-                  {selectionMode === "dynamic"
-                    ? "اسئلة بدون تكرار"
-                    : "أسئلة ثابتة"}
-                </span>
-              </div>
+    <div className="space-y-6">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-cyan-300">إعداد لعبة جديدة</div>
+            <h1 className="mt-2 text-4xl font-black text-white">
+              جهّز اللعبة خلال دقائق
+            </h1>
+            <p className="mt-3 text-lg leading-8 text-white/75">
+              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدّد ست فئات لتبدأ الجولة
+              مباشرة.
+            </p>
+          </div>
 
-              <h1 className="mt-4 text-3xl font-black sm:text-4xl">
-                جهّز اللعبة خلال دقائق
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-                اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدّد ست فئات لتبدأ
-                الجولة مباشرة.
-              </p>
+          <div className="flex flex-wrap gap-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
+              <div className="text-sm text-white/60">الألعاب المتبقية</div>
+              <div className="mt-1 text-2xl font-black text-white">
+                {profile.games_remaining ?? 0}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:w-auto">
-              <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
-                <p className="text-xs text-slate-400">الألعاب المتبقية</p>
-                <p className="mt-2 text-2xl font-black text-white">
-                  {profile.games_remaining ?? 0}
-                </p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
+              <div className="text-sm text-white/60">الفئات المطلوبة</div>
+              <div className="mt-1 text-2xl font-black text-white">
+                {REQUIRED_CATEGORY_COUNT}
               </div>
-              <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
-                <p className="text-xs text-slate-400">الفئات المطلوبة</p>
-                <p className="mt-2 text-2xl font-black text-white">
-                  {REQUIRED_CATEGORY_COUNT}
-                </p>
+            </div>
+
+            <div className="rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-5 py-3 text-center">
+              <div className="text-sm text-cyan-100/80">نمط الأسئلة</div>
+              <div className="mt-1 text-xl font-black text-cyan-100">
+                {selectionMode === "dynamic"
+                  ? "بدون تكرار"
+                  : "ثابتة وقابلة للتكرار"}
               </div>
             </div>
           </div>
         </div>
 
         {params.error ? (
-          <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
             {params.error}
           </div>
         ) : null}
+      </section>
 
-        <StartGameForm
-          sections={sections}
-          categories={categories}
-          gamesRemaining={profile.games_remaining ?? 0}
-          action={createGameSession}
-          categoryAvailability={categoryAvailability}
-          selectionMode={selectionMode}
-        />
-      </div>
-    </main>
+      <StartGameForm
+        sections={sections}
+        categories={categories}
+        gamesRemaining={profile.games_remaining ?? 0}
+        action={createGameSession}
+        categoryAvailability={categoryAvailability}
+        selectionMode={selectionMode}
+      />
+    </div>
   );
 }

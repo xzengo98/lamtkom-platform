@@ -155,7 +155,7 @@ export default function StartGameForm({
       .map((section) => ({
         ...section,
         categories: safeCategories.filter(
-          (category) => category.section_id === section.id
+          (category) => category.section_id === section.id,
         ),
       }))
       .filter((section) => section.categories.length > 0);
@@ -192,15 +192,15 @@ export default function StartGameForm({
   }
 
   function handleInfoClick(
-    event: ReactMouseEvent<HTMLButtonElement>,
-    categoryId: string
+    event: ReactMouseEvent,
+    categoryId: string,
   ) {
     event.preventDefault();
     event.stopPropagation();
     setOpenInfoId((prev) => (prev === categoryId ? null : categoryId));
   }
 
-  function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
+  function validateBeforeSubmit(event: FormEvent) {
     const cleanGameName = gameName.trim();
     const cleanTeamOne = teamOne.trim();
     const cleanTeamTwo = teamTwo.trim();
@@ -218,12 +218,20 @@ export default function StartGameForm({
     }
 
     const invalidSelection = selectedCategories.find(
-      (id) => !categoryAvailability[id]?.isSelectable
+      (id) => !categoryAvailability[id]?.isSelectable,
     );
 
     if (invalidSelection) {
       event.preventDefault();
-      setErrorMessage("هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.");
+      setErrorMessage(
+        "هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.",
+      );
+      return;
+    }
+
+    if (gamesRemaining <= 0) {
+      event.preventDefault();
+      setErrorMessage("لا توجد ألعاب متبقية في حسابك.");
       return;
     }
 
@@ -240,34 +248,32 @@ export default function StartGameForm({
         value={selectedCategories.join(",")}
       />
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 sm:p-6 lg:p-8">
-        <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4 sm:p-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs text-cyan-200 sm:text-sm">
-                الخطوة الأولى
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                اختر اسم اللعبة وأسماء الفرق
-              </span>
+      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="mb-4">
+            <div className="text-cyan-300">الخطوة الأولى</div>
+            <h2 className="mt-2 text-3xl font-black text-white">
+              اختر اسم اللعبة وأسماء الفرق
+            </h2>
+          </div>
+
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                اسم اللعبة
+              </label>
+              <input
+                name="gameName"
+                value={gameName}
+                onChange={(e) => setGameName(e.target.value)}
+                placeholder="مثال: تحدي الأذكياء"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+              />
             </div>
 
-            <div className="mt-4 grid gap-4 min-[620px]:grid-cols-2">
-              <div className="min-[620px]:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-white">
-                  اسم اللعبة
-                </label>
-                <input
-                  name="gameName"
-                  value={gameName}
-                  onChange={(e) => setGameName(e.target.value)}
-                  placeholder="مثال: تحدي الأذكياء"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
-                />
-              </div>
-
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white">
+                <label className="mb-2 block text-sm font-bold text-white">
                   الفريق الأول
                 </label>
                 <input
@@ -280,7 +286,7 @@ export default function StartGameForm({
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-white">
+                <label className="mb-2 block text-sm font-bold text-white">
                   الفريق الثاني
                 </label>
                 <input
@@ -293,121 +299,105 @@ export default function StartGameForm({
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-cyan-400/10 via-slate-950 to-orange-400/10 p-4 sm:p-5">
-            <h2 className="text-lg font-black text-white sm:text-xl">
-              ملخص الإعداد
-            </h2>
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="text-cyan-300">ملخص الإعداد</div>
+          <h2 className="mt-2 text-3xl font-black text-white">جاهزية اللعبة</h2>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <InfoBox label="الألعاب المتبقية" value={String(gamesRemaining)} />
-              <InfoBox
-                label="الفئات المختارة"
-                value={`${selectedCategories.length}/${REQUIRED_CATEGORY_COUNT}`}
-              />
-            </div>
+          <div className="mt-5 space-y-4">
+            <InfoBox
+              label="الألعاب المتبقية"
+              value={String(gamesRemaining)}
+            />
 
-            <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-slate-950/60 p-4">
-              <p className="text-sm leading-7 text-slate-300">
-                {selectionMode === "dynamic" ? (
-                  <>
-                    حسابك يعمل الآن بنمط{" "}
-                    <span className="font-bold text-white">
-                      عشوائي بدون تكرار
-                    </span>
-                    . يظهر على كل فئة عدد الألعاب المتبقية بشكل واضح.
-                  </>
-                ) : (
-                  <>
-                    حسابك يعمل الآن بنمط{" "}
-                    <span className="font-bold text-white">الأسئلة الثابتة</span>.
-                    ستظهر لك نفس المجموعة الثابتة في كل مرة طالما الفئة مكتملة.
-                  </>
-                )}
+            <InfoBox
+              label="حالة الاختيار"
+              value={isReadyToSubmit ? "جاهز للبدء" : "أكمل اختيار الفئات"}
+            />
+
+            <InfoBox
+              label="نوع السحب"
+              value={
+                selectionMode === "dynamic"
+                  ? "بدون تكرار للبريميوم"
+                  : "قابل للتكرار للحساب المجاني"
+              }
+            />
+          </div>
+
+          <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-white/75">
+            {selectionMode === "dynamic" ? (
+              <p className="leading-8">
+                حسابك يعمل الآن بنمط <strong className="text-white">عشوائي بدون تكرار</strong>.
+                يظهر على كل فئة عدد الألعاب المتبقية بشكل واضح، ولن تُستخدم نفس
+                الأسئلة مرة أخرى.
               </p>
-            </div>
-
-            <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-white">حالة الاختيار</p>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    isReadyToSubmit
-                      ? "bg-emerald-500/15 text-emerald-200"
-                      : "bg-orange-500/15 text-orange-100"
-                  }`}
-                >
-                  {isReadyToSubmit ? "جاهز للبدء" : "أكمل اختيار الفئات"}
-                </span>
-              </div>
-
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                {isReadyToSubmit
-                  ? "تم اختيار العدد المطلوب. يمكنك الآن بدء اللعبة."
-                  : `اختر ${
-                      REQUIRED_CATEGORY_COUNT - selectedCategories.length
-                    } فئات إضافية للمتابعة.`}
+            ) : (
+              <p className="leading-8">
+                حسابك يعمل الآن بنمط <strong className="text-white">الأسئلة الثابتة</strong>.
+                قد تتكرر الأسئلة في الحساب المجاني.
               </p>
+            )}
+          </div>
+
+          <div className="mt-5 rounded-[1.5rem] border border-cyan-400/20 bg-cyan-400/10 p-4">
+            <div className="text-lg font-black text-cyan-100">
+              {isReadyToSubmit
+                ? "تم اختيار العدد المطلوب. يمكنك الآن بدء اللعبة."
+                : `اختر ${REQUIRED_CATEGORY_COUNT - selectedCategories.length} فئات إضافية للمتابعة.`}
             </div>
           </div>
-        </div>
+        </section>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1.5 text-xs text-orange-100 sm:text-sm">
-                الخطوة الثانية
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                اختر {REQUIRED_CATEGORY_COUNT} فئات
-              </span>
-            </div>
-
-            <h2 className="mt-3 text-2xl font-black text-white sm:text-3xl">
-              اختر الفئات المناسبة
+            <div className="text-cyan-300">الخطوة الثانية</div>
+            <h2 className="mt-2 text-3xl font-black text-white">
+              اختر {REQUIRED_CATEGORY_COUNT} فئات
             </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-300 sm:text-base">
-              يظهر على كل بطاقة عدد الألعاب المتبقية بخلفية واضحة وغير شفافة.
+            <p className="mt-3 text-white/70">
+              يظهر على كل بطاقة عدد الألعاب المتبقية أو حالة الفئة بشكل واضح.
             </p>
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 px-4 py-3 text-center">
-            <p className="text-xs text-slate-400 sm:text-sm">الفئات المختارة</p>
-            <p className="mt-1 text-2xl font-black text-cyan-300">
-              {selectedCategories.length}
-              <span className="mr-1 text-base text-slate-400">/6</span>
-            </p>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
+            <div className="text-sm text-white/60">الفئات المختارة</div>
+            <div className="mt-1 text-2xl font-black text-white">
+              {selectedCategories.length} / {REQUIRED_CATEGORY_COUNT}
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 space-y-8">
+        <div className="space-y-8">
           {groupedSections.map((section) => {
             const theme = getSectionTheme(section.slug);
 
             return (
-              <div key={section.id}>
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <section key={section.id} className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`rounded-full border px-3 py-1.5 text-xs font-bold sm:text-sm ${theme.badge}`}
-                      >
-                        {section.name}
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                        {section.categories.length} فئات
-                      </span>
+                    <div
+                      className={[
+                        "inline-flex rounded-full border px-3 py-1 text-sm font-bold",
+                        theme.badge,
+                      ].join(" ")}
+                    >
+                      {section.name}
                     </div>
-
-                    <p className="mt-2 text-sm leading-7 text-slate-400">
+                    <p className="mt-2 text-white/65">
                       {section.description || "قسم رئيسي للفئات"}
                     </p>
                   </div>
+
+                  <div className="text-sm text-white/50">
+                    {section.categories.length} فئات
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 min-[560px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {section.categories.map((category) => {
                     const active = selectedCategories.includes(category.id);
 
@@ -434,27 +424,28 @@ export default function StartGameForm({
                     );
                   })}
                 </div>
-              </div>
+              </section>
             );
           })}
 
           {uncategorized.length > 0 ? (
-            <div>
-              <div className="mb-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white sm:text-sm">
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-bold text-white">
                     فئات بدون قسم
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 sm:text-sm">
-                    {uncategorized.length} فئات
-                  </span>
+                  </div>
+                  <p className="mt-2 text-white/65">
+                    هذه الفئات غير مربوطة بقسم رئيسي.
+                  </p>
                 </div>
-                <p className="mt-2 text-sm leading-7 text-slate-400">
-                  هذه الفئات غير مربوطة بقسم رئيسي.
-                </p>
+
+                <div className="text-sm text-white/50">
+                  {uncategorized.length} فئات
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 min-[560px]:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {uncategorized.map((category) => {
                   const active = selectedCategories.includes(category.id);
 
@@ -481,46 +472,42 @@ export default function StartGameForm({
                   );
                 })}
               </div>
-            </div>
+            </section>
           ) : null}
 
           {groupedSections.length === 0 && uncategorized.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-6 text-center text-slate-300">
+            <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
               لا توجد أقسام أو فئات جاهزة حاليًا.
             </div>
           ) : null}
         </div>
+
+        {errorMessage ? (
+          <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
+            {errorMessage}
+          </div>
+        ) : null}
       </section>
 
-      {errorMessage ? (
-        <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
-          {errorMessage}
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div className="mb-4">
+          <div className="text-cyan-300">الخطوة الأخيرة</div>
+          <h3 className="mt-2 text-3xl font-black text-white">
+            جاهز لبدء اللعبة؟
+          </h3>
+          <p className="mt-3 text-white/70">
+            بعد التأكد من اسم اللعبة، أسماء الفرق، واختيار 6 فئات، يمكنك بدء
+            الجولة مباشرة.
+          </p>
         </div>
-      ) : null}
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h3 className="text-xl font-black text-white sm:text-2xl">
-              جاهز لبدء اللعبة؟
-            </h3>
-            <p className="mt-2 text-sm leading-7 text-slate-300 sm:text-base">
-              بعد التأكد من اسم اللعبة، أسماء الفرق، واختيار 6 فئات، يمكنك بدء
-              الجولة مباشرة.
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            className={`inline-flex min-h-12 items-center justify-center rounded-2xl px-6 py-3 text-base font-bold transition ${
-              isReadyToSubmit
-                ? "bg-cyan-400 text-slate-950 hover:bg-cyan-300"
-                : "cursor-not-allowed bg-slate-700 text-slate-300"
-            }`}
-          >
-            ابدأ اللعبة
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-8 py-4 text-lg font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={!isReadyToSubmit || gamesRemaining <= 0}
+        >
+          ابدأ اللعبة
+        </button>
       </section>
     </form>
   );
@@ -528,9 +515,9 @@ export default function StartGameForm({
 
 function InfoBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-4 text-center">
-      <p className="text-xs text-slate-400 sm:text-sm">{label}</p>
-      <p className="mt-2 text-xl font-black text-white sm:text-2xl">{value}</p>
+    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+      <div className="text-sm text-white/60">{label}</div>
+      <div className="mt-1 text-xl font-black text-white">{value}</div>
     </div>
   );
 }
@@ -549,8 +536,8 @@ function CategoryCard({
   infoOpen: boolean;
   onToggle: () => void;
   onInfoClick: (
-    event: ReactMouseEvent<HTMLButtonElement>,
-    categoryId: string
+    event: ReactMouseEvent,
+    categoryId: string,
   ) => void;
   theme: {
     badge: string;
@@ -563,15 +550,20 @@ function CategoryCard({
   const badge = getAvailabilityBadge(availability);
 
   return (
-    <div
-      className={`group relative overflow-hidden rounded-[1.75rem] border transition ${
+    <button
+      type="button"
+      onClick={onToggle}
+      className={[
+        "group relative overflow-hidden rounded-[2rem] border text-right transition-all duration-200",
+        "bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)]",
         active
-          ? "border-cyan-400 bg-cyan-400/10 shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
-          : availability.isSelectable
-          ? `border-white/10 bg-slate-950/70 ${theme.ring}`
-          : "border-red-500/15 bg-slate-950/60 opacity-90"
-      }`}
+          ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
+          : `border-white/10 ${theme.ring}`,
+        !availability.isSelectable ? "opacity-75" : "hover:-translate-y-0.5",
+      ].join(" ")}
     >
+      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.glow}`} />
+
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
@@ -582,60 +574,66 @@ function CategoryCard({
       </button>
 
       <div
-        className={`absolute left-3 top-3 z-20 max-w-[68%] rounded-full border px-3 py-1.5 text-[11px] font-bold leading-none backdrop-blur-sm sm:text-xs ${badge.className}`}
+        className={[
+          "absolute left-3 top-3 z-20 rounded-full border px-3 py-1 text-xs font-bold",
+          badge.className,
+        ].join(" ")}
       >
         {badge.text}
       </div>
 
       {active ? (
-        <div className="absolute left-3 bottom-[5.25rem] z-20 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-lg">
+        <div className="absolute bottom-[4.6rem] left-3 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
           تم الاختيار
         </div>
       ) : null}
 
-      <button
-        type="button"
-        onClick={onToggle}
-        disabled={!availability.isSelectable}
-        className="relative block h-full w-full text-right disabled:cursor-not-allowed"
-      >
-        <div className="relative aspect-[1.02/1] overflow-hidden bg-slate-200/90">
-          <div
-            className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${theme.glow}`}
-          />
-
+      <div className="relative">
+        <div className="h-56 overflow-hidden">
           {category.image_url ? (
             <img
               src={category.image_url}
               alt={category.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-slate-800 text-4xl text-white/80">
+            <div className="flex h-full items-center justify-center bg-slate-900 text-5xl text-white/25">
               ✨
             </div>
           )}
+        </div>
 
-          {!availability.isSelectable ? (
-            <div className="absolute inset-0 bg-slate-950/45" />
-          ) : null}
+        {!availability.isSelectable ? (
+          <div className="absolute inset-0 bg-slate-950/35" />
+        ) : null}
 
-          {infoOpen ? (
-            <div className="absolute inset-x-3 top-14 z-20 rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-2xl">
-              <p className="text-xs font-bold text-white sm:text-sm">
-                {category.name}
-              </p>
-              <p className="mt-2 text-[11px] leading-6 text-slate-200 sm:text-sm">
-                {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
-              </p>
+        {infoOpen ? (
+          <div className="absolute inset-x-3 top-14 z-20 rounded-[1.5rem] border border-white/10 bg-slate-950/95 p-4 text-white shadow-2xl">
+            <div className="text-lg font-black">{category.name}</div>
+            <p className="mt-2 text-sm leading-7 text-white/75">
+              {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+            </p>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <InfoBox
+                label="200"
+                value={String(availability.easyCount)}
+              />
+              <InfoBox
+                label="400"
+                value={String(availability.mediumCount)}
+              />
+              <InfoBox
+                label="600"
+                value={String(availability.hardCount)}
+              />
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
+      </div>
 
-        <div className={`relative px-3 py-3 text-center ${theme.chip}`}>
-          <p className="text-base font-black sm:text-lg">{category.name}</p>
-        </div>
-      </button>
-    </div>
+      <div className="relative bg-orange-500 px-4 py-4 text-center">
+        <div className="text-2xl font-black text-white">{category.name}</div>
+      </div>
+    </button>
   );
 }
