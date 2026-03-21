@@ -59,6 +59,7 @@ export type CategoryAvailability = {
 
 type HistoryRow = {
   question_id: string;
+  category_id: string;
 };
 
 type ServerSupabase = Awaited<ReturnType<typeof getSupabaseServerClient>>;
@@ -251,7 +252,7 @@ async function fetchAllUserHistoryPaged(
   while (true) {
     const { data, error } = await supabase
       .from("user_question_history")
-      .select("question_id")
+      .select("question_id, category_id")
       .eq("user_id", userId)
       .range(from, from + PAGE_SIZE - 1);
 
@@ -587,18 +588,22 @@ export default async function GameStartPage({
     }
 
     if (preventRepeat) {
-      const uniqueQuestionIds = Array.from(
-        new Set(built.rows.map((row) => row.question_id)),
+      const uniqueHistoryRows = Array.from(
+        new Map(
+          built.rows.map((row) => [
+            `${row.question_id}-${row.category_id}`,
+            {
+              user_id: user.id,
+              question_id: row.question_id,
+              category_id: row.category_id,
+            },
+          ]),
+        ).values(),
       );
-
-      const historyRows = uniqueQuestionIds.map((questionId) => ({
-        user_id: user.id,
-        question_id: questionId,
-      }));
 
       const { error: historyInsertError } = await supabase
         .from("user_question_history")
-        .insert(historyRows);
+        .insert(uniqueHistoryRows);
 
       if (historyInsertError) {
         await supabase
@@ -635,7 +640,7 @@ export default async function GameStartPage({
       await supabase.from("game_sessions").delete().eq("id", insertedSession.id);
 
       if (preventRepeat) {
-        const uniqueQuestionIds = Array.from(
+        const questionIds = Array.from(
           new Set(built.rows.map((row) => row.question_id)),
         );
 
@@ -643,7 +648,7 @@ export default async function GameStartPage({
           .from("user_question_history")
           .delete()
           .eq("user_id", user.id)
-          .in("question_id", uniqueQuestionIds);
+          .in("question_id", questionIds);
       }
 
       redirect(

@@ -39,49 +39,37 @@ type Props = {
 
 const REQUIRED_CATEGORY_COUNT = 6;
 
-const sectionStyles: Record<
+const sectionThemes: Record<
   string,
   {
     badge: string;
-    title: string;
-    description: string;
-    cardGlow: string;
+    glow: string;
   }
 > = {
   general: {
     badge: "border-orange-400/30 bg-orange-500/10 text-orange-200",
-    title: "text-orange-100",
-    description: "text-orange-100/70",
-    cardGlow: "from-orange-400/10 via-orange-300/5 to-transparent",
+    glow: "from-orange-400/10 via-orange-300/5 to-transparent",
   },
   islamic: {
     badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
-    title: "text-emerald-100",
-    description: "text-emerald-100/70",
-    cardGlow: "from-emerald-400/10 via-lime-300/5 to-transparent",
-  },
-  entertainment: {
-    badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
-    title: "text-fuchsia-100",
-    description: "text-fuchsia-100/70",
-    cardGlow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
+    glow: "from-emerald-400/10 via-lime-300/5 to-transparent",
   },
   sports: {
     badge: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
-    title: "text-cyan-100",
-    description: "text-cyan-100/70",
-    cardGlow: "from-cyan-400/10 via-sky-300/5 to-transparent",
+    glow: "from-cyan-400/10 via-sky-300/5 to-transparent",
+  },
+  entertainment: {
+    badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
+    glow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
   },
   default: {
     badge: "border-white/15 bg-white/5 text-white/85",
-    title: "text-white",
-    description: "text-white/65",
-    cardGlow: "from-slate-400/10 via-slate-300/5 to-transparent",
+    glow: "from-slate-400/10 via-slate-300/5 to-transparent",
   },
 };
 
 function getSectionTheme(slug: string) {
-  return sectionStyles[slug] ?? sectionStyles.default;
+  return sectionThemes[slug] ?? sectionThemes.default;
 }
 
 function formatAvailableGamesLabel(count: number) {
@@ -113,15 +101,7 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
     text: formatAvailableGamesLabel(availability.availableGames),
     className:
       "border-emerald-400/30 bg-slate-950/95 text-emerald-200 shadow-lg shadow-emerald-900/20",
-    };
-}
-
-function getSelectionError(availability: CategoryAvailability | undefined) {
-  if (!availability?.isSelectable) {
-    return "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.";
-  }
-
-  return "لا يمكن اختيار هذه الفئة حاليًا.";
+  };
 }
 
 function SummaryCard({
@@ -136,7 +116,7 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.6rem] border p-4",
+        "rounded-[1.5rem] border p-4",
         accent === "cyan"
           ? "border-cyan-400/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
@@ -158,6 +138,21 @@ function SummaryCard({
       >
         {value}
       </div>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
+      <div className="text-xs text-white/60">{label}</div>
+      <div className="mt-1 text-base font-black text-white">{value}</div>
     </div>
   );
 }
@@ -204,7 +199,9 @@ export default function StartGameForm({
     const availability = categoryAvailability[id];
 
     if (!availability?.isSelectable) {
-      setLocalError(getSelectionError(availability));
+      setLocalError(
+        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.",
+      );
       return;
     }
 
@@ -280,7 +277,7 @@ export default function StartGameForm({
         value={selectedCategories.join(",")}
       />
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <div className="text-cyan-300">إعداد لعبة جديدة</div>
@@ -293,7 +290,7 @@ export default function StartGameForm({
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[460px]">
+          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[480px]">
             <SummaryCard
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
@@ -311,8 +308,8 @@ export default function StartGameForm({
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
+        <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
           <div className="mb-5">
             <div className="text-cyan-300">الخطوة الأولى</div>
             <h2 className="mt-2 text-3xl font-black text-white">
@@ -364,11 +361,11 @@ export default function StartGameForm({
           </div>
         </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
           <div className="text-cyan-300">ملخص الإعداد</div>
           <h2 className="mt-2 text-3xl font-black text-white">جاهزية اللعبة</h2>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 grid gap-4">
             <SummaryCard
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
@@ -412,7 +409,7 @@ export default function StartGameForm({
         </section>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="text-cyan-300">الخطوة الثانية</div>
@@ -420,7 +417,7 @@ export default function StartGameForm({
               اختر {REQUIRED_CATEGORY_COUNT} فئات
             </h2>
             <p className="mt-3 text-white/70">
-              تظهر حالة كل فئة بوضوح، سواء كانت متاحة الآن أو بعدد ألعاب متبقٍ.
+              كل بطاقة تعرض حالة الفئة، وعدد الجولات المتاحة، ومخزون الأسئلة.
             </p>
           </div>
 
@@ -448,7 +445,7 @@ export default function StartGameForm({
                     >
                       {section.name}
                     </div>
-                    <p className={["mt-2", theme.description].join(" ")}>
+                    <p className="mt-2 text-white/65">
                       {section.description || "قسم رئيسي للفئات"}
                     </p>
                   </div>
@@ -518,7 +515,7 @@ export default function StartGameForm({
                       infoOpen={openInfoId === category.id}
                       onToggle={() => toggleCategory(category.id)}
                       onInfoClick={handleInfoClick}
-                      theme={sectionStyles.default}
+                      theme={sectionThemes.default}
                       availability={
                         categoryAvailability[category.id] ?? {
                           availableGames: 0,
@@ -544,7 +541,7 @@ export default function StartGameForm({
         ) : null}
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
         <div className="mb-4">
           <div className="text-cyan-300">الخطوة الأخيرة</div>
           <h3 className="mt-2 text-3xl font-black text-white">
@@ -584,21 +581,16 @@ function CategoryCard({
   onInfoClick: (event: ReactMouseEvent, categoryId: string) => void;
   theme: {
     badge: string;
-    title: string;
-    description: string;
-    cardGlow: string;
+    glow: string;
   };
   availability: CategoryAvailability;
 }) {
   const badge = getAvailabilityBadge(availability);
 
   return (
-    <button
-      type="button"
-      onClick={onToggle}
+    <div
       className={[
-        "group relative overflow-hidden rounded-[2rem] border text-right transition-all duration-200",
-        "bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)]",
+        "group relative overflow-hidden rounded-[2rem] border bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all duration-200",
         active
           ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
           : "border-white/10 hover:-translate-y-0.5 hover:border-white/20",
@@ -606,7 +598,7 @@ function CategoryCard({
       ].join(" ")}
     >
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.cardGlow}`}
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.glow}`}
       />
 
       <button
@@ -634,7 +626,7 @@ function CategoryCard({
       ) : null}
 
       <div className="relative">
-        <div className="h-56 overflow-hidden">
+        <div className="h-52 overflow-hidden sm:h-56">
           {category.image_url ? (
             <img
               src={category.image_url}
@@ -660,26 +652,35 @@ function CategoryCard({
             </p>
 
             <div className="mt-4 grid grid-cols-3 gap-2">
-              <MiniInfo label="200" value={String(availability.easyCount)} />
-              <MiniInfo label="400" value={String(availability.mediumCount)} />
-              <MiniInfo label="600" value={String(availability.hardCount)} />
+              <MiniStat label="200" value={availability.easyCount} />
+              <MiniStat label="400" value={availability.mediumCount} />
+              <MiniStat label="600" value={availability.hardCount} />
             </div>
           </div>
         ) : null}
       </div>
 
-      <div className="relative bg-orange-500 px-4 py-4 text-center">
-        <div className="text-2xl font-black text-white">{category.name}</div>
-      </div>
-    </button>
-  );
-}
+      <div className="relative px-4 py-4 text-center">
+        <div className="text-xl font-black text-white sm:text-2xl">
+          {category.name}
+        </div>
 
-function MiniInfo({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
-      <div className="text-xs text-white/60">{label}</div>
-      <div className="mt-1 text-base font-black text-white">{value}</div>
+        <button
+          type="button"
+          onClick={onToggle}
+          disabled={!availability.isSelectable}
+          className={[
+            "mt-3 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-bold transition",
+            active
+              ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+              : availability.isSelectable
+                ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                : "cursor-not-allowed border border-white/10 bg-white/5 text-white/40",
+          ].join(" ")}
+        >
+          {active ? "إلغاء الاختيار" : "اختيار الفئة"}
+        </button>
+      </div>
     </div>
   );
 }
