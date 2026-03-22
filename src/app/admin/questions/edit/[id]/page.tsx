@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import AdminEmptyState from "@/components/admin/admin-empty-state";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -12,17 +13,38 @@ type SearchParams = Promise<{
   category?: string;
 }>;
 
-type CategorySectionRelation =
-  | { name: string }
-  | { name: string }[]
-  | null;
+type SectionRow = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 type CategoryRow = {
   id: string;
   name: string;
   slug: string;
-  category_sections: CategorySectionRelation;
+  section_id: string | null;
 };
+
+type CategorySectionRelation =
+  | { id?: string; name?: string; slug?: string }
+  | { id?: string; name?: string; slug?: string }[]
+  | null;
+
+type CategoryRelation =
+  | {
+      id?: string;
+      name?: string;
+      slug?: string;
+      category_sections?: CategorySectionRelation;
+    }
+  | {
+      id?: string;
+      name?: string;
+      slug?: string;
+      category_sections?: CategorySectionRelation;
+    }[]
+  | null;
 
 type QuestionRow = {
   id: string;
@@ -32,31 +54,32 @@ type QuestionRow = {
   is_active: boolean;
   is_used: boolean;
   category_id: string | null;
-  categories:
-    | { name: string; slug: string }
-    | { name: string; slug: string }[]
-    | null;
+  categories: CategoryRelation;
 };
 
 type PointStatRow = {
   points: number;
 };
 
-function getSectionName(section: CategorySectionRelation) {
-  if (!section) return "بدون قسم";
-  if (Array.isArray(section)) return section[0]?.name ?? "بدون قسم";
-  return section.name;
+function getCategoryObject(categories: CategoryRelation) {
+  if (!categories) return null;
+  return Array.isArray(categories) ? (categories[0] ?? null) : categories;
 }
 
-function getCategoryName(
-  categories:
-    | { name: string; slug: string }
-    | { name: string; slug: string }[]
-    | null,
-) {
-  if (!categories) return "بدون فئة";
-  if (Array.isArray(categories)) return categories[0]?.name ?? "بدون فئة";
-  return categories.name;
+function getSectionObject(section: CategorySectionRelation) {
+  if (!section) return null;
+  return Array.isArray(section) ? (section[0] ?? null) : section;
+}
+
+function getCategoryName(categories: CategoryRelation) {
+  const category = getCategoryObject(categories);
+  return category?.name ?? "بدون فئة";
+}
+
+function getSectionName(categories: CategoryRelation) {
+  const category = getCategoryObject(categories);
+  const section = getSectionObject(category?.category_sections ?? null);
+  return section?.name ?? "بدون قسم";
 }
 
 function stripHtml(value: string | null) {
@@ -64,25 +87,62 @@ function stripHtml(value: string | null) {
   return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function truncateText(value: string, maxLength = 140) {
+function truncateText(value: string, maxLength = 160) {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength)}...`;
+}
+
+function decodeHtml(value: string) {
+  return value
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
+}
+
+function extractFirstImageSrc(html: string | null | undefined) {
+  if (!html) return null;
+  const match = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+  if (!match?.[1]) return null;
+  return decodeHtml(match[1].trim());
+}
+
+function buildReturnTo(params: {
+  q: string;
+  sectionId: string;
+  categoryId: string;
+}) {
+  const query = new URLSearchParams();
+
+  if (params.q) query.set("q", params.q);
+  if (params.sectionId) query.set("section", params.sectionId);
+  if (params.categoryId) query.set("category", params.categoryId);
+
+  const queryString = query.toString();
+  return queryString ? `/admin/questions?${queryString}` : "/admin/questions";
 }
 
 async function deleteQuestion(formData: FormData) {
   "use server";
 
-  const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  const id = String(formData.get("id") ?? "").trim();
+  const returnTo = String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
+
+  if (!id) {
+    redirect(returnTo);
+  }
 
   const supabase = await getSupabaseServerClient();
-
   await supabase.from("questions").delete().eq("id", id);
 
   revalidatePath("/admin/questions");
   revalidatePath("/admin");
   revalidatePath("/game/start");
   revalidatePath("/game/board");
+
+  redirect(returnTo);
 }
 
 export default async function AdminQuestionsPage({
@@ -101,13 +161,36 @@ export default async function AdminQuestionsPage({
       selectedSection.length > 0 ||
       selectedCategory.length > 0;
 
+    const returnTo = buildReturnTo({
+      q: searchQuery,
+      sectionId: selectedSection,
+      categoryId: selectedCategory,
+    });
+
     const supabase = await getSupabaseServerClient();
 
-    const { data: categoriesData, error: categoriesError } = await supabase
-      .from("categories")
-      .select("id, name, slug, category_sections ( name )")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true });
+    const [
+      { data: sectionsData, error: sectionsError },
+      { data: categoriesData, error: categoriesError },
+    ] = await Promise.all([
+      supabase
+        .from("category_sections")
+        .select("id, name, slug")
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("categories")
+        .select("id, name, slug, section_id")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true }),
+    ]);
+
+    if (sectionsError) {
+      return (
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+          فشل تحميل الأقسام: {sectionsError.message}
+        </div>
+      );
+    }
 
     if (categoriesError) {
       return (
@@ -117,21 +200,11 @@ export default async function AdminQuestionsPage({
       );
     }
 
+    const sections = (sectionsData ?? []) as SectionRow[];
     const categories = (categoriesData ?? []) as CategoryRow[];
 
-    const sectionOptions = Array.from(
-      new Set(
-        categories
-          .map((category) => getSectionName(category.category_sections))
-          .filter(Boolean),
-      ),
-    ).sort((a, b) => a.localeCompare(b, "ar"));
-
     const filteredCategoriesForDropdown = selectedSection
-      ? categories.filter(
-          (category) =>
-            getSectionName(category.category_sections) === selectedSection,
-        )
+      ? categories.filter((category) => category.section_id === selectedSection)
       : categories;
 
     let questions: QuestionRow[] = [];
@@ -145,10 +218,7 @@ export default async function AdminQuestionsPage({
 
       if (selectedSection) {
         allowedCategoryIds = categories
-          .filter(
-            (category) =>
-              getSectionName(category.category_sections) === selectedSection,
-          )
+          .filter((category) => category.section_id === selectedSection)
           .map((category) => category.id);
       }
 
@@ -165,7 +235,9 @@ export default async function AdminQuestionsPage({
           .order("created_at", { ascending: false });
 
         if (searchQuery) {
-          statsQuery = statsQuery.ilike("question_text", `%${searchQuery}%`);
+          statsQuery = statsQuery.or(
+            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
+          );
         }
 
         if (allowedCategoryIds && allowedCategoryIds.length > 0) {
@@ -182,32 +254,41 @@ export default async function AdminQuestionsPage({
           );
         }
 
-        const allFilteredPointRows = (statsData ?? []) as PointStatRow[];
+        const pointRows = (statsData ?? []) as PointStatRow[];
 
-        totalFilteredCount = allFilteredPointRows.length;
-        count200 = allFilteredPointRows.filter((item) => item.points === 200).length;
-        count400 = allFilteredPointRows.filter((item) => item.points === 400).length;
-        count600 = allFilteredPointRows.filter((item) => item.points === 600).length;
+        totalFilteredCount = pointRows.length;
+        count200 = pointRows.filter((item) => item.points === 200).length;
+        count400 = pointRows.filter((item) => item.points === 400).length;
+        count600 = pointRows.filter((item) => item.points === 600).length;
 
         let query = supabase
           .from("questions")
-          .select(
-            `
+          .select(`
+            id,
+            question_text,
+            answer_text,
+            points,
+            is_active,
+            is_used,
+            category_id,
+            categories (
               id,
-              question_text,
-              answer_text,
-              points,
-              is_active,
-              is_used,
-              category_id,
-              categories ( name, slug )
-            `,
-          )
+              name,
+              slug,
+              category_sections (
+                id,
+                name,
+                slug
+              )
+            )
+          `)
           .order("created_at", { ascending: false })
           .limit(150);
 
         if (searchQuery) {
-          query = query.ilike("question_text", `%${searchQuery}%`);
+          query = query.or(
+            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
+          );
         }
 
         if (allowedCategoryIds && allowedCategoryIds.length > 0) {
@@ -233,7 +314,7 @@ export default async function AdminQuestionsPage({
         <AdminPageHeader
           title="إدارة الأسئلة"
           description="فلتر الأسئلة بسرعة، راقب الصور داخل السؤال والإجابة، وعدّل أو احذف بدون فقدان الفلترة الحالية."
-          actions={
+          action={
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/admin/questions/import"
@@ -276,9 +357,9 @@ export default async function AdminQuestionsPage({
                 className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
               >
                 <option value="">كل الأقسام</option>
-                {sectionOptions.map((sectionName) => (
-                  <option key={sectionName} value={sectionName}>
-                    {sectionName}
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.name}
                   </option>
                 ))}
               </select>
@@ -296,7 +377,7 @@ export default async function AdminQuestionsPage({
                 <option value="">كل الفئات</option>
                 {filteredCategoriesForDropdown.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {getSectionName(category.category_sections)} / {category.name}
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -319,7 +400,7 @@ export default async function AdminQuestionsPage({
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-              يتم عرض الأسئلة فقط بعد استخدام الفلترة
+              الفلترة الحالية محفوظة داخل الرابط
             </div>
 
             {hasFilters ? (
@@ -340,22 +421,37 @@ export default async function AdminQuestionsPage({
                   600 نقطة: {count600}
                 </div>
               </>
-            ) : null}
+            ) : (
+              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
+                ابدأ بالبحث أو اختيار قسم/فئة لإظهار النتائج
+              </div>
+            )}
           </div>
         </section>
 
         {!hasFilters ? (
-          <AdminEmptyState
-            title="لا توجد نتائج بعد"
-            description="استخدم البحث أو الفلترة بالقسم أو الفئة، وبعدها ستظهر لك الأسئلة وتوزيعها حسب النقاط."
-            actionHref="/admin/questions/new"
-            actionLabel="إضافة سؤال جديد"
-          />
+          <div className="space-y-4">
+            <AdminEmptyState
+              title="لا توجد نتائج بعد"
+              description="استخدم البحث أو الفلترة بالقسم أو الفئة، وبعدها ستظهر لك الأسئلة وتوزيعها حسب النقاط."
+              buttonText="إضافة سؤال جديد"
+            />
+            <div className="flex justify-center">
+              <Link
+                href="/admin/questions/new"
+                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+              >
+                إضافة سؤال جديد
+              </Link>
+            </div>
+          </div>
         ) : questions.length > 0 ? (
           <section className="grid gap-5 xl:grid-cols-2">
             {questions.map((question) => {
               const questionPreview = truncateText(stripHtml(question.question_text));
               const answerPreview = truncateText(stripHtml(question.answer_text));
+              const questionImage = extractFirstImageSrc(question.question_text);
+              const answerImage = extractFirstImageSrc(question.answer_text);
 
               return (
                 <article
@@ -371,6 +467,10 @@ export default async function AdminQuestionsPage({
                   </h3>
 
                   <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
+                      {getSectionName(question.categories)}
+                    </span>
+
                     <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
                       {getCategoryName(question.categories)}
                     </span>
@@ -402,6 +502,44 @@ export default async function AdminQuestionsPage({
                     </span>
                   </div>
 
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                      <div className="mb-2 text-sm font-bold text-white/70">
+                        صورة السؤال
+                      </div>
+
+                      {questionImage ? (
+                        <img
+                          src={questionImage}
+                          alt="صورة السؤال"
+                          className="h-52 w-full rounded-[1rem] object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
+                          لا توجد صورة داخل السؤال
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                      <div className="mb-2 text-sm font-bold text-white/70">
+                        صورة الإجابة
+                      </div>
+
+                      {answerImage ? (
+                        <img
+                          src={answerImage}
+                          alt="صورة الإجابة"
+                          className="h-52 w-full rounded-[1rem] object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
+                          لا توجد صورة داخل الإجابة
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
                     <div className="mb-2 text-sm font-bold text-white/70">
                       الإجابة
@@ -414,7 +552,7 @@ export default async function AdminQuestionsPage({
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Link
                       href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
-                        `/admin/questions?q=${encodeURIComponent(searchQuery)}&section=${encodeURIComponent(selectedSection)}&category=${encodeURIComponent(selectedCategory)}`,
+                        returnTo,
                       )}`}
                       className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
                     >
@@ -423,6 +561,7 @@ export default async function AdminQuestionsPage({
 
                     <form action={deleteQuestion}>
                       <input type="hidden" name="id" value={question.id} />
+                      <input type="hidden" name="returnTo" value={returnTo} />
                       <button
                         type="submit"
                         className="inline-flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
@@ -436,12 +575,21 @@ export default async function AdminQuestionsPage({
             })}
           </section>
         ) : (
-          <AdminEmptyState
-            title="لا توجد أسئلة مطابقة"
-            description="جرّب تغيير نص البحث أو القسم أو الفئة، وستظهر هنا النتائج مع توزيعها حسب النقاط."
-            actionHref="/admin/questions/new"
-            actionLabel="إضافة سؤال جديد"
-          />
+          <div className="space-y-4">
+            <AdminEmptyState
+              title="لا توجد أسئلة مطابقة"
+              description="جرّب تغيير نص البحث أو القسم أو الفئة، وستظهر هنا النتائج مع توزيعها حسب النقاط."
+              buttonText="إضافة سؤال جديد"
+            />
+            <div className="flex justify-center">
+              <Link
+                href="/admin/questions/new"
+                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+              >
+                إضافة سؤال جديد
+              </Link>
+            </div>
+          </div>
         )}
       </div>
     );
