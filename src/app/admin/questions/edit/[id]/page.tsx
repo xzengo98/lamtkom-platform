@@ -128,7 +128,8 @@ async function deleteQuestion(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id") ?? "").trim();
-  const returnTo = String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
+  const returnTo =
+    String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
 
   if (!id) {
     redirect(returnTo);
@@ -445,7 +446,9 @@ export default async function AdminQuestionsPage({
         ) : questions.length > 0 ? (
           <section className="grid gap-5 xl:grid-cols-2">
             {questions.map((question) => {
-              const questionPreview = truncateText(stripHtml(question.question_text));
+              const questionPreview = truncateText(
+                stripHtml(question.question_text),
+              );
               const answerPreview = truncateText(stripHtml(question.answer_text));
               const questionImage = extractFirstImageSrc(question.question_text);
               const answerImage = extractFirstImageSrc(question.answer_text);
