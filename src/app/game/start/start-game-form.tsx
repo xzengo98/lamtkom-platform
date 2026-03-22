@@ -84,20 +84,20 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
   if (!availability.isSelectable) {
     return {
       text: "غير متاحة",
-      className: "border-red-500/30 bg-red-500/10 text-red-200",
+      className: "border-red-500/30 bg-[#34161b] text-red-200",
     };
   }
 
   if (availability.mode === "fixed") {
     return {
       text: "متاحة",
-      className: "border-white/15 bg-white/10 text-white",
+      className: "border-white/15 bg-[#161f3d] text-white",
     };
   }
 
   return {
     text: formatAvailableGamesLabel(availability.availableGames),
-    className: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    className: "border-emerald-500/40 bg-[#0f2e2a] text-emerald-200",
   };
 }
 
@@ -413,8 +413,8 @@ export default function StartGameForm({
 
             return (
               <section key={section.id} className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-wrap items-center gap-3">
                     <div
                       className={[
                         "inline-flex rounded-full border px-3 py-1 text-sm font-bold",
@@ -423,13 +423,14 @@ export default function StartGameForm({
                     >
                       {section.name}
                     </div>
-                    <p className="mt-2 text-sm text-white/65 md:text-base">
-                      {section.description || "قسم رئيسي للفئات"}
-                    </p>
+
+                    <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
+                      {section.categories.length} فئات
+                    </div>
                   </div>
 
-                  <div className="text-sm text-white/50">
-                    {section.categories.length} فئات
+                  <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
+                    {section.description || "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
                   </div>
                 </div>
 
@@ -466,18 +467,19 @@ export default function StartGameForm({
 
           {uncategorized.length > 0 ? (
             <section className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-bold text-white">
                     فئات بدون قسم
                   </div>
-                  <p className="mt-2 text-sm text-white/65 md:text-base">
-                    هذه الفئات غير مربوطة بقسم رئيسي.
-                  </p>
+
+                  <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
+                    {uncategorized.length} فئات
+                  </div>
                 </div>
 
-                <div className="text-sm text-white/50">
-                  {uncategorized.length} فئات
+                <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
+                  هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار واللعب.
                 </div>
               </div>
 
