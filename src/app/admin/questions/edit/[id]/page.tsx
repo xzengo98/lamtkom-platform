@@ -229,10 +229,7 @@ export default async function AdminQuestionsPage({
       if (allowedCategoryIds && allowedCategoryIds.length === 0) {
         questions = [];
       } else {
-        let statsQuery = supabase
-          .from("questions")
-          .select("points")
-          .order("created_at", { ascending: false });
+        let statsQuery = supabase.from("questions").select("points");
 
         if (searchQuery) {
           statsQuery = statsQuery.or(
@@ -313,7 +310,7 @@ export default async function AdminQuestionsPage({
       <div className="space-y-6">
         <AdminPageHeader
           title="إدارة الأسئلة"
-          description="فلتر الأسئلة بسرعة، راقب الصور داخل السؤال والإجابة، وعدّل أو احذف بدون فقدان الفلترة الحالية."
+          description="فلتر الأسئلة بسرعة، وراقب توزيع النتائج حسب النقاط، وعدّل أو احذف بدون فقدان الفلترة الحالية."
           action={
             <div className="flex flex-wrap gap-3">
               <Link
@@ -410,15 +407,15 @@ export default async function AdminQuestionsPage({
                 </div>
 
                 <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-bold text-amber-100">
-                  200 نقطة: {count200}
+                  200 نقطة: {count200} سؤال
                 </div>
 
                 <div className="rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sm font-bold text-sky-100">
-                  400 نقطة: {count400}
+                  400 نقطة: {count400} سؤال
                 </div>
 
                 <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-2 text-sm font-bold text-fuchsia-100">
-                  600 نقطة: {count600}
+                  600 نقطة: {count600} سؤال
                 </div>
               </>
             ) : (
