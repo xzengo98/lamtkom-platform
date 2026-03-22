@@ -116,7 +116,7 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.5rem] border p-4",
+        "rounded-[1.25rem] border p-3 md:rounded-[1.5rem] md:p-4",
         accent === "cyan"
           ? "border-cyan-400/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
@@ -124,7 +124,7 @@ function SummaryCard({
     >
       <div
         className={[
-          "text-sm",
+          "text-xs md:text-sm",
           accent === "cyan" ? "text-cyan-100/80" : "text-white/60",
         ].join(" ")}
       >
@@ -132,8 +132,9 @@ function SummaryCard({
       </div>
       <div
         className={[
-          "mt-1 text-2xl font-black",
+          "mt-1 font-black",
           accent === "cyan" ? "text-cyan-100" : "text-white",
+          "text-xl md:text-2xl",
         ].join(" ")}
       >
         {value}
@@ -150,9 +151,11 @@ function MiniStat({
   value: string | number;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-2 text-center">
-      <div className="text-xs text-white/60">{label}</div>
-      <div className="mt-1 text-base font-black text-white">{value}</div>
+    <div className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
+      <div className="text-[10px] text-white/60 md:text-xs">{label}</div>
+      <div className="mt-1 text-sm font-black text-white md:text-base">
+        {value}
+      </div>
     </div>
   );
 }
@@ -270,27 +273,27 @@ export default function StartGameForm({
   const visibleError = localError || errorMessage;
 
   return (
-    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-6">
+    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-5 md:space-y-6">
       <input
         type="hidden"
         name="selectedCategories"
         value={selectedCategories.join(",")}
       />
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+      <section className="rounded-[1.5rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[2rem] md:p-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <div className="text-cyan-300">إعداد لعبة جديدة</div>
-            <h1 className="mt-2 text-3xl font-black text-white md:text-5xl">
+            <div className="text-cyan-300 text-sm">إعداد لعبة جديدة</div>
+            <h1 className="mt-2 text-2xl font-black text-white md:text-5xl">
               جهّز اللعبة خلال دقائق
             </h1>
-            <p className="mt-3 max-w-3xl text-base leading-8 text-white/75 md:text-lg">
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/75 md:text-lg md:leading-8">
               اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
               مباشرة.
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[480px]">
+          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[470px]">
             <SummaryCard
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
@@ -308,11 +311,11 @@ export default function StartGameForm({
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
+      <section className="grid gap-5 xl:grid-cols-[1fr_0.9fr]">
+        <div className="rounded-[1.5rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[2rem] md:p-6">
           <div className="mb-5">
-            <div className="text-cyan-300">الخطوة الأولى</div>
-            <h2 className="mt-2 text-3xl font-black text-white">
+            <div className="text-cyan-300 text-sm">الخطوة الأولى</div>
+            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
               اختر اسم اللعبة وأسماء الفرق
             </h2>
           </div>
@@ -327,7 +330,7 @@ export default function StartGameForm({
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}
                 placeholder="مثال: تحدي الأذكياء"
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
               />
             </div>
 
@@ -341,7 +344,7 @@ export default function StartGameForm({
                   value={teamOne}
                   onChange={(e) => setTeamOne(e.target.value)}
                   placeholder="اسم الفريق الأول"
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
                 />
               </div>
 
@@ -354,16 +357,18 @@ export default function StartGameForm({
                   value={teamTwo}
                   onChange={(e) => setTeamTwo(e.target.value)}
                   placeholder="اسم الفريق الثاني"
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
-          <div className="text-cyan-300">ملخص الإعداد</div>
-          <h2 className="mt-2 text-3xl font-black text-white">جاهزية اللعبة</h2>
+        <section className="rounded-[1.5rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[2rem] md:p-6">
+          <div className="text-cyan-300 text-sm">ملخص الإعداد</div>
+          <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
+            جاهزية اللعبة
+          </h2>
 
           <div className="mt-5 grid gap-4">
             <SummaryCard
@@ -384,23 +389,23 @@ export default function StartGameForm({
             />
           </div>
 
-          <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-white/75">
+          <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-white/5 p-4 text-sm leading-7 text-white/75 md:rounded-[1.5rem] md:text-base md:leading-8">
             {selectionMode === "dynamic" ? (
-              <p className="leading-8">
+              <p>
                 حسابك يعمل الآن بنمط <strong className="text-white">عشوائي بدون تكرار</strong>.
                 كل فئة تُظهر عدد الألعاب المتبقية الفعلي، ولن تُستخدم نفس الأسئلة
                 مرة أخرى.
               </p>
             ) : (
-              <p className="leading-8">
+              <p>
                 حسابك يعمل الآن بنمط <strong className="text-white">الأسئلة الثابتة</strong>.
                 قد تتكرر الأسئلة في الحساب المجاني.
               </p>
             )}
           </div>
 
-          <div className="mt-5 rounded-[1.5rem] border border-cyan-400/20 bg-cyan-400/10 p-4">
-            <div className="text-lg font-black text-cyan-100">
+          <div className="mt-5 rounded-[1.25rem] border border-cyan-400/20 bg-cyan-400/10 p-4 md:rounded-[1.5rem]">
+            <div className="text-base font-black text-cyan-100 md:text-lg">
               {isReadyToSubmit
                 ? "تم اختيار العدد المطلوب. يمكنك الآن بدء اللعبة."
                 : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
@@ -409,27 +414,27 @@ export default function StartGameForm({
         </section>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
+      <section className="rounded-[1.5rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[2rem] md:p-6">
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="text-cyan-300">الخطوة الثانية</div>
-            <h2 className="mt-2 text-3xl font-black text-white">
+            <div className="text-cyan-300 text-sm">الخطوة الثانية</div>
+            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
               اختر {REQUIRED_CATEGORY_COUNT} فئات
             </h2>
-            <p className="mt-3 text-white/70">
+            <p className="mt-3 text-sm text-white/70 md:text-base">
               كل بطاقة تعرض حالة الفئة، وعدد الجولات المتاحة، ومخزون الأسئلة.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center">
             <div className="text-sm text-white/60">الفئات المختارة</div>
-            <div className="mt-1 text-2xl font-black text-white">
+            <div className="mt-1 text-xl font-black text-white md:text-2xl">
               {selectedCount} / {REQUIRED_CATEGORY_COUNT}
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-7">
           {groupedSections.map((section) => {
             const theme = getSectionTheme(section.slug);
 
@@ -445,7 +450,7 @@ export default function StartGameForm({
                     >
                       {section.name}
                     </div>
-                    <p className="mt-2 text-white/65">
+                    <p className="mt-2 text-sm text-white/65 md:text-base">
                       {section.description || "قسم رئيسي للفئات"}
                     </p>
                   </div>
@@ -455,7 +460,7 @@ export default function StartGameForm({
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {section.categories.map((category) => {
                     const active = selectedCategories.includes(category.id);
 
@@ -493,7 +498,7 @@ export default function StartGameForm({
                   <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-bold text-white">
                     فئات بدون قسم
                   </div>
-                  <p className="mt-2 text-white/65">
+                  <p className="mt-2 text-sm text-white/65 md:text-base">
                     هذه الفئات غير مربوطة بقسم رئيسي.
                   </p>
                 </div>
@@ -503,7 +508,7 @@ export default function StartGameForm({
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {uncategorized.map((category) => {
                   const active = selectedCategories.includes(category.id);
 
@@ -541,13 +546,13 @@ export default function StartGameForm({
         ) : null}
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-6">
+      <section className="rounded-[1.5rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[2rem] md:p-6">
         <div className="mb-4">
-          <div className="text-cyan-300">الخطوة الأخيرة</div>
-          <h3 className="mt-2 text-3xl font-black text-white">
+          <div className="text-cyan-300 text-sm">الخطوة الأخيرة</div>
+          <h3 className="mt-2 text-2xl font-black text-white md:text-3xl">
             جاهز لبدء اللعبة؟
           </h3>
-          <p className="mt-3 text-white/70">
+          <p className="mt-3 text-sm text-white/70 md:text-base">
             بعد التأكد من اسم اللعبة وأسماء الفرق واختيار 6 فئات، يمكنك بدء الجولة
             مباشرة.
           </p>
@@ -555,7 +560,7 @@ export default function StartGameForm({
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-8 py-4 text-lg font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 md:px-8 md:py-4 md:text-lg"
           disabled={!isReadyToSubmit || gamesRemaining <= 0}
         >
           ابدأ اللعبة
@@ -590,7 +595,7 @@ function CategoryCard({
   return (
     <div
       className={[
-        "group relative overflow-hidden rounded-[2rem] border bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all duration-200",
+        "group relative overflow-hidden rounded-[1.5rem] border bg-[#09132c] shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all duration-200",
         active
           ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
           : "border-white/10 hover:-translate-y-0.5 hover:border-white/20",
@@ -604,7 +609,7 @@ function CategoryCard({
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500 text-xl font-black text-white shadow-lg"
+        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500 text-lg font-black text-white shadow-lg md:h-9 md:w-9 md:text-xl"
         aria-label={`عرض وصف ${category.name}`}
       >
         i
@@ -612,7 +617,7 @@ function CategoryCard({
 
       <div
         className={[
-          "absolute left-3 top-3 z-20 rounded-full border px-3 py-1 text-xs font-bold",
+          "absolute left-3 top-3 z-20 rounded-full border px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs",
           badge.className,
         ].join(" ")}
       >
@@ -620,13 +625,13 @@ function CategoryCard({
       </div>
 
       {active ? (
-        <div className="absolute bottom-[4.7rem] left-3 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
+        <div className="absolute bottom-[4.3rem] left-3 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-bold text-cyan-100 md:bottom-[4.6rem] md:px-3 md:text-xs">
           تم الاختيار
         </div>
       ) : null}
 
       <div className="relative">
-        <div className="h-52 overflow-hidden sm:h-56">
+        <div className="h-40 overflow-hidden sm:h-44 md:h-48">
           {category.image_url ? (
             <img
               src={category.image_url}
@@ -634,7 +639,7 @@ function CategoryCard({
               className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-slate-900 text-5xl text-white/25">
+            <div className="flex h-full items-center justify-center bg-slate-900 text-4xl text-white/25 md:text-5xl">
               ✨
             </div>
           )}
@@ -645,9 +650,9 @@ function CategoryCard({
         ) : null}
 
         {infoOpen ? (
-          <div className="absolute inset-x-3 top-14 z-20 rounded-[1.5rem] border border-white/10 bg-slate-950/95 p-4 text-white shadow-2xl">
-            <div className="text-lg font-black">{category.name}</div>
-            <p className="mt-2 text-sm leading-7 text-white/75">
+          <div className="absolute inset-x-3 top-12 z-20 rounded-[1.25rem] border border-white/10 bg-slate-950/95 p-3 text-white shadow-2xl md:rounded-[1.5rem] md:p-4">
+            <div className="text-base font-black md:text-lg">{category.name}</div>
+            <p className="mt-2 text-xs leading-6 text-white/75 md:text-sm md:leading-7">
               {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
             </p>
 
@@ -660,8 +665,8 @@ function CategoryCard({
         ) : null}
       </div>
 
-      <div className="relative px-4 py-4 text-center">
-        <div className="text-xl font-black text-white sm:text-2xl">
+      <div className="relative px-3 py-3 text-center md:px-4 md:py-4">
+        <div className="text-lg font-black text-white md:text-xl">
           {category.name}
         </div>
 
@@ -670,7 +675,7 @@ function CategoryCard({
           onClick={onToggle}
           disabled={!availability.isSelectable}
           className={[
-            "mt-3 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-bold transition",
+            "mt-3 inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-bold transition md:text-sm",
             active
               ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
               : availability.isSelectable
