@@ -1,604 +1,571 @@
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import AdminEmptyState from "@/components/admin/admin-empty-state";
-import AdminPageHeader from "@/components/admin/admin-page-header";
+import { revalidatePath } from "next/cache";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import HtmlSnippetEditor from "@/components/admin/html-snippet-editor";
+import AdminEmptyState from "@/components/admin/admin-empty-state";
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{
-  q?: string;
-  section?: string;
-  category?: string;
+type Params = Promise<{
+  id: string;
 }>;
 
-type SectionRow = {
-  id: string;
-  name: string;
-  slug: string;
-};
+type SearchParams = Promise<{
+  error?: string;
+  returnTo?: string;
+}>;
+
+type CategoryRelation = { name: string } | { name: string }[] | null;
 
 type CategoryRow = {
   id: string;
   name: string;
-  slug: string;
-  section_id: string | null;
+  category_sections: CategoryRelation;
 };
-
-type CategorySectionRelation =
-  | { id?: string; name?: string; slug?: string }
-  | { id?: string; name?: string; slug?: string }[]
-  | null;
-
-type CategoryRelation =
-  | {
-      id?: string;
-      name?: string;
-      slug?: string;
-      category_sections?: CategorySectionRelation;
-    }
-  | {
-      id?: string;
-      name?: string;
-      slug?: string;
-      category_sections?: CategorySectionRelation;
-    }[]
-  | null;
 
 type QuestionRow = {
   id: string;
   question_text: string;
   answer_text: string | null;
+  category_id: string | null;
   points: number;
   is_active: boolean;
   is_used: boolean;
-  category_id: string | null;
-  categories: CategoryRelation;
+  year_tolerance_before: number | null;
+  year_tolerance_after: number | null;
 };
 
-type PointStatRow = {
-  points: number;
-};
-
-function getCategoryObject(categories: CategoryRelation) {
-  if (!categories) return null;
-  return Array.isArray(categories) ? (categories[0] ?? null) : categories;
+function getSectionName(section: CategoryRelation) {
+  if (!section) return "";
+  if (Array.isArray(section)) return section[0]?.name ?? "";
+  return section.name;
 }
 
-function getSectionObject(section: CategorySectionRelation) {
-  if (!section) return null;
-  return Array.isArray(section) ? (section[0] ?? null) : section;
-}
-
-function getCategoryName(categories: CategoryRelation) {
-  const category = getCategoryObject(categories);
-  return category?.name ?? "بدون فئة";
-}
-
-function getSectionName(categories: CategoryRelation) {
-  const category = getCategoryObject(categories);
-  const section = getSectionObject(category?.category_sections ?? null);
-  return section?.name ?? "بدون قسم";
-}
-
-function stripHtml(value: string | null) {
-  if (!value) return "";
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function truncateText(value: string, maxLength = 160) {
-  if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength)}...`;
-}
-
-function decodeHtml(value: string) {
+function escapeAttribute(value: string) {
   return value
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&apos;", "'")
-    .replaceAll("&amp;", "&")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">");
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function toYouTubeEmbed(url: string) {
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.hostname.includes("youtube.com")) {
+      const v = parsed.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+
+    if (parsed.hostname.includes("youtu.be")) {
+      const id = parsed.pathname.replace("/", "");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+  } catch {}
+
+  return url;
+}
+
+function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
+  const parts: string[] = [];
+
+  if (baseHtml.trim()) {
+    parts.push(baseHtml.trim());
+  }
+
+  if (imageUrl.trim()) {
+    parts.push(
+      `<img src="${escapeAttribute(
+        imageUrl.trim(),
+      )}" alt="" class="w-full rounded-2xl object-contain" />`,
+    );
+  }
+
+  if (videoUrl.trim()) {
+    const embed = toYouTubeEmbed(videoUrl.trim());
+
+    if (embed.includes("youtube.com/embed/")) {
+      parts.push(
+        `<iframe src="${escapeAttribute(
+          embed,
+        )}" class="aspect-video w-full rounded-2xl" allowfullscreen></iframe>`,
+      );
+    } else {
+      parts.push(
+        `<video src="${escapeAttribute(
+          embed,
+        )}" controls class="w-full rounded-2xl"></video>`,
+      );
+    }
+  }
+
+  return parts.join("\n\n").trim();
+}
+
+function normalizeHtmlText(value: string) {
+  return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 function extractFirstImageSrc(html: string | null | undefined) {
-  if (!html) return null;
+  if (!html) return "";
   const match = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-  if (!match?.[1]) return null;
-  return decodeHtml(match[1].trim());
+  return match?.[1]?.trim() ?? "";
 }
 
-function buildReturnTo(params: {
-  q: string;
-  sectionId: string;
-  categoryId: string;
-}) {
-  const query = new URLSearchParams();
+function extractFirstVideoSrc(html: string | null | undefined) {
+  if (!html) return "";
 
-  if (params.q) query.set("q", params.q);
-  if (params.sectionId) query.set("section", params.sectionId);
-  if (params.categoryId) query.set("category", params.categoryId);
+  const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["'][^>]*>/i);
+  if (iframeMatch?.[1]) return iframeMatch[1].trim();
 
-  const queryString = query.toString();
-  return queryString ? `/admin/questions?${queryString}` : "/admin/questions";
+  const videoMatch = html.match(/<video[^>]+src=["']([^"']+)["'][^>]*>/i);
+  if (videoMatch?.[1]) return videoMatch[1].trim();
+
+  return "";
 }
 
-async function deleteQuestion(formData: FormData) {
-  "use server";
+function stripMediaHtml(html: string | null | undefined) {
+  if (!html) return "";
 
-  const id = String(formData.get("id") ?? "").trim();
-  const returnTo =
-    String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
+  return html
+    .replace(/<img[^>]*>/gi, "")
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<video[\s\S]*?<\/video>/gi, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
-  if (!id) {
-    redirect(returnTo);
+function sanitizeReturnTo(returnTo: string | undefined) {
+  if (!returnTo || !returnTo.startsWith("/")) {
+    return "/admin/questions";
   }
 
-  const supabase = await getSupabaseServerClient();
-  await supabase.from("questions").delete().eq("id", id);
-
-  revalidatePath("/admin/questions");
-  revalidatePath("/admin");
-  revalidatePath("/game/start");
-  revalidatePath("/game/board");
-
-  redirect(returnTo);
+  return returnTo;
 }
 
-export default async function AdminQuestionsPage({
+export default async function EditQuestionPage({
+  params,
   searchParams,
 }: {
+  params: Params;
   searchParams: SearchParams;
 }) {
-  try {
-    const params = await searchParams;
-    const searchQuery = String(params.q ?? "").trim();
-    const selectedSection = String(params.section ?? "").trim();
-    const selectedCategory = String(params.category ?? "").trim();
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const questionId = resolvedParams.id;
+  const returnTo = sanitizeReturnTo(resolvedSearchParams.returnTo);
 
-    const hasFilters =
-      searchQuery.length > 0 ||
-      selectedSection.length > 0 ||
-      selectedCategory.length > 0;
+  const supabase = await getSupabaseServerClient();
 
-    const returnTo = buildReturnTo({
-      q: searchQuery,
-      sectionId: selectedSection,
-      categoryId: selectedCategory,
-    });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.role !== "admin") {
+    redirect("/");
+  }
+
+  const [{ data: categoriesData, error: categoriesError }, { data: questionData, error: questionError }] =
+    await Promise.all([
+      supabase
+        .from("categories")
+        .select("id, name, category_sections ( name )")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("questions")
+        .select(
+          "id, question_text, answer_text, category_id, points, is_active, is_used, year_tolerance_before, year_tolerance_after",
+        )
+        .eq("id", questionId)
+        .single(),
+    ]);
+
+  if (categoriesError) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+        فشل تحميل الفئات: {categoriesError.message}
+      </div>
+    );
+  }
+
+  if (questionError) {
+    return (
+      <div className="space-y-4">
+        <AdminEmptyState
+          title="السؤال غير موجود"
+          description="ربما تم حذف السؤال أو أن الرابط غير صحيح."
+          buttonText="الرجوع للأسئلة"
+        />
+        <div className="flex justify-center">
+          <Link
+            href={returnTo}
+            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+          >
+            الرجوع للأسئلة
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const categories = (categoriesData ?? []) as CategoryRow[];
+  const question = questionData as QuestionRow;
+
+  const initialQuestionBase = stripMediaHtml(question.question_text);
+  const initialAnswerBase = stripMediaHtml(question.answer_text);
+  const initialQuestionImageUrl = extractFirstImageSrc(question.question_text);
+  const initialQuestionVideoUrl = extractFirstVideoSrc(question.question_text);
+  const initialAnswerImageUrl = extractFirstImageSrc(question.answer_text);
+  const initialAnswerVideoUrl = extractFirstVideoSrc(question.answer_text);
+
+  async function updateQuestion(formData: FormData) {
+    "use server";
 
     const supabase = await getSupabaseServerClient();
 
-    const [
-      { data: sectionsData, error: sectionsError },
-      { data: categoriesData, error: categoriesError },
-    ] = await Promise.all([
-      supabase
-        .from("category_sections")
-        .select("id, name, slug")
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("categories")
-        .select("id, name, slug, section_id")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true }),
-    ]);
+    const questionBase = formData.get("question_text")?.toString().trim() || "";
+    const answerBase = formData.get("answer_text")?.toString().trim() || "";
+    const category_id = formData.get("category_id")?.toString().trim() || "";
+    const question_image_url =
+      formData.get("question_image_url")?.toString().trim() || "";
+    const question_video_url =
+      formData.get("question_video_url")?.toString().trim() || "";
+    const answer_image_url =
+      formData.get("answer_image_url")?.toString().trim() || "";
+    const answer_video_url =
+      formData.get("answer_video_url")?.toString().trim() || "";
+    const points = Number(formData.get("points") || 200);
+    const is_active = formData.get("is_active") === "on";
+    const year_tolerance_before = Number(
+      formData.get("year_tolerance_before") || 0,
+    );
+    const year_tolerance_after = Number(
+      formData.get("year_tolerance_after") || 0,
+    );
+    const safeReturnTo = sanitizeReturnTo(
+      formData.get("returnTo")?.toString().trim(),
+    );
 
-    if (sectionsError) {
-      return (
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-          فشل تحميل الأقسام: {sectionsError.message}
-        </div>
+    const finalQuestionText = appendMediaHtml(
+      questionBase,
+      question_image_url,
+      question_video_url,
+    );
+    const finalAnswerText = appendMediaHtml(
+      answerBase,
+      answer_image_url,
+      answer_video_url,
+    );
+
+    if (!finalQuestionText || !finalAnswerText || !category_id) {
+      redirect(
+        `/admin/questions/edit/${questionId}?returnTo=${encodeURIComponent(
+          safeReturnTo,
+        )}&error=${encodeURIComponent(
+          "نص السؤال أو وسائطه، والإجابة أو وسائطها، والفئة حقول مطلوبة.",
+        )}`,
       );
     }
 
-    if (categoriesError) {
-      return (
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-          فشل تحميل الفئات: {categoriesError.message}
-        </div>
+    const normalizedQuestion = normalizeHtmlText(finalQuestionText);
+
+    const { data: existingQuestions, error: existingError } = await supabase
+      .from("questions")
+      .select("id, question_text")
+      .eq("category_id", category_id)
+      .neq("id", questionId);
+
+    if (existingError) {
+      redirect(
+        `/admin/questions/edit/${questionId}?returnTo=${encodeURIComponent(
+          safeReturnTo,
+        )}&error=${encodeURIComponent(existingError.message)}`,
       );
     }
 
-    const sections = (sectionsData ?? []) as SectionRow[];
-    const categories = (categoriesData ?? []) as CategoryRow[];
+    const isDuplicate = (existingQuestions ?? []).some((item) => {
+      const currentText =
+        typeof item.question_text === "string" ? item.question_text : "";
+      return normalizeHtmlText(currentText) === normalizedQuestion;
+    });
 
-    const filteredCategoriesForDropdown = selectedSection
-      ? categories.filter((category) => category.section_id === selectedSection)
-      : categories;
-
-    let questions: QuestionRow[] = [];
-    let totalFilteredCount = 0;
-    let count200 = 0;
-    let count400 = 0;
-    let count600 = 0;
-
-    if (hasFilters) {
-      let allowedCategoryIds: string[] | null = null;
-
-      if (selectedSection) {
-        allowedCategoryIds = categories
-          .filter((category) => category.section_id === selectedSection)
-          .map((category) => category.id);
-      }
-
-      if (selectedCategory) {
-        allowedCategoryIds = [selectedCategory];
-      }
-
-      if (allowedCategoryIds && allowedCategoryIds.length === 0) {
-        questions = [];
-      } else {
-        let statsQuery = supabase.from("questions").select("points");
-
-        if (searchQuery) {
-          statsQuery = statsQuery.or(
-            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
-          );
-        }
-
-        if (allowedCategoryIds && allowedCategoryIds.length > 0) {
-          statsQuery = statsQuery.in("category_id", allowedCategoryIds);
-        }
-
-        const { data: statsData, error: statsError } = await statsQuery;
-
-        if (statsError) {
-          return (
-            <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-              فشل تحميل إحصائيات الأسئلة: {statsError.message}
-            </div>
-          );
-        }
-
-        const pointRows = (statsData ?? []) as PointStatRow[];
-
-        totalFilteredCount = pointRows.length;
-        count200 = pointRows.filter((item) => item.points === 200).length;
-        count400 = pointRows.filter((item) => item.points === 400).length;
-        count600 = pointRows.filter((item) => item.points === 600).length;
-
-        let query = supabase
-          .from("questions")
-          .select(`
-            id,
-            question_text,
-            answer_text,
-            points,
-            is_active,
-            is_used,
-            category_id,
-            categories (
-              id,
-              name,
-              slug,
-              category_sections (
-                id,
-                name,
-                slug
-              )
-            )
-          `)
-          .order("created_at", { ascending: false })
-          .limit(150);
-
-        if (searchQuery) {
-          query = query.or(
-            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
-          );
-        }
-
-        if (allowedCategoryIds && allowedCategoryIds.length > 0) {
-          query = query.in("category_id", allowedCategoryIds);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          return (
-            <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-              فشل تحميل الأسئلة: {error.message}
-            </div>
-          );
-        }
-
-        questions = (data ?? []) as unknown as QuestionRow[];
-      }
+    if (isDuplicate) {
+      redirect(
+        `/admin/questions/edit/${questionId}?returnTo=${encodeURIComponent(
+          safeReturnTo,
+        )}&error=${encodeURIComponent(
+          "يوجد سؤال مطابق بالفعل داخل هذه الفئة.",
+        )}`,
+      );
     }
 
-    return (
-      <div className="space-y-6">
-        <AdminPageHeader
-          title="إدارة الأسئلة"
-          description="فلتر الأسئلة بسرعة، وراقب توزيع النتائج حسب النقاط، وعدّل أو احذف بدون فقدان الفلترة الحالية."
-          action={
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/admin/questions/import"
-                className="inline-flex items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-sm font-bold text-amber-100 transition hover:bg-amber-500/20"
-              >
-                رفع أسئلة بالجملة
-              </Link>
+    const { error } = await supabase
+      .from("questions")
+      .update({
+        question_text: finalQuestionText,
+        answer_text: finalAnswerText,
+        category_id,
+        points,
+        is_active,
+        year_tolerance_before,
+        year_tolerance_after,
+      })
+      .eq("id", questionId);
 
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
+    if (error) {
+      redirect(
+        `/admin/questions/edit/${questionId}?returnTo=${encodeURIComponent(
+          safeReturnTo,
+        )}&error=${encodeURIComponent(error.message)}`,
+      );
+    }
+
+    revalidatePath("/admin/questions");
+    revalidatePath("/admin");
+    revalidatePath("/game/start");
+    revalidatePath("/game/board");
+
+    redirect(safeReturnTo);
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-cyan-300">إدارة المحتوى</div>
+            <h1 className="mt-2 text-4xl font-black text-white">
+              تعديل السؤال
+            </h1>
+            <p className="mt-3 max-w-3xl text-lg leading-8 text-white/75">
+              عدّل السؤال مع النص أو الصور أو الفيديو، وحدد الفئة والنقاط والتفعيل
+              وسماحية السنوات من صفحة واحدة.
+            </p>
+          </div>
+
+          <Link
+            href={returnTo}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+          >
+            الرجوع للأسئلة
+          </Link>
+        </div>
+
+        {resolvedSearchParams.error ? (
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
+            {resolvedSearchParams.error}
+          </div>
+        ) : null}
+      </div>
+
+      <form action={updateQuestion} className="space-y-6">
+        <input type="hidden" name="returnTo" value={returnTo} />
+
+        <section className="grid gap-6 xl:grid-cols-2">
+          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <HtmlSnippetEditor
+              name="question_text"
+              label="نص السؤال"
+              defaultValue={initialQuestionBase}
+              placeholder="اكتب نص السؤال هنا..."
+              rows={10}
+            />
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-white">
+                  رابط صورة السؤال
+                </label>
+                <input
+                  name="question_image_url"
+                  defaultValue={initialQuestionImageUrl}
+                  placeholder="https://example.com/question-image.jpg"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-white">
+                  رابط فيديو السؤال
+                </label>
+                <input
+                  name="question_video_url"
+                  defaultValue={initialQuestionVideoUrl}
+                  placeholder="https://youtube.com/watch?v=..."
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                />
+              </div>
             </div>
-          }
-        />
+          </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          <form className="grid gap-4 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto_auto] xl:items-end">
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                البحث بنص السؤال
-              </label>
-              <input
-                name="q"
-                defaultValue={searchQuery}
-                placeholder="اكتب جزءًا من السؤال أو الإجابة..."
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
-              />
+          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <HtmlSnippetEditor
+              name="answer_text"
+              label="نص الإجابة"
+              defaultValue={initialAnswerBase}
+              placeholder="اكتب نص الإجابة هنا..."
+              rows={10}
+            />
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-white">
+                  رابط صورة الإجابة
+                </label>
+                <input
+                  name="answer_image_url"
+                  defaultValue={initialAnswerImageUrl}
+                  placeholder="https://example.com/answer-image.jpg"
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-white">
+                  رابط فيديو الإجابة
+                </label>
+                <input
+                  name="answer_video_url"
+                  defaultValue={initialAnswerVideoUrl}
+                  placeholder="https://youtube.com/watch?v=..."
+                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                />
+              </div>
             </div>
+          </div>
+        </section>
 
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                القسم
-              </label>
-              <select
-                name="section"
-                defaultValue={selectedSection}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
-              >
-                <option value="">كل الأقسام</option>
-                {sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <h2 className="text-2xl font-black text-white">إعدادات السؤال</h2>
+          <p className="mt-2 text-white/70">
+            اختر الفئة الصحيحة وحدد النقاط وحالة التفعيل وسماحية السنوات.
+          </p>
 
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
               <label className="mb-2 block text-sm font-bold text-white">
                 الفئة
               </label>
               <select
-                name="category"
-                defaultValue={selectedCategory}
+                name="category_id"
+                defaultValue={question.category_id ?? ""}
                 className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
               >
-                <option value="">كل الفئات</option>
-                {filteredCategoriesForDropdown.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+                <option value="">اختر الفئة</option>
+                {categories.map((category) => {
+                  const sectionName = getSectionName(category.category_sections);
+                  return (
+                    <option key={category.id} value={category.id}>
+                      {sectionName
+                        ? `${sectionName} / ${category.name}`
+                        : category.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
-            <button
-              type="submit"
-              className="inline-flex h-14 items-center justify-center rounded-2xl bg-cyan-500 px-6 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-            >
-              بحث / فلترة
-            </button>
-
-            <Link
-              href="/admin/questions"
-              className="inline-flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              تصفير
-            </Link>
-          </form>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-              الفلترة الحالية محفوظة داخل الرابط
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                النقاط
+              </label>
+              <select
+                name="points"
+                defaultValue={String(question.points ?? 200)}
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+              >
+                <option value="200">200</option>
+                <option value="400">400</option>
+                <option value="600">600</option>
+              </select>
             </div>
 
-            {hasFilters ? (
-              <>
-                <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-100">
-                  عدد النتائج: {totalFilteredCount}
-                </div>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                سماحية سنة قبل
+              </label>
+              <select
+                name="year_tolerance_before"
+                defaultValue={String(question.year_tolerance_before ?? 0)}
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+              >
+                <option value="0">بدون سماحية</option>
+                <option value="1">سنة واحدة قبل</option>
+                <option value="2">سنتان قبل</option>
+                <option value="5">5 سنوات قبل</option>
+                <option value="10">10 سنوات قبل</option>
+              </select>
+            </div>
 
-                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-bold text-amber-100">
-                  200 نقطة: {count200} سؤال
-                </div>
-
-                <div className="rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sm font-bold text-sky-100">
-                  400 نقطة: {count400} سؤال
-                </div>
-
-                <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-2 text-sm font-bold text-fuchsia-100">
-                  600 نقطة: {count600} سؤال
-                </div>
-              </>
-            ) : (
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-                ابدأ بالبحث أو اختيار قسم/فئة لإظهار النتائج
-              </div>
-            )}
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white">
+                سماحية سنة بعد
+              </label>
+              <select
+                name="year_tolerance_after"
+                defaultValue={String(question.year_tolerance_after ?? 0)}
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+              >
+                <option value="0">بدون سماحية</option>
+                <option value="1">سنة واحدة بعد</option>
+                <option value="2">سنتان بعد</option>
+                <option value="5">5 سنوات بعد</option>
+                <option value="10">10 سنوات بعد</option>
+              </select>
+            </div>
           </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <label className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
+              <input
+                type="checkbox"
+                name="is_active"
+                defaultChecked={question.is_active}
+                className="h-4 w-4 rounded border-white/20 bg-slate-900"
+              />
+              السؤال مفعّل
+            </label>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+              حالة الاستخدام الحالية: {question.is_used ? "مستخدم" : "غير مستخدم"}
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-7 text-white/60">
+            يمكنك تعديل السؤال كنص فقط، أو نص مع صورة، أو نص مع فيديو. وينطبق ذلك
+            أيضًا على الإجابة.
+          </p>
         </section>
 
-        {!hasFilters ? (
-          <div className="space-y-4">
-            <AdminEmptyState
-              title="لا توجد نتائج بعد"
-              description="استخدم البحث أو الفلترة بالقسم أو الفئة، وبعدها ستظهر لك الأسئلة وتوزيعها حسب النقاط."
-              buttonText="إضافة سؤال جديد"
-            />
-            <div className="flex justify-center">
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
-            </div>
-          </div>
-        ) : questions.length > 0 ? (
-          <section className="grid gap-5 xl:grid-cols-2">
-            {questions.map((question) => {
-              const questionPreview = truncateText(
-                stripHtml(question.question_text),
-              );
-              const answerPreview = truncateText(stripHtml(question.answer_text));
-              const questionImage = extractFirstImageSrc(question.question_text);
-              const answerImage = extractFirstImageSrc(question.answer_text);
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={returnTo}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+          >
+            إلغاء
+          </Link>
 
-              return (
-                <article
-                  key={question.id}
-                  className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
-                >
-                  <div className="mb-3 flex items-start justify-between gap-4">
-                    <div className="text-cyan-300 text-sm font-bold">سؤال</div>
-                  </div>
-
-                  <h3 className="text-3xl font-black leading-[1.5] text-white">
-                    {questionPreview || "بدون نص"}
-                  </h3>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
-                      {getSectionName(question.categories)}
-                    </span>
-
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
-                      {getCategoryName(question.categories)}
-                    </span>
-
-                    <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-sm font-bold text-amber-100">
-                      {question.points} نقطة
-                    </span>
-
-                    <span
-                      className={[
-                        "rounded-full border px-3 py-1 text-sm font-bold",
-                        question.is_active
-                          ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-100"
-                          : "border-white/10 bg-white/5 text-white/70",
-                      ].join(" ")}
-                    >
-                      {question.is_active ? "مفعّل" : "غير مفعّل"}
-                    </span>
-
-                    <span
-                      className={[
-                        "rounded-full border px-3 py-1 text-sm font-bold",
-                        question.is_used
-                          ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                          : "border-white/10 bg-white/5 text-white/70",
-                      ].join(" ")}
-                    >
-                      {question.is_used ? "مستخدم" : "غير مستخدم"}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-4 md:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                      <div className="mb-2 text-sm font-bold text-white/70">
-                        صورة السؤال
-                      </div>
-
-                      {questionImage ? (
-                        <img
-                          src={questionImage}
-                          alt="صورة السؤال"
-                          className="h-52 w-full rounded-[1rem] object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
-                          لا توجد صورة داخل السؤال
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                      <div className="mb-2 text-sm font-bold text-white/70">
-                        صورة الإجابة
-                      </div>
-
-                      {answerImage ? (
-                        <img
-                          src={answerImage}
-                          alt="صورة الإجابة"
-                          className="h-52 w-full rounded-[1rem] object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
-                          لا توجد صورة داخل الإجابة
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                    <div className="mb-2 text-sm font-bold text-white/70">
-                      الإجابة
-                    </div>
-                    <p className="text-lg leading-8 text-white">
-                      {answerPreview || "غير مضافة"}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                      href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
-                        returnTo,
-                      )}`}
-                      className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-                    >
-                      تعديل
-                    </Link>
-
-                    <form action={deleteQuestion}>
-                      <input type="hidden" name="id" value={question.id} />
-                      <input type="hidden" name="returnTo" value={returnTo} />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
-                      >
-                        حذف
-                      </button>
-                    </form>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-        ) : (
-          <div className="space-y-4">
-            <AdminEmptyState
-              title="لا توجد أسئلة مطابقة"
-              description="جرّب تغيير نص البحث أو القسم أو الفئة، وستظهر هنا النتائج مع توزيعها حسب النقاط."
-              buttonText="إضافة سؤال جديد"
-            />
-            <div className="flex justify-center">
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  } catch (error) {
-    return (
-      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-        فشل تحميل الأسئلة:{" "}
-        {error instanceof Error ? error.message : "Unknown error"}
-      </div>
-    );
-  }
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+          >
+            حفظ التعديلات
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
