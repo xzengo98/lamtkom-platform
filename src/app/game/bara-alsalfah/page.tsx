@@ -54,7 +54,8 @@ type Step =
   | "reveal-outsider"
   | "guess"
   | "results"
-  | "round-end";
+  | "round-end"
+  | "category-finished";
 
 type GameMode = "points" | "judge";
 
@@ -91,13 +92,11 @@ function buildQuestionPairs(players: Player[]): QuestionPair[] {
 
   const shuffledPlayers = shuffleArray(players);
 
-  // المرحلة الأولى: كل لاعب يسأل مرة وكل لاعب يُسأل مرة
   const firstRound: QuestionPair[] = shuffledPlayers.map((asker, index) => ({
     asker,
     target: shuffledPlayers[(index + 1) % shuffledPlayers.length],
   }));
 
-  // المرحلة الثانية: باقي الأزواج التي لم تحصل بعد
   const usedKeys = new Set(
     firstRound.map((pair) => `${pair.asker.id}->${pair.target.id}`),
   );
@@ -171,6 +170,7 @@ export default function BaraAlsalfahPage() {
   const [usedItemIdsByCategory, setUsedItemIdsByCategory] = useState<
     Record<string, string[]>
   >({});
+  const [exhaustedCategoryName, setExhaustedCategoryName] = useState("");
 
   const [revealOrder, setRevealOrder] = useState<string[]>([]);
   const [revealIndex, setRevealIndex] = useState(0);
@@ -285,6 +285,12 @@ export default function BaraAlsalfahPage() {
 
   const currentQuestionPair = questionPairs[questionTurnIndex] ?? null;
 
+  const remainingItemsCount = useMemo(() => {
+    if (!selectedCategoryId) return 0;
+    const usedCount = usedItemIdsByCategory[selectedCategoryId]?.length ?? 0;
+    return Math.max(activeCategoryItems.length - usedCount, 0);
+  }, [selectedCategoryId, usedItemIdsByCategory, activeCategoryItems.length]);
+
   function addPlayer() {
     const trimmed = newPlayerName.trim();
     if (!trimmed) return;
@@ -349,6 +355,7 @@ export default function BaraAlsalfahPage() {
     setSelectedCategoryId(null);
     setSelectedMode(null);
     setUsedItemIdsByCategory({});
+    setExhaustedCategoryName("");
     resetRoundState();
     setStep("intro");
   }
@@ -369,10 +376,9 @@ export default function BaraAlsalfahPage() {
     }
 
     const picked = randomPick(pool);
-
     const nextHistory = [picked.id, ...recentIds].slice(0, 2);
-    localStorage.setItem(historyKey, JSON.stringify(nextHistory));
 
+    localStorage.setItem(historyKey, JSON.stringify(nextHistory));
     return picked.id;
   }
 
@@ -381,19 +387,17 @@ export default function BaraAlsalfahPage() {
     if (categoryItems.length === 0) return null;
 
     const usedIds = usedItemIdsByCategory[categoryId] ?? [];
-    let availableItems = categoryItems.filter((item) => !usedIds.includes(item.id));
-    let nextUsedIdsBase = usedIds;
+    const availableItems = categoryItems.filter((item) => !usedIds.includes(item.id));
 
     if (availableItems.length === 0) {
-      availableItems = categoryItems;
-      nextUsedIdsBase = [];
+      return null;
     }
 
     const chosen = randomPick(availableItems);
 
     setUsedItemIdsByCategory((prev) => ({
       ...prev,
-      [categoryId]: [...nextUsedIdsBase, chosen.id],
+      [categoryId]: [...(prev[categoryId] ?? []), chosen.id],
     }));
 
     return chosen;
@@ -404,7 +408,13 @@ export default function BaraAlsalfahPage() {
     if (players.length < 3) return;
 
     const chosenItem = pickNextItemForCategory(selectedCategoryId);
-    if (!chosenItem) return;
+
+    if (!chosenItem) {
+      setExhaustedCategoryName(activeCategory?.name ?? "هذه الفئة");
+      resetRoundState();
+      setStep("category-finished");
+      return;
+    }
 
     const chosenOutsiderId = pickOutsiderSmart();
 
@@ -526,6 +536,8 @@ export default function BaraAlsalfahPage() {
 
   function changeCategoryKeepScores() {
     resetRoundState();
+    setSelectedCategoryId(null);
+    setExhaustedCategoryName("");
     setStep("category");
   }
 
@@ -571,10 +583,7 @@ export default function BaraAlsalfahPage() {
                 value={activeCategory?.name ?? "غير محددة"}
               />
               <StatCard label="الوضع" value={getModeLabel(selectedMode)} />
-              <StatCard
-                label="برا السالفة"
-                value={outsiderPlayer?.name ?? "—"}
-              />
+              <StatCard label="المتبقي" value={remainingItemsCount} />
             </div>
           </div>
         </section>
@@ -604,7 +613,7 @@ export default function BaraAlsalfahPage() {
                 <p>2. تضيف اللاعبين يدويًا.</p>
                 <p>3. نوزع الأدوار عشوائيًا، وشخص واحد فقط يكون برا السالفة.</p>
                 <p>4. كل لاعب يسأل مرة على الأقل ويُسأل مرة على الأقل.</p>
-                <p>5. بعد ذلك ينتقل الدور إلى أزواج جديدة حتى التصويت.</p>
+                <p>5. عند انتهاء عناصر الفئة يجب اختيار فئة جديدة.</p>
               </div>
             </div>
           </section>
@@ -1179,6 +1188,31 @@ export default function BaraAlsalfahPage() {
                 className="rounded-[1.4rem] border border-white/10 bg-white/5 px-6 py-4 text-xl font-black text-white transition hover:bg-white/10 md:col-span-2"
               >
                 العودة للبداية
+              </button>
+            </div>
+          </section>
+        )}
+
+        {step === "category-finished" && (
+          <section className="rounded-[2rem] border border-amber-400/20 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <SectionBadge>انتهت أسئلة الفئة</SectionBadge>
+
+            <h2 className="mt-5 text-3xl font-black text-white md:text-5xl">
+              انتهت الأسئلة المتوفرة في هذه الفئة
+            </h2>
+
+            <p className="mt-5 text-lg leading-8 text-white/75">
+              الفئة الحالية: <span className="font-black text-cyan-300">{exhaustedCategoryName}</span>
+              <br />
+              يرجى اختيار فئة جديدة، وسيتم الحفاظ على نفس النقاط ونفس اللاعبين.
+            </p>
+
+            <div className="mt-10 flex justify-center">
+              <button
+                onClick={changeCategoryKeepScores}
+                className="rounded-[1.5rem] bg-cyan-500 px-8 py-4 text-2xl font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                تغيير نوع السالفة
               </button>
             </div>
           </section>
