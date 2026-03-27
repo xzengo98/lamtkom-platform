@@ -165,7 +165,7 @@ function RichContent({
           "prose prose-invert max-w-none text-center",
           "prose-headings:text-white prose-p:text-white/90 prose-strong:text-white prose-li:text-white/85 prose-blockquote:text-white/80",
           "prose-p:text-center prose-headings:text-center prose-figcaption:text-center",
-          large ? "prose-lg md:prose-2xl lg:prose-3xl" : "prose-base md:prose-xl lg:prose-2xl",
+          large ? "prose-xl md:prose-3xl lg:prose-4xl" : "prose-lg md:prose-2xl lg:prose-3xl",
           "[&_p]:my-2 sm:[&_p]:my-3 md:[&_p]:my-4",
           "[&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-3",
           "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full",
