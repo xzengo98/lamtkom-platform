@@ -8,7 +8,7 @@ const gameCards = [
       "اللعبة المبنية على الفئات والأسئلة والنقاط بين فريقين.",
     href: "/game/start",
     image:
-      "https://placehold.co/1200x700/0b1733/ffffff?text=Lammatna+Quiz",
+      "https://a.top4top.io/p_3738qob7g1.png",
     active: true,
   },
   {
@@ -18,7 +18,7 @@ const gameCards = [
       "اختر الفئة، أضف اللاعبين، ودع اللعبة تختار شخصًا واحدًا فقط يكون برا السالفة.",
     href: "/game/bara-alsalfah",
     image:
-      "https://placehold.co/1200x700/10243f/ffffff?text=Bara+Alsalfah",
+      "https://b.top4top.io/p_3738ss14e2.png",
     active: true,
   },
   {
@@ -28,7 +28,7 @@ const gameCards = [
       "مكان مخصص للألعاب القادمة داخل الموقع. سنضيف هنا ألعابًا جديدة لاحقًا.",
     href: "#",
     image:
-      "https://placehold.co/1200x700/1a1f2b/ffffff?text=Coming+Soon",
+      "https://i.top4top.io/p_3738ncix61.png",
     active: false,
   },
 ];
