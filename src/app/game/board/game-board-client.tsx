@@ -162,17 +162,19 @@ function RichContent({
     <div className="flex h-full w-full items-center justify-center">
       <div
         className={[
-          "prose prose-invert max-w-none text-center",
-          "prose-headings:text-white prose-p:text-white/90 prose-strong:text-white prose-li:text-white/85 prose-blockquote:text-white/80",
-          "prose-p:text-center prose-headings:text-center prose-figcaption:text-center",
-          large ? "prose-xl md:prose-3xl lg:prose-4xl" : "prose-lg md:prose-2xl lg:prose-3xl",
-          "[&_p]:my-2 sm:[&_p]:my-3 md:[&_p]:my-4",
-          "[&_h1]:mb-3 [&_h2]:mb-3 [&_h3]:mb-3",
-          "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full",
-          "[&_img]:max-h-[18vh] sm:[&_img]:max-h-[22vh] md:[&_img]:max-h-[34vh]",
-          "[&_img]:object-contain [&_img]:rounded-2xl",
-          "[&_img]:my-3 md:[&_img]:my-5",
-          "[&_figure]:mx-auto [&_figure]:my-3 md:[&_figure]:my-5 [&_figure]:text-center",
+          "mx-auto w-full max-w-5xl text-center font-bold leading-relaxed text-white",
+          large
+            ? "text-2xl md:text-4xl lg:text-5xl"
+            : "text-xl md:text-2xl lg:text-3xl",
+          "[&_p]:my-3 [&_p]:text-inherit [&_p]:leading-relaxed",
+          "[&_strong]:text-inherit [&_strong]:font-black",
+          "[&_h1]:mb-4 [&_h1]:text-3xl [&_h1]:font-black md:[&_h1]:text-4xl lg:[&_h1]:text-5xl",
+          "[&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-black md:[&_h2]:text-3xl lg:[&_h2]:text-4xl",
+          "[&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-black md:[&_h3]:text-2xl lg:[&_h3]:text-3xl",
+          "[&_li]:my-2 [&_li]:text-inherit",
+          "[&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain",
+          "[&_img]:max-h-[18vh] sm:[&_img]:max-h-[24vh] md:[&_img]:max-h-[38vh]",
+          "[&_figure]:my-4 [&_figure]:text-center",
           "[&_figure_img]:mx-auto",
           "[&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:max-h-[20vh] [&_iframe]:w-full",
           "[&_video]:mx-auto [&_video]:my-3 [&_video]:max-h-[20vh]",
