@@ -108,7 +108,7 @@ export default function Navbar() {
           <img
             src="https://k.top4top.io/p_3722mj2o21.png"
             alt="لمّتنا"
-            className="h-10 w-auto object-contain md:h-12"
+            className="h-14 w-auto object-contain md:h-16"
           />
         </Link>
 
