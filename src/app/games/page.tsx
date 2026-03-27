@@ -18,7 +18,7 @@ const gameCards = [
       "اختر الفئة، أضف اللاعبين، ودع اللعبة تختار شخصًا واحدًا فقط يكون برا السالفة.",
     href: "/game/bara-alsalfah",
     image:
-      "https://b.top4top.io/p_3738ss14e2.png",
+      "https://l.top4top.io/p_373887e151.png",
     active: true,
   },
   {
