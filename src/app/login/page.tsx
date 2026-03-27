@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="border-b border-white/10 bg-gradient-to-l from-cyan-400/10 to-transparent px-5 py-6 md:px-8 md:py-8">
             <h1 className="text-3xl font-black md:text-4xl">تسجيل الدخول</h1>
             <p className="mt-3 text-sm leading-7 text-slate-300 md:text-base">
-              ادخل إلى حسابك للوصول إلى ألعابك ورصيدك ولوحة الاستخدام الخاصة بك.
+              ادخل إلى حسابك لتتمكن من اللعب.
             </p>
           </div>
 

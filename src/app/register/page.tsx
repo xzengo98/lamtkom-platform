@@ -125,13 +125,13 @@ export default function RegisterPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-            أنشئ حسابك وابدأ مباشرة بتنظيم الألعاب والجولات وحدد الفرق ، مع تجربة اكثر من رائعة وبسيطة
+            أنشئ حسابك وابدأ مباشرة بتنظيم الألعاب الخاصة بك ، مع تجربة اكثر من رائعة وبسيطة
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {[
               "تسجيل سريع وبسيط",
-              "لا خوف على بياناتك المسجلة",
+              "لا خوف على بياناتك الخاصة المسجلة",
               "لا نشارك اي معلومات مع طرف اخر",
               "بدء اللعبة خلال لحظات",
             ].map((item) => (
@@ -150,8 +150,7 @@ export default function RegisterPage() {
           <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
             <p className="text-sm font-bold text-cyan-300">معلومة سريعة</p>
             <p className="mt-2 text-sm leading-7 text-slate-300">
-              بعد التسجيل يمكنك الدخول مباشرة والبدء بإنشاء أول لعبة من حسابك،
-              ثم متابعة الجولات غير المكتملة لاحقًا من صفحة الحساب.
+              بعد التسجيل يمكنك الدخول مباشرة والبدء بانشاء العابك الخاصة.
             </p>
           </div>
         </section>
