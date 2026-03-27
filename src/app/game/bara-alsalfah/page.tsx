@@ -58,6 +58,11 @@ type Step =
 
 type GameMode = "points" | "judge";
 
+type QuestionPair = {
+  asker: Player;
+  target: Player;
+};
+
 function randomPick<T>(items: T[]) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -106,6 +111,21 @@ function StatCard({
   );
 }
 
+function buildQuestionPairs(players: Player[]): QuestionPair[] {
+  if (players.length < 2) return [];
+
+  const shuffled = shuffleArray(players);
+  const pairs: QuestionPair[] = [];
+
+  for (let i = 0; i < shuffled.length; i += 1) {
+    const asker = shuffled[i];
+    const target = shuffled[(i + 1) % shuffled.length];
+    pairs.push({ asker, target });
+  }
+
+  return pairs;
+}
+
 export default function BaraAlsalfahPage() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -135,6 +155,7 @@ export default function BaraAlsalfahPage() {
   const [revealIndex, setRevealIndex] = useState(0);
   const [revealShown, setRevealShown] = useState(false);
 
+  const [questionPairs, setQuestionPairs] = useState<QuestionPair[]>([]);
   const [questionTurnIndex, setQuestionTurnIndex] = useState(0);
 
   const [voteOrder, setVoteOrder] = useState<string[]>([]);
@@ -142,7 +163,9 @@ export default function BaraAlsalfahPage() {
   const [votes, setVotes] = useState<VoteMap>({});
 
   const [guessOptions, setGuessOptions] = useState<string[]>([]);
-  const [selectedGuess, setSelectedGuess] = useState<string>("");
+  const [selectedGuess, setSelectedGuess] = useState("");
+  const [guessSubmitted, setGuessSubmitted] = useState(false);
+  const [guessWasCorrect, setGuessWasCorrect] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -235,19 +258,7 @@ export default function BaraAlsalfahPage() {
     return players.find((player) => player.id === playerId) ?? null;
   }, [players, voteOrder, voteIndex]);
 
-  const orderedQuestionPairs = useMemo(() => {
-    if (players.length < 2) return [];
-
-    return players.map((player, index) => {
-      const target = players[(index + 1) % players.length];
-      return {
-        asker: player,
-        target,
-      };
-    });
-  }, [players]);
-
-  const currentQuestionPair = orderedQuestionPairs[questionTurnIndex] ?? null;
+  const currentQuestionPair = questionPairs[questionTurnIndex] ?? null;
 
   function addPlayer() {
     const trimmed = newPlayerName.trim();
@@ -280,9 +291,7 @@ export default function BaraAlsalfahPage() {
 
     setPlayers((prev) =>
       prev.map((player) =>
-        player.id === editingPlayerId
-          ? { ...player, name: trimmed }
-          : player,
+        player.id === editingPlayerId ? { ...player, name: trimmed } : player,
       ),
     );
 
@@ -296,27 +305,54 @@ export default function BaraAlsalfahPage() {
     setRevealOrder([]);
     setRevealIndex(0);
     setRevealShown(false);
+    setQuestionPairs([]);
     setQuestionTurnIndex(0);
     setVoteOrder([]);
     setVoteIndex(0);
     setVotes({});
     setGuessOptions([]);
     setSelectedGuess("");
+    setGuessSubmitted(false);
+    setGuessWasCorrect(null);
   }
 
-  function beginRoleDistribution() {
+  function pickOutsiderSmart() {
+    const historyKey = "bara-alsalfah-outsider-history";
+    let recentIds: string[] = [];
+
+    try {
+      recentIds = JSON.parse(localStorage.getItem(historyKey) || "[]");
+    } catch {
+      recentIds = [];
+    }
+
+    let pool = players.filter((player) => !recentIds.includes(player.id));
+    if (pool.length === 0) {
+      pool = players;
+    }
+
+    const picked = randomPick(pool);
+
+    const nextHistory = [picked.id, ...recentIds].slice(0, 2);
+    localStorage.setItem(historyKey, JSON.stringify(nextHistory));
+
+    return picked.id;
+  }
+
+  function prepareRound() {
     if (!selectedCategoryId || !selectedMode) return;
     if (players.length < 3) return;
     if (activeCategoryItems.length === 0) return;
 
     const chosenItem = randomPick(activeCategoryItems);
-    const chosenOutsider = randomPick(players);
+    const chosenOutsiderId = pickOutsiderSmart();
 
     setActiveItem(chosenItem);
-    setOutsiderId(chosenOutsider.id);
+    setOutsiderId(chosenOutsiderId);
     setRevealOrder(shuffleArray(players.map((player) => player.id)));
     setRevealIndex(0);
     setRevealShown(false);
+    setQuestionPairs(buildQuestionPairs(players));
     setQuestionTurnIndex(0);
     setVotes({});
     setVoteIndex(0);
@@ -333,7 +369,17 @@ export default function BaraAlsalfahPage() {
       ),
     );
     setSelectedGuess("");
+    setGuessSubmitted(false);
+    setGuessWasCorrect(null);
     setStep("reveal-pass");
+  }
+
+  function beginRoleDistribution() {
+    prepareRound();
+  }
+
+  function continueWithSamePlayers() {
+    prepareRound();
   }
 
   function goNextReveal() {
@@ -349,17 +395,19 @@ export default function BaraAlsalfahPage() {
   }
 
   function nextQuestionTurn() {
-    if (orderedQuestionPairs.length === 0) return;
-    setQuestionTurnIndex((prev) => (prev + 1) % orderedQuestionPairs.length);
+    if (questionPairs.length === 0) return;
+    setQuestionTurnIndex((prev) => (prev + 1) % questionPairs.length);
   }
 
   function castVote(targetId: string) {
     if (!votingPlayer) return;
 
-    setVotes((prev) => ({
-      ...prev,
+    const newVotes = {
+      ...votes,
       [votingPlayer.id]: targetId,
-    }));
+    };
+
+    setVotes(newVotes);
 
     if (voteIndex < voteOrder.length - 1) {
       setVoteIndex((prev) => prev + 1);
@@ -367,15 +415,8 @@ export default function BaraAlsalfahPage() {
     }
 
     const updatedPlayers = players.map((player) => {
-      const votedTarget = {
-        ...votes,
-        [votingPlayer.id]: targetId,
-      }[player.id];
-
-      const gained =
-        votedTarget && votedTarget === outsiderId
-          ? 1
-          : 0;
+      const votedTarget = newVotes[player.id];
+      const gained = votedTarget === outsiderId ? 1 : 0;
 
       return {
         ...player,
@@ -391,29 +432,35 @@ export default function BaraAlsalfahPage() {
     if (!selectedGuess || !outsiderId || !activeItem) return;
 
     const isCorrect = selectedGuess === activeItem.correct_answer;
+    setGuessSubmitted(true);
+    setGuessWasCorrect(isCorrect);
 
-    setPlayers((prev) =>
-      prev.map((player) =>
-        player.id === outsiderId
-          ? {
-              ...player,
-              score: player.score + (isCorrect ? 3 : 0),
-            }
-          : player,
-      ),
-    );
-
-    setStep("results");
+    if (isCorrect) {
+      setPlayers((prev) =>
+        prev.map((player) =>
+          player.id === outsiderId
+            ? {
+                ...player,
+                score: player.score + 3,
+              }
+            : player,
+        ),
+      );
+    }
   }
 
-  function continueWithSamePlayers() {
-    resetRoundState();
-    setStep("category");
+  function goToResultsAfterGuess() {
+    setStep("results");
   }
 
   function changePlayersKeepScores() {
     resetRoundState();
     setStep("players");
+  }
+
+  function changeCategoryKeepScores() {
+    resetRoundState();
+    setStep("category");
   }
 
   function resetEverything() {
@@ -468,11 +515,11 @@ export default function BaraAlsalfahPage() {
                 label="الفئة"
                 value={activeCategory?.name ?? "غير محددة"}
               />
+              <StatCard label="الوضع" value={getModeLabel(selectedMode)} />
               <StatCard
-                label="الوضع"
-                value={getModeLabel(selectedMode)}
+                label="برا السالفة"
+                value={outsiderPlayer?.name ?? "—"}
               />
-              <StatCard label="الخطوة الحالية" value={step} />
             </div>
           </div>
         </section>
@@ -492,13 +539,6 @@ export default function BaraAlsalfahPage() {
               >
                 ابدأ اللعب
               </button>
-
-              <div className="mt-6 flex flex-col items-center gap-3 text-white/75">
-                <button className="text-sm hover:text-white">
-                  مشاركة اللعبة للأصدقاء
-                </button>
-                <button className="text-sm hover:text-white">حول اللعبة</button>
-              </div>
             </div>
 
             <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
@@ -508,8 +548,8 @@ export default function BaraAlsalfahPage() {
                 <p>1. تختار الفئة ونوع الجولة.</p>
                 <p>2. تضيف اللاعبين يدويًا.</p>
                 <p>3. نوزع الأدوار عشوائيًا، وشخص واحد فقط يكون برا السالفة.</p>
-                <p>4. يبدأ اللاعبون بالأسئلة ثم التصويت.</p>
-                <p>5. إذا عرف الشخص برا السالفة الكلمة، يأخذ نقاط إضافية.</p>
+                <p>4. كل لاعب يسأل لاعبًا آخر مرة واحدة على الأقل.</p>
+                <p>5. يبدأ التصويت ثم تخمين الكلمة والنتائج.</p>
               </div>
             </div>
           </section>
@@ -615,7 +655,7 @@ export default function BaraAlsalfahPage() {
               >
                 <div className="text-2xl font-black">وضع النقاط</div>
                 <p className="mt-3 text-white/70">
-                  اللاعبون يأخذون نقاطًا عند التصويت الصحيح، والشخص برا السالفة يأخذ 3 نقاط إذا عرف الجواب الصحيح.
+                  اللاعبون يأخذون نقطة عند التصويت الصحيح، والشخص برا السالفة يأخذ 3 نقاط إذا عرف الجواب.
                 </p>
               </button>
 
@@ -630,7 +670,7 @@ export default function BaraAlsalfahPage() {
               >
                 <div className="text-2xl font-black">نظام الحكم</div>
                 <p className="mt-3 text-white/70">
-                  يعتمد على كشف الشخص برا السالفة، ومعرفة هل تمكن من اكتشاف الجواب أم لا.
+                  يعتمد على كشف الشخص برا السالفة، ويمكن تطويره لاحقًا بشكل مختلف عن النقاط.
                 </p>
               </button>
             </div>
@@ -734,10 +774,7 @@ export default function BaraAlsalfahPage() {
                   label="الفئة المختارة"
                   value={activeCategory?.name ?? "غير محددة"}
                 />
-                <StatCard
-                  label="الوضع"
-                  value={getModeLabel(selectedMode)}
-                />
+                <StatCard label="الوضع" value={getModeLabel(selectedMode)} />
               </div>
 
               <div className="mt-6 rounded-[1.4rem] border border-white/10 bg-white/5 p-4 text-white/75">
@@ -771,13 +808,6 @@ export default function BaraAlsalfahPage() {
 
         {step === "reveal-pass" && revealPlayer && (
           <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <button
-              onClick={() => setStep("players")}
-              className="mb-8 inline-flex rounded-full bg-green-500 p-4 text-xl"
-            >
-              ⌂
-            </button>
-
             <div className="text-2xl font-black text-green-400 md:text-4xl">
               {revealPlayer.name}
             </div>
@@ -802,13 +832,6 @@ export default function BaraAlsalfahPage() {
 
         {step === "reveal-role" && revealPlayer && activeItem && (
           <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <button
-              onClick={() => setStep("players")}
-              className="mb-8 inline-flex rounded-full bg-green-500 p-4 text-xl"
-            >
-              ⌂
-            </button>
-
             <div className="text-2xl font-black text-green-400 md:text-4xl">
               {revealPlayer.name}
             </div>
@@ -829,7 +852,7 @@ export default function BaraAlsalfahPage() {
             ) : revealPlayer.id === outsiderId ? (
               <>
                 <p className="mt-5 text-xl leading-9 text-white">
-                  أنت <span className="text-green-400 font-black">برا السالفة</span>
+                  أنت <span className="font-black text-green-400">برا السالفة</span>
                   <br />
                   حاول تعرف الكلمة من أسئلة اللاعبين وتصويتهم.
                 </p>
@@ -860,20 +883,20 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "questions" && currentQuestionPair && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <div className="text-center">
-              <SectionBadge>وقت الأسئلة</SectionBadge>
-              <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                {currentQuestionPair.asker.name}
-              </h2>
-              <p className="mt-4 text-xl leading-9 text-white/80">
-                يسأل الآن
-                <br />
-                <span className="text-cyan-300 font-black">
-                  {currentQuestionPair.target.name}
-                </span>
-              </p>
-            </div>
+          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <SectionBadge>وقت الأسئلة</SectionBadge>
+
+            <h2 className="mt-5 text-3xl font-black md:text-5xl">
+              {currentQuestionPair.asker.name}
+            </h2>
+
+            <p className="mt-4 text-xl leading-9 text-white/80">
+              يسأل الآن
+              <br />
+              <span className="font-black text-cyan-300">
+                {currentQuestionPair.target.name}
+              </span>
+            </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <button
@@ -955,33 +978,75 @@ export default function BaraAlsalfahPage() {
             </div>
 
             <div className="mx-auto mt-8 max-w-3xl grid gap-3 md:grid-cols-2">
-              {guessOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => setSelectedGuess(option)}
-                  className={[
-                    "rounded-[1.2rem] border px-5 py-4 text-lg font-black transition",
-                    selectedGuess === option
-                      ? option === activeItem.correct_answer
-                        ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-100"
-                        : "border-cyan-400/30 bg-cyan-400/10 text-cyan-100"
-                      : "border-white/10 bg-white/5 text-white hover:bg-white/10",
-                  ].join(" ")}
-                >
-                  {option}
-                </button>
-              ))}
+              {guessOptions.map((option) => {
+                const isSelected = selectedGuess === option;
+                const isCorrect = option === activeItem.correct_answer;
+
+                let classes =
+                  "rounded-[1.2rem] border px-5 py-4 text-lg font-black transition";
+
+                if (guessSubmitted && isSelected && isCorrect) {
+                  classes +=
+                    " border-emerald-400/40 bg-emerald-500/20 text-emerald-100";
+                } else if (guessSubmitted && isSelected && !isCorrect) {
+                  classes +=
+                    " border-red-400/40 bg-red-500/20 text-red-100";
+                } else if (isSelected) {
+                  classes +=
+                    " border-cyan-400/30 bg-cyan-400/10 text-cyan-100";
+                } else {
+                  classes +=
+                    " border-white/10 bg-white/5 text-white hover:bg-white/10";
+                }
+
+                return (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      if (!guessSubmitted) setSelectedGuess(option);
+                    }}
+                    className={classes}
+                    disabled={guessSubmitted}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="mt-8 flex justify-center">
-              <button
-                onClick={submitOutsiderGuess}
-                disabled={!selectedGuess}
-                className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                النتائج
-              </button>
+              {!guessSubmitted ? (
+                <button
+                  onClick={submitOutsiderGuess}
+                  disabled={!selectedGuess}
+                  className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  إجابة
+                </button>
+              ) : (
+                <button
+                  onClick={goToResultsAfterGuess}
+                  className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                >
+                  النتائج
+                </button>
+              )}
             </div>
+
+            {guessSubmitted ? (
+              <div
+                className={[
+                  "mt-6 rounded-2xl border px-4 py-3 text-center text-lg font-black",
+                  guessWasCorrect
+                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
+                    : "border-red-400/30 bg-red-500/10 text-red-100",
+                ].join(" ")}
+              >
+                {guessWasCorrect
+                  ? "إجابة صحيحة — تم احتساب 3 نقاط"
+                  : "إجابة خاطئة — لا توجد نقاط إضافية"}
+              </div>
+            ) : null}
           </section>
         )}
 
@@ -1029,7 +1094,7 @@ export default function BaraAlsalfahPage() {
                 ماذا تريدون الآن؟
               </h2>
               <p className="mt-4 text-lg leading-8 text-white/75">
-                تستطيعون الاستمرار بنفس اللاعبين، أو تغيير اللاعبين، أو تغيير الفئة مع بقاء النقاط محفوظة.
+                تستطيعون الاستمرار بنفس اللاعبين ونفس الفئة، أو تغيير اللاعبين، أو تغيير الفئة، مع بقاء النقاط محفوظة.
               </p>
             </div>
 
@@ -1038,7 +1103,7 @@ export default function BaraAlsalfahPage() {
                 onClick={continueWithSamePlayers}
                 className="rounded-[1.4rem] bg-green-500 px-6 py-4 text-xl font-black text-white transition hover:bg-green-400"
               >
-                كمل لعب
+                كمل اللعبة
               </button>
 
               <button
@@ -1049,10 +1114,7 @@ export default function BaraAlsalfahPage() {
               </button>
 
               <button
-                onClick={() => {
-                  resetRoundState();
-                  setStep("category");
-                }}
+                onClick={changeCategoryKeepScores}
                 className="rounded-[1.4rem] bg-cyan-500 px-6 py-4 text-xl font-black text-slate-950 transition hover:bg-cyan-400 md:col-span-2"
               >
                 تغيير نوع السالفة
