@@ -104,8 +104,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030b1e]/90 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="text-2xl font-black text-white">لمّتنا</div>
+        <Link href="/" className="flex items-center">
+          <img
+            src="https://k.top4top.io/p_3722mj2o21.png"
+            alt="لمّتنا"
+            className="h-10 w-auto object-contain md:h-12"
+          />
         </Link>
 
         <nav className="hidden items-center gap-2 lg:flex">

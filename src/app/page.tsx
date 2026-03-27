@@ -294,6 +294,46 @@ export default function HomePage() {
             description="يمكن إضافة ألعاب جديدة لاحقًا بسهولة مع الحفاظ على نفس الهوية البصرية والهيكل العام للموقع."
           />
         </section>
+        <section className="mt-8 rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-6">
+  <div className="flex flex-wrap gap-2">
+    <Link
+      href="/"
+      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+    >
+      الرئيسية
+    </Link>
+    <Link
+      href="/pricing"
+      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+    >
+      الباقات
+    </Link>
+    <Link
+      href="/terms"
+      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+    >
+      الشروط والأحكام
+    </Link>
+
+    <Link
+      href="/privacy"
+      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+    >
+      الخصوصية
+    </Link>
+
+    <Link
+      href="/about"
+      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
+    >
+      من نحن
+    </Link>
+  </div>
+
+  <div className="mt-4 border-t border-white/10 pt-4 text-center text-[10px] text-slate-500 sm:mt-5 sm:text-xs lg:text-sm">
+    © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
+  </div>
+</section>
       </main>
     </div>
   );
