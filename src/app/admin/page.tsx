@@ -38,6 +38,10 @@ export default async function AdminPage() {
     { label: "رفع أسئلة بالجملة", href: "/admin/questions/import" },
     { label: "الأعضاء", href: "/admin/users" },
     { label: "الألعاب المنتهية", href: "/admin/games" },
+    { label: "إدارة برا السالفة", href: "/admin/bara-alsalfah" },
+{ label: "إضافة عنصر برا السالفة", href: "/admin/bara-alsalfah/new" },
+{ label: "فئات برا السالفة", href: "/admin/bara-alsalfah/categories" },
+{ label: "إضافة قسم / فئة لبرا السالفة", href: "/admin/bara-alsalfah/categories/new" },
   ];
 
   return (

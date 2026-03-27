@@ -18,6 +18,10 @@ const sidebarItems = [
   { label: "إضافة سؤال جديد", href: "/admin/questions/new" },
   { label: "الأعضاء", href: "/admin/users" },
   { label: "الألعاب المنتهية", href: "/admin/games" },
+  { label: "إدارة برا السالفة", href: "/admin/bara-alsalfah" },
+{ label: "فئات برا السالفة", href: "/admin/bara-alsalfah/categories" },
+{ label: "إضافة عنصر برا السالفة", href: "/admin/bara-alsalfah/new" },
+{ label: "إضافة قسم / فئة لبرا السالفة", href: "/admin/bara-alsalfah/categories/new" },
 ];
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {

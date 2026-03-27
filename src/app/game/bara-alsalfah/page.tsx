@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -86,7 +86,39 @@ function getModeLabel(mode: GameMode | null) {
   return "غير محدد";
 }
 
-function SectionBadge({ children }: { children: React.ReactNode }) {
+function buildQuestionPairs(players: Player[]): QuestionPair[] {
+  if (players.length < 2) return [];
+
+  const shuffledPlayers = shuffleArray(players);
+
+  // المرحلة الأولى: كل لاعب يسأل مرة وكل لاعب يُسأل مرة
+  const firstRound: QuestionPair[] = shuffledPlayers.map((asker, index) => ({
+    asker,
+    target: shuffledPlayers[(index + 1) % shuffledPlayers.length],
+  }));
+
+  // المرحلة الثانية: باقي الأزواج التي لم تحصل بعد
+  const usedKeys = new Set(
+    firstRound.map((pair) => `${pair.asker.id}->${pair.target.id}`),
+  );
+
+  const remainingPairs: QuestionPair[] = [];
+
+  for (const asker of shuffledPlayers) {
+    for (const target of shuffledPlayers) {
+      if (asker.id === target.id) continue;
+
+      const key = `${asker.id}->${target.id}`;
+      if (!usedKeys.has(key)) {
+        remainingPairs.push({ asker, target });
+      }
+    }
+  }
+
+  return [...firstRound, ...shuffleArray(remainingPairs)];
+}
+
+function SectionBadge({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
       {children}
@@ -99,7 +131,7 @@ function StatCard({
   value,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
 }) {
   return (
     <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
@@ -109,21 +141,6 @@ function StatCard({
       </div>
     </div>
   );
-}
-
-function buildQuestionPairs(players: Player[]): QuestionPair[] {
-  if (players.length < 2) return [];
-
-  const shuffled = shuffleArray(players);
-  const pairs: QuestionPair[] = [];
-
-  for (let i = 0; i < shuffled.length; i += 1) {
-    const asker = shuffled[i];
-    const target = shuffled[(i + 1) % shuffled.length];
-    pairs.push({ asker, target });
-  }
-
-  return pairs;
 }
 
 export default function BaraAlsalfahPage() {
@@ -150,6 +167,10 @@ export default function BaraAlsalfahPage() {
 
   const [activeItem, setActiveItem] = useState<BaraItem | null>(null);
   const [outsiderId, setOutsiderId] = useState<string | null>(null);
+
+  const [usedItemIdsByCategory, setUsedItemIdsByCategory] = useState<
+    Record<string, string[]>
+  >({});
 
   const [revealOrder, setRevealOrder] = useState<string[]>([]);
   const [revealIndex, setRevealIndex] = useState(0);
@@ -193,7 +214,9 @@ export default function BaraAlsalfahPage() {
           .order("sort_order", { ascending: true }),
         supabase
           .from("bara_categories")
-          .select("id, name, slug, description, section_id, sort_order, is_active")
+          .select(
+            "id, name, slug, description, section_id, sort_order, is_active",
+          )
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
         supabase
@@ -228,7 +251,9 @@ export default function BaraAlsalfahPage() {
     return sections
       .map((section) => ({
         ...section,
-        categories: categories.filter((category) => category.section_id === section.id),
+        categories: categories.filter(
+          (category) => category.section_id === section.id,
+        ),
       }))
       .filter((section) => section.categories.length > 0);
   }, [sections, categories]);
@@ -316,6 +341,18 @@ export default function BaraAlsalfahPage() {
     setGuessWasCorrect(null);
   }
 
+  function resetEverything() {
+    setPlayers([]);
+    setNewPlayerName("");
+    setEditingPlayerId(null);
+    setEditingPlayerName("");
+    setSelectedCategoryId(null);
+    setSelectedMode(null);
+    setUsedItemIdsByCategory({});
+    resetRoundState();
+    setStep("intro");
+  }
+
   function pickOutsiderSmart() {
     const historyKey = "bara-alsalfah-outsider-history";
     let recentIds: string[] = [];
@@ -339,24 +376,52 @@ export default function BaraAlsalfahPage() {
     return picked.id;
   }
 
+  function pickNextItemForCategory(categoryId: string) {
+    const categoryItems = items.filter((item) => item.category_id === categoryId);
+    if (categoryItems.length === 0) return null;
+
+    const usedIds = usedItemIdsByCategory[categoryId] ?? [];
+    let availableItems = categoryItems.filter((item) => !usedIds.includes(item.id));
+    let nextUsedIdsBase = usedIds;
+
+    if (availableItems.length === 0) {
+      availableItems = categoryItems;
+      nextUsedIdsBase = [];
+    }
+
+    const chosen = randomPick(availableItems);
+
+    setUsedItemIdsByCategory((prev) => ({
+      ...prev,
+      [categoryId]: [...nextUsedIdsBase, chosen.id],
+    }));
+
+    return chosen;
+  }
+
   function prepareRound() {
     if (!selectedCategoryId || !selectedMode) return;
     if (players.length < 3) return;
-    if (activeCategoryItems.length === 0) return;
 
-    const chosenItem = randomPick(activeCategoryItems);
+    const chosenItem = pickNextItemForCategory(selectedCategoryId);
+    if (!chosenItem) return;
+
     const chosenOutsiderId = pickOutsiderSmart();
 
     setActiveItem(chosenItem);
     setOutsiderId(chosenOutsiderId);
+
     setRevealOrder(shuffleArray(players.map((player) => player.id)));
     setRevealIndex(0);
     setRevealShown(false);
+
     setQuestionPairs(buildQuestionPairs(players));
     setQuestionTurnIndex(0);
+
     setVotes({});
     setVoteIndex(0);
     setVoteOrder(shuffleArray(players.map((player) => player.id)));
+
     setGuessOptions(
       shuffleArray(
         [
@@ -368,6 +433,7 @@ export default function BaraAlsalfahPage() {
         ].filter(Boolean) as string[],
       ),
     );
+
     setSelectedGuess("");
     setGuessSubmitted(false);
     setGuessWasCorrect(null);
@@ -378,7 +444,7 @@ export default function BaraAlsalfahPage() {
     prepareRound();
   }
 
-  function continueWithSamePlayers() {
+  function continueWithSamePlayersAndCategory() {
     prepareRound();
   }
 
@@ -396,7 +462,10 @@ export default function BaraAlsalfahPage() {
 
   function nextQuestionTurn() {
     if (questionPairs.length === 0) return;
-    setQuestionTurnIndex((prev) => (prev + 1) % questionPairs.length);
+
+    setQuestionTurnIndex((prev) =>
+      prev < questionPairs.length - 1 ? prev + 1 : 0,
+    );
   }
 
   function castVote(targetId: string) {
@@ -439,10 +508,7 @@ export default function BaraAlsalfahPage() {
       setPlayers((prev) =>
         prev.map((player) =>
           player.id === outsiderId
-            ? {
-                ...player,
-                score: player.score + 3,
-              }
+            ? { ...player, score: player.score + 3 }
             : player,
         ),
       );
@@ -461,17 +527,6 @@ export default function BaraAlsalfahPage() {
   function changeCategoryKeepScores() {
     resetRoundState();
     setStep("category");
-  }
-
-  function resetEverything() {
-    setPlayers([]);
-    setNewPlayerName("");
-    setSelectedCategoryId(null);
-    setSelectedMode(null);
-    setEditingPlayerId(null);
-    setEditingPlayerName("");
-    resetRoundState();
-    setStep("intro");
   }
 
   if (loading) {
@@ -548,8 +603,8 @@ export default function BaraAlsalfahPage() {
                 <p>1. تختار الفئة ونوع الجولة.</p>
                 <p>2. تضيف اللاعبين يدويًا.</p>
                 <p>3. نوزع الأدوار عشوائيًا، وشخص واحد فقط يكون برا السالفة.</p>
-                <p>4. كل لاعب يسأل لاعبًا آخر مرة واحدة على الأقل.</p>
-                <p>5. يبدأ التصويت ثم تخمين الكلمة والنتائج.</p>
+                <p>4. كل لاعب يسأل مرة على الأقل ويُسأل مرة على الأقل.</p>
+                <p>5. بعد ذلك ينتقل الدور إلى أزواج جديدة حتى التصويت.</p>
               </div>
             </div>
           </section>
@@ -670,7 +725,7 @@ export default function BaraAlsalfahPage() {
               >
                 <div className="text-2xl font-black">نظام الحكم</div>
                 <p className="mt-3 text-white/70">
-                  يعتمد على كشف الشخص برا السالفة، ويمكن تطويره لاحقًا بشكل مختلف عن النقاط.
+                  الوضع الثاني جاهز للتمديد لاحقًا، وحاليًا يعمل بنفس منطق الجولات الأساسية.
                 </p>
               </button>
             </div>
@@ -989,8 +1044,7 @@ export default function BaraAlsalfahPage() {
                   classes +=
                     " border-emerald-400/40 bg-emerald-500/20 text-emerald-100";
                 } else if (guessSubmitted && isSelected && !isCorrect) {
-                  classes +=
-                    " border-red-400/40 bg-red-500/20 text-red-100";
+                  classes += " border-red-400/40 bg-red-500/20 text-red-100";
                 } else if (isSelected) {
                   classes +=
                     " border-cyan-400/30 bg-cyan-400/10 text-cyan-100";
@@ -1100,7 +1154,7 @@ export default function BaraAlsalfahPage() {
 
             <div className="mx-auto mt-10 grid max-w-3xl gap-4 md:grid-cols-2">
               <button
-                onClick={continueWithSamePlayers}
+                onClick={continueWithSamePlayersAndCategory}
                 className="rounded-[1.4rem] bg-green-500 px-6 py-4 text-xl font-black text-white transition hover:bg-green-400"
               >
                 كمل اللعبة
