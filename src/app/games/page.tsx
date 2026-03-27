@@ -5,7 +5,7 @@ const gameCards = [
     title: "لمّتنا",
     subtitle: "أسئلة وأجوبة",
     description:
-      "اللعبة الرئيسية المبنية على الفئات والأسئلة والنقاط بين فريقين.",
+      "اللعبة المبنية على الفئات والأسئلة والنقاط بين فريقين.",
     href: "/game/start",
     image:
       "https://placehold.co/1200x700/0b1733/ffffff?text=Lammatna+Quiz",
@@ -44,8 +44,8 @@ export default function GamesPage() {
               اختر اللعبة التي تريدها
             </h1>
             <p className="mt-4 text-sm leading-7 text-white/70 md:text-base md:leading-8">
-              هنا ستجد ألعاب الموقع في مكان واحد. اختر اللعبة التي تريد بدءها الآن،
-              ومع الوقت سنضيف ألعابًا جديدة بنفس ستايل لمّتنا.
+              هنا ستجد ألعاب المنصة بالكامل في مكان واحد. اختر اللعبة التي تريد بدءها الآن،
+              ومع الوقت سنضيف ألعابًا جديدة.
             </p>
           </div>
         </section>

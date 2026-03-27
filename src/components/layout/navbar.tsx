@@ -155,8 +155,8 @@ export default function Navbar() {
         <Link href="/pricing" className={linkClasses("/pricing")}>
           الباقات
         </Link>
-        <Link href="/game/start" className={linkClasses("/game/start")}>
-          اللعبة
+        <Link href="/games" className={linkClasses("/game/start")}>
+          الالعاب
         </Link>
         {authState.isLoggedIn ? (
           <Link href="/account" className={linkClasses("/account")}>
