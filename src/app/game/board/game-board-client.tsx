@@ -53,7 +53,7 @@ type CategoryColumn = {
   category: Category;
   rows: {
     points: 200 | 400 | 600;
-    question: QuestionRow | null;
+    questions: QuestionRow[];
   }[];
 };
 
@@ -142,23 +142,20 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
   } catch {}
 }
 
-function stripHtml(html: string | null | undefined) {
-  if (!html) return "";
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
 function RichContent({
   html,
   large = false,
+  center = true,
 }: {
   html: string | null | undefined;
   large?: boolean;
+  center?: boolean;
 }) {
   const safeHtml = html?.trim();
 
   if (!safeHtml) {
     return (
-      <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
+      <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
         لا يوجد محتوى محفوظ.
       </div>
     );
@@ -168,10 +165,13 @@ function RichContent({
     <div
       className={[
         "prose prose-invert max-w-none",
-        "prose-p:leading-8 prose-headings:text-white prose-strong:text-white",
-        "prose-img:mx-auto prose-img:rounded-[1.4rem] prose-img:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-        "prose-iframe:w-full prose-iframe:rounded-[1.4rem]",
-        large ? "text-lg md:text-xl" : "text-base md:text-lg",
+        "prose-headings:text-white prose-strong:text-white",
+        "prose-p:leading-9 md:prose-p:leading-10",
+        "prose-img:mx-auto prose-img:rounded-[1.2rem] prose-img:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "prose-img:max-h-[240px] md:prose-img:max-h-[320px] prose-img:w-auto",
+        "prose-iframe:mx-auto prose-iframe:w-full prose-iframe:max-w-3xl prose-iframe:rounded-[1.2rem]",
+        large ? "text-xl md:text-3xl" : "text-base md:text-lg",
+        center ? "text-center prose-p:text-center prose-headings:text-center" : "",
       ].join(" ")}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
@@ -202,7 +202,6 @@ function ScoreCard({
   isTurn,
   onIncrease,
   onDecrease,
-  compact = false,
   accent = "cyan",
 }: {
   teamName: string;
@@ -211,7 +210,6 @@ function ScoreCard({
   isTurn: boolean;
   onIncrease: () => void;
   onDecrease: () => void;
-  compact?: boolean;
   accent?: "cyan" | "orange";
 }) {
   const classes =
@@ -219,67 +217,59 @@ function ScoreCard({
       ? {
           chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
           card: isTurn
-            ? "border-orange-300/35 bg-orange-400/12 shadow-[0_18px_60px_rgba(251,146,60,0.16)]"
+            ? "border-orange-300/35 bg-orange-400/12 shadow-[0_18px_50px_rgba(251,146,60,0.16)]"
             : "border-white/10 bg-white/5",
           btn: "border-orange-300/20 bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
         }
       : {
           chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
           card: isTurn
-            ? "border-cyan-300/35 bg-cyan-400/12 shadow-[0_18px_60px_rgba(34,211,238,0.16)]"
+            ? "border-cyan-300/35 bg-cyan-400/12 shadow-[0_18px_50px_rgba(34,211,238,0.16)]"
             : "border-white/10 bg-white/5",
           btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
         };
 
   return (
-    <div
-      className={[
-        "rounded-[1.8rem] border p-4 transition",
-        compact ? "min-h-[122px]" : "min-h-[156px]",
-        classes.card,
-      ].join(" ")}
-    >
+    <div className={["rounded-[1.5rem] border p-4 transition", classes.card].join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-bold text-white/55">لوحة الفريق</div>
-          <h3 className="mt-1 truncate text-lg font-black text-white md:text-xl">
-            {teamName}
-          </h3>
+          <div className="text-[11px] font-bold text-white/55">لوحة الفريق</div>
+          <h3 className="mt-1 truncate text-xl font-black text-white">{teamName}</h3>
         </div>
 
         <div className="flex flex-wrap gap-2">
           {isTurn ? (
-            <span className={`rounded-full border px-3 py-1 text-[11px] font-black ${classes.chip}`}>
+            <span className={`rounded-full border px-3 py-1 text-[10px] font-black ${classes.chip}`}>
               الدور الآن
             </span>
           ) : null}
 
           {isLeading ? (
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-black text-emerald-100">
+            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black text-emerald-100">
               متصدر
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-4 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={onDecrease}
-          className={`flex h-12 w-12 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
         >
           −
         </button>
 
         <div className="text-center">
           <div className="text-4xl font-black text-white md:text-5xl">{score}</div>
-          <div className="text-xs font-bold text-white/55">نقطة</div>
+          <div className="text-[11px] font-bold text-white/55">نقطة</div>
         </div>
 
         <button
           type="button"
           onClick={onIncrease}
-          className={`flex h-12 w-12 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
         >
           +
         </button>
@@ -309,21 +299,19 @@ function QuestionCell({
       disabled={disabled}
       onClick={onOpen}
       className={[
-        "group relative min-h-[102px] rounded-[1.4rem] border px-3 py-4 text-center transition md:min-h-[118px]",
+        "group relative min-h-[88px] rounded-[1.15rem] border px-2 py-3 text-center transition md:min-h-[96px]",
         disabled
           ? "cursor-not-allowed border-white/5 bg-slate-950/50 text-slate-500"
           : "border-white/10 bg-white/5 text-white hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-cyan-400/10",
         active ? "border-cyan-300/40 bg-cyan-400/12 shadow-[0_0_0_1px_rgba(34,211,238,0.25)]" : "",
       ].join(" ")}
     >
-      <div className="text-4xl font-black tracking-tight md:text-5xl">{points}</div>
-
-      <div className="mt-2 text-xs font-bold">
+      <div className="text-3xl font-black tracking-tight md:text-4xl">{points}</div>
+      <div className="mt-1 text-[11px] font-bold">
         {!question ? "غير متاح" : used ? "تم الاستخدام" : "جاهز"}
       </div>
-
       {!disabled ? (
-        <div className="mt-1 text-[11px] font-medium text-white/55">اختر السؤال</div>
+        <div className="mt-1 text-[10px] font-medium text-white/55">اختر السؤال</div>
       ) : null}
     </button>
   );
@@ -375,11 +363,11 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-3 md:p-6">
-      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
+      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
         <div className="border-b border-white/10 px-5 py-4 md:px-8 md:py-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap justify-center gap-2 md:justify-start">
                 <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
                   {openQuestion.categoryName}
                 </span>
@@ -394,7 +382,7 @@ function QuestionOverlay({
                 ) : null}
               </div>
 
-              <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">
+              <h2 className="mt-3 text-center text-2xl font-black text-white md:text-right md:text-3xl">
                 {!showAnswer && !showWinnerPicker
                   ? "السؤال"
                   : showAnswer && !showWinnerPicker
@@ -442,9 +430,9 @@ function QuestionOverlay({
 
         <div className="max-h-[70vh] overflow-y-auto px-5 py-5 md:px-8 md:py-7">
           {!showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.question_text} large />
+            <RichContent html={openQuestion.question_text} large center />
           ) : showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.answer_text} large />
+            <RichContent html={openQuestion.answer_text} large center />
           ) : (
             <div>
               <h3 className="mb-5 text-center text-2xl font-black text-white md:text-3xl">
@@ -456,7 +444,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.3rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
+                  className="rounded-[1.2rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
                 >
                   {teamOne}
                 </button>
@@ -465,7 +453,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.3rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
+                  className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
                 >
                   {teamTwo}
                 </button>
@@ -475,7 +463,7 @@ function QuestionOverlay({
                 type="button"
                 onClick={() => onAwardPoints("none")}
                 disabled={modalBusy}
-                className="mx-auto mt-4 block w-full max-w-md rounded-[1.3rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
+                className="mx-auto mt-4 block w-full max-w-md rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
               >
                 ولا أحد
               </button>
@@ -562,8 +550,7 @@ export default function GameBoardClient({
   const storageKey = `seenjeem-board-state:${sessionId}`;
 
   const initialState = useMemo(() => {
-    const normalizedServer = normalizeBoardState(initialBoardState);
-    return normalizedServer;
+    return normalizeBoardState(initialBoardState);
   }, [initialBoardState]);
 
   const [boardState, setBoardState] = useState<BoardState>(initialState);
@@ -667,29 +654,26 @@ export default function GameBoardClient({
       return {
         category,
         rows: pointsList.map((points) => {
-          const available = categoryQuestions
+          const matching = categoryQuestions
             .filter((question) => question.points === points)
-            .sort((a, b) => a.id.localeCompare(b.id));
-
-          const preferredUnused =
-            available.find(
-              (question) => !boardState.usedQuestionIds.includes(question.id),
-            ) ?? null;
-
-          const fallbackUsed = available[0] ?? null;
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .slice(0, 2);
 
           return {
             points,
-            question: preferredUnused ?? fallbackUsed,
+            questions: matching,
           };
         }),
       };
     });
-  }, [boardState.usedQuestionIds, categories, questions]);
+  }, [categories, questions]);
 
   const usedCount = boardState.usedQuestionIds.length;
   const totalBoardQuestions = boardColumns.reduce((sum, column) => {
-    return sum + column.rows.filter((row) => row.question).length;
+    return (
+      sum +
+      column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0)
+    );
   }, 0);
   const remainingCount = Math.max(totalBoardQuestions - usedCount, 0);
 
@@ -701,8 +685,7 @@ export default function GameBoardClient({
       ? teamTwo
       : "تعادل";
 
-  const activeTurn =
-    (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
 
   function updateState(updater: (prev: BoardState) => BoardState) {
     setBoardState((prev) => {
@@ -719,6 +702,7 @@ export default function GameBoardClient({
     if (boardState.usedQuestionIds.includes(question.id)) return;
 
     setTimerRunning(false);
+
     updateState((prev) => ({
       ...prev,
       openQuestionId: question.id,
@@ -730,6 +714,7 @@ export default function GameBoardClient({
 
   function handleCloseOverlay() {
     setTimerRunning(false);
+
     updateState((prev) => ({
       ...prev,
       openQuestionId: null,
@@ -741,6 +726,7 @@ export default function GameBoardClient({
 
   function handleRevealAnswer() {
     setTimerRunning(false);
+
     updateState((prev) => ({
       ...prev,
       showAnswer: true,
@@ -782,9 +768,18 @@ export default function GameBoardClient({
     setTimerRunning((prev) => !prev);
   }
 
+  function adjustScore(team: "teamOne" | "teamTwo", delta: number) {
+    updateState((prev) => ({
+      ...prev,
+      teamOneScore:
+        team === "teamOne" ? Math.max(0, prev.teamOneScore + delta) : prev.teamOneScore,
+      teamTwoScore:
+        team === "teamTwo" ? Math.max(0, prev.teamTwoScore + delta) : prev.teamTwoScore,
+    }));
+  }
+
   async function handleAwardPoints(winner: "teamOne" | "teamTwo" | "none") {
-    if (!openQuestion) return;
-    if (modalBusy) return;
+    if (!openQuestion || modalBusy) return;
 
     setModalBusy(true);
     setTimerRunning(false);
@@ -815,21 +810,11 @@ export default function GameBoardClient({
     setModalBusy(false);
   }
 
-  function adjustScore(team: "teamOne" | "teamTwo", delta: number) {
-    updateState((prev) => ({
-      ...prev,
-      teamOneScore:
-        team === "teamOne" ? Math.max(0, prev.teamOneScore + delta) : prev.teamOneScore,
-      teamTwoScore:
-        team === "teamTwo" ? Math.max(0, prev.teamTwoScore + delta) : prev.teamTwoScore,
-    }));
-  }
-
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-[1800px] px-3 py-3 md:px-5 md:py-5">
-        <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] p-3 shadow-[0_25px_80px_rgba(0,0,0,0.38)] md:p-5">
-          <div className="mb-4 rounded-[1.8rem] border border-white/10 bg-white/5 p-4 md:p-5">
+        <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] p-3 shadow-[0_25px_80px_rgba(0,0,0,0.38)] md:p-4">
+          <div className="mb-4 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <div className="text-xs font-black tracking-[0.18em] text-cyan-300/90">
@@ -856,66 +841,8 @@ export default function GameBoardClient({
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_330px]">
-            <div className="order-2 xl:order-1">
-              <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#020b1f] p-3 md:p-4">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-                  {boardColumns.map((column) => {
-                    const visual = getVisualBySlug(column.category.slug);
-
-                    return (
-                      <div key={column.category.id} className="flex flex-col gap-3">
-                        <div
-                          className={[
-                            "relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-gradient-to-b p-4 text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
-                            visual.gradient,
-                          ].join(" ")}
-                        >
-                          <div className="mx-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:h-16 md:w-16">
-                            {column.category.image_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={column.category.image_url}
-                                alt={column.category.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="text-xs font-black text-white/70">فئة</div>
-                            )}
-                          </div>
-
-                          <h3 className="mt-4 text-lg font-black leading-7 text-white md:text-xl">
-                            {column.category.name}
-                          </h3>
-                        </div>
-
-                        {column.rows.map((row) => {
-                          const used = row.question
-                            ? boardState.usedQuestionIds.includes(row.question.id)
-                            : true;
-
-                          const active =
-                            row.question?.id === boardState.openQuestionId;
-
-                          return (
-                            <QuestionCell
-                              key={`${column.category.id}-${row.points}`}
-                              question={row.question}
-                              points={row.points}
-                              used={used}
-                              active={active}
-                              onOpen={() => handleOpenQuestion(row.question)}
-                            />
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <aside className="order-1 xl:order-2">
+          <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)]">
+            <aside className="order-1">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                 <ScoreCard
                   teamName={teamOne}
@@ -937,15 +864,16 @@ export default function GameBoardClient({
                   accent="orange"
                 />
 
-                <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-4 xl:p-5">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
                   <div className="text-xs font-bold text-white/55">ملخص الجولة</div>
+
                   <div className="mt-4 grid gap-3">
                     <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
                       <div className="flex items-center gap-2 text-sm font-black text-white">
                         <CrownIcon className="h-4 w-4 text-emerald-300" />
                         المتصدر الحالي
                       </div>
-                      <div className="mt-2 text-lg font-black text-emerald-100">
+                      <div className="mt-2 text-2xl font-black text-emerald-100">
                         {leaderLabel}
                       </div>
                     </div>
@@ -966,16 +894,79 @@ export default function GameBoardClient({
                   </div>
                 </div>
 
-                <div className="rounded-[1.8rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
                   <Link
                     href="/account"
-                    className="inline-flex min-h-14 w-full items-center justify-center rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-3 text-base font-black text-white transition hover:bg-white/10"
+                    className="inline-flex min-h-14 w-full items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/5 px-5 py-3 text-base font-black text-white transition hover:bg-white/10"
                   >
                     الرجوع للحساب
                   </Link>
                 </div>
               </div>
             </aside>
+
+            <div className="order-2">
+              <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#020b1f] p-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+                  {boardColumns.map((column) => {
+                    const visual = getVisualBySlug(column.category.slug);
+
+                    return (
+                      <div key={column.category.id} className="flex flex-col gap-3">
+                        <div
+                          className={[
+                            "relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-gradient-to-b p-3 text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
+                            visual.gradient,
+                          ].join(" ")}
+                        >
+                          <div className="mx-auto flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10 md:h-12 md:w-12">
+                            {column.category.image_url ? (
+                              <img
+                                src={column.category.image_url}
+                                alt={column.category.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="text-[10px] font-black text-white/70">فئة</div>
+                            )}
+                          </div>
+
+                          <h3 className="mt-3 text-base font-black leading-6 text-white md:text-lg">
+                            {column.category.name}
+                          </h3>
+                        </div>
+
+                        {column.rows.map((row) => (
+                          <div
+                            key={`${column.category.id}-${row.points}`}
+                            className="grid grid-cols-2 gap-2"
+                          >
+                            {[0, 1].map((index) => {
+                              const question = row.questions[index] ?? null;
+                              const used = question
+                                ? boardState.usedQuestionIds.includes(question.id)
+                                : true;
+                              const active = question?.id === boardState.openQuestionId;
+
+                              return (
+                                <QuestionCell
+                                  key={`${column.category.id}-${row.points}-${index}`}
+                                  question={question}
+                                  points={row.points}
+                                  used={used}
+                                  active={active}
+                                  onOpen={() => handleOpenQuestion(question)}
+                                />
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
