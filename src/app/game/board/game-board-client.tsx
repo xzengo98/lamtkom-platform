@@ -302,35 +302,37 @@ function QuestionCell({
   onOpen?: () => void;
   mobile?: boolean;
 }) {
+  const disabled = !question || used;
+
   return (
     <button
       type="button"
-      onClick={onOpen}
-      disabled={!question || used}
+      onClick={disabled ? undefined : onOpen}
+      disabled={disabled}
       className={[
-        "group relative flex items-center justify-center overflow-hidden rounded-[1rem] border text-center transition-all duration-200",
-        mobile ? "h-[42px]" : "h-[88px]",
-        question && !used
-          ? "border-white/10 bg-white/5 text-white hover:border-cyan-300/40 hover:bg-cyan-400/10"
-          : "cursor-not-allowed border-white/5 bg-slate-900/50 text-slate-500",
+        "group rounded-[1rem] border text-center transition",
+        mobile
+          ? "h-[50px] px-1 py-1 rounded-[0.9rem]"
+          : "h-[88px] px-2 py-2 rounded-[1.25rem]",
+        disabled
+          ? "cursor-not-allowed border-white/5 bg-slate-900/50 text-slate-500"
+          : "border-white/10 bg-white/5 text-white hover:border-cyan-300/40 hover:bg-cyan-400/10",
       ].join(" ")}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_60%)]" />
-      <div className="relative flex flex-col items-center">
-        <span
-          className={[
-            "font-black leading-none tracking-tight",
-            mobile ? "text-[1rem]" : "text-[2.15rem]",
-          ].join(" ")}
-        >
-          {points}
-        </span>
-        {!mobile ? (
-          <span className="mt-1 text-[10px] text-white/40">
-            {question ? (used ? "تم الاستخدام" : "افتح السؤال") : "غير متاح"}
-          </span>
-        ) : null}
+      <div
+        className={[
+          "font-black leading-none tracking-tight",
+          mobile ? "text-[18px]" : "text-[38px]",
+        ].join(" ")}
+      >
+        {points}
       </div>
+
+      {!mobile ? (
+        <div className="mt-1 text-[11px] font-bold text-white/55">
+          {question ? (used ? "تم الاستخدام" : "افتح السؤال") : "غير متاح"}
+        </div>
+      ) : null}
     </button>
   );
 }
