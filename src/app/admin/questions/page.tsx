@@ -57,10 +57,6 @@ type QuestionRow = {
   categories: CategoryRelation;
 };
 
-type PointStatRow = {
-  points: number;
-};
-
 function getCategoryObject(categories: CategoryRelation) {
   if (!categories) return null;
   return Array.isArray(categories) ? (categories[0] ?? null) : categories;
@@ -187,7 +183,7 @@ export default async function AdminQuestionsPage({
 
     if (sectionsError) {
       return (
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+        <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
           فشل تحميل الأقسام: {sectionsError.message}
         </div>
       );
@@ -195,7 +191,7 @@ export default async function AdminQuestionsPage({
 
     if (categoriesError) {
       return (
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+        <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
           فشل تحميل الفئات: {categoriesError.message}
         </div>
       );
@@ -209,10 +205,6 @@ export default async function AdminQuestionsPage({
       : categories;
 
     let questions: QuestionRow[] = [];
-    let totalFilteredCount = 0;
-    let count200 = 0;
-    let count400 = 0;
-    let count600 = 0;
 
     if (hasFilters) {
       let allowedCategoryIds: string[] | null = null;
@@ -230,35 +222,6 @@ export default async function AdminQuestionsPage({
       if (allowedCategoryIds && allowedCategoryIds.length === 0) {
         questions = [];
       } else {
-        let statsQuery = supabase.from("questions").select("points");
-
-        if (searchQuery) {
-          statsQuery = statsQuery.or(
-            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
-          );
-        }
-
-        if (allowedCategoryIds && allowedCategoryIds.length > 0) {
-          statsQuery = statsQuery.in("category_id", allowedCategoryIds);
-        }
-
-        const { data: statsData, error: statsError } = await statsQuery;
-
-        if (statsError) {
-          return (
-            <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
-              فشل تحميل إحصائيات الأسئلة: {statsError.message}
-            </div>
-          );
-        }
-
-        const pointRows = (statsData ?? []) as PointStatRow[];
-
-        totalFilteredCount = pointRows.length;
-        count200 = pointRows.filter((item) => item.points === 200).length;
-        count400 = pointRows.filter((item) => item.points === 400).length;
-        count600 = pointRows.filter((item) => item.points === 600).length;
-
         let query = supabase
           .from("questions")
           .select(`
@@ -297,7 +260,7 @@ export default async function AdminQuestionsPage({
 
         if (error) {
           return (
-            <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+            <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
               فشل تحميل الأسئلة: {error.message}
             </div>
           );
@@ -307,52 +270,60 @@ export default async function AdminQuestionsPage({
       }
     }
 
+    const exportAllHref = "/api/admin/questions/export";
+    const exportSectionHref = selectedSection
+      ? `/api/admin/questions/export?section=${encodeURIComponent(selectedSection)}`
+      : null;
+    const exportCategoryHref = selectedCategory
+      ? `/api/admin/questions/export?category=${encodeURIComponent(selectedCategory)}`
+      : null;
+
     return (
-      <div className="space-y-6">
+      <div className="mx-auto max-w-7xl px-4 py-8">
         <AdminPageHeader
-          title="إدارة الأسئلة"
-          description="فلتر الأسئلة بسرعة، وراقب توزيع النتائج حسب النقاط، وعدّل أو احذف بدون فقدان الفلترة الحالية."
-          action={
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/admin/questions/import"
-                className="inline-flex items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-sm font-bold text-amber-100 transition hover:bg-amber-500/20"
-              >
-                رفع أسئلة بالجملة
-              </Link>
+  title="إدارة الأسئلة"
+  description="ابحث داخل الأسئلة، عدّلها، واحذفها، وصدّرها كملف JSON جاهز للمراجعة أو إعادة الرفع."
+  action={
+    <div className="flex flex-wrap gap-3">
+      <Link
+        href="/admin/questions/new"
+        className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
+      >
+        إضافة سؤال جديد
+      </Link>
 
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
-            </div>
-          }
-        />
+      <Link
+        href="/admin/questions/import"
+        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+      >
+        رفع أسئلة بالجملة
+      </Link>
+    </div>
+  }
+/>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          <form className="grid gap-4 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto_auto] xl:items-end">
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+        <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur">
+          <form className="grid gap-4 lg:grid-cols-4">
+            <div className="lg:col-span-2">
+              <label className="mb-2 block text-sm font-bold text-slate-200">
                 البحث بنص السؤال
               </label>
               <input
                 name="q"
                 defaultValue={searchQuery}
-                placeholder="اكتب جزءًا من السؤال أو الإجابة..."
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                placeholder="ابحث داخل السؤال أو الإجابة"
+                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none placeholder:text-slate-400"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-bold text-slate-200">
                 القسم
               </label>
               <select
                 name="section"
                 defaultValue={selectedSection}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none"
               >
                 <option value="">كل الأقسام</option>
                 {sections.map((section) => (
@@ -364,13 +335,13 @@ export default async function AdminQuestionsPage({
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-bold text-slate-200">
                 الفئة
               </label>
               <select
                 name="category"
                 defaultValue={selectedCategory}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none"
               >
                 <option value="">كل الفئات</option>
                 {filteredCategoriesForDropdown.map((category) => (
@@ -381,180 +352,182 @@ export default async function AdminQuestionsPage({
               </select>
             </div>
 
-            <button
-              type="submit"
-              className="inline-flex h-14 items-center justify-center rounded-2xl bg-cyan-500 px-6 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-            >
-              بحث / فلترة
-            </button>
+            <div className="flex flex-wrap items-end gap-3 lg:col-span-4">
+              <button
+                type="submit"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
+              >
+                بحث / فلترة
+              </button>
 
-            <Link
-              href="/admin/questions"
-              className="inline-flex h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              تصفير
-            </Link>
+              <Link
+                href="/admin/questions"
+                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                تصفير
+              </Link>
+
+              <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+                الفلترة الحالية محفوظة داخل الرابط{" "}
+                {hasFilters ? (
+                  <span className="font-bold">• عدد النتائج: {questions.length}</span>
+                ) : (
+                  <span className="font-bold">
+                    • ابدأ بالبحث أو اختيار قسم/فئة لإظهار النتائج
+                  </span>
+                )}
+              </div>
+            </div>
           </form>
+        </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-              الفلترة الحالية محفوظة داخل الرابط
+        <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold text-slate-200">
+                تصدير JSON
+              </div>
+              <h2 className="mt-3 text-xl font-black text-white">
+                تصدير الأسئلة للمراجعة الخارجية
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
+                يمكنك تحميل جميع الأسئلة أو تصدير قسم أو فئة محددة بنفس التنسيق
+                المقبول داخل نظام الرفع لديك.
+              </p>
             </div>
 
-            {hasFilters ? (
-              <>
-                <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-100">
-                  عدد النتائج: {totalFilteredCount}
-                </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={exportAllHref}
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-400/15"
+              >
+                تصدير جميع الأسئلة
+              </Link>
 
-                <div className="rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-bold text-amber-100">
-                  200 نقطة: {count200} سؤال
-                </div>
+              {exportSectionHref ? (
+                <Link
+                  href={exportSectionHref}
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  تصدير هذا القسم
+                </Link>
+              ) : (
+                <span className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-2.5 text-sm font-bold text-slate-400">
+                  اختر قسمًا لتفعيل تصدير القسم
+                </span>
+              )}
 
-                <div className="rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sm font-bold text-sky-100">
-                  400 نقطة: {count400} سؤال
-                </div>
-
-                <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-2 text-sm font-bold text-fuchsia-100">
-                  600 نقطة: {count600} سؤال
-                </div>
-              </>
-            ) : (
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-                ابدأ بالبحث أو اختيار قسم/فئة لإظهار النتائج
-              </div>
-            )}
+              {exportCategoryHref ? (
+                <Link
+                  href={exportCategoryHref}
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+                >
+                  تصدير هذه الفئة
+                </Link>
+              ) : (
+                <span className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-2.5 text-sm font-bold text-slate-400">
+                  اختر فئة لتفعيل تصدير الفئة
+                </span>
+              )}
+            </div>
           </div>
-        </section>
+        </div>
 
         {!hasFilters ? (
-          <div className="space-y-4">
+          <div className="mt-6">
             <AdminEmptyState
-              title="لا توجد نتائج بعد"
-              description="استخدم البحث أو الفلترة بالقسم أو الفئة، وبعدها ستظهر لك الأسئلة وتوزيعها حسب النقاط."
-              buttonText="إضافة سؤال جديد"
+              title="ابدأ بالبحث أو الفلترة"
+              description="اختر قسمًا أو فئة أو ابحث بالنص لعرض الأسئلة هنا، ويمكنك في أي وقت استخدام أزرار التصدير أعلاه."
             />
-            <div className="flex justify-center">
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
-            </div>
           </div>
         ) : questions.length > 0 ? (
-          <section className="grid gap-5 xl:grid-cols-2">
+          <div className="mt-6 grid gap-4">
             {questions.map((question) => {
-              const questionPreview = truncateText(
-                stripHtml(question.question_text),
-              );
+              const questionPreview = truncateText(stripHtml(question.question_text));
               const answerPreview = truncateText(stripHtml(question.answer_text));
               const questionImage = extractFirstImageSrc(question.question_text);
               const answerImage = extractFirstImageSrc(question.answer_text);
 
               return (
-                <article
+                <div
                   key={question.id}
-                  className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                  className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur"
                 >
-                  <div className="mb-3 flex items-start justify-between gap-4">
-                    <div className="text-cyan-300 text-sm font-bold">سؤال</div>
+                  <div className="mb-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-slate-300">
+                    سؤال
                   </div>
 
-                  <h3 className="text-3xl font-black leading-[1.5] text-white">
+                  <h3 className="text-lg font-black text-white">
                     {questionPreview || "بدون نص"}
                   </h3>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
                       {getSectionName(question.categories)}
                     </span>
-
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-bold text-white">
+                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
                       {getCategoryName(question.categories)}
                     </span>
-
-                    <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-sm font-bold text-amber-100">
+                    <span className="rounded-full border border-amber-400/15 bg-amber-400/10 px-3 py-2 text-amber-100">
                       {question.points} نقطة
                     </span>
-
-                    <span
-                      className={[
-                        "rounded-full border px-3 py-1 text-sm font-bold",
-                        question.is_active
-                          ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-100"
-                          : "border-white/10 bg-white/5 text-white/70",
-                      ].join(" ")}
-                    >
+                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
                       {question.is_active ? "مفعّل" : "غير مفعّل"}
                     </span>
-
-                    <span
-                      className={[
-                        "rounded-full border px-3 py-1 text-sm font-bold",
-                        question.is_used
-                          ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-                          : "border-white/10 bg-white/5 text-white/70",
-                      ].join(" ")}
-                    >
+                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
                       {question.is_used ? "مستخدم" : "غير مستخدم"}
                     </span>
                   </div>
 
-                  <div className="mt-5 grid gap-4 md:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                      <div className="mb-2 text-sm font-bold text-white/70">
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+                      <div className="mb-2 text-sm font-bold text-slate-200">
                         صورة السؤال
                       </div>
-
                       {questionImage ? (
                         <img
                           src={questionImage}
                           alt="صورة السؤال"
-                          className="h-52 w-full rounded-[1rem] object-cover"
+                          className="max-h-52 w-full rounded-2xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/40 p-4 text-sm text-slate-400">
                           لا توجد صورة داخل السؤال
                         </div>
                       )}
                     </div>
 
-                    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                      <div className="mb-2 text-sm font-bold text-white/70">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+                      <div className="mb-2 text-sm font-bold text-slate-200">
                         صورة الإجابة
                       </div>
-
                       {answerImage ? (
                         <img
                           src={answerImage}
                           alt="صورة الإجابة"
-                          className="h-52 w-full rounded-[1rem] object-cover"
+                          className="max-h-52 w-full rounded-2xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-52 items-center justify-center rounded-[1rem] border border-white/10 bg-slate-950/40 text-white/45">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/40 p-4 text-sm text-slate-400">
                           لا توجد صورة داخل الإجابة
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                    <div className="mb-2 text-sm font-bold text-white/70">
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+                    <div className="mb-2 text-sm font-bold text-slate-200">
                       الإجابة
                     </div>
-                    <p className="text-lg leading-8 text-white">
+                    <p className="text-sm leading-7 text-slate-300">
                       {answerPreview || "غير مضافة"}
                     </p>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Link
-                      href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
-                        returnTo,
-                      )}`}
-                      className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+                      href={`/admin/questions/${question.id}/edit?returnTo=${encodeURIComponent(returnTo)}`}
+                      className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-cyan-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
                     >
                       تعديل
                     </Link>
@@ -564,38 +537,29 @@ export default async function AdminQuestionsPage({
                       <input type="hidden" name="returnTo" value={returnTo} />
                       <button
                         type="submit"
-                        className="inline-flex items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-300 transition hover:bg-red-500/15"
                       >
                         حذف
                       </button>
                     </form>
                   </div>
-                </article>
+                </div>
               );
             })}
-          </section>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="mt-6">
             <AdminEmptyState
-              title="لا توجد أسئلة مطابقة"
-              description="جرّب تغيير نص البحث أو القسم أو الفئة، وستظهر هنا النتائج مع توزيعها حسب النقاط."
-              buttonText="إضافة سؤال جديد"
+              title="لا توجد نتائج"
+              description="لم يتم العثور على أسئلة مطابقة للفلاتر الحالية. يمكنك تعديل الفلاتر أو استخدام التصدير العام."
             />
-            <div className="flex justify-center">
-              <Link
-                href="/admin/questions/new"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                إضافة سؤال جديد
-              </Link>
-            </div>
           </div>
         )}
       </div>
     );
   } catch (error) {
     return (
-      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+      <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
         فشل تحميل الأسئلة:{" "}
         {error instanceof Error ? error.message : "Unknown error"}
       </div>
