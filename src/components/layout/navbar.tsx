@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ type AuthState = {
 
 function navLinkClass(pathname: string, href: string) {
   const active = pathname === href;
+
   return [
     "rounded-2xl px-4 py-2 text-sm font-bold transition",
     active
@@ -31,8 +33,8 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
-  const [menuOpen, setMenuOpen] = useState(false);
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>({
     loading: true,
     isLoggedIn: false,
@@ -102,89 +104,21 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#030b1e]/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-        <Link href="/" className="flex items-center">
-          <img
-            src="https://k.top4top.io/p_3722mj2o21.png"
-            alt="لمّتنا"
-            className="h-14 w-auto object-contain md:h-16"
-          />
-        </Link>
-
-        <nav className="hidden items-center gap-2 lg:flex">
-          <Link href="/" className={navLinkClass(pathname, "/")}>
-            الرئيسية
+    <header className="relative z-40 border-b border-white/10 bg-[#071126]/95 backdrop-blur">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <div className="flex min-h-[84px] items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-3 shrink-0">
+            <Image
+              src="https://k.top4top.io/p_3722mj2o21.png"
+              alt="لمّتنا"
+              width={120}
+              height={40}
+              className="h-auto w-[92px] md:w-[120px]"
+              priority
+            />
           </Link>
-          <Link href="/games" className={navLinkClass(pathname, "/games")}>
-            الألعاب
-          </Link>
-          <Link href="/pricing" className={navLinkClass(pathname, "/pricing")}>
-            الباقات
-          </Link>
-          {authState.isLoggedIn ? (
-            <Link
-              href="/account"
-              className={navLinkClass(pathname, "/account")}
-            >
-              حسابي
-            </Link>
-          ) : null}
-          {authState.isAdmin ? (
-            <Link href="/admin" className={navLinkClass(pathname, "/admin")}>
-              الإدارة
-            </Link>
-          ) : null}
-        </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          {authState.loading ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70">
-              جارٍ التحميل...
-            </div>
-          ) : authState.isLoggedIn ? (
-            <>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white">
-                {authState.username || "مستخدم"}
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
-              >
-                تسجيل الخروج
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/register"
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                إنشاء حساب
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                تسجيل الدخول
-              </Link>
-            </>
-          )}
-        </div>
-
-        <button
-          onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 text-slate-200 lg:hidden"
-          aria-label="فتح القائمة"
-        >
-          ☰
-        </button>
-      </div>
-
-      {menuOpen ? (
-        <div className="border-t border-white/10 bg-[#030b1e] px-4 py-4 lg:hidden">
-          <div className="flex flex-col gap-2">
+          <nav className="hidden items-center gap-2 lg:flex">
             <Link href="/" className={navLinkClass(pathname, "/")}>
               الرئيسية
             </Link>
@@ -196,10 +130,7 @@ export default function Navbar() {
             </Link>
 
             {authState.isLoggedIn ? (
-              <Link
-                href="/account"
-                className={navLinkClass(pathname, "/account")}
-              >
+              <Link href="/account" className={navLinkClass(pathname, "/account")}>
                 حسابي
               </Link>
             ) : null}
@@ -209,45 +140,122 @@ export default function Navbar() {
                 الإدارة
               </Link>
             ) : null}
-          </div>
+          </nav>
 
-          <div className="mt-4 border-t border-white/10 pt-4">
+          <div className="hidden items-center gap-3 lg:flex">
             {authState.loading ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/70">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-300">
                 جارٍ التحميل...
               </div>
             ) : authState.isLoggedIn ? (
-              <div className="space-y-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white">
+              <>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200">
                   {authState.username || "مستخدم"}
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleLogout}
-                  className="w-full rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100 transition hover:bg-red-500/20"
+                  className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-200 transition hover:bg-red-500/15"
                 >
                   تسجيل الخروج
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="grid gap-3">
+              <>
                 <Link
                   href="/register"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10"
                 >
                   إنشاء حساب
                 </Link>
+
                 <Link
                   href="/login"
-                  className="rounded-2xl bg-cyan-500 px-4 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+                  className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
                 >
                   تسجيل الدخول
                 </Link>
-              </div>
+              </>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 text-slate-200 lg:hidden"
+            aria-label="فتح القائمة"
+          >
+            ☰
+          </button>
         </div>
-      ) : null}
+
+        {menuOpen ? (
+          <div className="border-t border-white/10 py-4 lg:hidden">
+            <div className="flex flex-col gap-2">
+              <Link href="/" className={navLinkClass(pathname, "/")}>
+                الرئيسية
+              </Link>
+              <Link href="/games" className={navLinkClass(pathname, "/games")}>
+                الألعاب
+              </Link>
+              <Link href="/pricing" className={navLinkClass(pathname, "/pricing")}>
+                الباقات
+              </Link>
+
+              {authState.isLoggedIn ? (
+                <Link href="/account" className={navLinkClass(pathname, "/account")}>
+                  حسابي
+                </Link>
+              ) : null}
+
+              {authState.isAdmin ? (
+                <Link href="/admin" className={navLinkClass(pathname, "/admin")}>
+                  الإدارة
+                </Link>
+              ) : null}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2">
+              {authState.loading ? (
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-300">
+                  جارٍ التحميل...
+                </div>
+              ) : authState.isLoggedIn ? (
+                <>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-200">
+                    {authState.username || "مستخدم"}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15"
+                  >
+                    تسجيل الخروج
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-200 transition hover:bg-white/10"
+                  >
+                    إنشاء حساب
+                  </Link>
+
+                  <Link
+                    href="/login"
+                    className="rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </header>
   );
 }
