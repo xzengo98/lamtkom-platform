@@ -167,9 +167,9 @@ function RichContent({
         "prose prose-invert max-w-none",
         "prose-headings:text-white prose-strong:text-white",
         "prose-p:leading-9 md:prose-p:leading-10",
-        "prose-img:mx-auto prose-img:rounded-[1.2rem] prose-img:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-        "prose-img:max-h-[240px] md:prose-img:max-h-[320px] prose-img:w-auto",
-        "prose-iframe:mx-auto prose-iframe:w-full prose-iframe:max-w-3xl prose-iframe:rounded-[1.2rem]",
+        "prose-img:mx-auto prose-img:rounded-[1.1rem] prose-img:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "prose-img:max-h-[180px] md:prose-img:max-h-[240px] prose-img:w-auto",
+        "prose-iframe:mx-auto prose-iframe:w-full prose-iframe:max-w-2xl prose-iframe:max-h-[260px] prose-iframe:rounded-[1.1rem]",
         large ? "text-xl md:text-3xl" : "text-base md:text-lg",
         center ? "text-center prose-p:text-center prose-headings:text-center" : "",
       ].join(" ")}
@@ -217,24 +217,26 @@ function ScoreCard({
       ? {
           chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
           card: isTurn
-            ? "border-orange-300/35 bg-orange-400/12 shadow-[0_18px_50px_rgba(251,146,60,0.16)]"
+            ? "border-orange-300/30 bg-orange-400/10 shadow-[0_14px_40px_rgba(251,146,60,0.14)]"
             : "border-white/10 bg-white/5",
           btn: "border-orange-300/20 bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
         }
       : {
           chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
           card: isTurn
-            ? "border-cyan-300/35 bg-cyan-400/12 shadow-[0_18px_50px_rgba(34,211,238,0.16)]"
+            ? "border-cyan-300/30 bg-cyan-400/10 shadow-[0_14px_40px_rgba(34,211,238,0.14)]"
             : "border-white/10 bg-white/5",
           btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
         };
 
   return (
-    <div className={["rounded-[1.5rem] border p-4 transition", classes.card].join(" ")}>
+    <div className={["rounded-[1.35rem] border p-4 transition", classes.card].join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[11px] font-bold text-white/55">لوحة الفريق</div>
-          <h3 className="mt-1 truncate text-xl font-black text-white">{teamName}</h3>
+          <h3 className="mt-1 truncate text-lg font-black text-white md:text-xl">
+            {teamName}
+          </h3>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -256,20 +258,20 @@ function ScoreCard({
         <button
           type="button"
           onClick={onDecrease}
-          className={`flex h-11 w-11 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl font-black transition ${classes.btn}`}
         >
           −
         </button>
 
         <div className="text-center">
-          <div className="text-4xl font-black text-white md:text-5xl">{score}</div>
-          <div className="text-[11px] font-bold text-white/55">نقطة</div>
+          <div className="text-3xl font-black text-white md:text-4xl">{score}</div>
+          <div className="text-[10px] font-bold text-white/55">نقطة</div>
         </div>
 
         <button
           type="button"
           onClick={onIncrease}
-          className={`flex h-11 w-11 items-center justify-center rounded-full border text-2xl font-black transition ${classes.btn}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl font-black transition ${classes.btn}`}
         >
           +
         </button>
@@ -299,14 +301,20 @@ function QuestionCell({
       disabled={disabled}
       onClick={onOpen}
       className={[
-        "group relative min-h-[88px] rounded-[1.15rem] border px-2 py-3 text-center transition md:min-h-[96px]",
+        "group relative overflow-hidden min-h-[86px] rounded-[1.1rem] border px-2 py-3 text-center transition md:min-h-[92px]",
         disabled
-          ? "cursor-not-allowed border-white/5 bg-slate-950/50 text-slate-500"
-          : "border-white/10 bg-white/5 text-white hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-cyan-400/10",
-        active ? "border-cyan-300/40 bg-cyan-400/12 shadow-[0_0_0_1px_rgba(34,211,238,0.25)]" : "",
+          ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.78)_0%,rgba(2,8,23,0.92)_100%)] text-slate-500"
+          : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.90)_0%,rgba(5,15,37,0.98)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_10px_30px_rgba(34,211,238,0.12)]",
+        active
+          ? "border-cyan-300/40 bg-[linear-gradient(180deg,rgba(16,64,112,0.95)_0%,rgba(8,29,59,0.98)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.25),0_12px_30px_rgba(34,211,238,0.12)]"
+          : "",
       ].join(" ")}
     >
-      <div className="text-3xl font-black tracking-tight md:text-4xl">{points}</div>
+      {!disabled ? (
+        <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+      ) : null}
+
+      <div className="text-3xl font-black tracking-tight md:text-[2.45rem]">{points}</div>
       <div className="mt-1 text-[11px] font-bold">
         {!question ? "غير متاح" : used ? "تم الاستخدام" : "جاهز"}
       </div>
@@ -363,7 +371,7 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-3 md:p-6">
-      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
+      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.7rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
         <div className="border-b border-white/10 px-5 py-4 md:px-8 md:py-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -549,6 +557,8 @@ export default function GameBoardClient({
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const storageKey = `seenjeem-board-state:${sessionId}`;
 
+  const [isLandscapePhone, setIsLandscapePhone] = useState(false);
+
   const initialState = useMemo(() => {
     return normalizeBoardState(initialBoardState);
   }, [initialBoardState]);
@@ -566,6 +576,27 @@ export default function GameBoardClient({
       setBoardState(initialState);
     }
   }, [initialState, storageKey]);
+
+  useEffect(() => {
+    const checkLandscapePhone = () => {
+      if (typeof window === "undefined") return;
+
+      const isLandscape =
+        window.matchMedia("(orientation: landscape)").matches &&
+        window.innerWidth <= 1024;
+
+      setIsLandscapePhone(isLandscape);
+    };
+
+    checkLandscapePhone();
+    window.addEventListener("resize", checkLandscapePhone);
+    window.addEventListener("orientationchange", checkLandscapePhone);
+
+    return () => {
+      window.removeEventListener("resize", checkLandscapePhone);
+      window.removeEventListener("orientationchange", checkLandscapePhone);
+    };
+  }, []);
 
   useEffect(() => {
     writeLocalBoardState(storageKey, boardState);
@@ -810,6 +841,8 @@ export default function GameBoardClient({
     setModalBusy(false);
   }
 
+  const desktopLikeLayout = isLandscapePhone;
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-[1800px] px-3 py-3 md:px-5 md:py-5">
@@ -841,7 +874,13 @@ export default function GameBoardClient({
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)]">
+          <div
+            className={
+              desktopLikeLayout
+                ? "grid gap-4 grid-cols-[230px_minmax(0,1fr)]"
+                : "grid gap-4 xl:grid-cols-[230px_minmax(0,1fr)]"
+            }
+          >
             <aside className="order-1">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
                 <ScoreCard
@@ -864,7 +903,7 @@ export default function GameBoardClient({
                   accent="orange"
                 />
 
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-4">
                   <div className="text-xs font-bold text-white/55">ملخص الجولة</div>
 
                   <div className="mt-4 grid gap-3">
@@ -873,7 +912,7 @@ export default function GameBoardClient({
                         <CrownIcon className="h-4 w-4 text-emerald-300" />
                         المتصدر الحالي
                       </div>
-                      <div className="mt-2 text-2xl font-black text-emerald-100">
+                      <div className="mt-2 text-xl font-black text-emerald-100">
                         {leaderLabel}
                       </div>
                     </div>
@@ -894,10 +933,10 @@ export default function GameBoardClient({
                   </div>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-4">
                   <Link
                     href="/account"
-                    className="inline-flex min-h-14 w-full items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/5 px-5 py-3 text-base font-black text-white transition hover:bg-white/10"
+                    className="inline-flex min-h-13 w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
                   >
                     الرجوع للحساب
                   </Link>
@@ -906,8 +945,14 @@ export default function GameBoardClient({
             </aside>
 
             <div className="order-2">
-              <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#020b1f] p-3">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+              <div className="overflow-hidden rounded-[1.55rem] border border-white/10 bg-[#020b1f] p-3">
+                <div
+                  className={
+                    desktopLikeLayout
+                      ? "grid grid-cols-6 gap-3"
+                      : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6"
+                  }
+                >
                   {boardColumns.map((column) => {
                     const visual = getVisualBySlug(column.category.slug);
 
@@ -915,11 +960,11 @@ export default function GameBoardClient({
                       <div key={column.category.id} className="flex flex-col gap-3">
                         <div
                           className={[
-                            "relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-gradient-to-b p-3 text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
+                            "relative overflow-hidden rounded-[1.3rem] border border-white/10 bg-gradient-to-b p-3 text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
                             visual.gradient,
                           ].join(" ")}
                         >
-                          <div className="mx-auto flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/10 md:h-12 md:w-12">
+                          <div className="mx-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1rem] border border-white/10 bg-white/10 md:h-16 md:w-16">
                             {column.category.image_url ? (
                               <img
                                 src={column.category.image_url}
