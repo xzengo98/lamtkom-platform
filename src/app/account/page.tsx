@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Profile = {
@@ -29,6 +28,7 @@ type ActiveSession = {
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
+
   return new Date(value).toLocaleDateString("ar-EG", {
     year: "numeric",
     month: "2-digit",
@@ -38,9 +38,11 @@ function formatDate(value: string | null | undefined) {
 
 function getRoleLabel(role: string | null | undefined) {
   const normalized = String(role ?? "user").toLowerCase();
+
   if (normalized === "admin") return "ADMIN";
   if (normalized === "vip") return "VIP";
   if (normalized === "premium") return "Premium";
+
   return "FREE";
 }
 
@@ -83,6 +85,7 @@ function Icon({
           <path d="M6 19a6 6 0 0 1 12 0" />
         </svg>
       );
+
     case "email":
       return (
         <svg {...common}>
@@ -90,6 +93,7 @@ function Icon({
           <path d="m4 7 8 6 8-6" />
         </svg>
       );
+
     case "phone":
       return (
         <svg {...common}>
@@ -98,6 +102,7 @@ function Icon({
           <path d="M11 18h2" />
         </svg>
       );
+
     case "calendar":
       return (
         <svg {...common}>
@@ -107,6 +112,7 @@ function Icon({
           <path d="M3 10h18" />
         </svg>
       );
+
     case "games":
       return (
         <svg {...common}>
@@ -117,12 +123,14 @@ function Icon({
           <path d="M18 12h.01" />
         </svg>
       );
+
     case "play":
       return (
         <svg {...common}>
           <path d="M8 6v12l10-6-10-6Z" />
         </svg>
       );
+
     case "logout":
       return (
         <svg {...common}>
@@ -131,6 +139,7 @@ function Icon({
           <path d="M14 5h4v14h-4" />
         </svg>
       );
+
     case "quiz":
       return (
         <svg {...common}>
@@ -139,6 +148,7 @@ function Icon({
           <circle cx="12" cy="12" r="9" />
         </svg>
       );
+
     case "bara":
       return (
         <svg {...common}>
@@ -147,6 +157,7 @@ function Icon({
           <path d="M18.5 5.5h.01" />
         </svg>
       );
+
     case "stats":
       return (
         <svg {...common}>
@@ -155,18 +166,21 @@ function Icon({
           <path d="M19 19v-7" />
         </svg>
       );
+
     case "shield":
       return (
         <svg {...common}>
           <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" />
         </svg>
       );
+
     case "continue":
       return (
         <svg {...common}>
           <path d="M8 6l8 6-8 6" />
         </svg>
       );
+
     case "home":
       return (
         <svg {...common}>
@@ -174,6 +188,7 @@ function Icon({
           <path d="M5 10.5V20h14v-9.5" />
         </svg>
       );
+
     case "pricing":
       return (
         <svg {...common}>
@@ -181,6 +196,7 @@ function Icon({
           <path d="M16.5 7.5c0-1.7-2-3-4.5-3s-4.5 1.3-4.5 3 2 3 4.5 3 4.5 1.3 4.5 3-2 3-4.5 3-4.5-1.3-4.5-3" />
         </svg>
       );
+
     default:
       return null;
   }
@@ -394,16 +410,22 @@ export default function AccountPage() {
     loadAccount();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        if (!session) {
-          router.replace("/login");
-        } else {
-          loadAccount();
-        }
-      },
-    );
+  data: { subscription },
+} = supabase.auth.onAuthStateChange(
+  (
+    _event: string,
+    session: { user: { id: string } } | null,
+  ) => {
+    if (!mounted) return;
+
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+
+    loadAccount();
+  },
+);
 
     return () => {
       mounted = false;
@@ -502,14 +524,22 @@ export default function AccountPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <InfoCard label="اسم المستخدم" value={profile?.username || "-"} icon="user" />
+            <InfoCard
+              label="اسم المستخدم"
+              value={profile?.username || "-"}
+              icon="user"
+            />
             <InfoCard
               label="البريد الإلكتروني"
               value={profile?.email || "-"}
               icon="email"
               truncate
             />
-            <InfoCard label="رقم الهاتف" value={profile?.phone || "-"} icon="phone" />
+            <InfoCard
+              label="رقم الهاتف"
+              value={profile?.phone || "-"}
+              icon="phone"
+            />
             <InfoCard
               label="تاريخ الانضمام"
               value={formatDate(profile?.created_at)}
