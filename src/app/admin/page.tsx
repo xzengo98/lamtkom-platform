@@ -27,7 +27,9 @@ function StatCard({
   };
 
   return (
-    <div className={`rounded-[1.6rem] border p-5 shadow-[0_14px_40px_rgba(0,0,0,0.25)] ${tones[tone]}`}>
+    <div
+      className={`rounded-[1.6rem] border p-5 shadow-[0_14px_40px_rgba(0,0,0,0.25)] ${tones[tone]}`}
+    >
       <div className="text-sm font-bold text-white/65">{label}</div>
       <div className="mt-3 text-4xl font-black">{value}</div>
     </div>
@@ -42,8 +44,10 @@ function ActionCard({
 }: QuickAction) {
   const tones = {
     cyan: "border-cyan-400/20 bg-cyan-400/10 hover:border-cyan-300/35 hover:bg-cyan-400/15",
-    orange: "border-orange-400/20 bg-orange-400/10 hover:border-orange-300/35 hover:bg-orange-400/15",
-    emerald: "border-emerald-400/20 bg-emerald-400/10 hover:border-emerald-300/35 hover:bg-emerald-400/15",
+    orange:
+      "border-orange-400/20 bg-orange-400/10 hover:border-orange-300/35 hover:bg-orange-400/15",
+    emerald:
+      "border-emerald-400/20 bg-emerald-400/10 hover:border-emerald-300/35 hover:bg-emerald-400/15",
     slate: "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10",
   };
 
@@ -74,6 +78,9 @@ export default async function AdminPage() {
     categoriesResult,
     activeCategoriesResult,
     questionsResult,
+    baraSectionsResult,
+    baraCategoriesResult,
+    baraItemsResult,
   ] = await Promise.all([
     supabase.from("category_sections").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
@@ -82,12 +89,22 @@ export default async function AdminPage() {
       .select("*", { count: "exact", head: true })
       .eq("is_active", true),
     supabase.from("questions").select("*", { count: "exact", head: true }),
+    supabase.from("bara_sections").select("*", { count: "exact", head: true }),
+    supabase.from("bara_categories").select("*", { count: "exact", head: true }),
+    supabase
+      .from("bara_items")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
   ]);
 
   const sectionsCount = sectionsResult.count ?? 0;
   const categoriesCount = categoriesResult.count ?? 0;
   const activeCategoriesCount = activeCategoriesResult.count ?? 0;
   const questionsCount = questionsResult.count ?? 0;
+
+  const baraSectionsCount = baraSectionsResult.count ?? 0;
+  const baraCategoriesCount = baraCategoriesResult.count ?? 0;
+  const baraItemsCount = baraItemsResult.count ?? 0;
 
   const lammatnaActions: QuickAction[] = [
     {
@@ -148,14 +165,14 @@ export default async function AdminPage() {
       tone: "orange",
     },
     {
-      title: "إضافة قسم / فئة لبرا السالفة",
+      title: "إضافة قسم / فئة",
       description: "أنشئ قسمًا أو فئة جديدة للعبة برا السالفة.",
       href: "/admin/bara-alsalfah/categories/new",
       tone: "orange",
     },
     {
-      title: "إضافة عنصر برا السالفة",
-      description: "أضف كلمة صحيحة وخياراتها الخاطئة للعبة.",
+      title: "إضافة عنصر جديد",
+      description: "أضف الكلمة الصحيحة والخيارات الخاطئة للعبة.",
       href: "/admin/bara-alsalfah/new",
       tone: "emerald",
     },
@@ -199,18 +216,6 @@ export default async function AdminPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/admin/questions/import"
-              className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-            >
-              رفع أسئلة دفعة واحدة
-            </Link>
-            <Link
-              href="/admin/questions/new"
-              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-            >
-              إضافة سؤال جديد
-            </Link>
-            <Link
               href="/"
               className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
             >
@@ -220,11 +225,20 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="الأقسام الرئيسية" value={sectionsCount} tone="orange" />
-        <StatCard label="إجمالي الفئات" value={categoriesCount} tone="cyan" />
-        <StatCard label="الفئات المفعلة" value={activeCategoriesCount} tone="emerald" />
-        <StatCard label="إجمالي الأسئلة" value={questionsCount} tone="slate" />
+      <section className="space-y-5">
+        <div>
+          <div className="text-cyan-300">إحصائيات لمّتنا</div>
+          <h2 className="mt-2 text-3xl font-black text-white">
+            اللعبة الرئيسية
+          </h2>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="الأقسام الرئيسية" value={sectionsCount} tone="orange" />
+          <StatCard label="إجمالي الفئات" value={categoriesCount} tone="cyan" />
+          <StatCard label="الفئات المفعلة" value={activeCategoriesCount} tone="emerald" />
+          <StatCard label="إجمالي الأسئلة" value={questionsCount} tone="slate" />
+        </div>
       </section>
 
       <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
@@ -260,6 +274,12 @@ export default async function AdminPage() {
           {baraActions.map((item) => (
             <ActionCard key={item.href} {...item} />
           ))}
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <StatCard label="أقسام برا السالفة" value={baraSectionsCount} tone="orange" />
+          <StatCard label="فئات برا السالفة" value={baraCategoriesCount} tone="cyan" />
+          <StatCard label="العناصر المتاحة" value={baraItemsCount} tone="emerald" />
         </div>
       </section>
 
