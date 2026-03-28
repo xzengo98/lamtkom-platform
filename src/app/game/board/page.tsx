@@ -26,6 +26,13 @@ type CategoryRow = {
   image_url: string | null;
 };
 
+type SessionQuestionRow = {
+  category_id: string;
+  question_id: string;
+  points: number;
+  slot_index: number;
+};
+
 type QuestionRow = {
   id: string;
   question_text: string;
@@ -79,20 +86,20 @@ export default async function GameBoardPage({
 
   if (selectedRaw.length === 0) {
     return (
-      <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center">
-          <h1 className="text-3xl font-black text-white">لا توجد فئات في هذه الجلسة</h1>
-          <p className="mt-4 text-slate-300">
+      <div className="mx-auto max-w-4xl px-4 py-10 text-white">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-center">
+          <h1 className="text-3xl font-black">لا توجد فئات في هذه الجلسة</h1>
+          <p className="mt-4 text-white/70">
             يبدو أن الجلسة أُنشئت بدون فئات أو لم يتم حفظها بشكل صحيح.
           </p>
           <Link
             href="/game/start"
-            className="mt-6 inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950"
+            className="mt-6 inline-flex rounded-2xl bg-cyan-500 px-5 py-3 font-black text-slate-950"
           >
             الرجوع لإنشاء لعبة جديدة
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -108,6 +115,7 @@ export default async function GameBoardPage({
 
   if (categoriesById.length > 0) {
     const orderMap = new Map(selectedRaw.map((value, index) => [value, index]));
+
     categories = [...categoriesById].sort((a, b) => {
       const aOrder = orderMap.get(a.id) ?? 999;
       const bOrder = orderMap.get(b.id) ?? 999;
@@ -124,6 +132,7 @@ export default async function GameBoardPage({
 
     if (categoriesBySlug.length > 0) {
       const orderMap = new Map(selectedRaw.map((value, index) => [value, index]));
+
       categories = [...categoriesBySlug].sort((a, b) => {
         const aOrder = orderMap.get(a.slug) ?? 999;
         const bOrder = orderMap.get(b.slug) ?? 999;
@@ -134,20 +143,20 @@ export default async function GameBoardPage({
 
   if (categories.length === 0) {
     return (
-      <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center">
-          <h1 className="text-3xl font-black text-white">تعذر تحميل الفئات</h1>
-          <p className="mt-4 text-slate-300">
+      <div className="mx-auto max-w-4xl px-4 py-10 text-white">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-center">
+          <h1 className="text-3xl font-black">تعذر تحميل الفئات</h1>
+          <p className="mt-4 text-white/70">
             الفئات المختارة في الجلسة لم يتم العثور عليها داخل قاعدة البيانات.
           </p>
           <Link
             href="/game/start"
-            className="mt-6 inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950"
+            className="mt-6 inline-flex rounded-2xl bg-cyan-500 px-5 py-3 font-black text-slate-950"
           >
             الرجوع وإنشاء لعبة جديدة
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -161,8 +170,10 @@ export default async function GameBoardPage({
   let questions: QuestionRow[] = [];
 
   if ((sessionQuestionsData ?? []).length > 0) {
-    const questionIds = (sessionQuestionsData ?? []).map((row) =>
-      String(row.question_id)
+    const typedSessionQuestions = (sessionQuestionsData ?? []) as SessionQuestionRow[];
+
+    const questionIds = typedSessionQuestions.map(
+      (row: SessionQuestionRow) => String(row.question_id),
     );
 
     const { data: selectedQuestionsData } = await supabase
@@ -182,15 +193,15 @@ export default async function GameBoardPage({
       .eq("is_active", true);
 
     const questionMap = new Map(
-      ((selectedQuestionsData ?? []) as QuestionRow[]).map((question) => [
-        question.id,
-        question,
-      ])
+      ((selectedQuestionsData ?? []) as QuestionRow[]).map((item: QuestionRow) => [
+        item.id,
+        item,
+      ]),
     );
 
-    questions = (sessionQuestionsData ?? [])
-      .map((row) => questionMap.get(String(row.question_id)) ?? null)
-      .filter((item): item is QuestionRow => Boolean(item));
+    questions = typedSessionQuestions
+      .map((row: SessionQuestionRow) => questionMap.get(String(row.question_id)) ?? null)
+      .filter((item: QuestionRow | null): item is QuestionRow => Boolean(item));
   } else {
     const categoryIds = categories.map((category) => category.id);
 
