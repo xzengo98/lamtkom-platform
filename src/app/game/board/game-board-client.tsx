@@ -65,27 +65,13 @@ const categoryVisuals: Record<
     gradient: string;
   }
 > = {
-  history: {
-    gradient: "from-amber-300/20 via-orange-400/10 to-transparent",
-  },
-  sports: {
-    gradient: "from-emerald-300/20 via-green-400/10 to-transparent",
-  },
-  geography: {
-    gradient: "from-sky-300/20 via-cyan-400/10 to-transparent",
-  },
-  science: {
-    gradient: "from-violet-300/20 via-fuchsia-400/10 to-transparent",
-  },
-  movies: {
-    gradient: "from-rose-300/20 via-pink-400/10 to-transparent",
-  },
-  islamic: {
-    gradient: "from-yellow-300/20 via-amber-400/10 to-transparent",
-  },
-  default: {
-    gradient: "from-slate-300/20 via-slate-400/10 to-transparent",
-  },
+  history: { gradient: "from-amber-300/20 via-orange-400/10 to-transparent" },
+  sports: { gradient: "from-emerald-300/20 via-green-400/10 to-transparent" },
+  geography: { gradient: "from-sky-300/20 via-cyan-400/10 to-transparent" },
+  science: { gradient: "from-violet-300/20 via-fuchsia-400/10 to-transparent" },
+  movies: { gradient: "from-rose-300/20 via-pink-400/10 to-transparent" },
+  islamic: { gradient: "from-yellow-300/20 via-amber-400/10 to-transparent" },
+  default: { gradient: "from-slate-300/20 via-slate-400/10 to-transparent" },
 };
 
 function getVisualBySlug(slug: string) {
@@ -166,7 +152,7 @@ function RichContent({
         large ? "text-xl md:text-3xl" : "text-base md:text-lg",
         "[&_p]:my-0 [&_p]:mb-3 [&_p]:text-center [&_p]:leading-9 md:[&_p]:leading-10",
         "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
-        "[&_img]:mx-auto [&_img]:my-3 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[150px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "[&_img]:mx-auto [&_img]:my-3 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[140px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
         "[&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
         "[&_video]:mx-auto [&_video]:my-3 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
       ].join(" ")}
@@ -344,7 +330,7 @@ function QuestionCell({
       <div
         className={[
           "font-black tracking-tight",
-          compact ? "text-[0.9rem] md:text-[1rem]" : "text-[1.60rem] md:text-[1.70rem]",
+          compact ? "text-[1.25rem] md:text-[1.35rem]" : "text-[1.7rem] md:text-[1.85rem]",
           used ? "opacity-55" : "opacity-100",
         ].join(" ")}
       >
@@ -399,10 +385,10 @@ function QuestionOverlay({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-3 md:p-6">
-      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.6rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
-        <div className="border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
+      <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.6rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
+        <div className="shrink-0 border-b border-white/10 px-4 py-3 md:px-6 md:py-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex flex-wrap justify-center gap-2 md:justify-start">
                 <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
@@ -419,7 +405,7 @@ function QuestionOverlay({
                 ) : null}
               </div>
 
-              <h2 className="mt-3 text-center text-2xl font-black text-white md:text-right md:text-3xl">
+              <h2 className="mt-2 text-center text-2xl font-black text-white md:text-right md:text-3xl">
                 {!showAnswer && !showWinnerPicker
                   ? "السؤال"
                   : showAnswer && !showWinnerPicker
@@ -429,7 +415,7 @@ function QuestionOverlay({
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="min-w-[190px]">
+              <div className="min-w-[180px]">
                 <div className="mb-2 flex items-center justify-between text-sm font-bold text-white/75">
                   <span>المؤقت</span>
                   <span>{formatCountdown(timeLeft)}</span>
@@ -467,7 +453,7 @@ function QuestionOverlay({
           </div>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
           {!showAnswer && !showWinnerPicker ? (
             <RichContent html={openQuestion.question_text} large />
           ) : showAnswer && !showWinnerPicker ? (
@@ -510,16 +496,9 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div className="border-t border-white/10 px-4 py-4 md:px-6">
+        <div className="shrink-0 border-t border-white/10 px-4 py-3 md:px-6 md:py-4">
           {!showAnswer && !showWinnerPicker ? (
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={onRevealAnswer}
-                className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-              >
-                إظهار الإجابة
-              </button>
+            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
               <button
                 type="button"
                 onClick={onClose}
@@ -527,15 +506,22 @@ function QuestionOverlay({
               >
                 إغلاق
               </button>
-            </div>
-          ) : showAnswer && !showWinnerPicker ? (
-            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={onGoToWinnerPicker}
+                onClick={onRevealAnswer}
                 className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                أي فريق؟
+                إظهار الإجابة
+              </button>
+            </div>
+          ) : showAnswer && !showWinnerPicker ? (
+            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+              >
+                إغلاق
               </button>
               <button
                 type="button"
@@ -546,27 +532,27 @@ function QuestionOverlay({
               </button>
               <button
                 type="button"
+                onClick={onGoToWinnerPicker}
+                className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                أي فريق؟
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
+              <button
+                type="button"
                 onClick={onClose}
                 className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
                 إغلاق
               </button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={onBackToAnswer}
                 className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
                 العودة للإجابة
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                إغلاق
               </button>
             </div>
           )}

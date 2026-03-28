@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -93,7 +92,6 @@ export default function Navbar() {
   }, [router, supabase]);
 
   useEffect(() => {
-    loadUser();
     setMenuOpen(false);
   }, [pathname]);
 
@@ -107,14 +105,11 @@ export default function Navbar() {
     <header className="relative z-40 border-b border-white/10 bg-[#071126]/95 backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex min-h-[84px] items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <Image
+          <Link href="/" className="flex shrink-0 items-center gap-3">
+            <img
               src="https://k.top4top.io/p_3722mj2o21.png"
               alt="لمّتنا"
-              width={120}
-              height={40}
-              className="h-auto w-[92px] md:w-[120px]"
-              priority
+              className="h-auto w-[96px] object-contain md:w-[122px]"
             />
           </Link>
 
