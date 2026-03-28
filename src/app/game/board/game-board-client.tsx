@@ -145,17 +145,15 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
 function RichContent({
   html,
   large = false,
-  center = true,
 }: {
   html: string | null | undefined;
   large?: boolean;
-  center?: boolean;
 }) {
   const safeHtml = html?.trim();
 
   if (!safeHtml) {
     return (
-      <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
+      <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
         لا يوجد محتوى محفوظ.
       </div>
     );
@@ -164,14 +162,13 @@ function RichContent({
   return (
     <div
       className={[
-        "prose prose-invert max-w-none",
-        "prose-headings:text-white prose-strong:text-white",
-        "prose-p:leading-9 md:prose-p:leading-10",
-        "prose-img:mx-auto prose-img:rounded-[1.1rem] prose-img:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-        "prose-img:max-h-[180px] md:prose-img:max-h-[240px] prose-img:w-auto",
-        "prose-iframe:mx-auto prose-iframe:w-full prose-iframe:max-w-2xl prose-iframe:max-h-[260px] prose-iframe:rounded-[1.1rem]",
+        "max-w-none text-center text-white",
         large ? "text-xl md:text-3xl" : "text-base md:text-lg",
-        center ? "text-center prose-p:text-center prose-headings:text-center" : "",
+        "[&_p]:my-0 [&_p]:mb-3 [&_p]:text-center [&_p]:leading-9 md:[&_p]:leading-10",
+        "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
+        "[&_img]:mx-auto [&_img]:my-3 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[150px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "[&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
+        "[&_video]:mx-auto [&_video]:my-3 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
       ].join(" ")}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
@@ -203,6 +200,7 @@ function ScoreCard({
   onIncrease,
   onDecrease,
   accent = "cyan",
+  compact = false,
 }: {
   teamName: string;
   score: number;
@@ -211,6 +209,7 @@ function ScoreCard({
   onIncrease: () => void;
   onDecrease: () => void;
   accent?: "cyan" | "orange";
+  compact?: boolean;
 }) {
   const classes =
     accent === "orange"
@@ -230,48 +229,72 @@ function ScoreCard({
         };
 
   return (
-    <div className={["rounded-[1.35rem] border p-4 transition", classes.card].join(" ")}>
-      <div className="flex items-start justify-between gap-3">
+    <div
+      className={[
+        "rounded-[1.25rem] border transition",
+        compact ? "p-3" : "p-4",
+        classes.card,
+      ].join(" ")}
+    >
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[11px] font-bold text-white/55">لوحة الفريق</div>
-          <h3 className="mt-1 truncate text-lg font-black text-white md:text-xl">
+          <div className="text-[10px] font-bold text-white/55">لوحة الفريق</div>
+          <h3
+            className={[
+              "mt-1 truncate font-black text-white",
+              compact ? "text-base" : "text-lg md:text-xl",
+            ].join(" ")}
+          >
             {teamName}
           </h3>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
           {isTurn ? (
-            <span className={`rounded-full border px-3 py-1 text-[10px] font-black ${classes.chip}`}>
+            <span
+              className={`rounded-full border px-2.5 py-1 text-[9px] font-black ${classes.chip}`}
+            >
               الدور الآن
             </span>
           ) : null}
 
           {isLeading ? (
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black text-emerald-100">
+            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black text-emerald-100">
               متصدر
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={onDecrease}
-          className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl font-black transition ${classes.btn}`}
+          className={`flex items-center justify-center rounded-full border font-black transition ${classes.btn} ${
+            compact ? "h-8 w-8 text-lg" : "h-10 w-10 text-xl"
+          }`}
         >
           −
         </button>
 
         <div className="text-center">
-          <div className="text-3xl font-black text-white md:text-4xl">{score}</div>
+          <div
+            className={[
+              "font-black text-white",
+              compact ? "text-2xl" : "text-3xl md:text-4xl",
+            ].join(" ")}
+          >
+            {score}
+          </div>
           <div className="text-[10px] font-bold text-white/55">نقطة</div>
         </div>
 
         <button
           type="button"
           onClick={onIncrease}
-          className={`flex h-10 w-10 items-center justify-center rounded-full border text-xl font-black transition ${classes.btn}`}
+          className={`flex items-center justify-center rounded-full border font-black transition ${classes.btn} ${
+            compact ? "h-8 w-8 text-lg" : "h-10 w-10 text-xl"
+          }`}
         >
           +
         </button>
@@ -286,12 +309,14 @@ function QuestionCell({
   used,
   active = false,
   onOpen,
+  compact = false,
 }: {
   question: QuestionRow | null;
   points: number;
   used: boolean;
   active?: boolean;
   onOpen?: () => void;
+  compact?: boolean;
 }) {
   const disabled = !question || used;
 
@@ -301,7 +326,8 @@ function QuestionCell({
       disabled={disabled}
       onClick={onOpen}
       className={[
-        "group relative overflow-hidden min-h-[86px] rounded-[1.1rem] border px-2 py-3 text-center transition md:min-h-[92px]",
+        "group relative overflow-hidden rounded-[1rem] border text-center transition",
+        compact ? "min-h-[64px] px-1 py-2" : "min-h-[82px] px-2 py-3",
         disabled
           ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.78)_0%,rgba(2,8,23,0.92)_100%)] text-slate-500"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.90)_0%,rgba(5,15,37,0.98)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_10px_30px_rgba(34,211,238,0.12)]",
@@ -309,18 +335,21 @@ function QuestionCell({
           ? "border-cyan-300/40 bg-[linear-gradient(180deg,rgba(16,64,112,0.95)_0%,rgba(8,29,59,0.98)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.25),0_12px_30px_rgba(34,211,238,0.12)]"
           : "",
       ].join(" ")}
+      aria-label={`سؤال ${points}`}
     >
       {!disabled ? (
-        <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        <div className="absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
       ) : null}
 
-      <div className="text-3xl font-black tracking-tight md:text-[2.45rem]">{points}</div>
-      <div className="mt-1 text-[11px] font-bold">
-        {!question ? "غير متاح" : used ? "تم الاستخدام" : "جاهز"}
+      <div
+        className={[
+          "font-black tracking-tight",
+          compact ? "text-2xl md:text-[1.9rem]" : "text-3xl md:text-[2.2rem]",
+          used ? "opacity-55" : "opacity-100",
+        ].join(" ")}
+      >
+        {points}
       </div>
-      {!disabled ? (
-        <div className="mt-1 text-[10px] font-medium text-white/55">اختر السؤال</div>
-      ) : null}
     </button>
   );
 }
@@ -371,8 +400,8 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-3 md:p-6">
-      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.7rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
-        <div className="border-b border-white/10 px-5 py-4 md:px-8 md:py-5">
+      <div className="max-h-[96vh] w-full max-w-5xl overflow-hidden rounded-[1.6rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]">
+        <div className="border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex flex-wrap justify-center gap-2 md:justify-start">
@@ -400,17 +429,19 @@ function QuestionOverlay({
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="min-w-[200px]">
+              <div className="min-w-[190px]">
                 <div className="mb-2 flex items-center justify-between text-sm font-bold text-white/75">
                   <span>المؤقت</span>
                   <span>{formatCountdown(timeLeft)}</span>
                 </div>
+
                 <div className="h-3 overflow-hidden rounded-full bg-white/10">
                   <div
                     className="h-full rounded-full bg-cyan-400 transition-[width]"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
+
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -436,11 +467,11 @@ function QuestionOverlay({
           </div>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-5 md:px-8 md:py-7">
+        <div className="max-h-[70vh] overflow-y-auto px-4 py-5 md:px-6 md:py-6">
           {!showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.question_text} large center />
+            <RichContent html={openQuestion.question_text} large />
           ) : showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.answer_text} large center />
+            <RichContent html={openQuestion.answer_text} large />
           ) : (
             <div>
               <h3 className="mb-5 text-center text-2xl font-black text-white md:text-3xl">
@@ -452,7 +483,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.2rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
+                  className="rounded-[1.1rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
                 >
                   {teamOne}
                 </button>
@@ -461,7 +492,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
+                  className="rounded-[1.1rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
                 >
                   {teamTwo}
                 </button>
@@ -471,7 +502,7 @@ function QuestionOverlay({
                 type="button"
                 onClick={() => onAwardPoints("none")}
                 disabled={modalBusy}
-                className="mx-auto mt-4 block w-full max-w-md rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
+                className="mx-auto mt-4 block w-full max-w-md rounded-[1.1rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
               >
                 ولا أحد
               </button>
@@ -479,7 +510,7 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div className="border-t border-white/10 px-5 py-4 md:px-8">
+        <div className="border-t border-white/10 px-4 py-4 md:px-6">
           {!showAnswer && !showWinnerPicker ? (
             <div className="flex flex-wrap gap-3">
               <button
@@ -701,10 +732,7 @@ export default function GameBoardClient({
 
   const usedCount = boardState.usedQuestionIds.length;
   const totalBoardQuestions = boardColumns.reduce((sum, column) => {
-    return (
-      sum +
-      column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0)
-    );
+    return sum + column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0);
   }, 0);
   const remainingCount = Math.max(totalBoardQuestions - usedCount, 0);
 
@@ -841,33 +869,64 @@ export default function GameBoardClient({
     setModalBusy(false);
   }
 
-  const desktopLikeLayout = isLandscapePhone;
+  const compactLandscape = isLandscapePhone;
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
-      <div className="mx-auto max-w-[1800px] px-3 py-3 md:px-5 md:py-5">
-        <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] p-3 shadow-[0_25px_80px_rgba(0,0,0,0.38)] md:p-4">
-          <div className="mb-4 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
+        <div
+          className={[
+            "rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
+            compactLandscape ? "p-2.5" : "p-3 md:p-4",
+          ].join(" ")}
+        >
+          <div
+            className={[
+              "mb-3 rounded-[1.35rem] border border-white/10 bg-white/5",
+              compactLandscape ? "p-3" : "p-4",
+            ].join(" ")}
+          >
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="text-xs font-black tracking-[0.18em] text-cyan-300/90">
+                <div className="text-[10px] font-black tracking-[0.18em] text-cyan-300/90">
                   لوحة اللعبة
                 </div>
-                <h1 className="mt-2 text-2xl font-black md:text-4xl">{gameName}</h1>
-                <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
-                  اختر السؤال التالي وراقب النتيجة لحظة بلحظة ضمن واجهة مهيأة
-                  للعرض والهواتف.
-                </p>
+                <h1
+                  className={[
+                    "mt-1 font-black",
+                    compactLandscape ? "text-lg" : "text-2xl md:text-4xl",
+                  ].join(" ")}
+                >
+                  {gameName}
+                </h1>
+                {!compactLandscape ? (
+                  <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
+                    اختر السؤال التالي وراقب النتيجة لحظة بلحظة ضمن واجهة مهيأة
+                    للعرض والهواتف.
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <div className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-100">
+                <div
+                  className={`rounded-2xl border border-cyan-300/20 bg-cyan-400/10 font-black text-cyan-100 ${
+                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
+                  }`}
+                >
                   الدور الآن: {activeTurn === "teamOne" ? teamOne : teamTwo}
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/85">
+                <div
+                  className={`rounded-2xl border border-white/10 bg-white/5 font-black text-white/85 ${
+                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
+                  }`}
+                >
                   المتبقي: {remainingCount} سؤال
                 </div>
-                <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm font-black text-emerald-100">
+                <div
+                  className={`rounded-2xl border border-emerald-300/20 bg-emerald-400/10 font-black text-emerald-100 ${
+                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
+                  }`}
+                >
                   المتصدر: {leaderLabel}
                 </div>
               </div>
@@ -876,13 +935,13 @@ export default function GameBoardClient({
 
           <div
             className={
-              desktopLikeLayout
-                ? "grid gap-4 grid-cols-[230px_minmax(0,1fr)]"
-                : "grid gap-4 xl:grid-cols-[230px_minmax(0,1fr)]"
+              compactLandscape
+                ? "grid gap-3 grid-cols-[190px_minmax(0,1fr)]"
+                : "grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)]"
             }
           >
             <aside className="order-1">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <ScoreCard
                   teamName={teamOne}
                   score={boardState.teamOneScore}
@@ -891,6 +950,7 @@ export default function GameBoardClient({
                   onIncrease={() => adjustScore("teamOne", 100)}
                   onDecrease={() => adjustScore("teamOne", -100)}
                   accent="cyan"
+                  compact={compactLandscape}
                 />
 
                 <ScoreCard
@@ -901,42 +961,72 @@ export default function GameBoardClient({
                   onIncrease={() => adjustScore("teamTwo", 100)}
                   onDecrease={() => adjustScore("teamTwo", -100)}
                   accent="orange"
+                  compact={compactLandscape}
                 />
 
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-4">
-                  <div className="text-xs font-bold text-white/55">ملخص الجولة</div>
+                <div
+                  className={[
+                    "rounded-[1.2rem] border border-white/10 bg-white/5",
+                    compactLandscape ? "p-3" : "p-4",
+                  ].join(" ")}
+                >
+                  <div className="text-[10px] font-bold text-white/55">ملخص الجولة</div>
 
-                  <div className="mt-4 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                      <div className="flex items-center gap-2 text-sm font-black text-white">
+                  <div className="mt-3 grid gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+                      <div className="flex items-center gap-2 text-xs font-black text-white">
                         <CrownIcon className="h-4 w-4 text-emerald-300" />
                         المتصدر الحالي
                       </div>
-                      <div className="mt-2 text-xl font-black text-emerald-100">
+                      <div
+                        className={[
+                          "mt-2 font-black text-emerald-100",
+                          compactLandscape ? "text-lg" : "text-xl",
+                        ].join(" ")}
+                      >
                         {leaderLabel}
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                      <div className="text-sm font-bold text-white/60">الأسئلة المستخدمة</div>
-                      <div className="mt-2 text-3xl font-black text-white">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+                      <div className="text-xs font-bold text-white/60">الأسئلة المستخدمة</div>
+                      <div
+                        className={[
+                          "mt-1 font-black text-white",
+                          compactLandscape ? "text-2xl" : "text-3xl",
+                        ].join(" ")}
+                      >
                         {usedCount}
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                      <div className="text-sm font-bold text-white/60">الأسئلة المتبقية</div>
-                      <div className="mt-2 text-3xl font-black text-cyan-100">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
+                      <div className="text-xs font-bold text-white/60">الأسئلة المتبقية</div>
+                      <div
+                        className={[
+                          "mt-1 font-black text-cyan-100",
+                          compactLandscape ? "text-2xl" : "text-3xl",
+                        ].join(" ")}
+                      >
                         {remainingCount}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-[1.35rem] border border-white/10 bg-white/5 p-4">
+                <div
+                  className={[
+                    "rounded-[1.2rem] border border-white/10 bg-white/5",
+                    compactLandscape ? "p-3" : "p-4",
+                  ].join(" ")}
+                >
                   <Link
                     href="/account"
-                    className="inline-flex min-h-13 w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                    className={`inline-flex w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 font-black text-white transition hover:bg-white/10 ${
+                      compactLandscape
+                        ? "min-h-11 px-4 py-2 text-xs"
+                        : "min-h-13 px-5 py-3 text-sm"
+                    }`}
                   >
                     الرجوع للحساب
                   </Link>
@@ -945,11 +1035,16 @@ export default function GameBoardClient({
             </aside>
 
             <div className="order-2">
-              <div className="overflow-hidden rounded-[1.55rem] border border-white/10 bg-[#020b1f] p-3">
+              <div
+                className={[
+                  "overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#020b1f]",
+                  compactLandscape ? "p-2" : "p-3",
+                ].join(" ")}
+              >
                 <div
                   className={
-                    desktopLikeLayout
-                      ? "grid grid-cols-6 gap-3"
+                    compactLandscape
+                      ? "grid grid-cols-6 gap-2"
                       : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6"
                   }
                 >
@@ -957,14 +1052,19 @@ export default function GameBoardClient({
                     const visual = getVisualBySlug(column.category.slug);
 
                     return (
-                      <div key={column.category.id} className="flex flex-col gap-3">
+                      <div key={column.category.id} className="flex flex-col gap-2">
                         <div
                           className={[
-                            "relative overflow-hidden rounded-[1.3rem] border border-white/10 bg-gradient-to-b p-3 text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
+                            "relative overflow-hidden rounded-[1.15rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
                             visual.gradient,
+                            compactLandscape ? "p-2" : "p-3",
                           ].join(" ")}
                         >
-                          <div className="mx-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-[1rem] border border-white/10 bg-white/10 md:h-16 md:w-16">
+                          <div
+                            className={`mx-auto flex items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/10 ${
+                              compactLandscape ? "h-11 w-11" : "h-14 w-14 md:h-16 md:w-16"
+                            }`}
+                          >
                             {column.category.image_url ? (
                               <img
                                 src={column.category.image_url}
@@ -976,7 +1076,12 @@ export default function GameBoardClient({
                             )}
                           </div>
 
-                          <h3 className="mt-3 text-base font-black leading-6 text-white md:text-lg">
+                          <h3
+                            className={[
+                              "mt-2 font-black leading-5 text-white",
+                              compactLandscape ? "text-sm" : "text-base md:text-lg",
+                            ].join(" ")}
+                          >
                             {column.category.name}
                           </h3>
                         </div>
@@ -984,7 +1089,7 @@ export default function GameBoardClient({
                         {column.rows.map((row) => (
                           <div
                             key={`${column.category.id}-${row.points}`}
-                            className="grid grid-cols-2 gap-2"
+                            className={compactLandscape ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-2 gap-2"}
                           >
                             {[0, 1].map((index) => {
                               const question = row.questions[index] ?? null;
@@ -1000,6 +1105,7 @@ export default function GameBoardClient({
                                   points={row.points}
                                   used={used}
                                   active={active}
+                                  compact={compactLandscape}
                                   onOpen={() => handleOpenQuestion(question)}
                                 />
                               );
