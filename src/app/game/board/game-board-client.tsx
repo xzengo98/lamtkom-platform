@@ -327,7 +327,7 @@ function QuestionCell({
       onClick={onOpen}
       className={[
         "group relative overflow-hidden rounded-[1rem] border text-center transition",
-        compact ? "min-h-[64px] px-1 py-2" : "min-h-[82px] px-2 py-3",
+        compact ? "min-h-[56px] px-1 py-1.5" : "min-h-[82px] px-2 py-3",
         disabled
           ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.78)_0%,rgba(2,8,23,0.92)_100%)] text-slate-500"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.90)_0%,rgba(5,15,37,0.98)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_10px_30px_rgba(34,211,238,0.12)]",
@@ -344,7 +344,7 @@ function QuestionCell({
       <div
         className={[
           "font-black tracking-tight",
-          compact ? "text-2xl md:text-[1.9rem]" : "text-3xl md:text-[2.2rem]",
+          compact ? "text-[1.65rem] md:text-[1.7rem]" : "text-[2rem] md:text-[2.05rem]",
           used ? "opacity-55" : "opacity-100",
         ].join(" ")}
       >
@@ -936,12 +936,18 @@ export default function GameBoardClient({
           <div
             className={
               compactLandscape
-                ? "grid gap-3 grid-cols-[190px_minmax(0,1fr)]"
+                ? "grid gap-3 grid-cols-[165px_minmax(0,1fr)]"
                 : "grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)]"
             }
           >
             <aside className="order-1">
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <div
+                className={
+                  compactLandscape
+                    ? "grid gap-3 grid-cols-1"
+                    : "grid gap-3 sm:grid-cols-2 xl:grid-cols-1"
+                }
+              >
                 <ScoreCard
                   teamName={teamOne}
                   score={boardState.teamOneScore}
@@ -1055,14 +1061,14 @@ export default function GameBoardClient({
                       <div key={column.category.id} className="flex flex-col gap-2">
                         <div
                           className={[
-                            "relative overflow-hidden rounded-[1.15rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_12px_35px_rgba(0,0,0,0.25)]",
+                            "relative overflow-hidden rounded-[1rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_10px_24px_rgba(0,0,0,0.22)]",
                             visual.gradient,
-                            compactLandscape ? "p-2" : "p-3",
+                            compactLandscape ? "p-1.5" : "p-3",
                           ].join(" ")}
                         >
                           <div
-                            className={`mx-auto flex items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/10 ${
-                              compactLandscape ? "h-11 w-11" : "h-14 w-14 md:h-16 md:w-16"
+                            className={`mx-auto flex items-center justify-center overflow-hidden rounded-[0.9rem] border border-white/10 bg-white/10 shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${
+                              compactLandscape ? "h-9 w-9" : "h-14 w-14 md:h-16 md:w-16"
                             }`}
                           >
                             {column.category.image_url ? (
@@ -1079,7 +1085,7 @@ export default function GameBoardClient({
                           <h3
                             className={[
                               "mt-2 font-black leading-5 text-white",
-                              compactLandscape ? "text-sm" : "text-base md:text-lg",
+                              compactLandscape ? "text-[11px]" : "text-base md:text-lg",
                             ].join(" ")}
                           >
                             {column.category.name}
