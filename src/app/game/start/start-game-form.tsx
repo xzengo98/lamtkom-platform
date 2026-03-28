@@ -1,9 +1,11 @@
+// src/app/game/start/start-game-form.tsx
 "use client";
 
 import {
   useMemo,
   useState,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import type { CategoryAvailability } from "./page";
@@ -43,28 +45,40 @@ const sectionThemes: Record<
   string,
   {
     badge: string;
+    ring: string;
     glow: string;
+    chip: string;
   }
 > = {
   general: {
     badge: "border-orange-400/30 bg-orange-500/10 text-orange-200",
+    ring: "hover:border-orange-300/40",
     glow: "from-orange-400/10 via-orange-300/5 to-transparent",
+    chip: "bg-orange-500 text-white",
   },
   islamic: {
     badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    ring: "hover:border-emerald-300/40",
     glow: "from-emerald-400/10 via-lime-300/5 to-transparent",
+    chip: "bg-emerald-500 text-white",
   },
   sports: {
     badge: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
+    ring: "hover:border-cyan-300/40",
     glow: "from-cyan-400/10 via-sky-300/5 to-transparent",
+    chip: "bg-cyan-500 text-slate-950",
   },
   entertainment: {
     badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
+    ring: "hover:border-fuchsia-300/40",
     glow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
+    chip: "bg-fuchsia-500 text-white",
   },
   default: {
     badge: "border-white/15 bg-white/5 text-white/85",
+    ring: "hover:border-white/25",
     glow: "from-slate-400/10 via-slate-300/5 to-transparent",
+    chip: "bg-slate-200 text-slate-950",
   },
 };
 
@@ -113,27 +127,14 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.1rem] border p-3 md:rounded-[1.35rem] md:p-4",
+        "rounded-[1.35rem] border p-4 text-center shadow-[0_14px_30px_rgba(0,0,0,0.2)]",
         accent === "cyan"
           ? "border-cyan-400/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
       ].join(" ")}
     >
-      <div
-        className={[
-          "text-xs md:text-sm",
-          accent === "cyan" ? "text-cyan-100/80" : "text-white/60",
-        ].join(" ")}
-      >
-        {label}
-      </div>
-      <div
-        className={[
-          "mt-1 font-black",
-          accent === "cyan" ? "text-cyan-100" : "text-white",
-          "text-lg md:text-2xl",
-        ].join(" ")}
-      >
+      <div className="text-xs text-white/60 md:text-sm">{label}</div>
+      <div className="mt-2 text-2xl font-black text-white md:text-3xl">
         {value}
       </div>
     </div>
@@ -148,8 +149,8 @@ function MiniStat({
   value: string | number;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
-      <div className="text-[10px] text-white/55 md:text-xs">{label}</div>
+    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-center">
+      <div className="text-[10px] font-bold text-white/50">{label}</div>
       <div className="mt-1 text-sm font-black text-white">{value}</div>
     </div>
   );
@@ -268,174 +269,236 @@ export default function StartGameForm({
   const visibleError = localError || errorMessage;
 
   return (
-    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-4 md:space-y-5">
-      <input
-        type="hidden"
-        name="selectedCategories"
-        value={selectedCategories.join(",")}
-      />
-
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.9rem] md:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <div className="text-cyan-300 text-sm">إعداد لعبة جديدة</div>
-            <h1 className="mt-2 text-2xl font-black text-white md:text-4xl">
-              جهّز اللعبة بسرعة
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.12),_transparent_35%),linear-gradient(180deg,#071126_0%,#061020_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <div className="text-cyan-300">إعداد لعبة جديدة</div>
+            <h1 className="mt-2 text-4xl font-black text-white md:text-5xl">
+              جهّز اللعبة خلال دقائق
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/75 md:text-base md:leading-8">
-              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة مباشرة.
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70 md:text-base md:leading-8">
+              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدّد ست فئات لتبدأ الجولة
+              مباشرة.
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[440px]">
-            <SummaryCard label="الألعاب المتبقية" value={String(gamesRemaining)} />
-            <SummaryCard label="الفئات المطلوبة" value={String(REQUIRED_CATEGORY_COUNT)} />
+          <div className="grid grid-cols-2 gap-3">
             <SummaryCard
-              label="نمط الأسئلة"
-              value={selectionMode === "dynamic" ? "بدون تكرار" : "قابلة للتكرار"}
+              label="الألعاب المتبقية"
+              value={String(gamesRemaining)}
               accent="cyan"
             />
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-[1400px] gap-4 xl:grid-cols-[0.95fr_0.75fr]">
-        <div className="rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-          <div className="mb-4">
-            <div className="text-cyan-300 text-sm">الخطوة الأولى</div>
-            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-              بيانات اللعبة
-            </h2>
-          </div>
-
-          <div className="grid gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                اسم اللعبة
-              </label>
-              <input
-                name="gameName"
-                value={gameName}
-                onChange={(e) => setGameName(e.target.value)}
-                placeholder="مثال: تحدي الأذكياء"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  الفريق الأول
-                </label>
-                <input
-                  name="teamOne"
-                  value={teamOne}
-                  onChange={(e) => setTeamOne(e.target.value)}
-                  placeholder="اسم الفريق الأول"
-                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  الفريق الثاني
-                </label>
-                <input
-                  name="teamTwo"
-                  value={teamTwo}
-                  onChange={(e) => setTeamTwo(e.target.value)}
-                  placeholder="اسم الفريق الثاني"
-                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <section className="rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-          <div className="text-cyan-300 text-sm">ملخص سريع</div>
-          <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-            جاهزية اللعبة
-          </h2>
-
-          <div className="mt-4 grid gap-3">
             <SummaryCard
-              label="الفئات المختارة"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+              label="الفئات المطلوبة"
+              value={String(REQUIRED_CATEGORY_COUNT)}
+            />
+            <SummaryCard
+              label="نمط الأسئلة"
+              value={
+                selectionMode === "dynamic" ? "بدون تكرار" : "ثابتة"
+              }
             />
             <SummaryCard
               label="حالة الاختيار"
-              value={isReadyToSubmit ? "جاهز للبدء" : `باقي ${remainingToSelect}`}
-            />
-            <SummaryCard
-              label="نوع السحب"
-              value={
-                selectionMode === "dynamic"
-                  ? "بدون تكرار للبريميوم"
-                  : "قابل للتكرار للمجاني"
-              }
+              value={isReadyToSubmit ? "جاهز" : `${selectedCount}/${REQUIRED_CATEGORY_COUNT}`}
             />
           </div>
+        </div>
 
-          <div className="mt-4 rounded-[1.2rem] border border-cyan-400/20 bg-cyan-400/10 p-4">
-            <div className="text-sm font-black text-cyan-100 md:text-base">
+        {selectionMode === "dynamic" ? (
+          <div className="mt-5 rounded-[1.3rem] border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm leading-7 text-cyan-100">
+            حسابك يعمل الآن بنمط <strong>الأسئلة العشوائية بدون تكرار</strong>.
+            يظهر على كل فئة عدد الألعاب المتبقية بشكل واضح.
+          </div>
+        ) : (
+          <div className="mt-5 rounded-[1.3rem] border border-white/10 bg-white/5 p-4 text-sm leading-7 text-white/75">
+            حسابك يعمل الآن بنمط <strong>الأسئلة الثابتة</strong>، وستظهر لك نفس
+            المجموعة الثابتة في كل مرة طالما الفئة مكتملة.
+          </div>
+        )}
+
+        {visibleError ? (
+          <div className="mt-5 rounded-[1.3rem] border border-red-500/30 bg-red-500/10 p-4 text-sm font-bold text-red-100">
+            {visibleError}
+          </div>
+        ) : null}
+      </section>
+
+      <form action={action} onSubmit={validateBeforeSubmit} className="space-y-6">
+        <input
+          type="hidden"
+          name="selectedCategories"
+          value={selectedCategories.join(",")}
+        />
+
+        <section className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <div className="text-cyan-300">الخطوة الأولى</div>
+            <h2 className="mt-2 text-3xl font-black text-white">
+              اختر اسم اللعبة وأسماء الفرق
+            </h2>
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-bold text-white">
+                  اسم اللعبة
+                </label>
+                <input
+                  name="gameName"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  placeholder="مثال: تحدي الأذكياء"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-white">
+                    الفريق الأول
+                  </label>
+                  <input
+                    name="teamOne"
+                    value={teamOne}
+                    onChange={(e) => setTeamOne(e.target.value)}
+                    placeholder="اسم الفريق الأول"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-white">
+                    الفريق الثاني
+                  </label>
+                  <input
+                    name="teamTwo"
+                    value={teamTwo}
+                    onChange={(e) => setTeamTwo(e.target.value)}
+                    placeholder="اسم الفريق الثاني"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <div className="text-cyan-300">ملخص الإعداد</div>
+            <h2 className="mt-2 text-3xl font-black text-white">
+              جاهزية اللعبة
+            </h2>
+
+            <div className="mt-6 space-y-4">
+              <SummaryCard
+                label="الفئات المختارة"
+                value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+                accent="cyan"
+              />
+              <SummaryCard
+                label="المتبقي"
+                value={String(remainingToSelect)}
+              />
+            </div>
+
+            <div className="mt-6 rounded-[1.3rem] border border-white/10 bg-white/5 p-4 text-sm leading-7 text-white/75">
               {isReadyToSubmit
-                ? "تم اختيار العدد المطلوب. اضغط ابدأ اللعبة."
+                ? "تم اختيار العدد المطلوب. يمكنك الآن بدء اللعبة."
                 : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
             </div>
           </div>
         </section>
-      </section>
 
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-cyan-300 text-sm">الخطوة الثانية</div>
-            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-              اختر الفئات
-            </h2>
-            <p className="mt-2 text-sm text-white/70 md:text-base">
-              اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها.
-            </p>
-          </div>
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="text-cyan-300">الخطوة الثانية</div>
+              <h2 className="mt-2 text-3xl font-black text-white">
+                اختر {REQUIRED_CATEGORY_COUNT} فئات
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+                يظهر على كل بطاقة عدد الألعاب المتبقية بخلفية واضحة وغير شفافة.
+              </p>
+            </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center">
-            <div className="text-xs text-white/60 md:text-sm">عدد المختار</div>
-            <div className="mt-1 text-lg font-black text-white md:text-2xl">
-              {selectedCount} / {REQUIRED_CATEGORY_COUNT}
+            <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-black text-cyan-100">
+              {selectedCategories.length} / {REQUIRED_CATEGORY_COUNT}
             </div>
           </div>
-        </div>
 
-        <div className="space-y-7">
-          {groupedSections.map((section) => {
-            const theme = getSectionTheme(section.slug);
+          <div className="mt-8 space-y-8">
+            {groupedSections.map((section) => {
+              const theme = getSectionTheme(section.slug);
 
-            return (
-              <section key={section.id} className="space-y-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div
-                      className={[
-                        "inline-flex rounded-full border px-3 py-1 text-sm font-bold",
-                        theme.badge,
-                      ].join(" ")}
-                    >
-                      {section.name}
+              return (
+                <section key={section.id} className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div
+                        className={`rounded-full border px-4 py-2 text-sm font-bold ${theme.badge}`}
+                      >
+                        {section.name}
+                      </div>
+                      <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white">
+                        {section.categories.length} فئات
+                      </div>
                     </div>
 
-                    <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
-                      {section.categories.length} فئات
+                    <div className="text-sm text-white/60">
+                      {section.description || "قسم رئيسي للفئات"}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
-                    {section.description || "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    {section.categories.map((category) => {
+                      const active = selectedCategories.includes(category.id);
+
+                      return (
+                        <CategoryCard
+                          key={category.id}
+                          category={category}
+                          active={active}
+                          infoOpen={openInfoId === category.id}
+                          onToggle={() => toggleCategory(category.id)}
+                          onInfoClick={handleInfoClick}
+                          theme={theme}
+                          availability={
+                            categoryAvailability[category.id] ?? {
+                              availableGames: 0,
+                              isSelectable: false,
+                              mode: selectionMode,
+                              easyCount: 0,
+                              mediumCount: 0,
+                              hardCount: 0,
+                            }
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+
+            {uncategorized.length > 0 ? (
+              <section className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-bold text-white">
+                      فئات بدون قسم
+                    </div>
+                    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white">
+                      {uncategorized.length} فئات
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-white/60">
+                    هذه الفئات غير مربوطة بقسم رئيسي.
                   </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                  {section.categories.map((category) => {
+                  {uncategorized.map((category) => {
                     const active = selectedCategories.includes(category.id);
 
                     return (
@@ -446,7 +509,7 @@ export default function StartGameForm({
                         infoOpen={openInfoId === category.id}
                         onToggle={() => toggleCategory(category.id)}
                         onInfoClick={handleInfoClick}
-                        theme={theme}
+                        theme={sectionThemes.default}
                         availability={
                           categoryAvailability[category.id] ?? {
                             availableGames: 0,
@@ -462,85 +525,36 @@ export default function StartGameForm({
                   })}
                 </div>
               </section>
-            );
-          })}
+            ) : null}
 
-          {uncategorized.length > 0 ? (
-            <section className="space-y-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-bold text-white">
-                    فئات بدون قسم
-                  </div>
-
-                  <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
-                    {uncategorized.length} فئات
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
-                  هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار واللعب.
-                </div>
+            {groupedSections.length === 0 && uncategorized.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
+                لا توجد أقسام أو فئات جاهزة حاليًا.
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {uncategorized.map((category) => {
-                  const active = selectedCategories.includes(category.id);
-
-                  return (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      active={active}
-                      infoOpen={openInfoId === category.id}
-                      onToggle={() => toggleCategory(category.id)}
-                      onInfoClick={handleInfoClick}
-                      theme={sectionThemes.default}
-                      availability={
-                        categoryAvailability[category.id] ?? {
-                          availableGames: 0,
-                          isSelectable: false,
-                          mode: selectionMode,
-                          easyCount: 0,
-                          mediumCount: 0,
-                          hardCount: 0,
-                        }
-                      }
-                    />
-                  );
-                })}
-              </div>
-            </section>
-          ) : null}
-        </div>
-
-        {visibleError ? (
-          <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {visibleError}
+            ) : null}
           </div>
-        ) : null}
-      </section>
+        </section>
 
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-        <div className="mb-4">
-          <div className="text-cyan-300 text-sm">الخطوة الأخيرة</div>
-          <h3 className="mt-2 text-2xl font-black text-white md:text-3xl">
-            ابدأ الجولة
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="text-cyan-300">الخطوة الأخيرة</div>
+          <h3 className="mt-2 text-3xl font-black text-white">
+            جاهز لبدء اللعبة؟
           </h3>
-          <p className="mt-2 text-sm text-white/70 md:text-base">
-            بعد اختيار 6 فئات وإدخال بيانات اللعبة، يمكنك البدء مباشرة.
+          <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+            بعد التأكد من اسم اللعبة، أسماء الفرق، واختيار 6 فئات، يمكنك بدء
+            الجولة مباشرة.
           </p>
-        </div>
 
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 md:px-8 md:text-lg"
-          disabled={!isReadyToSubmit || gamesRemaining <= 0}
-        >
-          ابدأ اللعبة
-        </button>
-      </section>
-    </form>
+          <button
+            type="submit"
+            disabled={!isReadyToSubmit || gamesRemaining <= 0}
+            className="mt-6 rounded-[1.4rem] bg-cyan-500 px-8 py-4 text-lg font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            ابدأ اللعبة
+          </button>
+        </section>
+      </form>
+    </div>
   );
 }
 
@@ -560,22 +574,35 @@ function CategoryCard({
   onInfoClick: (event: ReactMouseEvent, categoryId: string) => void;
   theme: {
     badge: string;
+    ring: string;
     glow: string;
+    chip: string;
   };
   availability: CategoryAvailability;
 }) {
   const badge = getAvailabilityBadge(availability);
 
+  function handleCardKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (!availability.isSelectable) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onToggle();
+    }
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      disabled={!availability.isSelectable}
+    <div
+      role="button"
+      tabIndex={availability.isSelectable ? 0 : -1}
+      onClick={() => {
+        if (availability.isSelectable) onToggle();
+      }}
+      onKeyDown={handleCardKeyDown}
       className={[
-        "group relative overflow-hidden rounded-[1.25rem] border bg-[#09132c] text-right shadow-[0_14px_30px_rgba(0,0,0,0.22)] transition-all duration-200",
+        "group relative overflow-hidden rounded-[1.6rem] border bg-[#09132c] text-right shadow-[0_18px_40px_rgba(0,0,0,0.25)] transition-all duration-200",
         active
           ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
-          : "border-white/10 hover:-translate-y-0.5 hover:border-white/20",
+          : `border-white/10 ${theme.ring}`,
         !availability.isSelectable ? "cursor-not-allowed opacity-75" : "",
       ].join(" ")}
     >
@@ -586,7 +613,7 @@ function CategoryCard({
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute right-2 top-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500 text-lg font-black text-white shadow-lg"
+        className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500 text-lg font-black text-white shadow-lg"
         aria-label={`عرض وصف ${category.name}`}
       >
         i
@@ -594,7 +621,7 @@ function CategoryCard({
 
       <div
         className={[
-          "absolute left-2 top-2 z-20 rounded-full border px-2 py-1 text-[10px] font-bold md:px-2.5 md:text-[11px]",
+          "absolute left-3 top-3 z-20 rounded-full border px-3 py-1 text-[11px] font-bold",
           badge.className,
         ].join(" ")}
       >
@@ -602,34 +629,39 @@ function CategoryCard({
       </div>
 
       {active ? (
-        <div className="absolute bottom-[3.9rem] left-2 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2 py-1 text-[10px] font-bold text-cyan-100">
+        <div
+          className={`absolute bottom-[4.5rem] left-3 z-20 rounded-full px-3 py-1 text-[11px] font-black shadow-lg ${theme.chip}`}
+        >
           تم الاختيار
         </div>
       ) : null}
 
-      <div className="relative">
-        <div className="h-28 overflow-hidden sm:h-32 md:h-36">
-          {category.image_url ? (
-            <img
-              src={category.image_url}
-              alt={category.name}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-slate-900 text-3xl text-white/25">
-              ✨
-            </div>
-          )}
-        </div>
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        {category.image_url ? (
+          <img
+            src={category.image_url}
+            alt={category.name}
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-slate-900 text-4xl text-white/25">
+            ✨
+          </div>
+        )}
 
         {!availability.isSelectable ? (
-          <div className="absolute inset-0 bg-slate-950/35" />
+          <div className="absolute inset-0 bg-slate-950/40" />
         ) : null}
+      </div>
 
-        {infoOpen ? (
-          <div className="absolute inset-x-2 top-11 z-20 rounded-[1rem] border border-white/10 bg-slate-950/95 p-3 text-white shadow-2xl">
-            <div className="text-sm font-black md:text-base">{category.name}</div>
-            <p className="mt-2 line-clamp-4 text-[11px] leading-5 text-white/75 md:text-xs md:leading-6">
+      {infoOpen ? (
+        <div className="absolute inset-0 z-30 flex items-end bg-slate-950/90 p-4 text-right">
+          <div className="w-full rounded-[1.3rem] border border-white/10 bg-white/5 p-4">
+            <div className="text-lg font-black text-white">
+              {category.name}
+            </div>
+
+            <p className="mt-2 text-sm leading-7 text-white/75">
               {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
             </p>
 
@@ -639,18 +671,18 @@ function CategoryCard({
               <MiniStat label="600" value={availability.hardCount} />
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
-      <div className="relative px-3 py-3 text-center">
-        <div className="line-clamp-2 min-h-[2.8rem] text-base font-black text-white md:text-lg">
+      <div className="relative px-4 py-4 text-center">
+        <div className="text-lg font-black text-white md:text-xl">
           {category.name}
         </div>
 
-        <div className="mt-2 text-[11px] text-white/50">
+        <div className="mt-2 text-xs text-white/50">
           {active ? "اضغط لإلغاء الاختيار" : "اضغط لاختيار الفئة"}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
