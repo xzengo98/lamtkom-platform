@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -26,6 +27,12 @@ type ActiveSession = {
   status: string;
 };
 
+type BaraOverview = {
+  sections: number;
+  categories: number;
+  items: number;
+};
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString("ar-EG", {
@@ -37,26 +44,165 @@ function formatDate(value: string | null | undefined) {
 
 function getRoleLabel(role: string | null | undefined) {
   const normalized = String(role ?? "user").toLowerCase();
-
   if (normalized === "admin") return "ADMIN";
   if (normalized === "vip") return "VIP";
   if (normalized === "premium") return "Premium";
   return "FREE";
 }
 
+function Icon({
+  name,
+  className = "h-5 w-5",
+}: {
+  name:
+    | "user"
+    | "email"
+    | "phone"
+    | "calendar"
+    | "games"
+    | "play"
+    | "logout"
+    | "quiz"
+    | "bara"
+    | "stats"
+    | "shield"
+    | "continue";
+  className?: string;
+}) {
+  const common = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    viewBox: "0 0 24 24",
+    className,
+  };
+
+  switch (name) {
+    case "user":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3.2" />
+          <path d="M6 19a6 6 0 0 1 12 0" />
+        </svg>
+      );
+    case "email":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m4 7 8 6 8-6" />
+        </svg>
+      );
+    case "phone":
+      return (
+        <svg {...common}>
+          <path d="M7 4h10" />
+          <rect x="6" y="3" width="12" height="18" rx="2" />
+          <path d="M11 18h2" />
+        </svg>
+      );
+    case "calendar":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M16 3v4" />
+          <path d="M8 3v4" />
+          <path d="M3 10h18" />
+        </svg>
+      );
+    case "games":
+      return (
+        <svg {...common}>
+          <rect x="4" y="8" width="16" height="8" rx="3" />
+          <path d="M8 12h2" />
+          <path d="M9 11v2" />
+          <path d="M16 12h.01" />
+          <path d="M18 12h.01" />
+        </svg>
+      );
+    case "play":
+      return (
+        <svg {...common}>
+          <path d="M8 6v12l10-6-10-6Z" />
+        </svg>
+      );
+    case "logout":
+      return (
+        <svg {...common}>
+          <path d="M10 17l-5-5 5-5" />
+          <path d="M5 12h10" />
+          <path d="M14 5h4v14h-4" />
+        </svg>
+      );
+    case "quiz":
+      return (
+        <svg {...common}>
+          <path d="M9.5 9a2.5 2.5 0 1 1 4.3 1.7c-.8.8-1.8 1.4-1.8 2.8" />
+          <circle cx="12" cy="17.5" r="0.7" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+      );
+    case "bara":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3" />
+          <path d="M7 20a5 5 0 0 1 10 0" />
+          <path d="M18.5 5.5h.01" />
+        </svg>
+      );
+    case "stats":
+      return (
+        <svg {...common}>
+          <path d="M5 19V9" />
+          <path d="M12 19V5" />
+          <path d="M19 19v-7" />
+        </svg>
+      );
+    case "shield":
+      return (
+        <svg {...common}>
+          <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" />
+        </svg>
+      );
+    case "continue":
+      return (
+        <svg {...common}>
+          <path d="M8 6l8 6-8 6" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 function StatCard({
   label,
   value,
+  icon,
+  tone = "slate",
 }: {
   label: string;
   value: string | number;
+  icon: "games" | "stats" | "shield" | "play" | "bara" | "quiz";
+  tone?: "slate" | "cyan" | "orange" | "emerald";
 }) {
+  const tones = {
+    slate: "border-white/10 bg-white/5 text-white",
+    cyan: "border-cyan-400/20 bg-cyan-400/10 text-cyan-100",
+    orange: "border-orange-400/20 bg-orange-400/10 text-orange-100",
+    emerald: "border-emerald-400/20 bg-emerald-400/10 text-emerald-100",
+  };
+
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-3 break-words text-2xl font-black text-white sm:text-3xl">
-        {value}
-      </p>
+    <div className={`rounded-[1.6rem] border p-5 shadow-[0_14px_40px_rgba(0,0,0,0.25)] ${tones[tone]}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-bold text-white/65">{label}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white/85">
+          <Icon name={icon} className="h-4 w-4" />
+        </div>
+      </div>
+      <div className="mt-4 text-3xl font-black md:text-4xl">{value}</div>
     </div>
   );
 }
@@ -64,16 +210,67 @@ function StatCard({
 function InfoCard({
   label,
   value,
+  icon,
 }: {
   label: string;
   value: string;
+  icon: "user" | "email" | "phone" | "calendar" | "shield";
 }) {
   return (
-    <div className="rounded-[1.35rem] border border-white/10 bg-slate-900/60 p-4">
-      <p className="text-xs text-slate-400 sm:text-sm">{label}</p>
-      <p className="mt-2 break-words text-base font-black text-white sm:text-lg">
-        {value}
+    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 shadow-[0_14px_35px_rgba(0,0,0,0.2)]">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white/85">
+          <Icon name={icon} className="h-4 w-4" />
+        </div>
+        <div>
+          <div className="text-xs font-bold text-white/55">{label}</div>
+          <div className="mt-1 text-sm font-black text-white md:text-base">
+            {value}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SessionCard({ session }: { session: ActiveSession }) {
+  return (
+    <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.22)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
+          <Icon name="quiz" />
+        </div>
+
+        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-black text-emerald-100">
+          لعبة محفوظة
+        </div>
+      </div>
+
+      <h3 className="mt-4 text-2xl font-black text-white">{session.game_name}</h3>
+
+      <p className="mt-3 text-sm leading-7 text-white/70">
+        {session.team_one_name} ({session.team_one_score ?? 0}) ×{" "}
+        {session.team_two_name} ({session.team_two_score ?? 0})
       </p>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/60">
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+          تاريخ الإنشاء: {formatDate(session.created_at)}
+        </span>
+        <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-cyan-100">
+          الحالة: نشطة
+        </span>
+      </div>
+
+      <div className="mt-5">
+        <Link
+          href={`/game/board?sessionId=${session.id}`}
+          className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+        >
+          <Icon name="continue" className="h-4 w-4" />
+          متابعة اللعبة
+        </Link>
+      </div>
     </div>
   );
 }
@@ -85,8 +282,11 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+  const [baraOverview, setBaraOverview] = useState<BaraOverview>({
+    sections: 0,
+    categories: 0,
+    items: 0,
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -103,47 +303,63 @@ export default function AccountPage() {
         return;
       }
 
-      setCurrentUserId(user.id);
-
-      const [{ data: profileData }, { data: sessionsData }] = await Promise.all([
+      const [
+        { data: profileData },
+        { data: sessionsData },
+        baraSectionsResult,
+        baraCategoriesResult,
+        baraItemsResult,
+      ] = await Promise.all([
         supabase
           .from("profiles")
           .select(
-            "email, username, phone, role, games_remaining, games_played, created_at"
+            "email, username, phone, role, games_remaining, games_played, created_at",
           )
           .eq("id", user.id)
           .single(),
         supabase
           .from("game_sessions")
           .select(
-            "id, game_name, team_one_name, team_two_name, team_one_score, team_two_score, created_at, status"
+            "id, game_name, team_one_name, team_two_name, team_one_score, team_two_score, created_at, status",
           )
           .eq("user_id", user.id)
           .eq("status", "active")
           .order("created_at", { ascending: false }),
+        supabase.from("bara_sections").select("*", { count: "exact", head: true }),
+        supabase.from("bara_categories").select("*", { count: "exact", head: true }),
+        supabase
+          .from("bara_items")
+          .select("*", { count: "exact", head: true })
+          .eq("is_active", true),
       ]);
 
       if (!mounted) return;
 
       setProfile((profileData as Profile | null) ?? null);
       setActiveSessions(
-        Array.isArray(sessionsData) ? (sessionsData as ActiveSession[]) : []
+        Array.isArray(sessionsData) ? (sessionsData as ActiveSession[]) : [],
       );
+      setBaraOverview({
+        sections: baraSectionsResult.count ?? 0,
+        categories: baraCategoriesResult.count ?? 0,
+        items: baraItemsResult.count ?? 0,
+      });
       setLoading(false);
     }
 
     loadAccount();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        router.replace("/login");
-      } else {
-        setCurrentUserId(session.user.id);
-        loadAccount();
-      }
-    });
+  data: { subscription },
+} = supabase.auth.onAuthStateChange(
+  (_event: AuthChangeEvent, session: Session | null) => {
+    if (!session) {
+      router.replace("/login");
+    } else {
+      loadAccount();
+    }
+  },
+);
 
     return () => {
       mounted = false;
@@ -157,194 +373,195 @@ export default function AccountPage() {
     router.refresh();
   }
 
-  async function handleDeleteSession(sessionId: string) {
-    if (!currentUserId || deletingSessionId) return;
-
-    const confirmed = window.confirm(
-      "هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟ لا يمكن التراجع بعد الحذف."
-    );
-
-    if (!confirmed) return;
-
-    setDeletingSessionId(sessionId);
-
-    const { error } = await supabase
-      .from("game_sessions")
-      .delete()
-      .eq("id", sessionId)
-      .eq("user_id", currentUserId);
-
-    if (error) {
-      setDeletingSessionId(null);
-      window.alert("تعذر حذف اللعبة. حاول مرة أخرى.");
-      return;
-    }
-
-    try {
-      window.localStorage.removeItem(`seenjeem-board-state:${sessionId}`);
-    } catch {}
-
-    setActiveSessions((prev) => prev.filter((session) => session.id !== sessionId));
-    setDeletingSessionId(null);
-    router.refresh();
-  }
-
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-950 px-4 py-6 text-white sm:px-6 lg:px-8 lg:py-10">
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center text-slate-300">
+      <div className="min-h-screen bg-[#020817] px-4 py-8 text-white md:px-6">
+        <div className="mx-auto max-w-6xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center">
           جارٍ تحميل بيانات الحساب...
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
-        <section className="rounded-[2.25rem] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.14),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.10),transparent_20%),linear-gradient(135deg,#020617_0%,#08122f_46%,#020617_100%)] p-5 sm:p-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-bold text-cyan-200 sm:text-sm">
-                حسابي
-              </span>
-              <h1 className="mt-4 text-3xl font-black sm:text-4xl">
+    <div className="min-h-screen bg-[#020817] px-4 py-8 text-white md:px-6">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <section className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_35%),linear-gradient(180deg,#071126_0%,#061020_100%)] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.35)] md:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="text-cyan-300">حسابي</div>
+              <h1 className="mt-2 text-4xl font-black md:text-5xl">
                 أهلاً {profile?.username || "بك"}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
+              <p className="mt-4 text-sm leading-8 text-white/75 md:text-base">
                 من هنا يمكنك مراجعة بيانات حسابك، معرفة عدد الألعاب المتبقية،
-                ومتابعة الجولات غير المكتملة بسهولة.
+                متابعة الجولات غير المكتملة، والوصول السريع إلى ألعاب المنصة.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-wrap gap-3">
               <Link
-                href="/game/start"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                href="/games"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                إنشاء لعبة جديدة
+                <Icon name="play" className="h-4 w-4" />
+                صفحة الألعاب
               </Link>
+
               <button
                 onClick={handleLogout}
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-3 text-base font-bold text-red-300 transition hover:bg-red-500/15"
+                className="inline-flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm font-black text-red-100 transition hover:bg-red-500/20"
               >
+                <Icon name="logout" className="h-4 w-4" />
                 تسجيل الخروج
               </button>
             </div>
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="الألعاب المتبقية" value={profile?.games_remaining ?? 0} />
-          <StatCard label="عدد الألعاب التي لعبها" value={profile?.games_played ?? 0} />
-          <StatCard label="رتبة الحساب" value={getRoleLabel(profile?.role)} />
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
-            label="تاريخ إنشاء الحساب"
-            value={formatDate(profile?.created_at ?? null)}
+            label="رتبة الحساب"
+            value={getRoleLabel(profile?.role)}
+            icon="shield"
+            tone="orange"
+          />
+          <StatCard
+            label="الألعاب المتبقية"
+            value={profile?.games_remaining ?? 0}
+            icon="games"
+            tone="cyan"
+          />
+          <StatCard
+            label="الألعاب التي لعبتها"
+            value={profile?.games_played ?? 0}
+            icon="stats"
+            tone="emerald"
+          />
+          <StatCard
+            label="الجولات النشطة"
+            value={activeSessions.length}
+            icon="play"
+            tone="slate"
           />
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
-          <div className="mb-5">
-            <h2 className="text-2xl font-black text-white sm:text-3xl">
-              بيانات الحساب
-            </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-300">
-              معلوماتك الأساسية تجدها هنا .
-            </p>
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-cyan-300">بيانات الحساب</div>
+              <h2 className="mt-2 text-3xl font-black text-white">
+                معلوماتك الأساسية
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+                معلوماتك الأساسية وحالة الحساب الحالية.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/"
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+              >
+                العودة للرئيسية
+              </Link>
+              <Link
+                href="/pricing"
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+              >
+                استعراض الباقات
+              </Link>
+            </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <InfoCard label="اسم المستخدم" value={profile?.username || "-"} />
-            <InfoCard label="البريد الإلكتروني" value={profile?.email || "-"} />
-            <InfoCard label="رقم الهاتف" value={profile?.phone || "-"} />
-            <InfoCard label="الرتبة" value={profile?.role || "user"} />
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link
-              href="/"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              العودة للرئيسية
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-5 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-400/15"
-            >
-              استعراض الباقات
-            </Link>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <InfoCard label="اسم المستخدم" value={profile?.username || "-"} icon="user" />
+            <InfoCard label="البريد الإلكتروني" value={profile?.email || "-"} icon="email" />
+            <InfoCard label="رقم الهاتف" value={profile?.phone || "-"} icon="phone" />
+            <InfoCard label="تاريخ الانضمام" value={formatDate(profile?.created_at)} icon="calendar" />
+            <InfoCard label="نوع الحساب" value={getRoleLabel(profile?.role)} icon="shield" />
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
           <div className="mb-5">
-            <h2 className="text-2xl font-black text-white sm:text-3xl">
-              الألعاب غير المكتملة
+            <div className="text-cyan-300">لعبة لمّتنا</div>
+            <h2 className="mt-2 text-3xl font-black text-white">
+              الجولات غير المكتملة
             </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-300">
-              يمكنك الرجوع لأي لعبة لم تنتهِ بعد وإكمالها من نفس المكان أو حذفها نهائيًا.
+            <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+              يمكنك الرجوع لأي لعبة لم تنتهِ بعد وإكمالها من نفس المكان.
             </p>
           </div>
 
           {activeSessions.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-2">
-              {activeSessions.map((session) => {
-                const isDeleting = deletingSessionId === session.id;
-
-                return (
-                  <div
-                    key={session.id}
-                    className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-5"
-                  >
-                    <div className="flex flex-col gap-4">
-                      <div>
-                        <p className="text-xs text-cyan-300 sm:text-sm">لعبة محفوظة</p>
-                        <h3 className="mt-2 text-xl font-black text-white">
-                          {session.game_name}
-                        </h3>
-                      </div>
-
-                      <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
-                        <p className="text-sm text-slate-300">
-                          {session.team_one_name} ({session.team_one_score ?? 0}) ×{" "}
-                          {session.team_two_name} ({session.team_two_score ?? 0})
-                        </p>
-                        <p className="mt-2 text-xs text-slate-400">
-                          تاريخ الإنشاء: {formatDate(session.created_at)}
-                        </p>
-                        <p className="mt-1 text-xs text-emerald-300">الحالة: نشطة</p>
-                      </div>
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <Link
-                          href={`/game/board?sessionId=${session.id}`}
-                          className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
-                        >
-                          متابعة اللعبة
-                        </Link>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSession(session.id)}
-                          disabled={isDeleting}
-                          className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-base font-bold text-red-300 transition hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {isDeleting ? "جارٍ الحذف..." : "حذف اللعبة"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {activeSessions.map((session) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
             </div>
           ) : (
-            <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/60 p-6 text-center text-slate-300">
+            <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
               لا توجد ألعاب غير مكتملة حاليًا.
             </div>
           )}
         </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-cyan-300">لعبة برا السالفة</div>
+              <h2 className="mt-2 text-3xl font-black text-white">
+                نظرة سريعة على اللعبة
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
+                ابدأ لعبة برا السالفة مباشرة، واطلع على حجم المحتوى المتاح لها داخل المنصة.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/game/bara-alsalfah"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                <Icon name="bara" className="h-4 w-4" />
+                ابدأ برا السالفة
+              </Link>
+
+              {String(profile?.role ?? "").toLowerCase() === "admin" ? (
+                <Link
+                  href="/admin/bara-alsalfah"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  <Icon name="shield" className="h-4 w-4" />
+                  إدارة برا السالفة
+                </Link>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <StatCard
+              label="أقسام برا السالفة"
+              value={baraOverview.sections}
+              icon="stats"
+              tone="orange"
+            />
+            <StatCard
+              label="فئات برا السالفة"
+              value={baraOverview.categories}
+              icon="bara"
+              tone="cyan"
+            />
+            <StatCard
+              label="العناصر المتاحة"
+              value={baraOverview.items}
+              icon="games"
+              tone="emerald"
+            />
+          </div>
+        </section>
       </div>
-    </main>
+    </div>
   );
 }
