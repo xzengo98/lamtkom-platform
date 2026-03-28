@@ -322,7 +322,7 @@ function QuestionCell({
       <div
         className={[
           "font-black leading-none tracking-tight",
-          mobile ? "text-[18px]" : "text-[38px]",
+          mobile ? "text-[14px]" : "text-[35px]",
         ].join(" ")}
       >
         {points}
