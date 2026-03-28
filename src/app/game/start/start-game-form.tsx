@@ -608,7 +608,7 @@ function CategoryCard({
       ) : null}
 
       <div className="relative">
-        <div className="h-28 overflow-hidden sm:h-32 md:h-36">
+        <div className="aspect-[4/3] w-full overflow-hidden">
           {category.image_url ? (
             <img
               src={category.image_url}
