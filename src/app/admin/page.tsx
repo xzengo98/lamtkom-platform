@@ -20,6 +20,16 @@ type QuickAction = {
     | "back";
 };
 
+type StatTone = "cyan" | "orange" | "emerald" | "slate";
+type StatIcon =
+  | "sections"
+  | "categories"
+  | "questions"
+  | "bara"
+  | "users"
+  | "games"
+  | "active";
+
 function Icon({
   name,
   className = "h-5 w-5",
@@ -33,7 +43,8 @@ function Icon({
     | "bara"
     | "users"
     | "games"
-    | "back";
+    | "back"
+    | "active";
   className?: string;
 }) {
   const common = {
@@ -93,7 +104,6 @@ function Icon({
           <circle cx="12" cy="8" r="3" />
           <path d="M7 20a5 5 0 0 1 10 0" />
           <path d="M18.5 5.5h.01" />
-          <path d="M19 3v1.5" />
         </svg>
       );
     case "users":
@@ -109,10 +119,10 @@ function Icon({
       return (
         <svg {...common}>
           <rect x="4" y="8" width="16" height="8" rx="3" />
-          <path d="M8 12h.01" />
+          <path d="M8 12h2" />
+          <path d="M9 11v2" />
           <path d="M16 12h.01" />
-          <path d="M7 12h2" />
-          <path d="M8 11v2" />
+          <path d="M18 12h.01" />
         </svg>
       );
     case "back":
@@ -120,6 +130,16 @@ function Icon({
         <svg {...common}>
           <path d="M15 18l-6-6 6-6" />
           <path d="M9 12h10" />
+        </svg>
+      );
+    case "active":
+      return (
+        <svg {...common}>
+          <path d="M12 3v4" />
+          <path d="M12 17v4" />
+          <path d="M3 12h4" />
+          <path d="M17 12h4" />
+          <circle cx="12" cy="12" r="4" />
         </svg>
       );
     default:
@@ -131,10 +151,12 @@ function StatCard({
   label,
   value,
   tone = "slate",
+  icon,
 }: {
   label: string;
   value: number;
-  tone?: "cyan" | "orange" | "emerald" | "slate";
+  tone?: StatTone;
+  icon: StatIcon;
 }) {
   const tones = {
     cyan: "border-cyan-400/20 bg-cyan-400/10 text-cyan-100",
@@ -147,8 +169,14 @@ function StatCard({
     <div
       className={`rounded-[1.6rem] border p-5 shadow-[0_14px_40px_rgba(0,0,0,0.25)] ${tones[tone]}`}
     >
-      <div className="text-sm font-bold text-white/65">{label}</div>
-      <div className="mt-3 text-4xl font-black">{value}</div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-bold text-white/65">{label}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white/85">
+          <Icon name={icon} className="h-4 w-4" />
+        </div>
+      </div>
+
+      <div className="mt-4 text-4xl font-black">{value}</div>
     </div>
   );
 }
@@ -172,21 +200,24 @@ function ActionCard({
   return (
     <Link
       href={href}
-      className={`group rounded-[1.5rem] border p-5 transition ${tones[tone]}`}
+      className={`group h-full rounded-[1.5rem] border p-5 transition ${tones[tone]}`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white/85">
-          <Icon name={icon} />
+      <div className="flex h-full flex-col">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white/85">
+            <Icon name={icon} />
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-black text-white/80 transition group-hover:bg-white/15">
+            فتح
+          </div>
         </div>
 
-        <div className="flex-1">
-          <div className="text-xl font-black text-white">{title}</div>
-          <p className="mt-3 text-sm leading-7 text-white/70">{description}</p>
+        <div className="mt-4 min-h-[56px] text-lg font-black leading-8 text-white md:text-xl">
+          {title}
         </div>
 
-        <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-black text-white/80 transition group-hover:bg-white/15">
-          فتح
-        </div>
+        <p className="mt-3 text-sm leading-7 text-white/70">{description}</p>
       </div>
     </Link>
   );
@@ -305,14 +336,14 @@ export default async function AdminPage() {
       icon: "bara",
     },
     {
-      title: "إدارة فئات برا السالفة",
+      title: "إدارة الفئات",
       description: "تحكم بالأقسام والفئات الخاصة بلعبة برا السالفة.",
       href: "/admin/bara-alsalfah/categories",
       tone: "orange",
       icon: "categories",
     },
     {
-      title: "إضافة قسم / فئة",
+      title: "إضافة قسم أو فئة",
       description: "أنشئ قسمًا أو فئة جديدة للعبة برا السالفة.",
       href: "/admin/bara-alsalfah/categories/new",
       tone: "orange",
@@ -364,17 +395,17 @@ export default async function AdminPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="الأقسام الرئيسية" value={sectionsCount} tone="orange" />
-          <StatCard label="إجمالي الفئات" value={categoriesCount} tone="cyan" />
-          <StatCard label="الفئات المفعلة" value={activeCategoriesCount} tone="emerald" />
-          <StatCard label="إجمالي الأسئلة" value={questionsCount} tone="slate" />
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {lammatnaActions.map((item) => (
             <ActionCard key={item.href} {...item} />
           ))}
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="الأقسام الرئيسية" value={sectionsCount} tone="orange" icon="sections" />
+          <StatCard label="إجمالي الفئات" value={categoriesCount} tone="cyan" icon="categories" />
+          <StatCard label="الفئات المفعلة" value={activeCategoriesCount} tone="emerald" icon="active" />
+          <StatCard label="إجمالي الأسئلة" value={questionsCount} tone="slate" icon="questions" />
         </div>
       </section>
 
@@ -396,9 +427,9 @@ export default async function AdminPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <StatCard label="أقسام برا السالفة" value={baraSectionsCount} tone="orange" />
-          <StatCard label="فئات برا السالفة" value={baraCategoriesCount} tone="cyan" />
-          <StatCard label="العناصر المتاحة" value={baraItemsCount} tone="emerald" />
+          <StatCard label="أقسام برا السالفة" value={baraSectionsCount} tone="orange" icon="sections" />
+          <StatCard label="فئات برا السالفة" value={baraCategoriesCount} tone="cyan" icon="categories" />
+          <StatCard label="العناصر المتاحة" value={baraItemsCount} tone="emerald" icon="bara" />
         </div>
       </section>
 
@@ -420,9 +451,9 @@ export default async function AdminPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <StatCard label="عدد الأعضاء" value={usersCount} tone="cyan" />
-          <StatCard label="الألعاب المنتهية" value={completedGamesCount} tone="orange" />
-          <StatCard label="الألعاب النشطة" value={activeGamesCount} tone="emerald" />
+          <StatCard label="عدد الأعضاء" value={usersCount} tone="cyan" icon="users" />
+          <StatCard label="الألعاب المنتهية" value={completedGamesCount} tone="orange" icon="games" />
+          <StatCard label="الألعاب النشطة" value={activeGamesCount} tone="emerald" icon="active" />
         </div>
       </section>
     </div>
