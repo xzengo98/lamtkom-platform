@@ -217,14 +217,14 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.35rem] border p-4 text-center shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
+        "rounded-[1.15rem] border p-3 text-center shadow-[0_10px_20px_rgba(0,0,0,0.20)]",
         accent === "cyan"
           ? "border-cyan-300/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
       ].join(" ")}
     >
       <div className="text-xs font-black text-white/55">{label}</div>
-      <div className="mt-2 text-2xl font-black text-white">{value}</div>
+      <div className="mt-1.5 text-2xl font-black text-white">{value}</div>
     </div>
   );
 }
@@ -365,7 +365,7 @@ export default function StartGameForm({
       />
 
       {/* Hero / Header */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+      <section className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.30)] md:p-5">
         <div className="pointer-events-none absolute inset-0">
           <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
           <div className="hero-glow absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl" />
@@ -377,11 +377,11 @@ export default function StartGameForm({
             <span>إعداد لعبة جديدة</span>
           </div>
 
-          <h1 className="mt-5 text-4xl font-black text-white md:text-5xl">
+          <h1 className="mt-4 text-3xl font-black text-white md:text-4xl">
             جهّز اللعبة بسرعة
           </h1>
 
-          <p className="mt-4 max-w-3xl text-base leading-8 text-white/72">
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/72 md:text-base">
             اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
             مباشرة، مع الحفاظ على جميع شروط الحساب والمنطق الحالي كما هو.
           </p>
@@ -413,7 +413,7 @@ export default function StartGameForm({
         {/* Left: Inputs + Categories */}
         <div className="space-y-6">
           {/* Game Data */}
-          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
             <div className="mb-5 flex items-center gap-3">
               <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
                 <SparkIcon className="h-5 w-5" />
@@ -473,7 +473,7 @@ export default function StartGameForm({
           </section>
 
           {/* Categories */}
-          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
@@ -620,7 +620,7 @@ export default function StartGameForm({
 
         {/* Right: Summary / Submit */}
         <div className="space-y-6">
-          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
             <div className="mb-5 flex items-center gap-3">
               <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
                 <UsersIcon className="h-5 w-5" />
