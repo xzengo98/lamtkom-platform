@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import CodenamesBoardClient from "@/components/codenames/codenames-board-client";
-import { submitCodenamesClue } from "./actions";
+import {
+  endCodenamesTurn,
+  revealCodenamesCard,
+  submitCodenamesClue,
+} from "./actions";
 
 type PageProps = {
   params: Promise<{ code: string }>;
-  searchParams?: Promise<{ name?: string }>;
+  searchParams?: Promise<{ player_id?: string }>;
+};
+
+type PlayerLookupRow = {
+  id: string;
 };
 
 export default async function CodenamesBoardPage({
@@ -15,13 +23,13 @@ export default async function CodenamesBoardPage({
   const supabase = await getSupabaseServerClient();
   const { code } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const currentName = resolvedSearchParams?.name?.trim() || "";
+  const currentPlayerId = resolvedSearchParams?.player_id?.trim() || "";
   const roomCode = code.toUpperCase();
 
   const { data: roomData } = await supabase
     .from("codenames_rooms")
     .select(
-      "id, room_code, status, current_turn_team, starting_team, red_remaining, blue_remaining"
+      "id, room_code, status, current_turn_team, starting_team, red_remaining, blue_remaining, winner_team, assassin_revealed"
     )
     .eq("room_code", roomCode)
     .maybeSingle();
@@ -41,6 +49,15 @@ export default async function CodenamesBoardPage({
     .select("id, room_id, guest_name, team, role, is_host")
     .eq("room_id", roomData.id);
 
+  const currentPlayer =
+    ((playersData ?? []) as PlayerLookupRow[]).find(
+      (player: PlayerLookupRow) => player.id === currentPlayerId
+    ) || null;
+
+  if (!currentPlayer) {
+    notFound();
+  }
+
   const { data: turnsData } = await supabase
     .from("codenames_turns")
     .select(
@@ -49,26 +66,16 @@ export default async function CodenamesBoardPage({
     .eq("room_id", roomData.id)
     .order("created_at", { ascending: false });
 
-  async function boardFormAction(formData: FormData) {
-    "use server";
-
-    const intent = formData.get("intent");
-
-    if (intent === "submit-clue") {
-      await submitCodenamesClue(formData);
-      return;
-    }
-  }
-
   return (
-    <form action={boardFormAction}>
-      <CodenamesBoardClient
-        initialRoom={roomData}
-        initialCards={(cardsData ?? []) as never[]}
-        initialPlayers={(playersData ?? []) as never[]}
-        initialTurns={(turnsData ?? []) as never[]}
-        currentName={currentName}
-      />
-    </form>
+    <CodenamesBoardClient
+      initialRoom={roomData as never}
+      initialCards={(cardsData ?? []) as never[]}
+      initialPlayers={(playersData ?? []) as never[]}
+      initialTurns={(turnsData ?? []) as never[]}
+      currentPlayerId={currentPlayerId}
+      submitClueAction={submitCodenamesClue}
+      revealCardAction={revealCodenamesCard}
+      endTurnAction={endCodenamesTurn}
+    />
   );
 }

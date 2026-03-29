@@ -1,44 +1,78 @@
-import Link from "next/link";
-import { createCodenamesRoom } from "./actions";
+"use server";
 
-export default function CreateCodenamesRoomPage() {
-  return (
-    <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-6">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <h1 className="text-2xl font-bold text-white">إنشاء غرفة Codenames</h1>
-        <p className="mt-2 text-sm text-white/70">
-          أدخل اسمك ليتم إنشاء غرفة جديدة تلقائيًا
-        </p>
-      </div>
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { generateRoomCode } from "@/lib/codenames/room-code";
 
-      <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
-        <form action={createCodenamesRoom} className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm text-white/70">اسمك</label>
-            <input
-              name="guest_name"
-              placeholder="مثال: مصطفى"
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/40"
-            />
-          </div>
+function getString(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="submit"
-              className="rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-500"
-            >
-              إنشاء الغرفة
-            </button>
+async function generateUniqueRoomCode() {
+  const supabase = await getSupabaseServerClient();
 
-            <Link
-              href="/games/codenames"
-              className="rounded-2xl border border-white/10 px-5 py-3 text-white/80 hover:bg-white/5"
-            >
-              رجوع
-            </Link>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+  for (let i = 0; i < 20; i += 1) {
+    const code = generateRoomCode(6);
+
+    const { data } = await supabase
+      .from("codenames_rooms")
+      .select("id")
+      .eq("room_code", code)
+      .maybeSingle();
+
+    if (!data) {
+      return code;
+    }
+  }
+
+  throw new Error("تعذر إنشاء رمز غرفة فريد");
+}
+
+export async function createCodenamesRoom(formData: FormData) {
+  const supabase = await getSupabaseServerClient();
+
+  const guestName = getString(formData, "guest_name");
+  if (!guestName) {
+    throw new Error("الاسم مطلوب");
+  }
+
+  const roomCode = await generateUniqueRoomCode();
+
+  const { data: room, error: roomError } = await supabase
+    .from("codenames_rooms")
+    .insert({
+      room_code: roomCode,
+      status: "waiting",
+      starting_team: null,
+      current_turn_team: null,
+      red_remaining: 0,
+      blue_remaining: 0,
+      winner_team: null,
+      assassin_revealed: false,
+    })
+    .select("id, room_code")
+    .single();
+
+  if (roomError || !room) {
+    throw new Error(roomError?.message || "فشل إنشاء الغرفة");
+  }
+
+  const { data: player, error: playerError } = await supabase
+    .from("codenames_players")
+    .insert({
+      room_id: room.id,
+      guest_name: guestName,
+      is_host: true,
+      team: "red",
+      role: "spymaster",
+    })
+    .select("id")
+    .single();
+
+  if (playerError || !player) {
+    throw new Error(playerError?.message || "فشل إنشاء اللاعب");
+  }
+
+  redirect(`/games/codenames/room/${room.room_code}?player_id=${player.id}`);
 }

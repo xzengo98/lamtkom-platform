@@ -11,6 +11,8 @@ type RoomRow = {
   starting_team: string | null;
   red_remaining: number | null;
   blue_remaining: number | null;
+  winner_team?: string | null;
+  assassin_revealed?: boolean | null;
 };
 
 type CardRow = {
@@ -47,12 +49,17 @@ type RealtimePayload<T> = {
   old: T | null;
 };
 
+type ServerAction = (formData: FormData) => void | Promise<void>;
+
 type Props = {
   initialRoom: RoomRow;
   initialCards: CardRow[];
   initialPlayers: PlayerRow[];
   initialTurns: TurnRow[];
-  currentName: string;
+  currentPlayerId: string;
+  submitClueAction: ServerAction;
+  revealCardAction: ServerAction;
+  endTurnAction: ServerAction;
 };
 
 export default function CodenamesBoardClient({
@@ -60,7 +67,10 @@ export default function CodenamesBoardClient({
   initialCards,
   initialPlayers,
   initialTurns,
-  currentName,
+  currentPlayerId,
+  submitClueAction,
+  revealCardAction,
+  endTurnAction,
 }: Props) {
   const [room, setRoom] = useState<RoomRow>(initialRoom);
   const [cards, setCards] = useState<CardRow[]>(initialCards);
@@ -68,11 +78,8 @@ export default function CodenamesBoardClient({
   const [turns, setTurns] = useState<TurnRow[]>(initialTurns);
 
   const currentPlayer = useMemo(
-    () =>
-      players.find(
-        (player) => (player.guest_name?.trim() || "") === currentName
-      ) || null,
-    [players, currentName]
+    () => players.find((player) => player.id === currentPlayerId) || null,
+    [players, currentPlayerId]
   );
 
   const activeTurn = useMemo(
@@ -80,9 +87,20 @@ export default function CodenamesBoardClient({
     [turns]
   );
 
-  const isSpymaster = currentPlayer?.role === "spymaster";
-  const isCurrentTeam = currentPlayer?.team === room.current_turn_team;
-  const canSubmitClue = Boolean(isSpymaster && isCurrentTeam);
+  if (!currentPlayer) {
+    return null;
+  }
+
+  const isSpymaster = currentPlayer.role === "spymaster";
+  const isOperative = currentPlayer.role === "operative";
+  const isCurrentTeam = currentPlayer.team === room.current_turn_team;
+  const canSubmitClue = Boolean(
+    isSpymaster && isCurrentTeam && room.status === "active"
+  );
+  const canRevealCard = Boolean(
+    isOperative && isCurrentTeam && activeTurn && room.status === "active"
+  );
+  const canEndTurn = Boolean(isCurrentTeam && room.status === "active");
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -90,7 +108,7 @@ export default function CodenamesBoardClient({
     const roomChannel = supabase
       .channel(`board-room-${room.room_code}`)
       .on(
-          "postgres_changes" as any,
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
@@ -180,6 +198,38 @@ export default function CodenamesBoardClient({
     };
   }, [room.id, room.room_code]);
 
+  function getCardClasses(card: CardRow) {
+    const showSpymasterColor = isSpymaster && !card.is_revealed;
+
+    if (card.is_revealed) {
+      if (card.card_type === "red") {
+        return "rounded-2xl border border-red-500/20 bg-red-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      if (card.card_type === "blue") {
+        return "rounded-2xl border border-blue-500/20 bg-blue-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      if (card.card_type === "assassin") {
+        return "rounded-2xl border border-white/10 bg-black p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      return "rounded-2xl border border-white/10 bg-white/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+    }
+
+    if (showSpymasterColor) {
+      if (card.card_type === "red") {
+        return "rounded-2xl border border-red-500/20 bg-red-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      if (card.card_type === "blue") {
+        return "rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      if (card.card_type === "assassin") {
+        return "rounded-2xl border border-white/10 bg-black/70 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      }
+      return "rounded-2xl border border-white/10 bg-white/5 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+    }
+
+    return "rounded-2xl border border-white/10 bg-black/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold hover:bg-black/30";
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
@@ -193,15 +243,13 @@ export default function CodenamesBoardClient({
               </span>
             </div>
 
-            {currentPlayer && (
-              <div className="mt-2 text-sm text-white/60">
-                اللاعب الحالي:
-                <span className="mx-2 font-semibold text-white">
-                  {currentPlayer.guest_name}
-                </span>
-                • {currentPlayer.role}
-              </div>
-            )}
+            <div className="mt-2 text-sm text-white/60">
+              اللاعب الحالي:
+              <span className="mx-2 font-semibold text-white">
+                {currentPlayer.guest_name}
+              </span>
+              • {currentPlayer.role}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -217,6 +265,14 @@ export default function CodenamesBoardClient({
           </div>
         </div>
       </div>
+
+      {room.status === "finished" && (
+        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6 text-emerald-100">
+          <div className="text-2xl font-bold">
+            انتهت اللعبة - الفائز: {room.winner_team === "red" ? "الأحمر" : "الأزرق"}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         <div className="space-y-4">
@@ -238,6 +294,13 @@ export default function CodenamesBoardClient({
                     {activeTurn.clue_number}
                   </div>
                 </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-sm text-white/60">عدد الاختيارات الحالية</div>
+                  <div className="mt-2 text-2xl font-bold text-white">
+                    {activeTurn.guesses_made ?? 0}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
@@ -250,14 +313,63 @@ export default function CodenamesBoardClient({
             <h2 className="text-xl font-bold text-white">إرسال clue</h2>
 
             {canSubmitClue ? (
-              <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-                صندوق إرسال الـ clue جاهز
-                <br />
-                في الخطوة التالية سنربطه مع كشف البطاقات وتبديل الدور بشكل كامل
-              </div>
+              <form action={submitClueAction} className="mt-4 space-y-3">
+                <input type="hidden" name="room_code" value={room.room_code} />
+                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+
+                <div>
+                  <label className="mb-2 block text-sm text-white/70">الـ clue</label>
+                  <input
+                    name="clue_word"
+                    placeholder="مثال: سفر"
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/40"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-white/70">
+                    عدد الكلمات
+                  </label>
+                  <input
+                    type="number"
+                    name="clue_number"
+                    min={1}
+                    defaultValue={1}
+                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-500"
+                >
+                  إرسال clue
+                </button>
+              </form>
             ) : (
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
                 فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <h2 className="text-xl font-bold text-white">التحكم بالدور</h2>
+
+            {canEndTurn ? (
+              <form action={endTurnAction} className="mt-4">
+                <input type="hidden" name="room_code" value={room.room_code} />
+                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                <button
+                  type="submit"
+                  className="w-full rounded-2xl bg-orange-600 px-5 py-3 font-medium text-white hover:bg-orange-500"
+                >
+                  إنهاء الدور
+                </button>
+              </form>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
+                لا يمكنك إنهاء الدور الآن
               </div>
             )}
           </div>
@@ -265,43 +377,23 @@ export default function CodenamesBoardClient({
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {cards.map((card) => {
-            const showSpymasterColor = isSpymaster && !card.is_revealed;
+            const classes = getCardClasses(card);
 
-            let cardClasses =
-              "rounded-2xl border border-white/10 bg-black/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-
-            if (card.is_revealed) {
-              if (card.card_type === "red") {
-                cardClasses =
-                  "rounded-2xl border border-red-500/20 bg-red-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else if (card.card_type === "blue") {
-                cardClasses =
-                  "rounded-2xl border border-blue-500/20 bg-blue-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else if (card.card_type === "assassin") {
-                cardClasses =
-                  "rounded-2xl border border-white/10 bg-black p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else {
-                cardClasses =
-                  "rounded-2xl border border-white/10 bg-white/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              }
-            } else if (showSpymasterColor) {
-              if (card.card_type === "red") {
-                cardClasses =
-                  "rounded-2xl border border-red-500/20 bg-red-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else if (card.card_type === "blue") {
-                cardClasses =
-                  "rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else if (card.card_type === "assassin") {
-                cardClasses =
-                  "rounded-2xl border border-white/10 bg-black/70 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              } else {
-                cardClasses =
-                  "rounded-2xl border border-white/10 bg-white/5 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
-              }
+            if (canRevealCard && !card.is_revealed) {
+              return (
+                <form key={card.id} action={revealCardAction}>
+                  <input type="hidden" name="room_code" value={room.room_code} />
+                  <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                  <input type="hidden" name="card_id" value={card.id} />
+                  <button type="submit" className={`${classes} w-full`}>
+                    {card.word}
+                  </button>
+                </form>
+              );
             }
 
             return (
-              <div key={card.id} className={cardClasses}>
+              <div key={card.id} className={classes}>
                 {card.word}
               </div>
             );

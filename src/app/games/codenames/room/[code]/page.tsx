@@ -1,6 +1,6 @@
-import RoomStatusWatcher from "@/components/codenames/room-status-watcher";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import RoomStatusWatcher from "@/components/codenames/room-status-watcher";
 import {
   startCodenamesGame,
   updatePlayerRole,
@@ -9,7 +9,7 @@ import {
 
 type PageProps = {
   params: Promise<{ code: string }>;
-  searchParams?: Promise<{ name?: string }>;
+  searchParams?: Promise<{ player_id?: string }>;
 };
 
 type RoomRow = {
@@ -22,8 +22,8 @@ type RoomRow = {
 type PlayerRow = {
   id: string;
   room_id: string;
-  guest_name: string | null;
   user_id: string | null;
+  guest_name: string | null;
   team: string | null;
   role: string | null;
   is_host: boolean | null;
@@ -35,8 +35,7 @@ function getPlayerDisplayName(player: PlayerRow) {
 }
 
 function getRoleLabel(role: string | null) {
-  if (role === "spymaster") return "Spymaster";
-  return "Operative";
+  return role === "spymaster" ? "Spymaster" : "Operative";
 }
 
 export default async function CodenamesRoomPage({
@@ -46,7 +45,7 @@ export default async function CodenamesRoomPage({
   const supabase = await getSupabaseServerClient();
   const { code } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const currentName = resolvedSearchParams?.name?.trim() || "";
+  const currentPlayerId = resolvedSearchParams?.player_id?.trim() || "";
   const roomCode = code.toUpperCase();
 
   const { data: roomData, error: roomError } = await supabase
@@ -74,7 +73,7 @@ export default async function CodenamesRoomPage({
 
   const { data: playersData, error: playersError } = await supabase
     .from("codenames_players")
-    .select("id, room_id, guest_name, user_id, team, role, is_host, joined_at")
+    .select("id, room_id, user_id, guest_name, team, role, is_host, joined_at")
     .eq("room_id", room.id)
     .order("joined_at", { ascending: true });
 
@@ -95,10 +94,24 @@ export default async function CodenamesRoomPage({
     role: player.role?.toLowerCase() ?? "operative",
   }));
 
-  const currentPlayer =
-    players.find((player) => (player.guest_name?.trim() || "") === currentName) || null;
+  const currentPlayer = players.find((player) => player.id === currentPlayerId) || null;
 
-  const isHost = Boolean(currentPlayer?.is_host);
+  if (!currentPlayer) {
+    return (
+      <div className="mx-auto max-w-4xl p-4 md:p-6">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+          <h1 className="text-xl font-bold">تعذر تحديد اللاعب الحالي</h1>
+          <p className="mt-2 text-sm">تأكد أن رابط الغرفة يحتوي على player_id صحيح</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (room.status === "active") {
+    redirect(`/games/codenames/board/${room.room_code}?player_id=${currentPlayer.id}`);
+  }
+
+  const isHost = Boolean(currentPlayer.is_host);
 
   const redPlayers = players.filter((player) => player.team === "red");
   const bluePlayers = players.filter((player) => player.team === "blue");
@@ -107,14 +120,14 @@ export default async function CodenamesRoomPage({
   );
 
   function canManagePlayer(player: PlayerRow) {
-    if (!currentPlayer) return false;
     if (isHost) return true;
     return currentPlayer.id === player.id;
   }
 
   return (
-    
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
+      <RoomStatusWatcher roomCode={room.room_code} playerId={currentPlayer.id} />
+
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -125,15 +138,13 @@ export default async function CodenamesRoomPage({
                 {room.room_code}
               </span>
             </div>
-            {currentPlayer && (
-              <div className="mt-2 text-sm text-white/60">
-                أنت داخل الغرفة باسم:{" "}
-                <span className="font-semibold text-white">
-                  {getPlayerDisplayName(currentPlayer)}
-                </span>
-                {isHost ? " • Host" : ""}
-              </div>
-            )}
+            <div className="mt-2 text-sm text-white/60">
+              أنت داخل الغرفة باسم:
+              <span className="mx-2 font-semibold text-white">
+                {getPlayerDisplayName(currentPlayer)}
+              </span>
+              {isHost ? "• Host" : ""}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -144,7 +155,7 @@ export default async function CodenamesRoomPage({
             {isHost && (
               <form action={startCodenamesGame}>
                 <input type="hidden" name="room_code" value={room.room_code} />
-                <input type="hidden" name="actor_name" value={currentName} />
+                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
                 <button
                   type="submit"
                   className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-500"
@@ -199,7 +210,11 @@ export default async function CodenamesRoomPage({
                       <form action={updatePlayerTeam}>
                         <input type="hidden" name="player_id" value={player.id} />
                         <input type="hidden" name="room_code" value={room.room_code} />
-                        <input type="hidden" name="actor_name" value={currentName} />
+                        <input
+                          type="hidden"
+                          name="actor_player_id"
+                          value={currentPlayer.id}
+                        />
                         <input type="hidden" name="team" value="red" />
                         <button
                           type="submit"
@@ -212,7 +227,11 @@ export default async function CodenamesRoomPage({
                       <form action={updatePlayerTeam}>
                         <input type="hidden" name="player_id" value={player.id} />
                         <input type="hidden" name="room_code" value={room.room_code} />
-                        <input type="hidden" name="actor_name" value={currentName} />
+                        <input
+                          type="hidden"
+                          name="actor_player_id"
+                          value={currentPlayer.id}
+                        />
                         <input type="hidden" name="team" value="blue" />
                         <button
                           type="submit"
@@ -269,7 +288,11 @@ export default async function CodenamesRoomPage({
                           <form action={updatePlayerRole}>
                             <input type="hidden" name="player_id" value={player.id} />
                             <input type="hidden" name="room_code" value={room.room_code} />
-                            <input type="hidden" name="actor_name" value={currentName} />
+                            <input
+                              type="hidden"
+                              name="actor_player_id"
+                              value={currentPlayer.id}
+                            />
                             <input type="hidden" name="role" value="spymaster" />
                             <button
                               type="submit"
@@ -286,7 +309,11 @@ export default async function CodenamesRoomPage({
                           <form action={updatePlayerRole}>
                             <input type="hidden" name="player_id" value={player.id} />
                             <input type="hidden" name="room_code" value={room.room_code} />
-                            <input type="hidden" name="actor_name" value={currentName} />
+                            <input
+                              type="hidden"
+                              name="actor_player_id"
+                              value={currentPlayer.id}
+                            />
                             <input type="hidden" name="role" value="operative" />
                             <button
                               type="submit"
@@ -301,9 +328,7 @@ export default async function CodenamesRoomPage({
                           </form>
                         </div>
                       ) : (
-                        <div className="text-sm text-white/50">
-                          لا يمكنك تعديل هذا اللاعب
-                        </div>
+                        <div className="text-sm text-white/50">لا يمكنك تعديل هذا اللاعب</div>
                       )}
                     </div>
                   </div>
@@ -351,7 +376,11 @@ export default async function CodenamesRoomPage({
                           <form action={updatePlayerRole}>
                             <input type="hidden" name="player_id" value={player.id} />
                             <input type="hidden" name="room_code" value={room.room_code} />
-                            <input type="hidden" name="actor_name" value={currentName} />
+                            <input
+                              type="hidden"
+                              name="actor_player_id"
+                              value={currentPlayer.id}
+                            />
                             <input type="hidden" name="role" value="spymaster" />
                             <button
                               type="submit"
@@ -368,7 +397,11 @@ export default async function CodenamesRoomPage({
                           <form action={updatePlayerRole}>
                             <input type="hidden" name="player_id" value={player.id} />
                             <input type="hidden" name="room_code" value={room.room_code} />
-                            <input type="hidden" name="actor_name" value={currentName} />
+                            <input
+                              type="hidden"
+                              name="actor_player_id"
+                              value={currentPlayer.id}
+                            />
                             <input type="hidden" name="role" value="operative" />
                             <button
                               type="submit"
@@ -383,9 +416,7 @@ export default async function CodenamesRoomPage({
                           </form>
                         </div>
                       ) : (
-                        <div className="text-sm text-white/50">
-                          لا يمكنك تعديل هذا اللاعب
-                        </div>
+                        <div className="text-sm text-white/50">لا يمكنك تعديل هذا اللاعب</div>
                       )}
                     </div>
                   </div>
@@ -398,14 +429,6 @@ export default async function CodenamesRoomPage({
             )}
           </div>
         </section>
-      </div>
-
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <h2 className="text-xl font-bold text-white">المرحلة التالية</h2>
-        <p className="mt-2 text-sm text-white/70">
-          بعد ضبط اللاعبين والفرق، يستطيع منشئ الغرفة بدء اللعبة والانتقال إلى
-          لوحة الكلمات.
-        </p>
       </div>
     </div>
   );

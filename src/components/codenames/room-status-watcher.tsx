@@ -6,7 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Props = {
   roomCode: string;
-  currentName: string;
+  playerId: string;
 };
 
 type RoomRealtimePayload = {
@@ -15,7 +15,7 @@ type RoomRealtimePayload = {
   } | null;
 };
 
-export default function RoomStatusWatcher({ roomCode, currentName }: Props) {
+export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function RoomStatusWatcher({ roomCode, currentName }: Props) {
     const channel = supabase
       .channel(`codenames-room-${roomCode}`)
       .on(
-        "postgres_changes",
+        "postgres_changes" as any,
         {
           event: "UPDATE",
           schema: "public",
@@ -36,7 +36,7 @@ export default function RoomStatusWatcher({ roomCode, currentName }: Props) {
 
           if (next?.status === "active") {
             router.replace(
-              `/games/codenames/board/${roomCode}?name=${encodeURIComponent(currentName)}`
+              `/games/codenames/board/${roomCode}?player_id=${encodeURIComponent(playerId)}`
             );
           }
         }
@@ -46,7 +46,7 @@ export default function RoomStatusWatcher({ roomCode, currentName }: Props) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomCode, currentName, router]);
+  }, [roomCode, playerId, router]);
 
   return null;
 }

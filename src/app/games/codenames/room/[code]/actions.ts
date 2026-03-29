@@ -39,10 +39,10 @@ function getString(formData: FormData, key: string) {
 
 async function getRoomAndActor({
   roomCode,
-  actorName,
+  actorPlayerId,
 }: {
   roomCode: string;
-  actorName: string;
+  actorPlayerId: string;
 }) {
   const supabase = await getSupabaseServerClient();
 
@@ -62,7 +62,7 @@ async function getRoomAndActor({
     .from("codenames_players")
     .select("id, room_id, guest_name, is_host")
     .eq("room_id", room.id)
-    .eq("guest_name", actorName)
+    .eq("id", actorPlayerId)
     .maybeSingle();
 
   if (actorError || !actorData) {
@@ -78,12 +78,15 @@ export async function updatePlayerTeam(formData: FormData) {
   const playerId = getString(formData, "player_id");
   const roomCode = getString(formData, "room_code").toUpperCase();
   const team = getString(formData, "team").toLowerCase();
-  const actorName = getString(formData, "actor_name");
+  const actorPlayerId = getString(formData, "actor_player_id");
 
-  if (!playerId || !roomCode || !actorName) return;
+  if (!playerId || !roomCode || !actorPlayerId) return;
   if (!["red", "blue"].includes(team)) return;
 
-  const { supabase, room, actor } = await getRoomAndActor({ roomCode, actorName });
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
 
   const { data: targetData, error: targetError } = await supabase
     .from("codenames_players")
@@ -119,12 +122,15 @@ export async function updatePlayerRole(formData: FormData) {
   const playerId = getString(formData, "player_id");
   const roomCode = getString(formData, "room_code").toUpperCase();
   const role = getString(formData, "role").toLowerCase();
-  const actorName = getString(formData, "actor_name");
+  const actorPlayerId = getString(formData, "actor_player_id");
 
-  if (!playerId || !roomCode || !actorName) return;
+  if (!playerId || !roomCode || !actorPlayerId) return;
   if (!["spymaster", "operative"].includes(role)) return;
 
-  const { supabase, room, actor } = await getRoomAndActor({ roomCode, actorName });
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
 
   const { data: targetData, error: targetError } = await supabase
     .from("codenames_players")
@@ -169,13 +175,16 @@ function shuffleArray<T>(items: T[]) {
 
 export async function startCodenamesGame(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
-  const actorName = getString(formData, "actor_name");
+  const actorPlayerId = getString(formData, "actor_player_id");
 
-  if (!roomCode || !actorName) {
+  if (!roomCode || !actorPlayerId) {
     throw new Error("بيانات الغرفة غير مكتملة");
   }
 
-  const { supabase, room, actor } = await getRoomAndActor({ roomCode, actorName });
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
 
   if (!actor.is_host) {
     throw new Error("فقط منشئ الغرفة يستطيع بدء اللعبة");
@@ -192,18 +201,10 @@ export async function startCodenamesGame(formData: FormData) {
 
   const allPlayers = (playersData ?? []) as BasicPlayerRow[];
 
-  const redPlayers = allPlayers.filter(
-    (player: BasicPlayerRow) => player.team === "red"
-  );
-  const bluePlayers = allPlayers.filter(
-    (player: BasicPlayerRow) => player.team === "blue"
-  );
-  const redSpymasters = redPlayers.filter(
-    (player: BasicPlayerRow) => player.role === "spymaster"
-  );
-  const blueSpymasters = bluePlayers.filter(
-    (player: BasicPlayerRow) => player.role === "spymaster"
-  );
+  const redPlayers = allPlayers.filter((player) => player.team === "red");
+  const bluePlayers = allPlayers.filter((player) => player.team === "blue");
+  const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
+  const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
 
   if (redPlayers.length === 0 || bluePlayers.length === 0) {
     throw new Error("يجب وجود لاعب واحد على الأقل في كل فريق");
@@ -227,7 +228,7 @@ export async function startCodenamesGame(formData: FormData) {
 
   const uniqueWords = Array.from(
     new Map<string, WordBankRow>(
-      words.map((item: WordBankRow) => [item.word, item])
+      words.map((item) => [item.word, item])
     ).values()
   );
 
@@ -245,7 +246,7 @@ export async function startCodenamesGame(formData: FormData) {
     "assassin",
   ]);
 
-  const cardsToInsert = selectedWords.map((item: WordBankRow, index: number) => ({
+  const cardsToInsert = selectedWords.map((item, index) => ({
     room_id: room.id,
     position_index: index,
     word: item.word,
@@ -298,5 +299,5 @@ export async function startCodenamesGame(formData: FormData) {
   }
 
   revalidatePath(`/games/codenames/room/${roomCode}`);
-  redirect(`/games/codenames/board/${roomCode}?name=${encodeURIComponent(actorName)}`);
+  redirect(`/games/codenames/board/${roomCode}?player_id=${actor.id}`);
 }

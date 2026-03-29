@@ -12,7 +12,7 @@ function getString(formData: FormData, key: string) {
 async function generateUniqueRoomCode() {
   const supabase = await getSupabaseServerClient();
 
-  for (let i = 0; i < 10; i += 1) {
+  for (let i = 0; i < 20; i += 1) {
     const code = generateRoomCode(6);
 
     const { data } = await supabase
@@ -44,6 +44,12 @@ export async function createCodenamesRoom(formData: FormData) {
     .insert({
       room_code: roomCode,
       status: "waiting",
+      starting_team: null,
+      current_turn_team: null,
+      red_remaining: 0,
+      blue_remaining: 0,
+      winner_team: null,
+      assassin_revealed: false,
     })
     .select("id, room_code")
     .single();
@@ -52,17 +58,21 @@ export async function createCodenamesRoom(formData: FormData) {
     throw new Error(roomError?.message || "فشل إنشاء الغرفة");
   }
 
-  const { error: playerError } = await supabase.from("codenames_players").insert({
-    room_id: room.id,
-    guest_name: guestName,
-    is_host: true,
-    team: "red",
-    role: "spymaster",
-  });
+  const { data: player, error: playerError } = await supabase
+    .from("codenames_players")
+    .insert({
+      room_id: room.id,
+      guest_name: guestName,
+      is_host: true,
+      team: "red",
+      role: "spymaster",
+    })
+    .select("id")
+    .single();
 
-  if (playerError) {
-    throw new Error(playerError.message);
+  if (playerError || !player) {
+    throw new Error(playerError?.message || "فشل إنشاء اللاعب");
   }
 
-  redirect(`/games/codenames/room/${room.room_code}?name=${encodeURIComponent(guestName)}`);
+  redirect(`/games/codenames/room/${room.room_code}?player_id=${player.id}`);
 }

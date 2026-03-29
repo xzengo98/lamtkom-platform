@@ -14,26 +14,18 @@ export async function joinCodenamesRoom(formData: FormData) {
   const guestName = getString(formData, "guest_name");
   const roomCode = getString(formData, "room_code").toUpperCase();
 
-  if (!guestName) {
-    throw new Error("الاسم مطلوب");
-  }
-
-  if (!roomCode) {
-    throw new Error("رمز الغرفة مطلوب");
+  if (!guestName || !roomCode) {
+    throw new Error("الاسم ورمز الغرفة مطلوبان");
   }
 
   const { data: room, error: roomError } = await supabase
     .from("codenames_rooms")
-    .select("id, room_code, status")
+    .select("id, room_code")
     .eq("room_code", roomCode)
     .maybeSingle();
 
-  if (roomError) {
-    throw new Error(roomError.message);
-  }
-
-  if (!room) {
-    throw new Error("الغرفة غير موجودة");
+  if (roomError || !room) {
+    throw new Error(roomError?.message || "الغرفة غير موجودة");
   }
 
   const { data: existingPlayer } = await supabase
@@ -43,19 +35,25 @@ export async function joinCodenamesRoom(formData: FormData) {
     .eq("guest_name", guestName)
     .maybeSingle();
 
-  if (!existingPlayer) {
-    const { error: insertError } = await supabase.from("codenames_players").insert({
-      room_id: room.id,
-      guest_name: guestName,
-      is_host: false,
-      team: null,
-      role: "operative",
-    });
-
-    if (insertError) {
-      throw new Error(insertError.message);
-    }
+  if (existingPlayer?.id) {
+    redirect(`/games/codenames/room/${roomCode}?player_id=${existingPlayer.id}`);
   }
 
-  redirect(`/games/codenames/room/${room.room_code}?name=${encodeURIComponent(guestName)}`);
+  const { data: player, error: playerError } = await supabase
+    .from("codenames_players")
+    .insert({
+      room_id: room.id,
+      guest_name: guestName,
+      team: null,
+      role: "operative",
+      is_host: false,
+    })
+    .select("id")
+    .single();
+
+  if (playerError || !player) {
+    throw new Error(playerError?.message || "فشل إضافة اللاعب");
+  }
+
+  redirect(`/games/codenames/room/${roomCode}?player_id=${player.id}`);
 }
