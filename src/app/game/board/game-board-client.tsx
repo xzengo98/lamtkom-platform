@@ -330,7 +330,7 @@ function QuestionCell({
       <div
         className={[
           "font-black tracking-tight",
-          compact ? "text-[1.25rem] md:text-[1.35rem]" : "text-[1.7rem] md:text-[1.85rem]",
+          compact ? "text-[0.9rem] md:text-[1.10rem]" : "text-[1.6rem] md:text-[1.7rem]",
           used ? "opacity-55" : "opacity-100",
         ].join(" ")}
       >
