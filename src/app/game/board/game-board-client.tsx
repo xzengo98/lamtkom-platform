@@ -59,13 +59,8 @@ type CategoryColumn = {
 
 const QUESTION_TIMER_SECONDS = 60;
 
-/**
- * ضع هنا روابط صور الفريقين لاحقًا
- */
-const TEAM_BLUE_AVATAR =
-  "https://via.placeholder.com/160x160.png?text=BLUE+TEAM";
-const TEAM_ORANGE_AVATAR =
-  "https://via.placeholder.com/160x160.png?text=ORANGE+TEAM";
+const TEAM_BLUE_AVATAR = "https://k.top4top.io/p_3739o1dbh1.png";
+const TEAM_ORANGE_AVATAR = "https://l.top4top.io/p_3739qbt1f2.png";
 
 const categoryVisuals: Record<
   string,
@@ -73,13 +68,13 @@ const categoryVisuals: Record<
     gradient: string;
   }
 > = {
-  history: { gradient: "from-amber-300/20 via-orange-400/10 to-transparent" },
-  sports: { gradient: "from-emerald-300/20 via-green-400/10 to-transparent" },
-  geography: { gradient: "from-sky-300/20 via-cyan-400/10 to-transparent" },
-  science: { gradient: "from-violet-300/20 via-fuchsia-400/10 to-transparent" },
-  movies: { gradient: "from-rose-300/20 via-pink-400/10 to-transparent" },
-  islamic: { gradient: "from-yellow-300/20 via-amber-400/10 to-transparent" },
-  default: { gradient: "from-slate-300/20 via-slate-400/10 to-transparent" },
+  history: { gradient: "from-amber-300/18 via-orange-400/10 to-transparent" },
+  sports: { gradient: "from-emerald-300/18 via-green-400/10 to-transparent" },
+  geography: { gradient: "from-sky-300/18 via-cyan-400/10 to-transparent" },
+  science: { gradient: "from-violet-300/18 via-fuchsia-400/10 to-transparent" },
+  movies: { gradient: "from-rose-300/18 via-pink-400/10 to-transparent" },
+  islamic: { gradient: "from-yellow-300/18 via-amber-400/10 to-transparent" },
+  default: { gradient: "from-slate-300/18 via-slate-400/10 to-transparent" },
 };
 
 function getVisualBySlug(slug: string) {
@@ -266,7 +261,7 @@ function TeamCard({
     accent === "orange"
       ? {
           glow: "shadow-[0_0_0_1px_rgba(251,146,60,0.16),0_18px_50px_rgba(251,146,60,0.12)]",
-          card: "border-orange-300/20 bg-[linear-gradient(180deg,rgba(50,31,17,0.88)_0%,rgba(18,10,5,0.95)_100%)]",
+          card: "border-orange-300/20 bg-[linear-gradient(180deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)]",
           chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
           btn: "border-orange-300/20 bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
           score: "text-orange-50",
@@ -274,7 +269,7 @@ function TeamCard({
         }
       : {
           glow: "shadow-[0_0_0_1px_rgba(34,211,238,0.16),0_18px_50px_rgba(34,211,238,0.10)]",
-          card: "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(8,41,63,0.88)_0%,rgba(4,15,28,0.96)_100%)]",
+          card: "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)]",
           chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
           btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
           score: "text-cyan-50",
@@ -284,7 +279,7 @@ function TeamCard({
   return (
     <div
       className={[
-        "rounded-[1.45rem] border p-4 transition",
+        "rounded-[1.5rem] border p-4 transition board-soft-float",
         compact ? "p-3" : "p-4",
         palette.card,
         palette.glow,
@@ -297,8 +292,8 @@ function TeamCard({
             <img
               src={avatarUrl}
               alt={teamName}
-              className={`relative rounded-full border border-white/10 object-cover ${
-                compact ? "h-12 w-12" : "h-14 w-14"
+              className={`relative rounded-full border border-white/10 object-cover shadow-[0_12px_24px_rgba(0,0,0,0.18)] ${
+                compact ? "h-12 w-12" : "h-16 w-16"
               }`}
             />
           </div>
@@ -307,7 +302,7 @@ function TeamCard({
             <div className="text-[10px] font-bold text-white/55">لوحة الفريق</div>
             <div
               className={`truncate font-black text-white ${
-                compact ? "text-base" : "text-lg"
+                compact ? "text-base" : "text-xl"
               }`}
             >
               {teamName}
@@ -395,7 +390,7 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[1.15rem] border transition",
+        "group relative overflow-hidden rounded-[1.2rem] border transition board-soft-glow",
         compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
         disabled
           ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500"
@@ -476,7 +471,7 @@ function QuestionOverlay({
       <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
         <div className="shrink-0 border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-center gap-2 md:justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
                 {openQuestion.categoryName}
               </span>
@@ -502,7 +497,7 @@ function QuestionOverlay({
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 md:p-5">
+              <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] p-4 md:p-5 shadow-[0_16px_35px_rgba(0,0,0,0.2)]">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm font-black text-white/75">
                     <TimerIcon className="h-5 w-5 text-cyan-300" />
@@ -659,7 +654,7 @@ function StatusPill({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/90">
+    <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/90 shadow-[0_8px_18px_rgba(0,0,0,0.14)]">
       {icon}
       <span>{label}</span>
     </div>
@@ -962,7 +957,7 @@ export default function GameBoardClient({
   const compactLandscape = isLandscapePhone;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.09),transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
         <div
           className={[
@@ -970,9 +965,15 @@ export default function GameBoardClient({
             compactLandscape ? "p-2.5" : "p-3 md:p-4",
           ].join(" ")}
         >
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.9rem]">
+            <div className="board-soft-glow absolute -right-20 top-10 h-72 w-72 rounded-full bg-cyan-400/8 blur-3xl" />
+            <div className="board-soft-glow absolute -left-20 bottom-10 h-72 w-72 rounded-full bg-violet-400/8 blur-3xl" />
+            <div className="board-soft-glow absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-400/6 blur-3xl" />
+          </div>
+
           <div
             className={[
-              "mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+              "relative mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
               compactLandscape ? "p-3" : "p-4 md:p-5",
             ].join(" ")}
           >
@@ -1017,8 +1018,8 @@ export default function GameBoardClient({
           <div
             className={
               compactLandscape
-                ? "grid gap-3 grid-cols-[175px_minmax(0,1fr)]"
-                : "grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]"
+                ? "relative grid gap-3 grid-cols-[175px_minmax(0,1fr)]"
+                : "relative grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]"
             }
           >
             <aside className="order-1">
@@ -1052,48 +1053,6 @@ export default function GameBoardClient({
                   avatarUrl={TEAM_ORANGE_AVATAR}
                   compact={compactLandscape}
                 />
-
-                <div
-                  className={[
-                    "rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]",
-                    compactLandscape ? "p-3" : "p-4",
-                  ].join(" ")}
-                >
-                  <div className="mb-3 flex items-center gap-2 text-sm font-black text-white">
-                    <SparkIcon className="h-4 w-4 text-cyan-300" />
-                    <span>ملخص الجولة</span>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
-                      <div className="flex items-center gap-2 text-xs font-black text-white/70">
-                        <CrownIcon className="h-4 w-4 text-emerald-300" />
-                        المتصدر الحالي
-                      </div>
-                      <div className="mt-2 text-2xl font-black text-emerald-100">
-                        {leaderLabel}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
-                      <div className="text-xs font-black text-white/70">
-                        الأسئلة المستخدمة
-                      </div>
-                      <div className="mt-2 text-3xl font-black text-white">
-                        {usedCount}
-                      </div>
-                    </div>
-
-                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
-                      <div className="text-xs font-black text-white/70">
-                        الأسئلة المتبقية
-                      </div>
-                      <div className="mt-2 text-3xl font-black text-cyan-100">
-                        {remainingCount}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 <div
                   className={[
@@ -1230,7 +1189,7 @@ export default function GameBoardClient({
         @keyframes boardGlow {
           0%,
           100% {
-            opacity: 0.55;
+            opacity: 0.5;
             transform: scale(1);
           }
           50% {
@@ -1250,11 +1209,11 @@ export default function GameBoardClient({
         }
 
         .board-soft-glow {
-          animation: boardGlow 4.6s ease-in-out infinite;
+          animation: boardGlow 4.8s ease-in-out infinite;
         }
 
         .board-soft-float {
-          animation: floatSoft 5.5s ease-in-out infinite;
+          animation: floatSoft 5.6s ease-in-out infinite;
         }
       `}</style>
     </div>
