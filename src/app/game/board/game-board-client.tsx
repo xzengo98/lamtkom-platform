@@ -561,7 +561,7 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[1.2rem] border transition duration-300",
+        "group relative overflow-hidden rounded-[1.2rem] border transition duration-300 board-soft-float",
         compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
         disabled
           ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500 opacity-70"
@@ -1168,25 +1168,8 @@ export default function GameBoardClient({
     if (!question) return;
     if (boardState.usedQuestionIds.includes(question.id)) return;
 
-    const isMobile =
-      typeof window !== "undefined" && window.innerWidth < 1024;
-
-    if (isMobile) {
-      router.push(
-        `/game/question?sessionId=${sessionId}&questionId=${question.id}`,
-      );
-      return;
-    }
-
     setTimerRunning(false);
-
-    updateState((prev) => ({
-      ...prev,
-      openQuestionId: question.id,
-      showAnswer: false,
-      showWinnerPicker: false,
-      timeLeft: QUESTION_TIMER_SECONDS,
-    }));
+    router.push(`/game/question?sessionId=${sessionId}&questionId=${question.id}`);
   }
 
   function handleCloseOverlay() {
