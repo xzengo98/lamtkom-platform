@@ -231,7 +231,7 @@ function TeamCard({
           </div>
 
           <div className="min-w-0">
-            <div className="text-[10px] font-bold text-white/55">لوحة الفريق</div>
+            <div className="text-[10px] font-bold text-white/55">لوحة فريق</div>
             <div
               className={`truncate font-black text-white ${
                 compact ? "text-base" : "text-xl"
@@ -397,7 +397,7 @@ function QuestionCell({
         <div
           className={[
             "font-black tracking-tight",
-            compact ? "text-[1.2rem] md:text-[1.3rem]" : "text-[1.8rem] md:text-[2rem]",
+            compact ? "text-[0.95rem] md:text-[1.15rem]" : "text-[1.65rem] md:text-[1.75rem]",
           ].join(" ")}
         >
           {points}
@@ -605,7 +605,7 @@ export default function GameBoardClient({
           >
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="text-[10px] font-black tracking-[0.18em] text-cyan-300/90">
+                <div className="text-[10px] font-black tracking-[0.55em] text-cyan-300/90">
                   لوحة اللعبة
                 </div>
                 <h1
@@ -618,8 +618,7 @@ export default function GameBoardClient({
                 </h1>
                 {!compactLandscape ? (
                   <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
-                    اختر السؤال التالي وراقب النتيجة لحظة بلحظة ضمن واجهة مهيأة
-                    للعرض والهواتف.
+                   قم باختيار الاسئلة بالترتيب من الاسفل الى حين انتهاء جميع الاسئلة وظهور اسم الفريق الفائز.
                   </p>
                 ) : null}
               </div>

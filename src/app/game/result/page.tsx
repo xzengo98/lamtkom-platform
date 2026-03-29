@@ -233,7 +233,7 @@ export default async function GameResultPage({
             </h1>
 
             <p className="mt-3 text-sm text-white/70 md:text-base">
-              تم حفظ النتيجة النهائية بنجاح، وهذه هي لوحة الفوز الختامية.
+             انتهت اللعبة وهذا هو الفريق الفائز : 
             </p>
 
             <div className="mt-5 flex justify-center">
