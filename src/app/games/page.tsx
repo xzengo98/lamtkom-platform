@@ -41,7 +41,7 @@ const gameCards: GameCardItem[] = [
     title: "قريبًا",
     subtitle: "ألعاب أخرى",
     description:
-      "مكان مخصص للألعاب القادمة داخل الموقع. سنضيف هنا ألعابًا جديدة لاحقًا بنفس جودة التصميم والتجربة.",
+      "مكان مخصص للألعاب القادمة داخل الموقع. سيتم اضافة هنا ألعابًا جديدة لاحقًا بنفس جودة التصميم والتجربة.",
     href: "#",
     image: "https://i.top4top.io/p_3738ncix61.png",
     active: false,
@@ -300,7 +300,7 @@ export default function GamesPage() {
                 <div className="mb-2 inline-flex rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-2 text-emerald-100">
                   <QuizIcon className="h-4 w-4" />
                 </div>
-                <div className="text-2xl font-black text-white">مرتب</div>
+                <div className="text-2xl font-black text-white">انيق</div>
                 <div className="mt-1 text-xs font-bold text-white/55">
                   تجربة واضحة
                 </div>
