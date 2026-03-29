@@ -46,6 +46,7 @@ type Props = {
 const QUESTION_TIMER_SECONDS = 60;
 const TEAM_BLUE_AVATAR = "https://k.top4top.io/p_3739o1dbh1.png";
 const TEAM_ORANGE_AVATAR = "https://l.top4top.io/p_3739qbt1f2.png";
+const NONE_AVATAR = "https://www.svgrepo.com/show/361654/value-none.svg";
 
 function normalizeBoardState(
   raw: Record<string, unknown> | null | undefined,
@@ -268,42 +269,45 @@ export default function QuestionPageClient({
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-3 py-3 md:px-6 md:py-6">
         <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(90deg,rgba(8,37,66,0.96)_0%,rgba(10,17,40,0.96)_50%,rgba(54,24,10,0.96)_100%)] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-            <div className="flex items-center gap-3 rounded-[1rem] border border-cyan-300/15 bg-cyan-400/5 p-3">
-              <img
-                src={TEAM_BLUE_AVATAR}
-                alt={teamOne}
-                className="h-10 w-10 rounded-full border border-white/10 object-cover"
-              />
-              <div className="min-w-0">
-                <div className="truncate text-sm font-black text-cyan-100">
-                  {teamOne}
-                </div>
-              </div>
-            </div>
+  {/* البرتقالي يسار */}
+  <div className="flex items-center gap-3 rounded-[1rem] border border-orange-300/15 bg-orange-400/5 p-3">
+    <img
+      src={TEAM_ORANGE_AVATAR}
+      alt={teamTwo}
+      className="h-10 w-10 rounded-full border border-white/10 object-cover"
+    />
+    <div className="min-w-0">
+      <div className="truncate text-sm font-black text-orange-100">
+        {teamTwo}
+      </div>
+    </div>
+  </div>
 
-            <div className="mx-auto flex min-w-[110px] flex-col items-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.22)]">
-              <div className="text-[11px] font-black text-white/70">المؤقت</div>
-              <div className="text-3xl font-black text-amber-200">
-                {Math.ceil(boardState.timeLeft)}
-              </div>
-              <div className="mt-1 text-[11px] font-black text-white/70">
-                {activeTurnName}
-              </div>
-            </div>
+  {/* المؤقت في الوسط */}
+  <div className="mx-auto flex min-w-[110px] flex-col items-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-3 shadow-[0_10px_25px_rgba(0,0,0,0.22)]">
+    <div className="text-[11px] font-black text-white/70">المؤقت</div>
+    <div className="text-3xl font-black text-amber-200">
+      {Math.ceil(boardState.timeLeft)}
+    </div>
+    <div className="mt-1 text-[11px] font-black text-white/70">
+      {activeTurnName}
+    </div>
+  </div>
 
-            <div className="flex items-center justify-end gap-3 rounded-[1rem] border border-orange-300/15 bg-orange-400/5 p-3">
-              <div className="min-w-0 text-right">
-                <div className="truncate text-sm font-black text-orange-100">
-                  {teamTwo}
-                </div>
-              </div>
-              <img
-                src={TEAM_ORANGE_AVATAR}
-                alt={teamTwo}
-                className="h-10 w-10 rounded-full border border-white/10 object-cover"
-              />
-            </div>
-          </div>
+  {/* الأزرق يمين */}
+  <div className="flex items-center justify-end gap-3 rounded-[1rem] border border-cyan-300/15 bg-cyan-400/5 p-3">
+    <div className="min-w-0 text-right">
+      <div className="truncate text-sm font-black text-cyan-100">
+        {teamOne}
+      </div>
+    </div>
+    <img
+      src={TEAM_BLUE_AVATAR}
+      alt={teamOne}
+      className="h-10 w-10 rounded-full border border-white/10 object-cover"
+    />
+  </div>
+</div>
 
           {!showAnswer && !showWinnerPicker ? (
             <div className="mt-4 flex items-center justify-center gap-2">
@@ -381,60 +385,67 @@ export default function QuestionPageClient({
               <RichContent html={question.answer_text} />
             </div>
           ) : (
-            <div>
-              <div className="mb-5 text-center">
-                <h3 className="text-2xl font-black text-white md:text-3xl">
-                  أي فريق جاوب صح؟
-                </h3>
-              </div>
+            
+<div>
+  <div className="mb-5 text-center">
+    <h3 className="text-2xl font-black text-white md:text-3xl">
+      أي فريق جاوب صح؟
+    </h3>
+  </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => handleAwardPoints("teamOne")}
-                  disabled={modalBusy}
-                  className="rounded-[1.35rem] border border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(34,211,238,0.08)] transition hover:-translate-y-0.5 hover:bg-cyan-400/10 disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={TEAM_BLUE_AVATAR}
-                      alt={teamOne}
-                      className="h-16 w-16 rounded-full border border-white/10 object-cover"
-                    />
-                    <div className="text-right">
-                      <div className="text-2xl font-black">{teamOne}</div>
-                    </div>
-                  </div>
-                </button>
+  <div className="grid gap-4 md:grid-cols-3">
+    {/* الفريق الأزرق */}
+    <button
+      type="button"
+      onClick={() => handleAwardPoints("teamOne")}
+      disabled={modalBusy}
+      className="rounded-[1.35rem] border border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(34,211,238,0.08)] transition hover:-translate-y-0.5 hover:bg-cyan-400/10 disabled:opacity-50"
+    >
+      <div className="flex flex-col items-center gap-3 text-center">
+        <img
+          src={TEAM_BLUE_AVATAR}
+          alt={teamOne}
+          className="h-16 w-16 rounded-full border border-white/10 object-cover"
+        />
+        <div className="text-xl font-black">{teamOne}</div>
+      </div>
+    </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleAwardPoints("teamTwo")}
-                  disabled={modalBusy}
-                  className="rounded-[1.35rem] border border-orange-300/20 bg-[linear-gradient(180deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(251,146,60,0.08)] transition hover:-translate-y-0.5 hover:bg-orange-400/10 disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={TEAM_ORANGE_AVATAR}
-                      alt={teamTwo}
-                      className="h-16 w-16 rounded-full border border-white/10 object-cover"
-                    />
-                    <div className="text-right">
-                      <div className="text-2xl font-black">{teamTwo}</div>
-                    </div>
-                  </div>
-                </button>
-              </div>
+    {/* لا أحد */}
+    <button
+      type="button"
+      onClick={() => handleAwardPoints("none")}
+      disabled={modalBusy}
+      className="rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(255,255,255,0.04)] transition hover:-translate-y-0.5 hover:bg-white/10 disabled:opacity-50"
+    >
+      <div className="flex flex-col items-center gap-3 text-center">
+        <img
+          src={NONE_AVATAR}
+          alt="لا أحد"
+          className="h-16 w-16 rounded-full border border-white/10 bg-white object-cover p-2"
+        />
+        <div className="text-xl font-black">لا أحد</div>
+      </div>
+    </button>
 
-              <button
-                type="button"
-                onClick={() => handleAwardPoints("none")}
-                disabled={modalBusy}
-                className="mx-auto mt-4 block w-full max-w-md rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
-              >
-                ولا أحد
-              </button>
-            </div>
+    {/* الفريق البرتقالي */}
+    <button
+      type="button"
+      onClick={() => handleAwardPoints("teamTwo")}
+      disabled={modalBusy}
+      className="rounded-[1.35rem] border border-orange-300/20 bg-[linear-gradient(180deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(251,146,60,0.08)] transition hover:-translate-y-0.5 hover:bg-orange-400/10 disabled:opacity-50"
+    >
+      <div className="flex flex-col items-center gap-3 text-center">
+        <img
+          src={TEAM_ORANGE_AVATAR}
+          alt={teamTwo}
+          className="h-16 w-16 rounded-full border border-white/10 object-cover"
+        />
+        <div className="text-xl font-black">{teamTwo}</div>
+      </div>
+    </button>
+  </div>
+</div>
           )}
         </div>
 
