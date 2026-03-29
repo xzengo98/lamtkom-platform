@@ -271,6 +271,15 @@ export async function startCodenamesGame(formData: FormData) {
     throw new Error(insertCardsError.message);
   }
 
+  const { error: deleteTurnsError } = await supabase
+    .from("codenames_turns")
+    .delete()
+    .eq("room_id", room.id);
+
+  if (deleteTurnsError) {
+    throw new Error(deleteTurnsError.message);
+  }
+
   const { error: roomUpdateError } = await supabase
     .from("codenames_rooms")
     .update({
@@ -281,21 +290,11 @@ export async function startCodenamesGame(formData: FormData) {
       blue_remaining: startingTeam === "blue" ? 9 : 8,
       winner_team: null,
       assassin_revealed: false,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", room.id);
 
   if (roomUpdateError) {
     throw new Error(roomUpdateError.message);
-  }
-
-  const { error: deleteTurnsError } = await supabase
-    .from("codenames_turns")
-    .delete()
-    .eq("room_id", room.id);
-
-  if (deleteTurnsError) {
-    throw new Error(deleteTurnsError.message);
   }
 
   revalidatePath(`/games/codenames/room/${roomCode}`);
