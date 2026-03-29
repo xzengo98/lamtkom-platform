@@ -236,6 +236,48 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function TeamPortrait({
+  teamName,
+  avatarUrl,
+  accent,
+  compact = false,
+}: {
+  teamName: string;
+  avatarUrl: string;
+  accent: "blue" | "orange";
+  compact?: boolean;
+}) {
+  const palette =
+    accent === "orange"
+      ? "border-orange-300/20 bg-orange-400/10 text-orange-100 shadow-[0_0_30px_rgba(251,146,60,0.16)]"
+      : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 shadow-[0_0_30px_rgba(34,211,238,0.14)]";
+
+  return (
+    <div
+      className={[
+        "rounded-[1.4rem] border p-3 text-center",
+        palette,
+        compact ? "w-[86px]" : "w-[110px] md:w-[130px]",
+      ].join(" ")}
+    >
+      <img
+        src={avatarUrl}
+        alt={teamName}
+        className={`mx-auto rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)] ${
+          compact ? "h-14 w-14" : "h-20 w-20 md:h-24 md:w-24"
+        }`}
+      />
+      <div
+        className={`mt-3 truncate font-black ${
+          compact ? "text-[11px]" : "text-sm md:text-base"
+        }`}
+      >
+        {teamName}
+      </div>
+    </div>
+  );
+}
+
 function TeamCard({
   teamName,
   score,
@@ -468,7 +510,7 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
-      <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
+      <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
         <div className="shrink-0 border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -539,32 +581,96 @@ function QuestionOverlay({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
           {!showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.question_text} large />
+            <div className="grid items-start gap-5 md:grid-cols-[130px_minmax(0,1fr)_130px]">
+              <div className="hidden md:flex justify-center">
+                <TeamPortrait
+                  teamName={teamOne}
+                  avatarUrl={TEAM_BLUE_AVATAR}
+                  accent="blue"
+                />
+              </div>
+
+              <div>
+                <RichContent html={openQuestion.question_text} large />
+              </div>
+
+              <div className="hidden md:flex justify-center">
+                <TeamPortrait
+                  teamName={teamTwo}
+                  avatarUrl={TEAM_ORANGE_AVATAR}
+                  accent="orange"
+                />
+              </div>
+            </div>
           ) : showAnswer && !showWinnerPicker ? (
-            <RichContent html={openQuestion.answer_text} large />
+            <div className="grid items-start gap-5 md:grid-cols-[130px_minmax(0,1fr)_130px]">
+              <div className="hidden md:flex justify-center">
+                <TeamPortrait
+                  teamName={teamOne}
+                  avatarUrl={TEAM_BLUE_AVATAR}
+                  accent="blue"
+                />
+              </div>
+
+              <div>
+                <RichContent html={openQuestion.answer_text} large />
+              </div>
+
+              <div className="hidden md:flex justify-center">
+                <TeamPortrait
+                  teamName={teamTwo}
+                  avatarUrl={TEAM_ORANGE_AVATAR}
+                  accent="orange"
+                />
+              </div>
+            </div>
           ) : (
             <div>
               <h3 className="mb-5 text-center text-2xl font-black text-white md:text-3xl">
                 أي فريق جاوب صح؟
               </h3>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
+                  className="rounded-[1.3rem] border border-cyan-300/20 bg-cyan-400/10 p-4 text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
                 >
-                  {teamOne}
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={TEAM_BLUE_AVATAR}
+                      alt={teamOne}
+                      className="h-16 w-16 rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+                    />
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-cyan-100/75">
+                        الفريق
+                      </div>
+                      <div className="text-2xl font-black">{teamOne}</div>
+                    </div>
+                  </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.2rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
+                  className="rounded-[1.3rem] border border-orange-300/20 bg-orange-400/10 p-4 text-white transition hover:bg-orange-400/15 disabled:opacity-50"
                 >
-                  {teamTwo}
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={TEAM_ORANGE_AVATAR}
+                      alt={teamTwo}
+                      className="h-16 w-16 rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+                    />
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-orange-100/75">
+                        الفريق
+                      </div>
+                      <div className="text-2xl font-black">{teamTwo}</div>
+                    </div>
+                  </div>
                 </button>
               </div>
 
@@ -816,10 +922,15 @@ export default function GameBoardClient({
   }, [categories, questions]);
 
   const usedCount = boardState.usedQuestionIds.length;
-  const totalBoardQuestions = boardColumns.reduce((sum, column) => {
-    return sum + column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0);
-  }, 0);
-  const remainingCount = Math.max(totalBoardQuestions - usedCount, 0);
+  const remainingCount = Math.max(
+    boardColumns.reduce(
+      (sum, column) =>
+        sum +
+        column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
+      0,
+    ) - usedCount,
+    0,
+  );
 
   const teamOneLeading = boardState.teamOneScore > boardState.teamTwoScore;
   const teamTwoLeading = boardState.teamTwoScore > boardState.teamOneScore;
@@ -961,7 +1072,7 @@ export default function GameBoardClient({
       <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
         <div
           className={[
-            "rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
+            "relative rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
             compactLandscape ? "p-2.5" : "p-3 md:p-4",
           ].join(" ")}
         >
