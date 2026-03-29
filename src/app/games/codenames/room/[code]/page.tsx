@@ -3,15 +3,15 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { updatePlayerRole, updatePlayerTeam } from "./actions";
 
 type PageProps = {
-  params: { code: string };
-  searchParams: { name?: string };
+  params: Promise<{ code: string }>;
+  searchParams?: Promise<{ name?: string }>;
 };
 
 type RoomRow = {
   id: string;
   room_code: string;
-  status: string;
-  created_at: string;
+  status: string | null;
+  created_at: string | null;
 };
 
 type PlayerRow = {
@@ -21,70 +21,118 @@ type PlayerRow = {
   user_id: string | null;
   team: string | null;
   role: string | null;
-  is_host: boolean;
-  joined_at: string;
+  is_host: boolean | null;
+  joined_at: string | null;
 };
 
-export default async function CodenamesRoomPage({
-  params,
-}: PageProps) {
+function getPlayerDisplayName(player: PlayerRow) {
+  return player.guest_name?.trim() || "لاعب";
+}
+
+function getRoleLabel(role: string | null) {
+  if (role === "spymaster") return "Spymaster";
+  return "Operative";
+}
+
+export default async function CodenamesRoomPage({ params }: PageProps) {
   const supabase = await getSupabaseServerClient();
-  const code = params.code;
+  const { code } = await params;
   const roomCode = code.toUpperCase();
 
-  const { data: room, error: roomError } = await supabase
+  const { data: roomData, error: roomError } = await supabase
     .from("codenames_rooms")
-    .select("*")
+    .select("id, room_code, status, created_at")
     .eq("room_code", roomCode)
     .maybeSingle();
 
   if (roomError) {
-    throw new Error(roomError.message);
+    return (
+      <div className="mx-auto max-w-4xl p-4 md:p-6">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+          <h1 className="text-xl font-bold">تعذر تحميل الغرفة</h1>
+          <p className="mt-2 text-sm">{roomError.message}</p>
+        </div>
+      </div>
+    );
   }
 
-  if (!room) {
+  if (!roomData) {
     notFound();
   }
 
-  const typedRoom = room as RoomRow;
+  const room = roomData as RoomRow;
 
   const { data: playersData, error: playersError } = await supabase
     .from("codenames_players")
-    .select("*")
-    .eq("room_id", typedRoom.id)
+    .select("id, room_id, guest_name, user_id, team, role, is_host, joined_at")
+    .eq("room_id", room.id)
     .order("joined_at", { ascending: true });
 
   if (playersError) {
-    throw new Error(playersError.message);
+    return (
+      <div className="mx-auto max-w-4xl p-4 md:p-6">
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+          <h1 className="text-xl font-bold">تعذر تحميل اللاعبين</h1>
+          <p className="mt-2 text-sm">{playersError.message}</p>
+        </div>
+      </div>
+    );
   }
 
-  const players = (playersData ?? []) as PlayerRow[];
+  const players = ((playersData ?? []) as PlayerRow[]).map((player) => ({
+    ...player,
+    team: player.team?.toLowerCase() ?? null,
+    role: player.role?.toLowerCase() ?? "operative",
+  }));
 
   const redPlayers = players.filter((player) => player.team === "red");
   const bluePlayers = players.filter((player) => player.team === "blue");
-  const unassignedPlayers = players.filter((player) => !player.team);
+  const unassignedPlayers = players.filter(
+    (player) => player.team !== "red" && player.team !== "blue"
+  );
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">غرفة Codenames</h1>
-            <p className="mt-2 text-sm text-white/70">
-              رمز الغرفة:
-              <span className="ml-2 rounded-xl bg-black/30 px-3 py-1 font-mono text-white">
-                {typedRoom.room_code}
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/70">
+              <span>رمز الغرفة</span>
+              <span className="rounded-xl bg-black/30 px-3 py-1 font-mono text-white">
+                {room.room_code}
               </span>
-            </p>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/70">
-            الحالة: {typedRoom.status}
+            الحالة: {room.status || "waiting"}
           </div>
         </div>
       </div>
 
-      {!!unassignedPlayers.length && (
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+          <div className="text-sm text-white/60">إجمالي اللاعبين</div>
+          <div className="mt-2 text-2xl font-bold text-white">{players.length}</div>
+        </div>
+
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5">
+          <div className="text-sm text-red-100/80">الفريق الأحمر</div>
+          <div className="mt-2 text-2xl font-bold text-red-100">
+            {redPlayers.length}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-5">
+          <div className="text-sm text-blue-100/80">الفريق الأزرق</div>
+          <div className="mt-2 text-2xl font-bold text-blue-100">
+            {bluePlayers.length}
+          </div>
+        </div>
+      </div>
+
+      {unassignedPlayers.length > 0 && (
         <div className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-5">
           <h2 className="text-lg font-bold text-yellow-100">لاعبون بدون فريق</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -94,12 +142,13 @@ export default async function CodenamesRoomPage({
                 className="rounded-2xl border border-white/10 bg-black/20 p-4"
               >
                 <div className="font-semibold text-white">
-                  {player.guest_name || "لاعب"}
+                  {getPlayerDisplayName(player)}
                 </div>
+
                 <div className="mt-3 flex flex-wrap gap-2">
                   <form action={updatePlayerTeam}>
                     <input type="hidden" name="player_id" value={player.id} />
-                    <input type="hidden" name="room_code" value={typedRoom.room_code} />
+                    <input type="hidden" name="room_code" value={room.room_code} />
                     <input type="hidden" name="team" value="red" />
                     <button
                       type="submit"
@@ -111,7 +160,7 @@ export default async function CodenamesRoomPage({
 
                   <form action={updatePlayerTeam}>
                     <input type="hidden" name="player_id" value={player.id} />
-                    <input type="hidden" name="room_code" value={typedRoom.room_code} />
+                    <input type="hidden" name="room_code" value={room.room_code} />
                     <input type="hidden" name="team" value="blue" />
                     <button
                       type="submit"
@@ -128,39 +177,65 @@ export default async function CodenamesRoomPage({
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
-          <h2 className="text-xl font-bold text-red-100">الفريق الأحمر</h2>
+        <section className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-red-100">الفريق الأحمر</h2>
+            <span className="rounded-xl border border-red-300/20 px-3 py-1 text-sm text-red-100/80">
+              {redPlayers.length} لاعب
+            </span>
+          </div>
+
           <div className="mt-4 space-y-3">
-            {redPlayers.length ? (
+            {redPlayers.length > 0 ? (
               redPlayers.map((player) => (
                 <div
                   key={player.id}
                   className="rounded-2xl border border-white/10 bg-black/20 p-4"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-col gap-3">
                     <div>
                       <div className="font-semibold text-white">
-                        {player.guest_name || "لاعب"}
+                        {getPlayerDisplayName(player)}
                       </div>
                       <div className="mt-1 text-sm text-white/60">
-                        {player.role === "spymaster" ? "Spymaster" : "Operative"}
+                        {getRoleLabel(player.role)}
                         {player.is_host ? " • Host" : ""}
                       </div>
                     </div>
 
-                    <form action={updatePlayerRole}>
-                      <input type="hidden" name="player_id" value={player.id} />
-                      <input type="hidden" name="room_code" value={typedRoom.room_code} />
-                      <select
-                        name="role"
-                        defaultValue={player.role ?? "operative"}
-                        onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                        className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
-                      >
-                        <option value="spymaster">Spymaster</option>
-                        <option value="operative">Operative</option>
-                      </select>
-                    </form>
+                    <div className="flex flex-wrap gap-2">
+                      <form action={updatePlayerRole}>
+                        <input type="hidden" name="player_id" value={player.id} />
+                        <input type="hidden" name="room_code" value={room.room_code} />
+                        <input type="hidden" name="role" value="spymaster" />
+                        <button
+                          type="submit"
+                          className={`rounded-xl px-4 py-2 text-sm ${
+                            player.role === "spymaster"
+                              ? "bg-white text-black"
+                              : "border border-white/10 text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Spymaster
+                        </button>
+                      </form>
+
+                      <form action={updatePlayerRole}>
+                        <input type="hidden" name="player_id" value={player.id} />
+                        <input type="hidden" name="room_code" value={room.room_code} />
+                        <input type="hidden" name="role" value="operative" />
+                        <button
+                          type="submit"
+                          className={`rounded-xl px-4 py-2 text-sm ${
+                            player.role === "operative"
+                              ? "bg-white text-black"
+                              : "border border-white/10 text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Operative
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               ))
@@ -170,41 +245,67 @@ export default async function CodenamesRoomPage({
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5">
-          <h2 className="text-xl font-bold text-blue-100">الفريق الأزرق</h2>
+        <section className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-blue-100">الفريق الأزرق</h2>
+            <span className="rounded-xl border border-blue-300/20 px-3 py-1 text-sm text-blue-100/80">
+              {bluePlayers.length} لاعب
+            </span>
+          </div>
+
           <div className="mt-4 space-y-3">
-            {bluePlayers.length ? (
+            {bluePlayers.length > 0 ? (
               bluePlayers.map((player) => (
                 <div
                   key={player.id}
                   className="rounded-2xl border border-white/10 bg-black/20 p-4"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-col gap-3">
                     <div>
                       <div className="font-semibold text-white">
-                        {player.guest_name || "لاعب"}
+                        {getPlayerDisplayName(player)}
                       </div>
                       <div className="mt-1 text-sm text-white/60">
-                        {player.role === "spymaster" ? "Spymaster" : "Operative"}
+                        {getRoleLabel(player.role)}
                         {player.is_host ? " • Host" : ""}
                       </div>
                     </div>
 
-                    <form action={updatePlayerRole}>
-                      <input type="hidden" name="player_id" value={player.id} />
-                      <input type="hidden" name="room_code" value={typedRoom.room_code} />
-                      <select
-                        name="role"
-                        defaultValue={player.role ?? "operative"}
-                        onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                        className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
-                      >
-                        <option value="spymaster">Spymaster</option>
-                        <option value="operative">Operative</option>
-                      </select>
-                    </form>
+                    <div className="flex flex-wrap gap-2">
+                      <form action={updatePlayerRole}>
+                        <input type="hidden" name="player_id" value={player.id} />
+                        <input type="hidden" name="room_code" value={room.room_code} />
+                        <input type="hidden" name="role" value="spymaster" />
+                        <button
+                          type="submit"
+                          className={`rounded-xl px-4 py-2 text-sm ${
+                            player.role === "spymaster"
+                              ? "bg-white text-black"
+                              : "border border-white/10 text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Spymaster
+                        </button>
+                      </form>
+
+                      <form action={updatePlayerRole}>
+                        <input type="hidden" name="player_id" value={player.id} />
+                        <input type="hidden" name="room_code" value={room.room_code} />
+                        <input type="hidden" name="role" value="operative" />
+                        <button
+                          type="submit"
+                          className={`rounded-xl px-4 py-2 text-sm ${
+                            player.role === "operative"
+                              ? "bg-white text-black"
+                              : "border border-white/10 text-white hover:bg-white/5"
+                          }`}
+                        >
+                          Operative
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               ))
@@ -214,14 +315,14 @@ export default async function CodenamesRoomPage({
               </div>
             )}
           </div>
-        </div>
+        </section>
       </div>
 
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <h2 className="text-xl font-bold text-white">الخطوة التالية</h2>
+        <h2 className="text-xl font-bold text-white">المرحلة التالية</h2>
         <p className="mt-2 text-sm text-white/70">
           بعد التأكد أن إنشاء الغرفة والانضمام وتوزيع الفرق يعملون، سنضيف زر بدء
-          اللعبة وتوليد بطاقات 5×5 وربطها بالجولة.
+          اللعبة وتوليد لوحة الكلمات 5×5.
         </p>
       </div>
     </div>
