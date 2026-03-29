@@ -107,11 +107,13 @@ export default async function CodenamesRoomPage({
     );
   }
 
+  const safeCurrentPlayer = currentPlayer as PlayerRow;
+
   if (room.status === "active") {
-    redirect(`/games/codenames/board/${room.room_code}?player_id=${currentPlayer.id}`);
+    redirect(`/games/codenames/board/${room.room_code}?player_id=${safeCurrentPlayer.id}`);
   }
 
-  const isHost = Boolean(currentPlayer.is_host);
+  const isHost = Boolean(safeCurrentPlayer.is_host);
 
   const redPlayers = players.filter((player) => player.team === "red");
   const bluePlayers = players.filter((player) => player.team === "blue");
@@ -121,12 +123,12 @@ export default async function CodenamesRoomPage({
 
   function canManagePlayer(player: PlayerRow) {
     if (isHost) return true;
-    return currentPlayer.id === player.id;
+    return safeCurrentPlayer.id === player.id;
   }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-      <RoomStatusWatcher roomCode={room.room_code} playerId={currentPlayer.id} />
+      <RoomStatusWatcher roomCode={room.room_code} playerId={safeCurrentPlayer.id} />
 
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -141,9 +143,9 @@ export default async function CodenamesRoomPage({
             <div className="mt-2 text-sm text-white/60">
               أنت داخل الغرفة باسم:
               <span className="mx-2 font-semibold text-white">
-                {getPlayerDisplayName(currentPlayer)}
+                {getPlayerDisplayName(safeCurrentPlayer)}
               </span>
-              {isHost ? "• Host" : ""}
+              {isHost ? " • Host" : ""}
             </div>
           </div>
 
@@ -155,7 +157,11 @@ export default async function CodenamesRoomPage({
             {isHost && (
               <form action={startCodenamesGame}>
                 <input type="hidden" name="room_code" value={room.room_code} />
-                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                <input
+                  type="hidden"
+                  name="actor_player_id"
+                  value={safeCurrentPlayer.id}
+                />
                 <button
                   type="submit"
                   className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-500"
@@ -213,7 +219,7 @@ export default async function CodenamesRoomPage({
                         <input
                           type="hidden"
                           name="actor_player_id"
-                          value={currentPlayer.id}
+                          value={safeCurrentPlayer.id}
                         />
                         <input type="hidden" name="team" value="red" />
                         <button
@@ -230,7 +236,7 @@ export default async function CodenamesRoomPage({
                         <input
                           type="hidden"
                           name="actor_player_id"
-                          value={currentPlayer.id}
+                          value={safeCurrentPlayer.id}
                         />
                         <input type="hidden" name="team" value="blue" />
                         <button
@@ -291,7 +297,7 @@ export default async function CodenamesRoomPage({
                             <input
                               type="hidden"
                               name="actor_player_id"
-                              value={currentPlayer.id}
+                              value={safeCurrentPlayer.id}
                             />
                             <input type="hidden" name="role" value="spymaster" />
                             <button
@@ -312,7 +318,7 @@ export default async function CodenamesRoomPage({
                             <input
                               type="hidden"
                               name="actor_player_id"
-                              value={currentPlayer.id}
+                              value={safeCurrentPlayer.id}
                             />
                             <input type="hidden" name="role" value="operative" />
                             <button
@@ -328,7 +334,9 @@ export default async function CodenamesRoomPage({
                           </form>
                         </div>
                       ) : (
-                        <div className="text-sm text-white/50">لا يمكنك تعديل هذا اللاعب</div>
+                        <div className="text-sm text-white/50">
+                          لا يمكنك تعديل هذا اللاعب
+                        </div>
                       )}
                     </div>
                   </div>
@@ -379,7 +387,7 @@ export default async function CodenamesRoomPage({
                             <input
                               type="hidden"
                               name="actor_player_id"
-                              value={currentPlayer.id}
+                              value={safeCurrentPlayer.id}
                             />
                             <input type="hidden" name="role" value="spymaster" />
                             <button
@@ -400,7 +408,7 @@ export default async function CodenamesRoomPage({
                             <input
                               type="hidden"
                               name="actor_player_id"
-                              value={currentPlayer.id}
+                              value={safeCurrentPlayer.id}
                             />
                             <input type="hidden" name="role" value="operative" />
                             <button
@@ -416,7 +424,9 @@ export default async function CodenamesRoomPage({
                           </form>
                         </div>
                       ) : (
-                        <div className="text-sm text-white/50">لا يمكنك تعديل هذا اللاعب</div>
+                        <div className="text-sm text-white/50">
+                          لا يمكنك تعديل هذا اللاعب
+                        </div>
                       )}
                     </div>
                   </div>
