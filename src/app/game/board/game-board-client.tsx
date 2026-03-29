@@ -595,6 +595,7 @@ function QuestionCell({
   );
 }
 
+
 function QuestionOverlay({
   openQuestion,
   teamOne,
@@ -646,162 +647,121 @@ function QuestionOverlay({
   const compact = isLandscapePhone;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/92 p-2 md:p-6">
       <div
         className={[
-          "flex w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]",
-          compact ? "h-[96vh]" : "h-[92vh]",
+          "flex w-full max-w-6xl flex-col overflow-hidden rounded-[1.9rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_24%),linear-gradient(180deg,#071126_0%,#040b18_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]",
+          compact ? "h-[96svh]" : "h-[92vh]",
         ].join(" ")}
       >
-        <div
-          className={[
-            "shrink-0 border-b border-white/10",
-            compact ? "px-3 py-3" : "px-6 py-5",
-          ].join(" ")}
-        >
-          <div className="flex flex-col gap-3">
-            {!compact ? (
-              <div className="grid items-start gap-3 md:grid-cols-[140px_minmax(0,1fr)_140px]">
-                <div className="flex justify-start">
-                  <TeamPortrait
-                    teamName={teamOne}
-                    avatarUrl={TEAM_BLUE_AVATAR}
-                    accent="blue"
-                    compact
-                  />
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                      {openQuestion.categoryName}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-                      {openQuestion.points} نقطة
-                    </span>
-                    {toleranceVisible ? (
-                      <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
-                        السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                        {openQuestion.year_tolerance_after ?? 0}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-3 text-center">
-                    <h2 className="text-5xl font-black text-white">
-                      {!showAnswer && !showWinnerPicker
-                        ? "السؤال"
-                        : showAnswer && !showWinnerPicker
-                          ? "الإجابة الصحيحة"
-                          : "تحديد الفريق الفائز"}
-                    </h2>
+        <div className={["shrink-0 border-b border-white/10", compact ? "p-3" : "p-5"].join(" ")}>
+          <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(90deg,rgba(8,37,66,0.96)_0%,rgba(10,17,40,0.96)_35%,rgba(28,14,34,0.96)_65%,rgba(54,24,10,0.96)_100%)] p-3 shadow-[0_20px_50px_rgba(0,0,0,0.28)] md:p-4">
+            <div className={compact ? "grid grid-cols-[1fr_auto_1fr] items-center gap-2" : "grid items-center gap-3 md:grid-cols-[1fr_auto_1fr]"}>
+              <div className="flex items-center gap-2 rounded-[1.2rem] border border-cyan-300/15 bg-cyan-400/5 p-2 md:gap-3 md:p-3">
+                <img
+                  src={TEAM_BLUE_AVATAR}
+                  alt={teamOne}
+                  className={compact ? "h-10 w-10 rounded-full border border-white/10 object-cover" : "h-12 w-12 rounded-full border border-white/10 object-cover"}
+                />
+                <div className="min-w-0">
+                  <div className={compact ? "truncate text-[11px] font-black text-cyan-100" : "truncate text-sm font-black text-cyan-100 md:text-base"}>
+                    {teamOne}
                   </div>
                 </div>
-
-                <div className="flex justify-end">
-                  <TeamPortrait
-                    teamName={teamTwo}
-                    avatarUrl={TEAM_ORANGE_AVATAR}
-                    accent="orange"
-                    compact
-                  />
-                </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                    {openQuestion.categoryName}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-                    {openQuestion.points} نقطة
+
+              <div className="mx-auto flex min-w-[120px] flex-col items-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.22)] md:min-w-[160px] md:px-5">
+                <div className="mb-1 flex items-center gap-1.5 text-white/75">
+                  <TimerIcon className="h-4 w-4" />
+                  <span className={compact ? "text-[10px] font-black" : "text-[11px] font-black md:text-xs"}>
+                    المؤقت
                   </span>
                 </div>
-
-                <h2 className="text-3xl font-black text-white">
-                  {!showAnswer && !showWinnerPicker
-                    ? "السؤال"
-                    : showAnswer && !showWinnerPicker
-                      ? "الإجابة الصحيحة"
-                      : "تحديد الفريق الفائز"}
-                </h2>
-
-                <div className="flex items-center justify-center gap-3">
-                  <TeamMini
-                    teamName={teamOne}
-                    avatarUrl={TEAM_BLUE_AVATAR}
-                    accent="blue"
-                  />
-                  <TeamMini
-                    teamName={teamTwo}
-                    avatarUrl={TEAM_ORANGE_AVATAR}
-                    accent="orange"
-                  />
+                <div className={compact ? "text-xl font-black text-amber-200" : "text-3xl font-black text-amber-200"}>
+                  {Math.ceil(timeLeft)}
+                </div>
+                <div className={compact ? "mt-1 text-[10px] font-black text-white/70" : "mt-1 text-[11px] font-black text-white/70"}>
+                  الدور الحالي: {activeTurnName}
                 </div>
               </div>
-            )}
+
+              <div className="flex items-center justify-end gap-2 rounded-[1.2rem] border border-orange-300/15 bg-orange-400/5 p-2 md:gap-3 md:p-3">
+                <div className="min-w-0 text-right">
+                  <div className={compact ? "truncate text-[11px] font-black text-orange-100" : "truncate text-sm font-black text-orange-100 md:text-base"}>
+                    {teamTwo}
+                  </div>
+                </div>
+                <img
+                  src={TEAM_ORANGE_AVATAR}
+                  alt={teamTwo}
+                  className={compact ? "h-10 w-10 rounded-full border border-white/10 object-cover" : "h-12 w-12 rounded-full border border-white/10 object-cover"}
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-cyan-400 transition-[width]"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div
-                className={[
-                  "rounded-[1.1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,24,46,0.96)_0%,rgba(8,14,29,0.96)_100%)] shadow-[0_10px_24px_rgba(0,0,0,0.18)]",
-                  compact ? "p-2.5" : "p-3",
-                ].join(" ")}
-              >
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5 text-[11px] font-black text-white/70 md:text-xs">
-                    <TimerIcon className="h-3.5 w-3.5 text-cyan-300" />
-                    <span>المؤقت</span>
-                  </div>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={onToggleTimer}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-4 md:text-xs"
+                >
+                  <TimerIcon className="h-3.5 w-3.5" />
+                  <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
+                </button>
 
-                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-base font-black text-white md:text-lg">
-                    {formatCountdown(timeLeft)}
-                  </div>
-                </div>
-
-                <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-cyan-400 transition-[width]"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-
-                <div className="mt-2.5 flex flex-wrap justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onToggleTimer}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-4 md:text-xs"
-                  >
-                    <TimerIcon className="h-3.5 w-3.5" />
-                    <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onResetTimer}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 md:px-4 md:text-xs"
-                  >
-                    <SparkIcon className="h-3.5 w-3.5" />
-                    <span>إعادة المؤقت</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={onResetTimer}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 md:px-4 md:text-xs"
+                >
+                  <SparkIcon className="h-3.5 w-3.5" />
+                  <span>إعادة المؤقت</span>
+                </button>
               </div>
             ) : null}
           </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+              {openQuestion.categoryName}
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+              {openQuestion.points} نقطة
+            </span>
+            {toleranceVisible ? (
+              <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
+                السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                {openQuestion.year_tolerance_after ?? 0}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mt-3 text-center">
+            <h2 className={compact ? "text-3xl font-black text-white" : "text-5xl font-black text-white"}>
+              {!showAnswer && !showWinnerPicker
+                ? "السؤال"
+                : showAnswer && !showWinnerPicker
+                  ? "الإجابة الصحيحة"
+                  : "تحديد الفريق الفائز"}
+            </h2>
+          </div>
         </div>
 
-        <div
-          className={[
-            "min-h-0 flex-1 overflow-y-auto",
-            compact ? "px-3 py-3" : "px-6 py-6",
-          ].join(" ")}
-        >
+        <div className={["min-h-0 flex-1 overflow-y-auto", compact ? "px-3 py-3" : "px-6 py-6"].join(" ")}>
           {!showAnswer && !showWinnerPicker ? (
-            <div className="rounded-[1.5rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
+            <div className="rounded-[1.45rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
               <RichContent html={openQuestion.question_text} large compact={compact} />
             </div>
           ) : showAnswer && !showWinnerPicker ? (
-            <div className="rounded-[1.5rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
+            <div className="rounded-[1.45rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
               <div className="mb-4 flex items-center justify-center gap-2 text-sm font-black text-emerald-100">
                 <AnswerIcon className="h-4 w-4" />
                 <span>الإجابة الصحيحة</span>
@@ -877,16 +837,10 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div
-          className={[
-            "shrink-0 border-t border-white/10",
-            compact ? "px-3 py-3" : "px-6 py-4",
-          ].join(" ")}
-        >
+        <div className={["shrink-0 border-t border-white/10", compact ? "px-3 py-3" : "px-6 py-4"].join(" ")}>
           <div className="flex items-center justify-between gap-3">
             <div className="text-[11px] font-black text-white/55 md:text-sm">
-              الدور الحالي:{" "}
-              <span className="text-cyan-100">{activeTurnName}</span>
+              الدور الحالي: <span className="text-cyan-100">{activeTurnName}</span>
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
@@ -961,6 +915,7 @@ function QuestionOverlay({
     </div>
   );
 }
+
 
 function StatusPill({
   label,
