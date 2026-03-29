@@ -59,6 +59,14 @@ type CategoryColumn = {
 
 const QUESTION_TIMER_SECONDS = 60;
 
+/**
+ * ضع هنا روابط صور الفريقين لاحقًا
+ */
+const TEAM_BLUE_AVATAR =
+  "https://via.placeholder.com/160x160.png?text=BLUE+TEAM";
+const TEAM_ORANGE_AVATAR =
+  "https://via.placeholder.com/160x160.png?text=ORANGE+TEAM";
+
 const categoryVisuals: Record<
   string,
   {
@@ -150,14 +158,33 @@ function RichContent({
       className={[
         "max-w-none text-center text-white",
         large ? "text-xl md:text-3xl" : "text-base md:text-lg",
-        "[&_p]:my-0 [&_p]:mb-3 [&_p]:text-center [&_p]:leading-9 md:[&_p]:leading-10",
+        "[&_p]:my-0 [&_p]:mb-4 [&_p]:text-center [&_p]:leading-9 md:[&_p]:leading-10",
         "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
-        "[&_img]:mx-auto [&_img]:my-3 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[140px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-        "[&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
-        "[&_video]:mx-auto [&_video]:my-3 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
+        "[&_img]:mx-auto [&_img]:my-4 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[150px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "[&_iframe]:mx-auto [&_iframe]:my-4 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
+        "[&_video]:mx-auto [&_video]:my-4 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
       ].join(" ")}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
+  );
+}
+
+function TimerIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="13" r="8" />
+      <path d="M12 9v4l2.6 1.6" />
+      <path d="M9 3h6" />
+      <path d="M12 3v2" />
+    </svg>
   );
 }
 
@@ -178,14 +205,51 @@ function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function ScoreCard({
+function SparkIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
+    </svg>
+  );
+}
+
+function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="8" width="16" height="8" rx="3" />
+      <path d="M8 12h2" />
+      <path d="M9 11v2" />
+      <path d="M16.5 12h.01" />
+      <path d="M18.5 12h.01" />
+    </svg>
+  );
+}
+
+function TeamCard({
   teamName,
   score,
   isLeading,
   isTurn,
   onIncrease,
   onDecrease,
-  accent = "cyan",
+  accent,
+  avatarUrl,
   compact = false,
 }: {
   teamName: string;
@@ -194,95 +258,113 @@ function ScoreCard({
   isTurn: boolean;
   onIncrease: () => void;
   onDecrease: () => void;
-  accent?: "cyan" | "orange";
+  accent: "blue" | "orange";
+  avatarUrl: string;
   compact?: boolean;
 }) {
-  const classes =
+  const palette =
     accent === "orange"
       ? {
+          glow: "shadow-[0_0_0_1px_rgba(251,146,60,0.16),0_18px_50px_rgba(251,146,60,0.12)]",
+          card: "border-orange-300/20 bg-[linear-gradient(180deg,rgba(50,31,17,0.88)_0%,rgba(18,10,5,0.95)_100%)]",
           chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-          card: isTurn
-            ? "border-orange-300/30 bg-orange-400/10 shadow-[0_14px_40px_rgba(251,146,60,0.14)]"
-            : "border-white/10 bg-white/5",
           btn: "border-orange-300/20 bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
+          score: "text-orange-50",
+          scoreGlow: "drop-shadow-[0_0_18px_rgba(251,146,60,0.18)]",
         }
       : {
+          glow: "shadow-[0_0_0_1px_rgba(34,211,238,0.16),0_18px_50px_rgba(34,211,238,0.10)]",
+          card: "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(8,41,63,0.88)_0%,rgba(4,15,28,0.96)_100%)]",
           chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-          card: isTurn
-            ? "border-cyan-300/30 bg-cyan-400/10 shadow-[0_14px_40px_rgba(34,211,238,0.14)]"
-            : "border-white/10 bg-white/5",
           btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
+          score: "text-cyan-50",
+          scoreGlow: "drop-shadow-[0_0_18px_rgba(34,211,238,0.18)]",
         };
 
   return (
     <div
       className={[
-        "rounded-[1.25rem] border transition",
+        "rounded-[1.45rem] border p-4 transition",
         compact ? "p-3" : "p-4",
-        classes.card,
+        palette.card,
+        palette.glow,
       ].join(" ")}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10px] font-bold text-white/55">لوحة الفريق</div>
-          <h3
-            className={[
-              "mt-1 truncate font-black text-white",
-              compact ? "text-base" : "text-lg md:text-xl",
-            ].join(" ")}
-          >
-            {teamName}
-          </h3>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 rounded-full bg-white/10 blur-md" />
+            <img
+              src={avatarUrl}
+              alt={teamName}
+              className={`relative rounded-full border border-white/10 object-cover ${
+                compact ? "h-12 w-12" : "h-14 w-14"
+              }`}
+            />
+          </div>
+
+          <div className="min-w-0">
+            <div className="text-[10px] font-bold text-white/55">لوحة الفريق</div>
+            <div
+              className={`truncate font-black text-white ${
+                compact ? "text-base" : "text-lg"
+              }`}
+            >
+              {teamName}
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">
           {isTurn ? (
             <span
-              className={`rounded-full border px-2.5 py-1 text-[9px] font-black ${classes.chip}`}
+              className={`rounded-full border px-3 py-1 text-[10px] font-black ${palette.chip}`}
             >
               الدور الآن
             </span>
           ) : null}
 
           {isLeading ? (
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black text-emerald-100">
+            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black text-emerald-100">
               متصدر
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-3">
         <button
           type="button"
-          onClick={onDecrease}
-          className={`flex items-center justify-center rounded-full border font-black transition ${classes.btn} ${
-            compact ? "h-8 w-8 text-lg" : "h-10 w-10 text-xl"
+          onClick={onIncrease}
+          className={`flex items-center justify-center rounded-full border font-black transition ${palette.btn} ${
+            compact ? "h-10 w-10 text-2xl" : "h-12 w-12 text-3xl"
           }`}
         >
-          −
+          +
         </button>
 
         <div className="text-center">
           <div
             className={[
-              "font-black text-white",
-              compact ? "text-2xl" : "text-3xl md:text-4xl",
+              "font-black tracking-tight",
+              compact ? "text-4xl" : "text-5xl",
+              palette.score,
+              palette.scoreGlow,
             ].join(" ")}
           >
             {score}
           </div>
-          <div className="text-[10px] font-bold text-white/55">نقطة</div>
+          <div className="text-[11px] font-bold text-white/55">نقطة</div>
         </div>
 
         <button
           type="button"
-          onClick={onIncrease}
-          className={`flex items-center justify-center rounded-full border font-black transition ${classes.btn} ${
-            compact ? "h-8 w-8 text-lg" : "h-10 w-10 text-xl"
+          onClick={onDecrease}
+          className={`flex items-center justify-center rounded-full border font-black transition ${palette.btn} ${
+            compact ? "h-10 w-10 text-2xl" : "h-12 w-12 text-3xl"
           }`}
         >
-          +
+          −
         </button>
       </div>
     </div>
@@ -311,30 +393,35 @@ function QuestionCell({
       type="button"
       disabled={disabled}
       onClick={onOpen}
+      aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[1rem] border text-center transition",
-        compact ? "min-h-[56px] px-1 py-1.5" : "min-h-[82px] px-2 py-3",
+        "group relative overflow-hidden rounded-[1.15rem] border transition",
+        compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
         disabled
-          ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.78)_0%,rgba(2,8,23,0.92)_100%)] text-slate-500"
-          : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.90)_0%,rgba(5,15,37,0.98)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_10px_30px_rgba(34,211,238,0.12)]",
+          ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500"
+          : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.96)_0%,rgba(5,15,37,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-0.5 hover:border-cyan-300/25 hover:shadow-[0_16px_30px_rgba(34,211,238,0.10)]",
         active
-          ? "border-cyan-300/40 bg-[linear-gradient(180deg,rgba(16,64,112,0.95)_0%,rgba(8,29,59,0.98)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.25),0_12px_30px_rgba(34,211,238,0.12)]"
+          ? "border-cyan-300/35 bg-[linear-gradient(180deg,rgba(14,62,112,0.96)_0%,rgba(8,29,59,1)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.22),0_16px_35px_rgba(34,211,238,0.14)]"
           : "",
       ].join(" ")}
-      aria-label={`سؤال ${points}`}
     >
       {!disabled ? (
-        <div className="absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+        <>
+          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] opacity-70" />
+        </>
       ) : null}
 
-      <div
-        className={[
-          "font-black tracking-tight",
-          compact ? "text-[0.9rem] md:text-[1.10rem]" : "text-[1.6rem] md:text-[1.7rem]",
-          used ? "opacity-55" : "opacity-100",
-        ].join(" ")}
-      >
-        {points}
+      <div className="relative flex h-full items-center justify-center">
+        <div
+          className={[
+            "font-black tracking-tight text-white",
+            compact ? "text-[1.2rem] md:text-[1.3rem]" : "text-[1.8rem] md:text-[2rem]",
+            used ? "opacity-40" : "opacity-100",
+          ].join(" ")}
+        >
+          {points}
+        </div>
       </div>
     </button>
   );
@@ -386,26 +473,26 @@ function QuestionOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
-      <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.6rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.10),_transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
-        <div className="shrink-0 border-b border-white/10 px-4 py-3 md:px-6 md:py-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="flex flex-wrap justify-center gap-2 md:justify-start">
-                <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                  {openQuestion.categoryName}
+      <div className="flex h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
+        <div className="shrink-0 border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 md:justify-center">
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                {openQuestion.categoryName}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                {openQuestion.points} نقطة
+              </span>
+              {toleranceVisible ? (
+                <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
+                  السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                  {openQuestion.year_tolerance_after ?? 0}
                 </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-                  {openQuestion.points} نقطة
-                </span>
-                {toleranceVisible ? (
-                  <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
-                    السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                    {openQuestion.year_tolerance_after ?? 0}
-                  </span>
-                ) : null}
-              </div>
+              ) : null}
+            </div>
 
-              <h2 className="mt-2 text-center text-2xl font-black text-white md:text-right md:text-3xl">
+            <div className="text-center">
+              <h2 className="text-3xl font-black text-white md:text-5xl">
                 {!showAnswer && !showWinnerPicker
                   ? "السؤال"
                   : showAnswer && !showWinnerPicker
@@ -415,41 +502,43 @@ function QuestionOverlay({
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="min-w-[180px]">
-                <div className="mb-2 flex items-center justify-between text-sm font-bold text-white/75">
-                  <span>المؤقت</span>
-                  <span>{formatCountdown(timeLeft)}</span>
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 md:p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm font-black text-white/75">
+                    <TimerIcon className="h-5 w-5 text-cyan-300" />
+                    <span>المؤقت</span>
+                  </div>
+                  <div className="text-2xl font-black text-white">
+                    {formatCountdown(timeLeft)}
+                  </div>
                 </div>
 
-                <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                <div className="h-4 overflow-hidden rounded-full bg-white/10">
                   <div
                     className="h-full rounded-full bg-cyan-400 transition-[width]"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap justify-center gap-3">
                   <button
                     type="button"
                     onClick={onToggleTimer}
-                    className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
+                    className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
                   >
                     {timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
                   </button>
+
                   <button
                     type="button"
                     onClick={onResetTimer}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10"
+                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
                   >
                     إعادة المؤقت
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/75">
-                {showWinnerPicker ? "حدد الفريق الفائز" : "تم كشف الإجابة"}
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -469,7 +558,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.1rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
+                  className="rounded-[1.2rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
                 >
                   {teamOne}
                 </button>
@@ -478,7 +567,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.1rem] border border-cyan-300/20 bg-cyan-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
+                  className="rounded-[1.2rem] border border-orange-300/20 bg-orange-400/10 px-5 py-5 text-xl font-black text-white transition hover:bg-orange-400/15 disabled:opacity-50"
                 >
                   {teamTwo}
                 </button>
@@ -488,7 +577,7 @@ function QuestionOverlay({
                 type="button"
                 onClick={() => onAwardPoints("none")}
                 disabled={modalBusy}
-                className="mx-auto mt-4 block w-full max-w-md rounded-[1.1rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
+                className="mx-auto mt-4 block w-full max-w-md rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-4 text-lg font-black text-white transition hover:bg-white/10 disabled:opacity-50"
               >
                 ولا أحد
               </button>
@@ -558,6 +647,21 @@ function QuestionOverlay({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatusPill({
+  label,
+  icon,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/90">
+      {icon}
+      <span>{label}</span>
     </div>
   );
 }
@@ -858,29 +962,29 @@ export default function GameBoardClient({
   const compactLandscape = isLandscapePhone;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
         <div
           className={[
-            "rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
+            "rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
             compactLandscape ? "p-2.5" : "p-3 md:p-4",
           ].join(" ")}
         >
           <div
             className={[
-              "mb-3 rounded-[1.35rem] border border-white/10 bg-white/5",
-              compactLandscape ? "p-3" : "p-4",
+              "mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+              compactLandscape ? "p-3" : "p-4 md:p-5",
             ].join(" ")}
           >
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <div className="text-[10px] font-black tracking-[0.18em] text-cyan-300/90">
                   لوحة اللعبة
                 </div>
                 <h1
                   className={[
-                    "mt-1 font-black",
-                    compactLandscape ? "text-lg" : "text-2xl md:text-4xl",
+                    "mt-1 font-black text-white",
+                    compactLandscape ? "text-lg" : "text-3xl md:text-5xl",
                   ].join(" ")}
                 >
                   {gameName}
@@ -894,27 +998,18 @@ export default function GameBoardClient({
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <div
-                  className={`rounded-2xl border border-cyan-300/20 bg-cyan-400/10 font-black text-cyan-100 ${
-                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
-                  }`}
-                >
-                  الدور الآن: {activeTurn === "teamOne" ? teamOne : teamTwo}
-                </div>
-                <div
-                  className={`rounded-2xl border border-white/10 bg-white/5 font-black text-white/85 ${
-                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
-                  }`}
-                >
-                  المتبقي: {remainingCount} سؤال
-                </div>
-                <div
-                  className={`rounded-2xl border border-emerald-300/20 bg-emerald-400/10 font-black text-emerald-100 ${
-                    compactLandscape ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
-                  }`}
-                >
-                  المتصدر: {leaderLabel}
-                </div>
+                <StatusPill
+                  label={`الدور الآن: ${activeTurn === "teamOne" ? teamOne : teamTwo}`}
+                  icon={<GamepadIcon className="h-4 w-4 text-cyan-300" />}
+                />
+                <StatusPill
+                  label={`المتبقي: ${remainingCount} سؤال`}
+                  icon={<TimerIcon className="h-4 w-4 text-white/80" />}
+                />
+                <StatusPill
+                  label={`المتصدر: ${leaderLabel}`}
+                  icon={<CrownIcon className="h-4 w-4 text-emerald-300" />}
+                />
               </div>
             </div>
           </div>
@@ -922,8 +1017,8 @@ export default function GameBoardClient({
           <div
             className={
               compactLandscape
-                ? "grid gap-3 grid-cols-[165px_minmax(0,1fr)]"
-                : "grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)]"
+                ? "grid gap-3 grid-cols-[175px_minmax(0,1fr)]"
+                : "grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]"
             }
           >
             <aside className="order-1">
@@ -931,21 +1026,22 @@ export default function GameBoardClient({
                 className={
                   compactLandscape
                     ? "grid gap-3 grid-cols-1"
-                    : "grid gap-3 sm:grid-cols-2 xl:grid-cols-1"
+                    : "grid gap-4 sm:grid-cols-2 xl:grid-cols-1"
                 }
               >
-                <ScoreCard
+                <TeamCard
                   teamName={teamOne}
                   score={boardState.teamOneScore}
                   isLeading={teamOneLeading}
                   isTurn={activeTurn === "teamOne"}
                   onIncrease={() => adjustScore("teamOne", 100)}
                   onDecrease={() => adjustScore("teamOne", -100)}
-                  accent="cyan"
+                  accent="blue"
+                  avatarUrl={TEAM_BLUE_AVATAR}
                   compact={compactLandscape}
                 />
 
-                <ScoreCard
+                <TeamCard
                   teamName={teamTwo}
                   score={boardState.teamTwoScore}
                   isLeading={teamTwoLeading}
@@ -953,53 +1049,46 @@ export default function GameBoardClient({
                   onIncrease={() => adjustScore("teamTwo", 100)}
                   onDecrease={() => adjustScore("teamTwo", -100)}
                   accent="orange"
+                  avatarUrl={TEAM_ORANGE_AVATAR}
                   compact={compactLandscape}
                 />
 
                 <div
                   className={[
-                    "rounded-[1.2rem] border border-white/10 bg-white/5",
+                    "rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]",
                     compactLandscape ? "p-3" : "p-4",
                   ].join(" ")}
                 >
-                  <div className="text-[10px] font-bold text-white/55">ملخص الجولة</div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-black text-white">
+                    <SparkIcon className="h-4 w-4 text-cyan-300" />
+                    <span>ملخص الجولة</span>
+                  </div>
 
-                  <div className="mt-3 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                      <div className="flex items-center gap-2 text-xs font-black text-white">
+                  <div className="grid gap-3">
+                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
+                      <div className="flex items-center gap-2 text-xs font-black text-white/70">
                         <CrownIcon className="h-4 w-4 text-emerald-300" />
                         المتصدر الحالي
                       </div>
-                      <div
-                        className={[
-                          "mt-2 font-black text-emerald-100",
-                          compactLandscape ? "text-lg" : "text-xl",
-                        ].join(" ")}
-                      >
+                      <div className="mt-2 text-2xl font-black text-emerald-100">
                         {leaderLabel}
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                      <div className="text-xs font-bold text-white/60">الأسئلة المستخدمة</div>
-                      <div
-                        className={[
-                          "mt-1 font-black text-white",
-                          compactLandscape ? "text-2xl" : "text-3xl",
-                        ].join(" ")}
-                      >
+                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
+                      <div className="text-xs font-black text-white/70">
+                        الأسئلة المستخدمة
+                      </div>
+                      <div className="mt-2 text-3xl font-black text-white">
                         {usedCount}
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-3">
-                      <div className="text-xs font-bold text-white/60">الأسئلة المتبقية</div>
-                      <div
-                        className={[
-                          "mt-1 font-black text-cyan-100",
-                          compactLandscape ? "text-2xl" : "text-3xl",
-                        ].join(" ")}
-                      >
+                    <div className="rounded-[1.1rem] border border-white/10 bg-[#020817]/70 p-4">
+                      <div className="text-xs font-black text-white/70">
+                        الأسئلة المتبقية
+                      </div>
+                      <div className="mt-2 text-3xl font-black text-cyan-100">
                         {remainingCount}
                       </div>
                     </div>
@@ -1008,7 +1097,7 @@ export default function GameBoardClient({
 
                 <div
                   className={[
-                    "rounded-[1.2rem] border border-white/10 bg-white/5",
+                    "rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)]",
                     compactLandscape ? "p-3" : "p-4",
                   ].join(" ")}
                 >
@@ -1029,7 +1118,7 @@ export default function GameBoardClient({
             <div className="order-2">
               <div
                 className={[
-                  "overflow-hidden rounded-[1.45rem] border border-white/10 bg-[#020b1f]",
+                  "overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,19,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
                   compactLandscape ? "p-2" : "p-3",
                 ].join(" ")}
               >
@@ -1047,14 +1136,16 @@ export default function GameBoardClient({
                       <div key={column.category.id} className="flex flex-col gap-2">
                         <div
                           className={[
-                            "relative overflow-hidden rounded-[1rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_10px_24px_rgba(0,0,0,0.22)]",
+                            "relative overflow-hidden rounded-[1.2rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_10px_24px_rgba(0,0,0,0.22)]",
                             visual.gradient,
-                            compactLandscape ? "p-1.5" : "p-3",
+                            compactLandscape ? "p-2" : "p-3",
                           ].join(" ")}
                         >
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] opacity-70" />
+
                           <div
-                            className={`mx-auto flex items-center justify-center overflow-hidden rounded-[0.9rem] border border-white/10 bg-white/10 shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${
-                              compactLandscape ? "h-9 w-9" : "h-14 w-14 md:h-16 md:w-16"
+                            className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/10 shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${
+                              compactLandscape ? "h-10 w-10" : "h-16 w-16"
                             }`}
                           >
                             {column.category.image_url ? (
@@ -1070,8 +1161,8 @@ export default function GameBoardClient({
 
                           <h3
                             className={[
-                              "mt-2 font-black leading-5 text-white",
-                              compactLandscape ? "text-[11px]" : "text-base md:text-lg",
+                              "relative mt-3 font-black leading-5 text-white",
+                              compactLandscape ? "text-[11px]" : "text-lg",
                             ].join(" ")}
                           >
                             {column.category.name}
@@ -1134,6 +1225,38 @@ export default function GameBoardClient({
           onAwardPoints={handleAwardPoints}
         />
       ) : null}
+
+      <style>{`
+        @keyframes boardGlow {
+          0%,
+          100% {
+            opacity: 0.55;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.02);
+          }
+        }
+
+        @keyframes floatSoft {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+        }
+
+        .board-soft-glow {
+          animation: boardGlow 4.6s ease-in-out infinite;
+        }
+
+        .board-soft-float {
+          animation: floatSoft 5.5s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
