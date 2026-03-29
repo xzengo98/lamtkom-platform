@@ -366,10 +366,10 @@ function QuestionCell({
 
   const usedClass =
     result === "teamOne"
-      ? "border-cyan-300/15 bg-cyan-400/10 text-cyan-100"
+      ? "border-cyan-300/10 bg-cyan-400/8 text-cyan-100/70"
       : result === "teamTwo"
-        ? "border-orange-300/15 bg-orange-400/10 text-orange-100"
-        : "border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500 opacity-70";
+        ? "border-orange-300/10 bg-orange-400/8 text-orange-100/70"
+        : "border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500/80 opacity-70";
 
   return (
     <button
@@ -427,6 +427,7 @@ export default function GameBoardClient({
   }, [initialBoardState]);
 
   const [boardState, setBoardState] = useState<BoardState>(initialState);
+  const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -531,6 +532,36 @@ export default function GameBoardClient({
 
   const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
   const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
+
+  useEffect(() => {
+    if (remainingCount !== 0) return;
+    if (hasRedirectedToResult) return;
+    if (questions.length === 0) return;
+
+    setHasRedirectedToResult(true);
+
+    const params = new URLSearchParams({
+      sessionId,
+      gameName,
+      teamOne,
+      teamTwo,
+      teamOneScore: String(boardState.teamOneScore),
+      teamTwoScore: String(boardState.teamTwoScore),
+    });
+
+    router.push(`/game/result?${params.toString()}`);
+  }, [
+    remainingCount,
+    hasRedirectedToResult,
+    questions.length,
+    sessionId,
+    gameName,
+    teamOne,
+    teamTwo,
+    boardState.teamOneScore,
+    boardState.teamTwoScore,
+    router,
+  ]);
 
   function updateState(updater: (prev: BoardState) => BoardState) {
     setBoardState((prev) => {
