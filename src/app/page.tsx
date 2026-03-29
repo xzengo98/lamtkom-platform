@@ -143,7 +143,7 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur">
+    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-cyan-300/20 hover:bg-white/[0.07]">
       <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
         <SparkIcon />
       </div>
@@ -163,7 +163,7 @@ function StepCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/20 hover:bg-white/[0.07]">
       <div className="text-sm font-black tracking-[0.2em] text-cyan-300">
         {number}
       </div>
@@ -177,9 +177,9 @@ function GameCard({ card }: { card: GameCardItem }) {
   return (
     <div
       className={[
-        "group overflow-hidden rounded-[2rem] border shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
+        "group overflow-hidden rounded-[2rem] border shadow-[0_25px_60px_rgba(0,0,0,0.25)] transition duration-300 hover:-translate-y-1",
         card.active
-          ? "border-white/10 bg-white/5"
+          ? "border-white/10 bg-white/5 hover:border-cyan-300/20 hover:bg-white/[0.07]"
           : "border-white/5 bg-white/[0.03] opacity-90",
       ].join(" ")}
     >
@@ -282,10 +282,10 @@ export default function HomePage() {
   }, [supabase]);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_20%),linear-gradient(180deg,#020617_0%,#071126_40%,#020617_100%)] text-white">
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_20%),linear-gradient(180deg,#020617_0%,#071126_40%,#020617_100%)] text-white">
       <section className="mx-auto max-w-7xl px-4 pb-14 pt-10 md:px-6 md:pt-16">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
+        <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="animate-[fadeInUp_0.7s_ease-out]">
             <SectionBadge>منصة عربية للألعاب الجماعية</SectionBadge>
 
             <h1 className="mt-5 text-4xl font-black leading-tight text-white md:text-6xl">
@@ -342,7 +342,7 @@ export default function HomePage() {
             </div>
 
             <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 transition duration-300 hover:border-cyan-300/20 hover:bg-white/[0.07]">
                 <div className="text-sm font-bold text-white/55">
                   الألعاب المتاحة الآن
                 </div>
@@ -351,7 +351,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 transition duration-300 hover:border-cyan-300/20 hover:bg-white/[0.07]">
                 <div className="text-sm font-bold text-white/55">
                   أسلوب المنصة
                 </div>
@@ -360,7 +360,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 transition duration-300 hover:border-cyan-300/20 hover:bg-white/[0.07]">
                 <div className="text-sm font-bold text-white/55">الهدف</div>
                 <div className="mt-2 text-2xl font-black text-emerald-100">
                   متعة وتنافس
@@ -369,69 +369,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative animate-[fadeInUp_0.9s_ease-out]">
             <div className="absolute inset-0 rounded-[2.5rem] bg-cyan-400/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-4 shadow-[0_35px_90px_rgba(0,0,0,0.35)]">
-              <div className="rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_30%),linear-gradient(180deg,#061020_0%,#020817_100%)] p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-sm font-bold text-white/55">
-                      معاينة سريعة
-                    </div>
-                    <div className="mt-1 text-2xl font-black text-white">
-                      داخل المنصة
-                    </div>
-                  </div>
-
-                  <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                    لمّتنا
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
-                    <div className="text-sm font-bold text-white/60">
-                      لوحة لعب أنيقة
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 gap-2">
-                      {[200, 400, 600].map((point) => (
-                        <div
-                          key={point}
-                          className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center text-2xl font-black text-white"
-                        >
-                          {point}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
-                    <div className="text-sm font-bold text-white/60">
-                      ألعاب متنوعة
-                    </div>
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-100">
-                        لمّتنا — أسئلة وأجوبة
-                      </div>
-                      <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm font-black text-emerald-100">
-                        برا السالفة — لعبة جماعية
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/70">
-                        ألعاب إضافية قريبًا
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
-                  <div className="text-sm font-bold text-white/60">
-                    مناسبة للموبايل والكمبيوتر
-                  </div>
-                  <div className="mt-3 text-lg font-black text-white">
-                    تجربة مرتبة وسهلة الاستخدام للجلسات والمنافسات
-                  </div>
-                </div>
-              </div>
+            <div className="relative">
+              <img
+                src="https://f.top4top.io/p_3739zf7hj1.png"
+                alt="معاينة داخل المنصة"
+                className="mx-auto h-auto w-full max-w-[640px] rounded-[2rem] object-contain drop-shadow-[0_30px_80px_rgba(0,0,0,0.35)] animate-[floatY_6s_ease-in-out_infinite]"
+              />
             </div>
           </div>
         </div>
@@ -510,7 +455,7 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <div className="overflow-hidden rounded-[2.4rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_25%),linear-gradient(180deg,#071126_0%,#020817_100%)] p-6 shadow-[0_35px_90px_rgba(0,0,0,0.3)] md:p-10">
+        <div className="overflow-hidden rounded-[2.4rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_25%),linear-gradient(180deg,#071126_0%,#020817_100%)] p-6 shadow-[0_35px_90px_rgba(0,0,0,0.3)] md:p-10 transition duration-300 hover:border-cyan-300/20">
           <div className="max-w-3xl">
             <SectionBadge>ابدأ الآن</SectionBadge>
             <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
@@ -578,6 +523,29 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      <style>{`
+  @keyframes floatY {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`}</style>
     </main>
   );
 }
