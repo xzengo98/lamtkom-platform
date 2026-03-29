@@ -242,10 +242,10 @@ export default function CodenamesBoardClient({
       .subscribe();
 
     previewChannel
-      .on("broadcast", { event: "preview-selection" }, ({ payload }: { payload: PreviewSelection }) => {
+      .on("broadcast" as any, { event: "preview-selection" }, ({ payload }: { payload: PreviewSelection }) => {
         setPreviewSelection(payload);
       })
-      .on("broadcast", { event: "clear-preview" }, () => {
+      .on("broadcast" as any, { event: "clear-preview" }, () => {
         setPreviewSelection(null);
       })
       .subscribe();
