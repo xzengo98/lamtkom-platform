@@ -1,3 +1,4 @@
+import RoomStatusWatcher from "@/components/codenames/room-status-watcher";
 import { notFound } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -112,6 +113,7 @@ export default async function CodenamesRoomPage({
   }
 
   return (
+    
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
