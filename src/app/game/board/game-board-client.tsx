@@ -288,6 +288,109 @@ function AnswerIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function FlagIcon({
+  className = "h-4 w-4",
+  mirrored = false,
+}: {
+  className?: string;
+  mirrored?: boolean;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={`${className} ${mirrored ? "scale-x-[-1]" : ""}`}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 21V4" />
+      <path d="M5 5c4-3 6 3 10 0v8c-4 3-6-3-10 0" />
+    </svg>
+  );
+}
+
+function TeamBattleHeader({
+  teamOne,
+  teamTwo,
+  teamOneScore,
+  teamTwoScore,
+  activeTurnName,
+}: {
+  teamOne: string;
+  teamTwo: string;
+  teamOneScore: number;
+  teamTwoScore: number;
+  activeTurnName: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(90deg,rgba(8,37,66,0.96)_0%,rgba(10,17,40,0.96)_35%,rgba(28,14,34,0.96)_65%,rgba(54,24,10,0.96)_100%)] p-3 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-4">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_40%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <div className="absolute left-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_left,rgba(34,211,238,0.12),transparent_55%)]" />
+        <div className="absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_right,rgba(251,146,60,0.12),transparent_55%)]" />
+      </div>
+
+      <div className="relative grid items-center gap-3 md:grid-cols-[1fr_auto_1fr]">
+        <div className="flex items-center justify-start gap-3 rounded-[1.35rem] border border-cyan-300/15 bg-cyan-400/5 p-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-200">
+            <FlagIcon className="h-4 w-4" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <img
+                src={TEAM_BLUE_AVATAR}
+                alt={teamOne}
+                className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-[0_8px_18px_rgba(0,0,0,0.22)]"
+              />
+              <div className="truncate text-sm font-black text-cyan-100 md:text-base">
+                {teamOne}
+              </div>
+            </div>
+            <div className="inline-flex min-w-[110px] items-center justify-center rounded-full border border-cyan-300/20 bg-[linear-gradient(180deg,rgba(22,132,199,0.18),rgba(8,47,73,0.18))] px-4 py-1.5 text-2xl font-black tracking-tight text-cyan-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_20px_rgba(34,211,238,0.12)] md:text-4xl">
+              {teamOneScore}
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto flex min-w-[120px] flex-col items-center justify-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-5 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.24)] md:min-w-[150px]">
+          <div className="mb-1 flex items-center gap-2 text-white/75">
+            <TimerIcon className="h-4 w-4" />
+            <span className="text-[11px] font-black md:text-xs">الدور الآن</span>
+          </div>
+          <div className="text-xl font-black text-amber-200 md:text-2xl">
+            {activeTurnName}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-start gap-3 rounded-[1.35rem] border border-orange-300/15 bg-orange-400/5 p-3 md:justify-end">
+          <div className="min-w-0 flex-1 text-right">
+            <div className="mb-1 flex items-center justify-end gap-2">
+              <div className="truncate text-sm font-black text-orange-100 md:text-base">
+                {teamTwo}
+              </div>
+              <img
+                src={TEAM_ORANGE_AVATAR}
+                alt={teamTwo}
+                className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-[0_8px_18px_rgba(0,0,0,0.22)]"
+              />
+            </div>
+            <div className="mr-auto inline-flex min-w-[110px] items-center justify-center rounded-full border border-orange-300/20 bg-[linear-gradient(180deg,rgba(251,146,60,0.18),rgba(120,53,15,0.18))] px-4 py-1.5 text-2xl font-black tracking-tight text-orange-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_20px_rgba(251,146,60,0.12)] md:ml-auto md:text-4xl">
+              {teamTwoScore}
+            </div>
+          </div>
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-300/20 bg-orange-400/10 text-orange-200">
+            <FlagIcon className="h-4 w-4" mirrored />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TeamMini({
   teamName,
   avatarUrl,
@@ -744,43 +847,44 @@ function QuestionOverlay({
             {!showAnswer && !showWinnerPicker ? (
               <div
                 className={[
-                  "rounded-[1.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[0_16px_35px_rgba(0,0,0,0.2)]",
-                  compact ? "p-3" : "p-4",
+                  "rounded-[1.15rem] border border-white/10 bg-[linear-gradient(180deg,rgba(14,23,47,0.95)_0%,rgba(7,14,31,0.95)_100%)] shadow-[0_12px_24px_rgba(0,0,0,0.18)]",
+                  compact ? "p-2.5" : "p-3.5",
                 ].join(" ")}
               >
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs font-black text-white/75 md:text-sm">
-                    <TimerIcon className="h-4 w-4 text-cyan-300 md:h-5 md:w-5" />
+                  <div className="flex items-center gap-2 text-[11px] font-black text-white/70 md:text-xs">
+                    <TimerIcon className="h-3.5 w-3.5 text-cyan-300" />
                     <span>المؤقت</span>
                   </div>
-                  <div className="text-xl font-black text-white md:text-2xl">
+
+                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-base font-black text-white md:text-lg">
                     {formatCountdown(timeLeft)}
                   </div>
                 </div>
 
-                <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
                   <div
                     className="h-full rounded-full bg-cyan-400 transition-[width]"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap justify-center gap-2 md:gap-3">
+                <div className="mt-2.5 flex flex-wrap justify-center gap-2">
                   <button
                     type="button"
                     onClick={onToggleTimer}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-xs font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-5 md:py-3 md:text-sm"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-4 md:text-xs"
                   >
-                    <TimerIcon className="h-4 w-4" />
+                    <TimerIcon className="h-3.5 w-3.5" />
                     <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={onResetTimer}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 md:px-4 md:text-xs"
                   >
-                    <SparkIcon className="h-4 w-4" />
+                    <SparkIcon className="h-3.5 w-3.5" />
                     <span>إعادة المؤقت</span>
                   </button>
                 </div>
@@ -1292,48 +1396,14 @@ export default function GameBoardClient({
             <div className="board-soft-glow absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-400/6 blur-3xl" />
           </div>
 
-          <div
-            className={[
-              "relative mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-              compactLandscape ? "p-3" : "p-4 md:p-5",
-            ].join(" ")}
-          >
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <div className="text-[10px] font-black tracking-[0.18em] text-cyan-300/90">
-                  لوحة اللعبة
-                </div>
-                <h1
-                  className={[
-                    "mt-1 font-black text-white",
-                    compactLandscape ? "text-lg" : "text-3xl md:text-5xl",
-                  ].join(" ")}
-                >
-                  {gameName}
-                </h1>
-                {!compactLandscape ? (
-                  <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
-                    اختر السؤال التالي وراقب النتيجة لحظة بلحظة ضمن واجهة مهيأة
-                    للعرض والهواتف.
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <StatusPill
-                  label={`الدور الآن: ${activeTurnName}`}
-                  icon={<GamepadIcon className="h-4 w-4 text-cyan-300" />}
-                />
-                <StatusPill
-                  label={`المتبقي: ${remainingCount} سؤال`}
-                  icon={<TimerIcon className="h-4 w-4 text-white/80" />}
-                />
-                <StatusPill
-                  label={`المتصدر: ${leaderLabel}`}
-                  icon={<CrownIcon className="h-4 w-4 text-emerald-300" />}
-                />
-              </div>
-            </div>
+          <div className="relative mb-4">
+            <TeamBattleHeader
+              teamOne={teamOne}
+              teamTwo={teamTwo}
+              teamOneScore={boardState.teamOneScore}
+              teamTwoScore={boardState.teamTwoScore}
+              activeTurnName={activeTurnName}
+            />
           </div>
 
           <div
