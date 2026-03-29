@@ -3,8 +3,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { updatePlayerRole, updatePlayerTeam } from "./actions";
 
 type PageProps = {
-  params: Promise<{ code: string }>;
-  searchParams: Promise<{ name?: string }>;
+  params: { code: string };
+  searchParams: { name?: string };
 };
 
 type RoomRow = {
@@ -29,7 +29,7 @@ export default async function CodenamesRoomPage({
   params,
 }: PageProps) {
   const supabase = await getSupabaseServerClient();
-  const { code } = await params;
+  const code = params.code;
   const roomCode = code.toUpperCase();
 
   const { data: room, error: roomError } = await supabase
