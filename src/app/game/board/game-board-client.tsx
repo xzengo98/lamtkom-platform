@@ -596,6 +596,7 @@ function QuestionCell({
 }
 
 
+
 function QuestionOverlay({
   openQuestion,
   teamOne,
@@ -654,10 +655,10 @@ function QuestionOverlay({
           compact ? "h-[96svh]" : "h-[92vh]",
         ].join(" ")}
       >
-        <div className={["shrink-0 border-b border-white/10", compact ? "p-3" : "p-5"].join(" ")}>
-          <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(90deg,rgba(8,37,66,0.96)_0%,rgba(10,17,40,0.96)_35%,rgba(28,14,34,0.96)_65%,rgba(54,24,10,0.96)_100%)] p-3 shadow-[0_20px_50px_rgba(0,0,0,0.28)] md:p-4">
-            <div className={compact ? "grid grid-cols-[1fr_auto_1fr] items-center gap-2" : "grid items-center gap-3 md:grid-cols-[1fr_auto_1fr]"}>
-              <div className="flex items-center gap-2 rounded-[1.2rem] border border-cyan-300/15 bg-cyan-400/5 p-2 md:gap-3 md:p-3">
+        <div className={["shrink-0 border-b border-white/10", compact ? "px-3 py-3" : "px-6 py-5"].join(" ")}>
+          <div className={["rounded-[1.5rem] border border-white/10 bg-[linear-gradient(90deg,rgba(8,37,66,0.96)_0%,rgba(10,17,40,0.96)_50%,rgba(54,24,10,0.96)_100%)] shadow-[0_18px_40px_rgba(0,0,0,0.24)]", compact ? "p-3" : "p-4"].join(" ")}>
+            <div className={compact ? "grid grid-cols-[1fr_auto_1fr] items-center gap-2" : "grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]"}>
+              <div className={["flex items-center gap-2 rounded-[1.15rem] border border-cyan-300/15 bg-cyan-400/5", compact ? "p-2" : "p-3"].join(" ")}>
                 <img
                   src={TEAM_BLUE_AVATAR}
                   alt={teamOne}
@@ -670,22 +671,22 @@ function QuestionOverlay({
                 </div>
               </div>
 
-              <div className="mx-auto flex min-w-[120px] flex-col items-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-3 py-2 shadow-[0_10px_25px_rgba(0,0,0,0.22)] md:min-w-[160px] md:px-5">
+              <div className={["mx-auto flex flex-col items-center rounded-[999px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] shadow-[0_10px_25px_rgba(0,0,0,0.22)]", compact ? "min-w-[96px] px-3 py-2" : "min-w-[150px] px-5 py-3"].join(" ")}>
                 <div className="mb-1 flex items-center gap-1.5 text-white/75">
-                  <TimerIcon className="h-4 w-4" />
+                  <TimerIcon className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
                   <span className={compact ? "text-[10px] font-black" : "text-[11px] font-black md:text-xs"}>
                     المؤقت
                   </span>
                 </div>
-                <div className={compact ? "text-xl font-black text-amber-200" : "text-3xl font-black text-amber-200"}>
+                <div className={compact ? "text-2xl font-black text-amber-200" : "text-3xl font-black text-amber-200"}>
                   {Math.ceil(timeLeft)}
                 </div>
                 <div className={compact ? "mt-1 text-[10px] font-black text-white/70" : "mt-1 text-[11px] font-black text-white/70"}>
-                  الدور الحالي: {activeTurnName}
+                  {activeTurnName}
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 rounded-[1.2rem] border border-orange-300/15 bg-orange-400/5 p-2 md:gap-3 md:p-3">
+              <div className={["flex items-center justify-end gap-2 rounded-[1.15rem] border border-orange-300/15 bg-orange-400/5", compact ? "p-2" : "p-3"].join(" ")}>
                 <div className="min-w-0 text-right">
                   <div className={compact ? "truncate text-[11px] font-black text-orange-100" : "truncate text-sm font-black text-orange-100 md:text-base"}>
                     {teamTwo}
@@ -699,59 +700,75 @@ function QuestionOverlay({
               </div>
             </div>
 
-            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-cyan-400 transition-[width]"
-                style={{ width: `${progressPercentage}%` }}
-              />
+            <div className={compact ? "mt-2" : "mt-3"}>
+              <div className={compact ? "h-2 overflow-hidden rounded-full bg-white/10" : "h-2.5 overflow-hidden rounded-full bg-white/10"}>
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-[width]"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <div className="mt-3 flex items-center justify-center gap-2">
                 <button
                   type="button"
                   onClick={onToggleTimer}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-4 md:text-xs"
+                  aria-label={timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-cyan-100 transition hover:bg-cyan-400/15"
                 >
-                  <TimerIcon className="h-3.5 w-3.5" />
-                  <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
+                  {timerRunning ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <rect x="6" y="5" width="4" height="14" rx="1" />
+                      <rect x="14" y="5" width="4" height="14" rx="1" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <path d="M8 5v14l11-7-11-7Z" />
+                    </svg>
+                  )}
                 </button>
 
                 <button
                   type="button"
                   onClick={onResetTimer}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 md:px-4 md:text-xs"
+                  aria-label="إعادة المؤقت"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10"
                 >
-                  <SparkIcon className="h-3.5 w-3.5" />
-                  <span>إعادة المؤقت</span>
+                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 1 0 3-6.7" />
+                    <path d="M3 4v5h5" />
+                  </svg>
                 </button>
               </div>
             ) : null}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-              {openQuestion.categoryName}
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-              {openQuestion.points} نقطة
-            </span>
-            {toleranceVisible ? (
-              <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
-                السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                {openQuestion.year_tolerance_after ?? 0}
+          <div className={compact ? "mt-3" : "mt-4"}>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                {openQuestion.categoryName}
               </span>
-            ) : null}
-          </div>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                {openQuestion.points} نقطة
+              </span>
+              {toleranceVisible ? (
+                <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
+                  السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                  {openQuestion.year_tolerance_after ?? 0}
+                </span>
+              ) : null}
+            </div>
 
-          <div className="mt-3 text-center">
-            <h2 className={compact ? "text-3xl font-black text-white" : "text-5xl font-black text-white"}>
-              {!showAnswer && !showWinnerPicker
-                ? "السؤال"
-                : showAnswer && !showWinnerPicker
-                  ? "الإجابة الصحيحة"
-                  : "تحديد الفريق الفائز"}
-            </h2>
+            <div className="mt-3 text-center">
+              <h2 className={compact ? "text-3xl font-black text-white" : "text-5xl font-black text-white"}>
+                {!showAnswer && !showWinnerPicker
+                  ? "السؤال"
+                  : showAnswer && !showWinnerPicker
+                    ? "الإجابة الصحيحة"
+                    : "تحديد الفريق الفائز"}
+              </h2>
+            </div>
           </div>
         </div>
 
@@ -838,13 +855,9 @@ function QuestionOverlay({
         </div>
 
         <div className={["shrink-0 border-t border-white/10", compact ? "px-3 py-3" : "px-6 py-4"].join(" ")}>
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[11px] font-black text-white/55 md:text-sm">
-              الدور الحالي: <span className="text-cyan-100">{activeTurnName}</span>
-            </div>
-
+          <div className="flex items-center justify-end gap-3">
             {!showAnswer && !showWinnerPicker ? (
-              <div className="flex flex-wrap justify-end gap-3">
+              <>
                 <button
                   type="button"
                   onClick={onClose}
@@ -861,9 +874,9 @@ function QuestionOverlay({
                   <AnswerIcon className="h-4 w-4" />
                   <span>إظهار الإجابة</span>
                 </button>
-              </div>
+              </>
             ) : showAnswer && !showWinnerPicker ? (
-              <div className="flex flex-wrap justify-end gap-3">
+              <>
                 <button
                   type="button"
                   onClick={onClose}
@@ -888,9 +901,9 @@ function QuestionOverlay({
                   <CrownIcon className="h-4 w-4" />
                   <span>أي فريق؟</span>
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex flex-wrap justify-end gap-3">
+              <>
                 <button
                   type="button"
                   onClick={onClose}
@@ -907,7 +920,7 @@ function QuestionOverlay({
                   <AnswerIcon className="h-4 w-4" />
                   <span>العودة للإجابة</span>
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
