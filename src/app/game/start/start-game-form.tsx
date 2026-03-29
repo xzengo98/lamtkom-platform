@@ -44,27 +44,39 @@ const sectionThemes: Record<
   {
     badge: string;
     glow: string;
+    iconBg: string;
+    iconText: string;
   }
 > = {
   general: {
     badge: "border-orange-400/30 bg-orange-500/10 text-orange-200",
     glow: "from-orange-400/10 via-orange-300/5 to-transparent",
+    iconBg: "bg-orange-400/10 border-orange-300/20",
+    iconText: "text-orange-100",
   },
   islamic: {
     badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
     glow: "from-emerald-400/10 via-lime-300/5 to-transparent",
+    iconBg: "bg-emerald-400/10 border-emerald-300/20",
+    iconText: "text-emerald-100",
   },
   sports: {
     badge: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
     glow: "from-cyan-400/10 via-sky-300/5 to-transparent",
+    iconBg: "bg-cyan-400/10 border-cyan-300/20",
+    iconText: "text-cyan-100",
   },
   entertainment: {
     badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
     glow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
+    iconBg: "bg-fuchsia-400/10 border-fuchsia-300/20",
+    iconText: "text-fuchsia-100",
   },
   default: {
     badge: "border-white/15 bg-white/5 text-white/85",
     glow: "from-slate-400/10 via-slate-300/5 to-transparent",
+    iconBg: "bg-white/5 border-white/10",
+    iconText: "text-white/85",
   },
 };
 
@@ -101,6 +113,98 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
   };
 }
 
+function SparkIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
+    </svg>
+  );
+}
+
+function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="8" width="16" height="8" rx="3" />
+      <path d="M8 12h2" />
+      <path d="M9 11v2" />
+      <path d="M16.5 12h.01" />
+      <path d="M18.5 12h.01" />
+    </svg>
+  );
+}
+
+function UsersIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="17" cy="10" r="2.5" />
+      <path d="M4 19a5 5 0 0 1 10 0" />
+      <path d="M14 19a4 4 0 0 1 6 0" />
+    </svg>
+  );
+}
+
+function GridIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+function InfoIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 10v6" />
+      <path d="M12 7h.01" />
+    </svg>
+  );
+}
+
 function SummaryCard({
   label,
   value,
@@ -113,29 +217,14 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.1rem] border p-3 md:rounded-[1.35rem] md:p-4",
+        "rounded-[1.35rem] border p-4 text-center shadow-[0_12px_28px_rgba(0,0,0,0.20)]",
         accent === "cyan"
-          ? "border-cyan-400/20 bg-cyan-400/10"
+          ? "border-cyan-300/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
       ].join(" ")}
     >
-      <div
-        className={[
-          "text-xs md:text-sm",
-          accent === "cyan" ? "text-cyan-100/80" : "text-white/60",
-        ].join(" ")}
-      >
-        {label}
-      </div>
-      <div
-        className={[
-          "mt-1 font-black",
-          accent === "cyan" ? "text-cyan-100" : "text-white",
-          "text-lg md:text-2xl",
-        ].join(" ")}
-      >
-        {value}
-      </div>
+      <div className="text-xs font-black text-white/55">{label}</div>
+      <div className="mt-2 text-2xl font-black text-white">{value}</div>
     </div>
   );
 }
@@ -148,9 +237,9 @@ function MiniStat({
   value: string | number;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-2 text-center">
-      <div className="text-[10px] text-white/55 md:text-xs">{label}</div>
-      <div className="mt-1 text-sm font-black text-white">{value}</div>
+    <div className="rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-center">
+      <div className="text-[11px] font-black text-white/50">{label}</div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
     </div>
   );
 }
@@ -268,278 +357,354 @@ export default function StartGameForm({
   const visibleError = localError || errorMessage;
 
   return (
-    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-4 md:space-y-5">
+    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-8">
       <input
         type="hidden"
         name="selectedCategories"
         value={selectedCategories.join(",")}
       />
 
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.9rem] md:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <div className="text-cyan-300 text-sm">إعداد لعبة جديدة</div>
-            <h1 className="mt-2 text-2xl font-black text-white md:text-4xl">
-              جهّز اللعبة بسرعة
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/75 md:text-base md:leading-8">
-              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة مباشرة.
-            </p>
+      {/* Hero / Header */}
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="hero-glow absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl" />
+        </div>
+
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+            <GamepadIcon className="h-4 w-4" />
+            <span>إعداد لعبة جديدة</span>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[440px]">
-            <SummaryCard label="الألعاب المتبقية" value={String(gamesRemaining)} />
-            <SummaryCard label="الفئات المطلوبة" value={String(REQUIRED_CATEGORY_COUNT)} />
+          <h1 className="mt-5 text-4xl font-black text-white md:text-5xl">
+            جهّز اللعبة بسرعة
+          </h1>
+
+          <p className="mt-4 max-w-3xl text-base leading-8 text-white/72">
+            اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
+            مباشرة، مع الحفاظ على جميع شروط الحساب والمنطق الحالي كما هو.
+          </p>
+
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
-              label="نمط الأسئلة"
-              value={selectionMode === "dynamic" ? "بدون تكرار" : "قابلة للتكرار"}
+              label="الألعاب المتبقية"
+              value={String(gamesRemaining)}
               accent="cyan"
+            />
+            <SummaryCard
+              label="عدد الفئات المطلوبة"
+              value={String(REQUIRED_CATEGORY_COUNT)}
+            />
+            <SummaryCard
+              label="عدد المختار حاليًا"
+              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+            />
+            <SummaryCard
+              label="وضع التكرار"
+              value={selectionMode === "dynamic" ? "بدون تكرار" : "تكرار مسموح"}
             />
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-[1400px] gap-4 xl:grid-cols-[0.95fr_0.75fr]">
-        <div className="rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-          <div className="mb-4">
-            <div className="text-cyan-300 text-sm">الخطوة الأولى</div>
-            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-              بيانات اللعبة
-            </h2>
-          </div>
-
-          <div className="grid gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                اسم اللعبة
-              </label>
-              <input
-                name="gameName"
-                value={gameName}
-                onChange={(e) => setGameName(e.target.value)}
-                placeholder="مثال: تحدي الأذكياء"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
-              />
+      {/* Main Grid */}
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        {/* Left: Inputs + Categories */}
+        <div className="space-y-6">
+          {/* Game Data */}
+          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+                <SparkIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                  الخطوة الأولى
+                </div>
+                <h2 className="mt-1 text-2xl font-black text-white">
+                  بيانات اللعبة
+                </h2>
+              </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+            <div className="grid gap-4 md:grid-cols-3">
+              <label className="block">
+                <div className="mb-2 text-sm font-black text-white/80">
+                  اسم اللعبة
+                </div>
+                <div className="relative">
+                  <input
+                    name="gameName"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                    placeholder="مثال: تحدي الأذكياء"
+                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
+                  />
+                </div>
+              </label>
+
+              <label className="block">
+                <div className="mb-2 text-sm font-black text-white/80">
                   الفريق الأول
-                </label>
+                </div>
                 <input
                   name="teamOne"
                   value={teamOne}
                   onChange={(e) => setTeamOne(e.target.value)}
                   placeholder="اسم الفريق الأول"
-                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
                 />
-              </div>
+              </label>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+              <label className="block">
+                <div className="mb-2 text-sm font-black text-white/80">
                   الفريق الثاني
-                </label>
+                </div>
                 <input
                   name="teamTwo"
                   value={teamTwo}
                   onChange={(e) => setTeamTwo(e.target.value)}
                   placeholder="اسم الفريق الثاني"
-                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-13 md:text-base"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
+                />
+              </label>
+            </div>
+          </section>
+
+          {/* Categories */}
+          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+                  <GridIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                    الخطوة الثانية
+                  </div>
+                  <h2 className="mt-1 text-2xl font-black text-white">
+                    اختر الفئات
+                  </h2>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <MiniStat
+                  label="عدد المختار"
+                  value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+                />
+                <MiniStat label="المتبقي" value={remainingToSelect} />
+                <MiniStat
+                  label="الحالة"
+                  value={isReadyToSubmit ? "جاهزة" : "قيد الإعداد"}
                 />
               </div>
             </div>
-          </div>
-        </div>
 
-        <section className="rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-          <div className="text-cyan-300 text-sm">ملخص سريع</div>
-          <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-            جاهزية اللعبة
-          </h2>
-
-          <div className="mt-4 grid gap-3">
-            <SummaryCard
-              label="الفئات المختارة"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
-            />
-            <SummaryCard
-              label="حالة الاختيار"
-              value={isReadyToSubmit ? "جاهز للبدء" : `باقي ${remainingToSelect}`}
-            />
-            <SummaryCard
-              label="نوع السحب"
-              value={
-                selectionMode === "dynamic"
-                  ? "بدون تكرار للبريميوم"
-                  : "قابل للتكرار للمجاني"
-              }
-            />
-          </div>
-
-          <div className="mt-4 rounded-[1.2rem] border border-cyan-400/20 bg-cyan-400/10 p-4">
-            <div className="text-sm font-black text-cyan-100 md:text-base">
-              {isReadyToSubmit
-                ? "تم اختيار العدد المطلوب. اضغط ابدأ اللعبة."
-                : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-cyan-300 text-sm">الخطوة الثانية</div>
-            <h2 className="mt-2 text-2xl font-black text-white md:text-3xl">
-              اختر الفئات
-            </h2>
-            <p className="mt-2 text-sm text-white/70 md:text-base">
-              اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها.
+            <p className="mb-6 text-sm leading-7 text-white/70">
+              اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها. يجب اختيار
+              {` ${REQUIRED_CATEGORY_COUNT} `}فئات بالضبط قبل بدء اللعبة.
             </p>
-          </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center">
-            <div className="text-xs text-white/60 md:text-sm">عدد المختار</div>
-            <div className="mt-1 text-lg font-black text-white md:text-2xl">
-              {selectedCount} / {REQUIRED_CATEGORY_COUNT}
-            </div>
-          </div>
-        </div>
+            <div className="space-y-6">
+              {groupedSections.map((section) => {
+                const theme = getSectionTheme(section.slug);
 
-        <div className="space-y-7">
-          {groupedSections.map((section) => {
-            const theme = getSectionTheme(section.slug);
+                return (
+                  <div
+                    key={section.id}
+                    className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
+                  >
+                    <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <div
+                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${theme.badge}`}
+                        >
+                          <SparkIcon className="h-4 w-4" />
+                          <span>{section.name}</span>
+                        </div>
+                        <div className="mt-3 text-sm text-white/65">
+                          {section.description ||
+                            "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
+                        </div>
+                      </div>
 
-            return (
-              <section key={section.id} className="space-y-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div
-                      className={[
-                        "inline-flex rounded-full border px-3 py-1 text-sm font-bold",
-                        theme.badge,
-                      ].join(" ")}
-                    >
-                      {section.name}
+                      <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/70">
+                        {section.categories.length} فئات
+                      </div>
                     </div>
 
-                    <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
-                      {section.categories.length} فئات
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {section.categories.map((category) => {
+                        const active = selectedCategories.includes(category.id);
+
+                        return (
+                          <CategoryCard
+                            key={category.id}
+                            category={category}
+                            active={active}
+                            infoOpen={openInfoId === category.id}
+                            onToggle={() => toggleCategory(category.id)}
+                            onInfoClick={handleInfoClick}
+                            theme={theme}
+                            availability={
+                              categoryAvailability[category.id] ?? {
+                                availableGames: 0,
+                                isSelectable: false,
+                                mode: selectionMode,
+                                easyCount: 0,
+                                mediumCount: 0,
+                                hardCount: 0,
+                              }
+                            }
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {uncategorized.length > 0 ? (
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                  <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-black text-white/85">
+                        <GridIcon className="h-4 w-4" />
+                        <span>فئات بدون قسم</span>
+                      </div>
+                      <div className="mt-3 text-sm text-white/65">
+                        هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار
+                        واللعب.
+                      </div>
+                    </div>
+
+                    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/70">
+                      {uncategorized.length} فئات
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
-                    {section.description || "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
-                  </div>
-                </div>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {uncategorized.map((category) => {
+                      const active = selectedCategories.includes(category.id);
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                  {section.categories.map((category) => {
-                    const active = selectedCategories.includes(category.id);
-
-                    return (
-                      <CategoryCard
-                        key={category.id}
-                        category={category}
-                        active={active}
-                        infoOpen={openInfoId === category.id}
-                        onToggle={() => toggleCategory(category.id)}
-                        onInfoClick={handleInfoClick}
-                        theme={theme}
-                        availability={
-                          categoryAvailability[category.id] ?? {
-                            availableGames: 0,
-                            isSelectable: false,
-                            mode: selectionMode,
-                            easyCount: 0,
-                            mediumCount: 0,
-                            hardCount: 0,
+                      return (
+                        <CategoryCard
+                          key={category.id}
+                          category={category}
+                          active={active}
+                          infoOpen={openInfoId === category.id}
+                          onToggle={() => toggleCategory(category.id)}
+                          onInfoClick={handleInfoClick}
+                          theme={sectionThemes.default}
+                          availability={
+                            categoryAvailability[category.id] ?? {
+                              availableGames: 0,
+                              isSelectable: false,
+                              mode: selectionMode,
+                              easyCount: 0,
+                              mediumCount: 0,
+                              hardCount: 0,
+                            }
                           }
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-
-          {uncategorized.length > 0 ? (
-            <section className="space-y-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-bold text-white">
-                    فئات بدون قسم
-                  </div>
-
-                  <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
-                    {uncategorized.length} فئات
+                        />
+                      );
+                    })}
                   </div>
                 </div>
+              ) : null}
+            </div>
+          </section>
+        </div>
 
-                <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
-                  هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار واللعب.
+        {/* Right: Summary / Submit */}
+        <div className="space-y-6">
+          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+                <UsersIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                  ملخص سريع
                 </div>
+                <h2 className="mt-1 text-2xl font-black text-white">
+                  جاهزية اللعبة
+                </h2>
               </div>
+            </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {uncategorized.map((category) => {
-                  const active = selectedCategories.includes(category.id);
-
-                  return (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      active={active}
-                      infoOpen={openInfoId === category.id}
-                      onToggle={() => toggleCategory(category.id)}
-                      onInfoClick={handleInfoClick}
-                      theme={sectionThemes.default}
-                      availability={
-                        categoryAvailability[category.id] ?? {
-                          availableGames: 0,
-                          isSelectable: false,
-                          mode: selectionMode,
-                          easyCount: 0,
-                          mediumCount: 0,
-                          hardCount: 0,
-                        }
-                      }
-                    />
-                  );
-                })}
+            <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 text-center">
+              <div className="text-sm font-black text-white/65">
+                {isReadyToSubmit
+                  ? "تم اختيار العدد المطلوب. اضغط ابدأ اللعبة."
+                  : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
               </div>
-            </section>
-          ) : null}
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <SummaryCard label="اسم اللعبة" value={gameName.trim() || "-"} />
+              <SummaryCard
+                label="الفريق الأول"
+                value={teamOne.trim() || "-"}
+                accent="cyan"
+              />
+              <SummaryCard label="الفريق الثاني" value={teamTwo.trim() || "-"} />
+            </div>
+
+            {visibleError ? (
+              <div className="mt-4 rounded-[1.2rem] border border-red-500/30 bg-[#34161b] px-4 py-4 text-sm font-bold text-red-200">
+                {visibleError}
+              </div>
+            ) : null}
+          </section>
+
+          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+                <GamepadIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                  الخطوة الأخيرة
+                </div>
+                <h3 className="mt-1 text-2xl font-black text-white">
+                  ابدأ الجولة
+                </h3>
+              </div>
+            </div>
+
+            <p className="mb-5 text-sm leading-7 text-white/70">
+              بعد اختيار {REQUIRED_CATEGORY_COUNT} فئات وإدخال بيانات اللعبة،
+              يمكنك البدء مباشرة دون التأثير على أي منطق أو شروط حالية داخل
+              المشروع.
+            </p>
+
+            <button
+              type="submit"
+              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              ابدأ اللعبة
+            </button>
+          </section>
         </div>
+      </div>
 
-        {visibleError ? (
-          <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {visibleError}
-          </div>
-        ) : null}
-      </section>
+      <style>{`
+        @keyframes glowPulse {
+          0%, 100% {
+            opacity: 0.55;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
 
-      <section className="mx-auto max-w-[1400px] rounded-[1.4rem] border border-white/10 bg-[#071126] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:rounded-[1.8rem] md:p-5">
-        <div className="mb-4">
-          <div className="text-cyan-300 text-sm">الخطوة الأخيرة</div>
-          <h3 className="mt-2 text-2xl font-black text-white md:text-3xl">
-            ابدأ الجولة
-          </h3>
-          <p className="mt-2 text-sm text-white/70 md:text-base">
-            بعد اختيار 6 فئات وإدخال بيانات اللعبة، يمكنك البدء مباشرة.
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 md:px-8 md:text-lg"
-          disabled={!isReadyToSubmit || gamesRemaining <= 0}
-        >
-          ابدأ اللعبة
-        </button>
-      </section>
+        .hero-glow {
+          animation: glowPulse 4.6s ease-in-out infinite;
+        }
+      `}</style>
     </form>
   );
 }
@@ -561,6 +726,8 @@ function CategoryCard({
   theme: {
     badge: string;
     glow: string;
+    iconBg: string;
+    iconText: string;
   };
   availability: CategoryAvailability;
 }) {
@@ -570,86 +737,80 @@ function CategoryCard({
     <button
       type="button"
       onClick={onToggle}
-      disabled={!availability.isSelectable}
       className={[
-        "group relative overflow-hidden rounded-[1.25rem] border bg-[#09132c] text-right shadow-[0_14px_30px_rgba(0,0,0,0.22)] transition-all duration-200",
+        "group relative overflow-hidden rounded-[1.45rem] border p-4 text-right shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition duration-300",
         active
-          ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
-          : "border-white/10 hover:-translate-y-0.5 hover:border-white/20",
-        !availability.isSelectable ? "cursor-not-allowed opacity-75" : "",
+          ? "border-cyan-300/30 bg-[linear-gradient(180deg,rgba(21,53,94,0.95)_0%,rgba(7,17,40,0.98)_100%)] shadow-[0_18px_36px_rgba(34,211,238,0.10)]"
+          : "border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] hover:-translate-y-1 hover:border-white/20",
       ].join(" ")}
     >
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.glow}`}
+        className={`pointer-events-none absolute inset-0 bg-radial from-white/10 via-transparent to-transparent opacity-80`}
       />
 
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute right-2 top-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500 text-lg font-black text-white shadow-lg"
+        className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
         aria-label={`عرض وصف ${category.name}`}
       >
-        i
+        <InfoIcon className="h-4 w-4" />
       </button>
 
-      <div
-        className={[
-          "absolute left-2 top-2 z-20 rounded-full border px-2 py-1 text-[10px] font-bold md:px-2.5 md:text-[11px]",
-          badge.className,
-        ].join(" ")}
-      >
-        {badge.text}
-      </div>
-
-      {active ? (
-        <div className="absolute bottom-[3.9rem] left-2 z-20 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2 py-1 text-[10px] font-bold text-cyan-100">
-          تم الاختيار
-        </div>
-      ) : null}
-
       <div className="relative">
-        <div className="aspect-[4/3] w-full overflow-hidden">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${badge.className}`}
+          >
+            <span>{badge.text}</span>
+          </div>
+
+          {active ? (
+            <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-100">
+              تم الاختيار
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mb-4 flex justify-center">
           {category.image_url ? (
-            <img
-              src={category.image_url}
-              alt={category.name}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-            />
+            <div className="h-20 w-20 overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5 shadow-[0_10px_20px_rgba(0,0,0,0.18)]">
+              <img
+                src={category.image_url}
+                alt={category.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
           ) : (
-            <div className="flex h-full items-center justify-center bg-slate-900 text-3xl text-white/25">
-              ✨
+            <div
+              className={`inline-flex h-20 w-20 items-center justify-center rounded-[1.1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_10px_20px_rgba(0,0,0,0.18)]`}
+            >
+              <SparkIcon className="h-7 w-7" />
             </div>
           )}
         </div>
 
+        <div className="text-center">
+          <h3 className="text-lg font-black text-white">{category.name}</h3>
+          <p className="mt-2 text-xs font-bold text-white/45">
+            {active ? "اضغط لإلغاء الاختيار" : "اضغط لاختيار الفئة"}
+          </p>
+        </div>
+
         {!availability.isSelectable ? (
-          <div className="absolute inset-0 bg-slate-950/35" />
+          <div className="mt-4 rounded-[1rem] border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
+            لا توجد أسئلة كافية لبدء لعبة كاملة
+          </div>
         ) : null}
 
         {infoOpen ? (
-          <div className="absolute inset-x-2 top-11 z-20 rounded-[1rem] border border-white/10 bg-slate-950/95 p-3 text-white shadow-2xl">
-            <div className="text-sm font-black md:text-base">{category.name}</div>
-            <p className="mt-2 line-clamp-4 text-[11px] leading-5 text-white/75 md:text-xs md:leading-6">
+          <div className="mt-4 rounded-[1rem] border border-white/10 bg-white/5 p-3 text-sm leading-7 text-white/75">
+            <div className="mb-2 font-black text-white">{category.name}</div>
+            <div>
               {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
-            </p>
-
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <MiniStat label="200" value={availability.easyCount} />
-              <MiniStat label="400" value={availability.mediumCount} />
-              <MiniStat label="600" value={availability.hardCount} />
             </div>
           </div>
         ) : null}
-      </div>
-
-      <div className="relative px-3 py-3 text-center">
-        <div className="line-clamp-2 min-h-[2.8rem] text-base font-black text-white md:text-lg">
-          {category.name}
-        </div>
-
-        <div className="mt-2 text-[11px] text-white/50">
-          {active ? "اضغط لإلغاء الاختيار" : "اضغط لاختيار الفئة"}
-        </div>
       </div>
     </button>
   );
