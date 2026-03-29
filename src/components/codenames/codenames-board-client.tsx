@@ -116,9 +116,7 @@ export default function CodenamesBoardClient({
           filter: `room_code=eq.${room.room_code}`,
         },
         (payload: RealtimePayload<RoomRow>) => {
-          if (payload.new) {
-            setRoom(payload.new);
-          }
+          if (payload.new) setRoom(payload.new);
         }
       )
       .subscribe();
@@ -203,201 +201,218 @@ export default function CodenamesBoardClient({
 
     if (card.is_revealed) {
       if (card.card_type === "red") {
-        return "rounded-2xl border border-red-500/20 bg-red-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-red-400/30 bg-[#ef5b47] text-white shadow-[inset_0_-6px_0_rgba(120,0,0,0.25)]";
       }
       if (card.card_type === "blue") {
-        return "rounded-2xl border border-blue-500/20 bg-blue-500/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-cyan-300/30 bg-[#20a8e0] text-white shadow-[inset_0_-6px_0_rgba(0,60,120,0.25)]";
       }
       if (card.card_type === "assassin") {
-        return "rounded-2xl border border-white/10 bg-black p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-white/10 bg-[#3b3b3b] text-white shadow-[inset_0_-6px_0_rgba(0,0,0,0.35)]";
       }
-      return "rounded-2xl border border-white/10 bg-white/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      return "rounded-[22px] border border-[#d8c1a8]/30 bg-[#e6c8a9] text-[#6f553e] shadow-[inset_0_-6px_0_rgba(110,80,40,0.18)]";
     }
 
     if (showSpymasterColor) {
       if (card.card_type === "red") {
-        return "rounded-2xl border border-red-500/20 bg-red-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-red-400/30 bg-red-500/25 text-white";
       }
       if (card.card_type === "blue") {
-        return "rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-cyan-300/30 bg-cyan-500/25 text-white";
       }
       if (card.card_type === "assassin") {
-        return "rounded-2xl border border-white/10 bg-black/70 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+        return "rounded-[22px] border border-white/10 bg-black/70 text-white";
       }
-      return "rounded-2xl border border-white/10 bg-white/5 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold";
+      return "rounded-[22px] border border-[#d8c1a8]/30 bg-[#e6c8a9]/80 text-[#6f553e]";
     }
 
-    return "rounded-2xl border border-white/10 bg-black/20 p-4 min-h-[110px] flex items-center justify-center text-center text-white font-semibold hover:bg-black/30";
+    return "rounded-[22px] border border-[#d8c1a8]/30 bg-[#e6c8a9] text-[#6f553e] shadow-[inset_0_-6px_0_rgba(110,80,40,0.18)] hover:brightness-95";
   }
 
-  return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">لوحة Codenames</h1>
-            <div className="mt-2 text-sm text-white/70">
-              رمز الغرفة:
-              <span className="ml-2 rounded-xl bg-black/30 px-3 py-1 font-mono text-white">
-                {room.room_code}
-              </span>
-            </div>
+  function SidePanel({
+    title,
+    players,
+    theme,
+  }: {
+    title: string;
+    players: PlayerRow[];
+    theme: "blue" | "red";
+  }) {
+    const wrapper =
+      theme === "blue"
+        ? "rounded-[28px] border border-cyan-300/25 bg-cyan-500/10 p-4"
+        : "rounded-[28px] border border-red-300/25 bg-red-500/10 p-4";
 
-            <div className="mt-2 text-sm text-white/60">
-              اللاعب الحالي:
-              <span className="mx-2 font-semibold text-white">
-                {currentPlayer.guest_name}
-              </span>
-              • {currentPlayer.role}
+    return (
+      <div className={wrapper}>
+        <div className="text-center text-sm font-black uppercase tracking-wide text-white/70">
+          {title}
+        </div>
+        <div className="mt-4 space-y-3">
+          {players.length > 0 ? (
+            players.map((player) => (
+              <div
+                key={player.id}
+                className="rounded-2xl border border-white/10 bg-black/20 p-3"
+              >
+                <div className="text-center text-lg font-black text-white">
+                  {player.guest_name}
+                </div>
+                <div className="mt-1 text-center text-xs font-semibold text-white/60">
+                  {player.role}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm text-white/50">
+              لا يوجد لاعبون
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-              الأحمر المتبقي: {room.red_remaining ?? 0}
-            </div>
-            <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
-              الأزرق المتبقي: {room.blue_remaining ?? 0}
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/70">
-              الدور الحالي: {room.current_turn_team || "-"}
-            </div>
-          </div>
+          )}
         </div>
       </div>
+    );
+  }
 
-      {room.status === "finished" && (
-        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-6 text-emerald-100">
-          <div className="text-2xl font-bold">
-            انتهت اللعبة - الفائز: {room.winner_team === "red" ? "الأحمر" : "الأزرق"}
-          </div>
-        </div>
-      )}
+  const bluePlayers = players.filter((player) => player.team === "blue");
+  const redPlayers = players.filter((player) => player.team === "red");
 
-      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+  return (
+    <div className="mx-auto max-w-[1500px] p-3 md:p-5">
+      <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)_220px]">
         <div className="space-y-4">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <h2 className="text-xl font-bold text-white">آخر clue</h2>
+          <SidePanel title="Blue Team" players={bluePlayers} theme="blue" />
+        </div>
 
-            {activeTurn ? (
-              <div className="mt-4 space-y-2">
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="text-sm text-white/60">الكلمة</div>
-                  <div className="mt-2 text-2xl font-bold text-white">
-                    {activeTurn.clue_word}
-                  </div>
-                </div>
+        <div className="space-y-4">
+          <div className="rounded-[30px] border border-white/10 bg-[#101522] px-5 py-4 text-center shadow-2xl">
+            <div className="text-2xl font-black uppercase tracking-wide text-white">
+              {room.status === "finished"
+                ? "Game Finished"
+                : activeTurn
+                ? "Give your operatives a clue"
+                : room.current_turn_team === "blue"
+                ? "Blue Team Turn"
+                : "Red Team Turn"}
+            </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="text-sm text-white/60">العدد</div>
-                  <div className="mt-2 text-2xl font-bold text-white">
-                    {activeTurn.clue_number}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="text-sm text-white/60">عدد الاختيارات الحالية</div>
-                  <div className="mt-2 text-2xl font-bold text-white">
-                    {activeTurn.guesses_made ?? 0}
-                  </div>
-                </div>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+              <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-4 py-2 text-sm font-bold text-cyan-100">
+                Blue: {room.blue_remaining ?? 0}
               </div>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
-                لا يوجد clue حتى الآن
+              <div className="rounded-full border border-red-300/20 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100">
+                Red: {room.red_remaining ?? 0}
               </div>
-            )}
+              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/75">
+                Turn: {room.current_turn_team || "-"}
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <h2 className="text-xl font-bold text-white">إرسال clue</h2>
+          <div className="grid grid-cols-5 gap-3 md:gap-4">
+            {cards.map((card) => {
+              const classes = getCardClasses(card);
 
-            {canSubmitClue ? (
-              <form action={submitClueAction} className="mt-4 space-y-3">
-                <input type="hidden" name="room_code" value={room.room_code} />
-                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+              if (canRevealCard && !card.is_revealed) {
+                return (
+                  <form key={card.id} action={revealCardAction}>
+                    <input type="hidden" name="room_code" value={room.room_code} />
+                    <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                    <input type="hidden" name="card_id" value={card.id} />
+                    <button
+                      type="submit"
+                      className={`${classes} flex min-h-[98px] w-full items-center justify-center px-2 py-4 text-center text-xl font-black uppercase tracking-wide transition md:min-h-[122px] md:text-2xl`}
+                    >
+                      {card.word}
+                    </button>
+                  </form>
+                );
+              }
 
-                <div>
-                  <label className="mb-2 block text-sm text-white/70">الـ clue</label>
-                  <input
-                    name="clue_word"
-                    placeholder="مثال: سفر"
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/40"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm text-white/70">
-                    عدد الكلمات
-                  </label>
-                  <input
-                    type="number"
-                    name="clue_number"
-                    min={1}
-                    defaultValue={1}
-                    className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-500"
+              return (
+                <div
+                  key={card.id}
+                  className={`${classes} flex min-h-[98px] items-center justify-center px-2 py-4 text-center text-xl font-black uppercase tracking-wide md:min-h-[122px] md:text-2xl`}
                 >
-                  إرسال clue
-                </button>
-              </form>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
-                فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue
-              </div>
-            )}
+                  {card.word}
+                </div>
+              );
+            })}
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-            <h2 className="text-xl font-bold text-white">التحكم بالدور</h2>
+          <div className="rounded-[30px] border border-white/10 bg-[#101522] p-4 shadow-2xl">
+            <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="text-sm font-semibold text-white/60">آخر clue</div>
+                  {activeTurn ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <div className="rounded-2xl bg-white/5 px-4 py-3 text-xl font-black text-white">
+                        {activeTurn.clue_word}
+                      </div>
+                      <div className="rounded-2xl bg-white/5 px-4 py-3 text-xl font-black text-white">
+                        {activeTurn.clue_number}
+                      </div>
+                      <div className="rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold text-white/70">
+                        Guesses: {activeTurn.guesses_made ?? 0}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 text-white/50">لا يوجد clue حتى الآن</div>
+                  )}
+                </div>
 
-            {canEndTurn ? (
-              <form action={endTurnAction} className="mt-4">
-                <input type="hidden" name="room_code" value={room.room_code} />
-                <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
-                <button
-                  type="submit"
-                  className="w-full rounded-2xl bg-orange-600 px-5 py-3 font-medium text-white hover:bg-orange-500"
-                >
-                  إنهاء الدور
-                </button>
-              </form>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
-                لا يمكنك إنهاء الدور الآن
+                {canSubmitClue ? (
+                  <form action={submitClueAction} className="space-y-3">
+                    <input type="hidden" name="room_code" value={room.room_code} />
+                    <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+
+                    <div className="grid gap-3 md:grid-cols-[1fr_120px_auto]">
+                      <input
+                        name="clue_word"
+                        placeholder="YOUR CLUE"
+                        className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-lg font-bold uppercase text-white outline-none placeholder:text-white/35"
+                      />
+                      <input
+                        type="number"
+                        name="clue_number"
+                        min={1}
+                        defaultValue={1}
+                        className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center text-lg font-black text-white outline-none"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-black text-white hover:bg-emerald-400"
+                      >
+                        Send Clue
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/55">
+                    فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue
+                  </div>
+                )}
               </div>
-            )}
+
+              <div className="flex items-end">
+                {canEndTurn && (
+                  <form action={endTurnAction}>
+                    <input type="hidden" name="room_code" value={room.room_code} />
+                    <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                    <button
+                      type="submit"
+                      className="w-full rounded-2xl bg-orange-500 px-6 py-4 text-lg font-black text-white hover:bg-orange-400"
+                    >
+                      إنهاء الدور
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-          {cards.map((card) => {
-            const classes = getCardClasses(card);
-
-            if (canRevealCard && !card.is_revealed) {
-              return (
-                <form key={card.id} action={revealCardAction}>
-                  <input type="hidden" name="room_code" value={room.room_code} />
-                  <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
-                  <input type="hidden" name="card_id" value={card.id} />
-                  <button type="submit" className={`${classes} w-full`}>
-                    {card.word}
-                  </button>
-                </form>
-              );
-            }
-
-            return (
-              <div key={card.id} className={classes}>
-                {card.word}
-              </div>
-            );
-          })}
+        <div className="space-y-4">
+          <SidePanel title="Red Team" players={redPlayers} theme="red" />
         </div>
       </div>
     </div>

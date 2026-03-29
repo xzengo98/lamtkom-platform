@@ -1,43 +1,68 @@
 import Link from "next/link";
-import { createCodenamesRoom } from "./actions";
 
-export default function CreateCodenamesRoomPage() {
+export default function CodenamesHomePage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-6">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <h1 className="text-2xl font-bold text-white">إنشاء غرفة Codenames</h1>
-        <p className="mt-2 text-sm text-white/70">
-          أدخل اسمك ليتم إنشاء غرفة جديدة تلقائيًا
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl p-4 md:p-6">
+      <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a1020] shadow-2xl">
+        <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="relative overflow-hidden p-8 md:p-12">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(239,68,68,0.16),_transparent_35%)]" />
+            <div className="relative z-10">
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
+                لعبة جماعية مباشرة
+              </div>
 
-      <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
-        <form action={createCodenamesRoom} className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm text-white/70">اسمك</label>
-            <input
-              name="guest_name"
-              placeholder="مثال: مصطفى"
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/40"
-            />
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-white md:text-6xl">
+                Codenames
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-base leading-8 text-white/70 md:text-lg">
+                أنشئ غرفة ووزع اللاعبين على الفريقين وحدد الـ Spymasters ثم ابدأ
+                اللعبة. كل الأحداث تتحدث مباشرة عند الجميع داخل الغرفة.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/games/codenames/create"
+                  className="rounded-2xl bg-emerald-500 px-6 py-3 text-base font-bold text-white transition hover:bg-emerald-400"
+                >
+                  إنشاء غرفة
+                </Link>
+                <Link
+                  href="/games/codenames/join"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                >
+                  الانضمام لغرفة
+                </Link>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="submit"
-              className="rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-500"
-            >
-              إنشاء الغرفة
-            </button>
+          <div className="border-t border-white/10 bg-black/20 p-6 lg:border-r-0 lg:border-t-0 lg:border-l lg:border-white/10">
+            <div className="grid gap-4">
+              <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5">
+                <div className="text-sm font-semibold text-blue-200">أزرق</div>
+                <div className="mt-2 text-2xl font-black text-white">
+                  Operatives + Spymaster
+                </div>
+              </div>
 
-            <Link
-              href="/games/codenames"
-              className="rounded-2xl border border-white/10 px-5 py-3 text-white/80 hover:bg-white/5"
-            >
-              رجوع
-            </Link>
+              <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
+                <div className="text-sm font-semibold text-red-200">أحمر</div>
+                <div className="mt-2 text-2xl font-black text-white">
+                  Operatives + Spymaster
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                <div className="text-sm font-semibold text-white/70">اللعب</div>
+                <div className="mt-2 text-xl font-bold text-white">
+                  Clue • كشف الكروت • تبديل الدور • الفوز والخسارة
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

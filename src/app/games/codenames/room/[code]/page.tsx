@@ -9,7 +9,7 @@ import {
 
 type PageProps = {
   params: Promise<{ code: string }>;
-  searchParams?: Promise<{ player_id?: string }>;
+  searchParams?: Promise<{ player_id?: string; error?: string }>;
 };
 
 type RoomRow = {
@@ -46,6 +46,7 @@ export default async function CodenamesRoomPage({
   const { code } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const currentPlayerId = resolvedSearchParams?.player_id?.trim() || "";
+  const errorMessage = resolvedSearchParams?.error?.trim() || "";
   const roomCode = code.toUpperCase();
 
   const { data: roomData, error: roomError } = await supabase
@@ -121,324 +122,279 @@ export default async function CodenamesRoomPage({
     (player) => player.team !== "red" && player.team !== "blue"
   );
 
+  const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
+  const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
+
+  const canStartGame =
+    redPlayers.length > 0 &&
+    bluePlayers.length > 0 &&
+    redSpymasters.length === 1 &&
+    blueSpymasters.length === 1;
+
   function canManagePlayer(player: PlayerRow) {
     if (isHost) return true;
     return safeCurrentPlayer.id === player.id;
   }
 
-  return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-      <RoomStatusWatcher roomCode={room.room_code} playerId={safeCurrentPlayer.id} />
+  function TeamColumn({
+    title,
+    players,
+    theme,
+  }: {
+    title: string;
+    players: PlayerRow[];
+    theme: "red" | "blue";
+  }) {
+    const wrapperClass =
+      theme === "blue"
+        ? "rounded-[28px] border border-cyan-400/20 bg-cyan-500/10 p-5"
+        : "rounded-[28px] border border-red-400/20 bg-red-500/10 p-5";
 
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">غرفة Codenames</h1>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/70">
-              <span>رمز الغرفة</span>
-              <span className="rounded-xl bg-black/30 px-3 py-1 font-mono text-white">
-                {room.room_code}
-              </span>
-            </div>
-            <div className="mt-2 text-sm text-white/60">
-              أنت داخل الغرفة باسم:
-              <span className="mx-2 font-semibold text-white">
-                {getPlayerDisplayName(safeCurrentPlayer)}
-              </span>
-              {isHost ? " • Host" : ""}
-            </div>
-          </div>
+    const badgeClass =
+      theme === "blue"
+        ? "rounded-full border border-cyan-300/20 bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-100"
+        : "rounded-full border border-red-300/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-100";
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/70">
-              الحالة: {room.status || "waiting"}
-            </div>
-
-            {isHost && (
-              <form action={startCodenamesGame}>
-                <input type="hidden" name="room_code" value={room.room_code} />
-                <input
-                  type="hidden"
-                  name="actor_player_id"
-                  value={safeCurrentPlayer.id}
-                />
-                <button
-                  type="submit"
-                  className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-500"
-                >
-                  ابدأ اللعبة
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
-          <div className="text-sm text-white/60">إجمالي اللاعبين</div>
-          <div className="mt-2 text-2xl font-bold text-white">{players.length}</div>
+    return (
+      <section className={wrapperClass}>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-black text-white">{title}</h2>
+          <span className={badgeClass}>{players.length} لاعب</span>
         </div>
 
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5">
-          <div className="text-sm text-red-100/80">الفريق الأحمر</div>
-          <div className="mt-2 text-2xl font-bold text-red-100">
-            {redPlayers.length}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-5">
-          <div className="text-sm text-blue-100/80">الفريق الأزرق</div>
-          <div className="mt-2 text-2xl font-bold text-blue-100">
-            {bluePlayers.length}
-          </div>
-        </div>
-      </div>
-
-      {unassignedPlayers.length > 0 && (
-        <div className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-5">
-          <h2 className="text-lg font-bold text-yellow-100">لاعبون بدون فريق</h2>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {unassignedPlayers.map((player) => {
+        <div className="mt-4 space-y-4">
+          {players.length > 0 ? (
+            players.map((player) => {
               const canManage = canManagePlayer(player);
 
               return (
                 <div
                   key={player.id}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                  className="rounded-[24px] border border-white/10 bg-black/20 p-4"
                 >
-                  <div className="font-semibold text-white">
-                    {getPlayerDisplayName(player)}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-xl font-black text-white">
+                          {getPlayerDisplayName(player)}
+                        </div>
+                        <div className="mt-1 text-sm text-white/60">
+                          {getRoleLabel(player.role)}
+                          {player.is_host ? " • Host" : ""}
+                        </div>
+                      </div>
+                    </div>
+
+                    {canManage ? (
+                      <div className="flex flex-wrap gap-2">
+                        <form action={updatePlayerRole}>
+                          <input type="hidden" name="player_id" value={player.id} />
+                          <input type="hidden" name="room_code" value={room.room_code} />
+                          <input
+                            type="hidden"
+                            name="actor_player_id"
+                            value={safeCurrentPlayer.id}
+                          />
+                          <input type="hidden" name="role" value="operative" />
+                          <button
+                            type="submit"
+                            className={`rounded-2xl px-4 py-2 text-sm font-bold ${
+                              player.role === "operative"
+                                ? "bg-white text-black"
+                                : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                            }`}
+                          >
+                            Operative
+                          </button>
+                        </form>
+
+                        <form action={updatePlayerRole}>
+                          <input type="hidden" name="player_id" value={player.id} />
+                          <input type="hidden" name="room_code" value={room.room_code} />
+                          <input
+                            type="hidden"
+                            name="actor_player_id"
+                            value={safeCurrentPlayer.id}
+                          />
+                          <input type="hidden" name="role" value="spymaster" />
+                          <button
+                            type="submit"
+                            className={`rounded-2xl px-4 py-2 text-sm font-bold ${
+                              player.role === "spymaster"
+                                ? "bg-white text-black"
+                                : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                            }`}
+                          >
+                            Spymaster
+                          </button>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-white/45">لا يمكنك تعديل هذا اللاعب</div>
+                    )}
                   </div>
-
-                  {canManage ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <form action={updatePlayerTeam}>
-                        <input type="hidden" name="player_id" value={player.id} />
-                        <input type="hidden" name="room_code" value={room.room_code} />
-                        <input
-                          type="hidden"
-                          name="actor_player_id"
-                          value={safeCurrentPlayer.id}
-                        />
-                        <input type="hidden" name="team" value="red" />
-                        <button
-                          type="submit"
-                          className="rounded-xl bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500"
-                        >
-                          انقله للأحمر
-                        </button>
-                      </form>
-
-                      <form action={updatePlayerTeam}>
-                        <input type="hidden" name="player_id" value={player.id} />
-                        <input type="hidden" name="room_code" value={room.room_code} />
-                        <input
-                          type="hidden"
-                          name="actor_player_id"
-                          value={safeCurrentPlayer.id}
-                        />
-                        <input type="hidden" name="team" value="blue" />
-                        <button
-                          type="submit"
-                          className="rounded-xl bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-500"
-                        >
-                          انقله للأزرق
-                        </button>
-                      </form>
-                    </div>
-                  ) : (
-                    <div className="mt-3 text-sm text-white/50">
-                      فقط المنشئ أو اللاعب نفسه يمكنه تعديل هذا اللاعب
-                    </div>
-                  )}
                 </div>
               );
-            })}
+            })
+          ) : (
+            <div className="rounded-[24px] border border-white/10 bg-black/20 p-6 text-white/55">
+              لا يوجد لاعبون هنا
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl p-4 md:p-6">
+      <RoomStatusWatcher roomCode={room.room_code} playerId={safeCurrentPlayer.id} />
+
+      <div className="space-y-6">
+        <div className="rounded-[36px] border border-white/10 bg-[#0a1020] p-6 md:p-8">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/65">
+                غرفة مباشرة
+              </div>
+              <h1 className="mt-4 text-4xl font-black text-white md:text-5xl">
+                غرفة Codenames
+              </h1>
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-white/70">
+                <span>رمز الغرفة</span>
+                <span className="rounded-xl bg-black/30 px-3 py-1 font-mono text-white">
+                  {room.room_code}
+                </span>
+              </div>
+              <div className="mt-3 text-sm text-white/60">
+                أنت داخل الغرفة باسم{" "}
+                <span className="font-bold text-white">
+                  {getPlayerDisplayName(safeCurrentPlayer)}
+                </span>
+                {isHost ? " • Host" : ""}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-white/70">
+                الحالة: {room.status || "waiting"}
+              </div>
+
+              {isHost && canStartGame && (
+                <form action={startCodenamesGame}>
+                  <input type="hidden" name="room_code" value={room.room_code} />
+                  <input
+                    type="hidden"
+                    name="actor_player_id"
+                    value={safeCurrentPlayer.id}
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-2xl bg-emerald-500 px-6 py-3 font-black text-white transition hover:bg-emerald-400"
+                  >
+                    ابدأ اللعبة
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+
+          {isHost && !canStartGame && (
+            <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100">
+              يجب أن يكون لكل فريق Spymaster واحد فقط ويوجد لاعب واحد على الأقل في كل فريق
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">
+              {decodeURIComponent(errorMessage)}
+            </div>
+          )}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+            <div className="text-sm font-semibold text-white/60">إجمالي اللاعبين</div>
+            <div className="mt-3 text-4xl font-black text-white">{players.length}</div>
+          </div>
+
+          <div className="rounded-[28px] border border-red-500/20 bg-red-500/10 p-5">
+            <div className="text-sm font-semibold text-red-100/80">الفريق الأحمر</div>
+            <div className="mt-3 text-4xl font-black text-white">{redPlayers.length}</div>
+          </div>
+
+          <div className="rounded-[28px] border border-cyan-500/20 bg-cyan-500/10 p-5">
+            <div className="text-sm font-semibold text-cyan-100/80">الفريق الأزرق</div>
+            <div className="mt-3 text-4xl font-black text-white">{bluePlayers.length}</div>
           </div>
         </div>
-      )}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold text-red-100">الفريق الأحمر</h2>
-            <span className="rounded-xl border border-red-300/20 px-3 py-1 text-sm text-red-100/80">
-              {redPlayers.length} لاعب
-            </span>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {redPlayers.length > 0 ? (
-              redPlayers.map((player) => {
+        {unassignedPlayers.length > 0 && (
+          <div className="rounded-[30px] border border-yellow-500/20 bg-yellow-500/10 p-5">
+            <div className="mb-4 text-xl font-black text-yellow-100">لاعبون بدون فريق</div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {unassignedPlayers.map((player) => {
                 const canManage = canManagePlayer(player);
 
                 return (
                   <div
                     key={player.id}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-4"
+                    className="rounded-[24px] border border-white/10 bg-black/20 p-4"
                   >
-                    <div className="flex flex-col gap-3">
-                      <div>
-                        <div className="font-semibold text-white">
-                          {getPlayerDisplayName(player)}
-                        </div>
-                        <div className="mt-1 text-sm text-white/60">
-                          {getRoleLabel(player.role)}
-                          {player.is_host ? " • Host" : ""}
-                        </div>
-                      </div>
-
-                      {canManage ? (
-                        <div className="flex flex-wrap gap-2">
-                          <form action={updatePlayerRole}>
-                            <input type="hidden" name="player_id" value={player.id} />
-                            <input type="hidden" name="room_code" value={room.room_code} />
-                            <input
-                              type="hidden"
-                              name="actor_player_id"
-                              value={safeCurrentPlayer.id}
-                            />
-                            <input type="hidden" name="role" value="spymaster" />
-                            <button
-                              type="submit"
-                              className={`rounded-xl px-4 py-2 text-sm ${
-                                player.role === "spymaster"
-                                  ? "bg-white text-black"
-                                  : "border border-white/10 text-white hover:bg-white/5"
-                              }`}
-                            >
-                              Spymaster
-                            </button>
-                          </form>
-
-                          <form action={updatePlayerRole}>
-                            <input type="hidden" name="player_id" value={player.id} />
-                            <input type="hidden" name="room_code" value={room.room_code} />
-                            <input
-                              type="hidden"
-                              name="actor_player_id"
-                              value={safeCurrentPlayer.id}
-                            />
-                            <input type="hidden" name="role" value="operative" />
-                            <button
-                              type="submit"
-                              className={`rounded-xl px-4 py-2 text-sm ${
-                                player.role === "operative"
-                                  ? "bg-white text-black"
-                                  : "border border-white/10 text-white hover:bg-white/5"
-                              }`}
-                            >
-                              Operative
-                            </button>
-                          </form>
-                        </div>
-                      ) : (
-                        <div className="text-sm text-white/50">
-                          لا يمكنك تعديل هذا اللاعب
-                        </div>
-                      )}
+                    <div className="text-lg font-black text-white">
+                      {getPlayerDisplayName(player)}
                     </div>
+
+                    {canManage ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <form action={updatePlayerTeam}>
+                          <input type="hidden" name="player_id" value={player.id} />
+                          <input type="hidden" name="room_code" value={room.room_code} />
+                          <input
+                            type="hidden"
+                            name="actor_player_id"
+                            value={safeCurrentPlayer.id}
+                          />
+                          <input type="hidden" name="team" value="blue" />
+                          <button
+                            type="submit"
+                            className="rounded-2xl bg-cyan-500 px-4 py-2 text-sm font-black text-white hover:bg-cyan-400"
+                          >
+                            انقله للأزرق
+                          </button>
+                        </form>
+
+                        <form action={updatePlayerTeam}>
+                          <input type="hidden" name="player_id" value={player.id} />
+                          <input type="hidden" name="room_code" value={room.room_code} />
+                          <input
+                            type="hidden"
+                            name="actor_player_id"
+                            value={safeCurrentPlayer.id}
+                          />
+                          <input type="hidden" name="team" value="red" />
+                          <button
+                            type="submit"
+                            className="rounded-2xl bg-red-500 px-4 py-2 text-sm font-black text-white hover:bg-red-400"
+                          >
+                            انقله للأحمر
+                          </button>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="mt-3 text-sm text-white/45">لا يمكنك تعديل هذا اللاعب</div>
+                    )}
                   </div>
                 );
-              })
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
-                لا يوجد لاعبون في الفريق الأحمر
-              </div>
-            )}
+              })}
+            </div>
           </div>
-        </section>
+        )}
 
-        <section className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold text-blue-100">الفريق الأزرق</h2>
-            <span className="rounded-xl border border-blue-300/20 px-3 py-1 text-sm text-blue-100/80">
-              {bluePlayers.length} لاعب
-            </span>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {bluePlayers.length > 0 ? (
-              bluePlayers.map((player) => {
-                const canManage = canManagePlayer(player);
-
-                return (
-                  <div
-                    key={player.id}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-4"
-                  >
-                    <div className="flex flex-col gap-3">
-                      <div>
-                        <div className="font-semibold text-white">
-                          {getPlayerDisplayName(player)}
-                        </div>
-                        <div className="mt-1 text-sm text-white/60">
-                          {getRoleLabel(player.role)}
-                          {player.is_host ? " • Host" : ""}
-                        </div>
-                      </div>
-
-                      {canManage ? (
-                        <div className="flex flex-wrap gap-2">
-                          <form action={updatePlayerRole}>
-                            <input type="hidden" name="player_id" value={player.id} />
-                            <input type="hidden" name="room_code" value={room.room_code} />
-                            <input
-                              type="hidden"
-                              name="actor_player_id"
-                              value={safeCurrentPlayer.id}
-                            />
-                            <input type="hidden" name="role" value="spymaster" />
-                            <button
-                              type="submit"
-                              className={`rounded-xl px-4 py-2 text-sm ${
-                                player.role === "spymaster"
-                                  ? "bg-white text-black"
-                                  : "border border-white/10 text-white hover:bg-white/5"
-                              }`}
-                            >
-                              Spymaster
-                            </button>
-                          </form>
-
-                          <form action={updatePlayerRole}>
-                            <input type="hidden" name="player_id" value={player.id} />
-                            <input type="hidden" name="room_code" value={room.room_code} />
-                            <input
-                              type="hidden"
-                              name="actor_player_id"
-                              value={safeCurrentPlayer.id}
-                            />
-                            <input type="hidden" name="role" value="operative" />
-                            <button
-                              type="submit"
-                              className={`rounded-xl px-4 py-2 text-sm ${
-                                player.role === "operative"
-                                  ? "bg-white text-black"
-                                  : "border border-white/10 text-white hover:bg-white/5"
-                              }`}
-                            >
-                              Operative
-                            </button>
-                          </form>
-                        </div>
-                      ) : (
-                        <div className="text-sm text-white/50">
-                          لا يمكنك تعديل هذا اللاعب
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-white/60">
-                لا يوجد لاعبون في الفريق الأزرق
-              </div>
-            )}
-          </div>
-        </section>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <TeamColumn title="الفريق الأزرق" players={bluePlayers} theme="blue" />
+          <TeamColumn title="الفريق الأحمر" players={redPlayers} theme="red" />
+        </div>
       </div>
     </div>
   );

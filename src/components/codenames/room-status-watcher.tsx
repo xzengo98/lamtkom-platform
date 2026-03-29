@@ -33,7 +33,6 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
         },
         (payload: RoomRealtimePayload) => {
           const next = payload.new;
-
           if (next?.status === "active") {
             router.replace(
               `/games/codenames/board/${roomCode}?player_id=${encodeURIComponent(playerId)}`
