@@ -89,7 +89,7 @@ const features: FeatureItem[] = [
   {
     title: "مناسبة للهاتف",
     description:
-      "التصميم يظل مريحًا على الهاتف، مع تجربة أفضل في التنقل واللعب ومتابعة النتائج.",
+      "التصميم يبقى مريحًا على الهاتف، مع تجربة أفضل في التنقل واللعب ومتابعة النتائج.",
     icon: "mobile",
   },
   {
@@ -114,7 +114,7 @@ const steps: StepItem[] = [
   {
     step: "03",
     title: "تابع النتيجة",
-    description: "احسب النقاط وشاهد الفائز النهائي ضمن تجربة مرتبة وواضحة.",
+    description: "احسب النقاط وشاهد الفائز النهائي ضمن تجربة انيقة وواضحة.",
   },
 ];
 
@@ -528,7 +528,7 @@ export default function HomePage() {
                   <div className="mb-2 inline-flex rounded-2xl border border-violet-300/20 bg-violet-400/10 p-2 text-violet-100">
                     <SparkIcon className="h-4 w-4" />
                   </div>
-                  <div className="text-2xl font-black text-white">متعة</div>
+                  <div className="text-2xl font-black text-white">تسلية</div>
                   <div className="mt-1 text-xs font-bold text-white/55">
                     الهدف
                   </div>
@@ -566,7 +566,7 @@ export default function HomePage() {
               <span>ما الذي يميز المنصة؟</span>
             </div>
             <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-              تجربة مرتبة وواضحة من البداية للنهاية
+              تجربة انيقة وواضحة منذ البداية وحتى النهاية
             </h2>
           </div>
 
