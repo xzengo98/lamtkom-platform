@@ -389,8 +389,8 @@ export default function StartGameForm({
             </h1>
 
             <p className="mt-3 text-sm leading-7 text-white/72 md:text-base">
-              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
-              مباشرة، مع الحفاظ على جميع شروط الحساب والمنطق الحالي كما هو.
+              اختر اسم اللعبة ثم أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
+              مباشرة.
             </p>
           </div>
 
@@ -727,7 +727,7 @@ function CategoryCard({
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
+        className="absolute left-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
         aria-label={`عرض وصف ${category.name}`}
       >
         <InfoIcon className="h-4 w-4" />
