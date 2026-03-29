@@ -134,9 +134,11 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
 function RichContent({
   html,
   large = false,
+  compact = false,
 }: {
   html: string | null | undefined;
   large?: boolean;
+  compact?: boolean;
 }) {
   const safeHtml = html?.trim();
 
@@ -152,12 +154,28 @@ function RichContent({
     <div
       className={[
         "max-w-none text-center text-white",
-        large ? "text-lg md:text-3xl" : "text-base md:text-lg",
-        "[&_p]:my-0 [&_p]:mb-4 [&_p]:text-center [&_p]:leading-8 md:[&_p]:leading-10",
+        large
+          ? compact
+            ? "text-lg md:text-2xl"
+            : "text-xl md:text-3xl"
+          : "text-base md:text-lg",
+        "[&_p]:my-0 [&_p]:text-center",
+        compact
+          ? "[&_p]:mb-5 [&_p]:leading-8 md:[&_p]:leading-9"
+          : "[&_p]:mb-7 [&_p]:leading-9 md:[&_p]:leading-10",
         "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
-        "[&_img]:mx-auto [&_img]:my-4 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[140px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-        "[&_iframe]:mx-auto [&_iframe]:my-4 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
-        "[&_video]:mx-auto [&_video]:my-4 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
+        "[&_img]:mx-auto [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        compact
+          ? "[&_img]:my-5 [&_img]:max-h-[120px] md:[&_img]:max-h-[180px]"
+          : "[&_img]:my-7 [&_img]:max-h-[150px] md:[&_img]:max-h-[220px]",
+        "[&_iframe]:mx-auto [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:rounded-[1rem]",
+        compact
+          ? "[&_iframe]:my-5 [&_iframe]:max-h-[180px]"
+          : "[&_iframe]:my-7 [&_iframe]:max-h-[220px]",
+        "[&_video]:mx-auto [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:rounded-[1rem]",
+        compact
+          ? "[&_video]:my-5 [&_video]:max-h-[180px]"
+          : "[&_video]:my-7 [&_video]:max-h-[220px]",
       ].join(" ")}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
@@ -470,6 +488,54 @@ function TeamCard({
   );
 }
 
+function CategoryCard({
+  category,
+  compact = false,
+}: {
+  category: Category;
+  compact?: boolean;
+}) {
+  const visual = getVisualBySlug(category.slug);
+
+  return (
+    <div
+      className={[
+        "relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_12px_26px_rgba(0,0,0,0.20)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(34,211,238,0.12)]",
+        visual.gradient,
+        compact ? "p-2.5" : "p-3",
+      ].join(" ")}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.09),transparent_50%)] opacity-80" />
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+
+      <div
+        className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-[1rem] border border-white/10 bg-white/10 shadow-[0_10px_20px_rgba(0,0,0,0.18)] ${
+          compact ? "h-10 w-10" : "h-16 w-16"
+        }`}
+      >
+        {category.image_url ? (
+          <img
+            src={category.image_url}
+            alt={category.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="text-[10px] font-black text-white/70">فئة</div>
+        )}
+      </div>
+
+      <h3
+        className={[
+          "relative mt-3 font-black leading-5 text-white",
+          compact ? "text-[11px]" : "text-lg",
+        ].join(" ")}
+      >
+        {category.name}
+      </h3>
+    </div>
+  );
+}
+
 function QuestionCell({
   question,
   points,
@@ -533,11 +599,13 @@ function QuestionOverlay({
   openQuestion,
   teamOne,
   teamTwo,
+  activeTurnName,
   showAnswer,
   showWinnerPicker,
   modalBusy,
   timeLeft,
   timerRunning,
+  isLandscapePhone,
   onClose,
   onRevealAnswer,
   onGoToWinnerPicker,
@@ -550,11 +618,13 @@ function QuestionOverlay({
   openQuestion: OpenQuestion;
   teamOne: string;
   teamTwo: string;
+  activeTurnName: string;
   showAnswer: boolean;
   showWinnerPicker: boolean;
   modalBusy: boolean;
   timeLeft: number;
   timerRunning: boolean;
+  isLandscapePhone: boolean;
   onClose: () => void;
   onRevealAnswer: () => void;
   onGoToWinnerPicker: () => void;
@@ -573,20 +643,72 @@ function QuestionOverlay({
     Math.min(100, (timeLeft / QUESTION_TIMER_SECONDS) * 100),
   );
 
+  const compact = isLandscapePhone;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
-      <div className="flex h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[92vh]">
-        <div className="shrink-0 border-b border-white/10 px-3 py-3 md:px-6 md:py-5">
-          <div className="flex flex-col gap-4">
-            <div className="hidden items-start justify-between md:flex">
-              <TeamPortrait
-                teamName={teamOne}
-                avatarUrl={TEAM_BLUE_AVATAR}
-                accent="blue"
-                compact
-              />
+      <div
+        className={[
+          "flex w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]",
+          compact ? "h-[96vh]" : "h-[92vh]",
+        ].join(" ")}
+      >
+        <div
+          className={[
+            "shrink-0 border-b border-white/10",
+            compact ? "px-3 py-3" : "px-6 py-5",
+          ].join(" ")}
+        >
+          <div className="flex flex-col gap-3">
+            {!compact ? (
+              <div className="grid items-start gap-3 md:grid-cols-[140px_minmax(0,1fr)_140px]">
+                <div className="flex justify-start">
+                  <TeamPortrait
+                    teamName={teamOne}
+                    avatarUrl={TEAM_BLUE_AVATAR}
+                    accent="blue"
+                    compact
+                  />
+                </div>
 
-              <div className="flex flex-1 flex-col items-center px-4">
+                <div className="flex flex-col items-center">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                      {openQuestion.categoryName}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                      {openQuestion.points} نقطة
+                    </span>
+                    {toleranceVisible ? (
+                      <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
+                        السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                        {openQuestion.year_tolerance_after ?? 0}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-3 text-center">
+                    <h2 className="text-5xl font-black text-white">
+                      {!showAnswer && !showWinnerPicker
+                        ? "السؤال"
+                        : showAnswer && !showWinnerPicker
+                          ? "الإجابة الصحيحة"
+                          : "تحديد الفريق الفائز"}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <TeamPortrait
+                    teamName={teamTwo}
+                    avatarUrl={TEAM_ORANGE_AVATAR}
+                    accent="orange"
+                    compact
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
                     {openQuestion.categoryName}
@@ -594,85 +716,60 @@ function QuestionOverlay({
                   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
                     {openQuestion.points} نقطة
                   </span>
-                  {toleranceVisible ? (
-                    <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
-                      السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                      {openQuestion.year_tolerance_after ?? 0}
-                    </span>
-                  ) : null}
                 </div>
 
-                <div className="mt-3 text-center">
-                  <h2 className="text-3xl font-black text-white md:text-5xl">
-                    {!showAnswer && !showWinnerPicker
-                      ? "السؤال"
-                      : showAnswer && !showWinnerPicker
-                        ? "الإجابة الصحيحة"
-                        : "تحديد الفريق الفائز"}
-                  </h2>
+                <h2 className="text-3xl font-black text-white">
+                  {!showAnswer && !showWinnerPicker
+                    ? "السؤال"
+                    : showAnswer && !showWinnerPicker
+                      ? "الإجابة الصحيحة"
+                      : "تحديد الفريق الفائز"}
+                </h2>
+
+                <div className="flex items-center justify-center gap-3">
+                  <TeamMini
+                    teamName={teamOne}
+                    avatarUrl={TEAM_BLUE_AVATAR}
+                    accent="blue"
+                  />
+                  <TeamMini
+                    teamName={teamTwo}
+                    avatarUrl={TEAM_ORANGE_AVATAR}
+                    accent="orange"
+                  />
                 </div>
               </div>
-
-              <TeamPortrait
-                teamName={teamTwo}
-                avatarUrl={TEAM_ORANGE_AVATAR}
-                accent="orange"
-                compact
-              />
-            </div>
-
-            <div className="md:hidden">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                  {openQuestion.categoryName}
-                </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-                  {openQuestion.points} نقطة
-                </span>
-              </div>
-
-              <div className="mt-3 text-center">
-                <h2 className="text-3xl font-black text-white">السؤال</h2>
-              </div>
-
-              <div className="mt-4 flex items-center justify-center gap-3">
-                <TeamMini
-                  teamName={teamOne}
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  accent="blue"
-                />
-                <TeamMini
-                  teamName={teamTwo}
-                  avatarUrl={TEAM_ORANGE_AVATAR}
-                  accent="orange"
-                />
-              </div>
-            </div>
+            )}
 
             {!showAnswer && !showWinnerPicker ? (
-              <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] p-4 md:p-5 shadow-[0_16px_35px_rgba(0,0,0,0.2)]">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-sm font-black text-white/75">
-                    <TimerIcon className="h-5 w-5 text-cyan-300" />
+              <div
+                className={[
+                  "rounded-[1.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[0_16px_35px_rgba(0,0,0,0.2)]",
+                  compact ? "p-3" : "p-4",
+                ].join(" ")}
+              >
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs font-black text-white/75 md:text-sm">
+                    <TimerIcon className="h-4 w-4 text-cyan-300 md:h-5 md:w-5" />
                     <span>المؤقت</span>
                   </div>
-                  <div className="text-2xl font-black text-white">
+                  <div className="text-xl font-black text-white md:text-2xl">
                     {formatCountdown(timeLeft)}
                   </div>
                 </div>
 
-                <div className="h-4 overflow-hidden rounded-full bg-white/10">
+                <div className="h-3 overflow-hidden rounded-full bg-white/10">
                   <div
                     className="h-full rounded-full bg-cyan-400 transition-[width]"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
 
-                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                <div className="mt-3 flex flex-wrap justify-center gap-2 md:gap-3">
                   <button
                     type="button"
                     onClick={onToggleTimer}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-xs font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-5 md:py-3 md:text-sm"
                   >
                     <TimerIcon className="h-4 w-4" />
                     <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
@@ -681,7 +778,7 @@ function QuestionOverlay({
                   <button
                     type="button"
                     onClick={onResetTimer}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
                   >
                     <SparkIcon className="h-4 w-4" />
                     <span>إعادة المؤقت</span>
@@ -692,10 +789,15 @@ function QuestionOverlay({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
+        <div
+          className={[
+            "min-h-0 flex-1 overflow-y-auto",
+            compact ? "px-3 py-3" : "px-6 py-6",
+          ].join(" ")}
+        >
           {!showAnswer && !showWinnerPicker ? (
             <div className="rounded-[1.5rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
-              <RichContent html={openQuestion.question_text} large />
+              <RichContent html={openQuestion.question_text} large compact={compact} />
             </div>
           ) : showAnswer && !showWinnerPicker ? (
             <div className="rounded-[1.5rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
@@ -703,7 +805,7 @@ function QuestionOverlay({
                 <AnswerIcon className="h-4 w-4" />
                 <span>الإجابة الصحيحة</span>
               </div>
-              <RichContent html={openQuestion.answer_text} large />
+              <RichContent html={openQuestion.answer_text} large compact={compact} />
             </div>
           ) : (
             <div>
@@ -774,73 +876,85 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div className="shrink-0 border-t border-white/10 px-3 py-3 md:px-6 md:py-4">
-          {!showAnswer && !showWinnerPicker ? (
-            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                <SparkIcon className="h-4 w-4" />
-                <span>إغلاق</span>
-              </button>
-              <button
-                type="button"
-                onClick={onRevealAnswer}
-                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-              >
-                <AnswerIcon className="h-4 w-4" />
-                <span>إظهار الإجابة</span>
-              </button>
+        <div
+          className={[
+            "shrink-0 border-t border-white/10",
+            compact ? "px-3 py-3" : "px-6 py-4",
+          ].join(" ")}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-[11px] font-black text-white/55 md:text-sm">
+              الدور الحالي:{" "}
+              <span className="text-cyan-100">{activeTurnName}</span>
             </div>
-          ) : showAnswer && !showWinnerPicker ? (
-            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                <SparkIcon className="h-4 w-4" />
-                <span>إغلاق</span>
-              </button>
-              <button
-                type="button"
-                onClick={onBackToQuestion}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                <GamepadIcon className="h-4 w-4" />
-                <span>ارجع للسؤال</span>
-              </button>
-              <button
-                type="button"
-                onClick={onGoToWinnerPicker}
-                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-              >
-                <CrownIcon className="h-4 w-4" />
-                <span>أي فريق؟</span>
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-wrap justify-center gap-3 md:justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                <SparkIcon className="h-4 w-4" />
-                <span>إغلاق</span>
-              </button>
-              <button
-                type="button"
-                onClick={onBackToAnswer}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-              >
-                <AnswerIcon className="h-4 w-4" />
-                <span>العودة للإجابة</span>
-              </button>
-            </div>
-          )}
+
+            {!showAnswer && !showWinnerPicker ? (
+              <div className="flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                >
+                  <SparkIcon className="h-4 w-4" />
+                  <span>إغلاق</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onRevealAnswer}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-4 py-2.5 text-xs font-black text-slate-950 transition hover:bg-cyan-400 md:px-5 md:py-3 md:text-sm"
+                >
+                  <AnswerIcon className="h-4 w-4" />
+                  <span>إظهار الإجابة</span>
+                </button>
+              </div>
+            ) : showAnswer && !showWinnerPicker ? (
+              <div className="flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                >
+                  <SparkIcon className="h-4 w-4" />
+                  <span>إغلاق</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onBackToQuestion}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                >
+                  <GamepadIcon className="h-4 w-4" />
+                  <span>ارجع للسؤال</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onGoToWinnerPicker}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-4 py-2.5 text-xs font-black text-slate-950 transition hover:bg-cyan-400 md:px-5 md:py-3 md:text-sm"
+                >
+                  <CrownIcon className="h-4 w-4" />
+                  <span>أي فريق؟</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                >
+                  <SparkIcon className="h-4 w-4" />
+                  <span>إغلاق</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onBackToAnswer}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                >
+                  <AnswerIcon className="h-4 w-4" />
+                  <span>العودة للإجابة</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -1036,6 +1150,7 @@ export default function GameBoardClient({
       : "تعادل";
 
   const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
 
   function updateState(updater: (prev: BoardState) => BoardState) {
     setBoardState((prev) => {
@@ -1206,7 +1321,7 @@ export default function GameBoardClient({
 
               <div className="flex flex-wrap gap-2">
                 <StatusPill
-                  label={`الدور الآن: ${activeTurn === "teamOne" ? teamOne : teamTwo}`}
+                  label={`الدور الآن: ${activeTurnName}`}
                   icon={<GamepadIcon className="h-4 w-4 text-cyan-300" />}
                 />
                 <StatusPill
@@ -1295,44 +1410,12 @@ export default function GameBoardClient({
                   }
                 >
                   {boardColumns.map((column) => {
-                    const visual = getVisualBySlug(column.category.slug);
-
                     return (
                       <div key={column.category.id} className="flex flex-col gap-2">
-                        <div
-                          className={[
-                            "relative overflow-hidden rounded-[1.2rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_10px_24px_rgba(0,0,0,0.22)]",
-                            visual.gradient,
-                            compactLandscape ? "p-2" : "p-3",
-                          ].join(" ")}
-                        >
-                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] opacity-70" />
-
-                          <div
-                            className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-[0.95rem] border border-white/10 bg-white/10 shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${
-                              compactLandscape ? "h-10 w-10" : "h-16 w-16"
-                            }`}
-                          >
-                            {column.category.image_url ? (
-                              <img
-                                src={column.category.image_url}
-                                alt={column.category.name}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="text-[10px] font-black text-white/70">فئة</div>
-                            )}
-                          </div>
-
-                          <h3
-                            className={[
-                              "relative mt-3 font-black leading-5 text-white",
-                              compactLandscape ? "text-[11px]" : "text-lg",
-                            ].join(" ")}
-                          >
-                            {column.category.name}
-                          </h3>
-                        </div>
+                        <CategoryCard
+                          category={column.category}
+                          compact={compactLandscape}
+                        />
 
                         {column.rows.map((row) => (
                           <div
@@ -1375,11 +1458,13 @@ export default function GameBoardClient({
           openQuestion={openQuestion}
           teamOne={teamOne}
           teamTwo={teamTwo}
+          activeTurnName={activeTurnName}
           showAnswer={boardState.showAnswer}
           showWinnerPicker={boardState.showWinnerPicker}
           modalBusy={modalBusy}
           timeLeft={boardState.timeLeft}
           timerRunning={timerRunning}
+          isLandscapePhone={isLandscapePhone}
           onClose={handleCloseOverlay}
           onRevealAnswer={handleRevealAnswer}
           onGoToWinnerPicker={handleGoToWinnerPicker}
