@@ -88,7 +88,10 @@ async function getRoomAndActor({
   return { supabase, room, actor };
 }
 
-async function getActiveTurn(supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>, roomId: string) {
+async function getActiveTurn(
+  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>,
+  roomId: string
+) {
   const { data, error } = await supabase
     .from("codenames_turns")
     .select("id, room_id, team, clue_word, clue_number, turn_status, guesses_made")
@@ -140,17 +143,9 @@ export async function submitCodenamesClue(formData: FormData) {
     throw new Error("ليس دور فريقك الآن");
   }
 
-  const { error: closeOldTurnsError } = await supabase
-    .from("codenames_turns")
-    .update({
-      turn_status: "ended",
-      ended_at: new Date().toISOString(),
-    })
-    .eq("room_id", room.id)
-    .eq("turn_status", "active");
-
-  if (closeOldTurnsError) {
-    throw new Error(closeOldTurnsError.message);
+  const activeTurn = await getActiveTurn(supabase, room.id);
+  if (activeTurn) {
+    throw new Error("تم إرسال clue بالفعل، يجب إنهاء هذا الدور أولًا");
   }
 
   const { error: insertTurnError } = await supabase
@@ -208,7 +203,6 @@ export async function endCodenamesTurn(formData: FormData) {
     .from("codenames_rooms")
     .update({
       current_turn_team: nextTeam,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", room.id);
 
@@ -248,6 +242,13 @@ export async function revealCodenamesCard(formData: FormData) {
     throw new Error("يجب إرسال clue أولًا");
   }
 
+  const maxAllowedGuesses = (activeTurn.clue_number ?? 0) + 1;
+  const currentGuessesMade = activeTurn.guesses_made ?? 0;
+
+  if (currentGuessesMade >= maxAllowedGuesses) {
+    throw new Error("تم استهلاك الحد الأقصى من المحاولات لهذا الدور");
+  }
+
   const { data: cardData, error: cardError } = await supabase
     .from("codenames_cards")
     .select("id, room_id, position_index, word, card_type, is_revealed")
@@ -278,7 +279,7 @@ export async function revealCodenamesCard(formData: FormData) {
     throw new Error(revealError.message);
   }
 
-  const nextGuessesMade = (activeTurn.guesses_made ?? 0) + 1;
+  const nextGuessesMade = currentGuessesMade + 1;
 
   const { error: updateTurnError } = await supabase
     .from("codenames_turns")
@@ -308,6 +309,7 @@ export async function revealCodenamesCard(formData: FormData) {
       roomStatus = "finished";
       winnerTeam = "red";
     }
+
     if (currentTeam !== "red") {
       shouldEndTurn = true;
     }
@@ -318,6 +320,7 @@ export async function revealCodenamesCard(formData: FormData) {
       roomStatus = "finished";
       winnerTeam = "blue";
     }
+
     if (currentTeam !== "blue") {
       shouldEndTurn = true;
     }
@@ -330,6 +333,15 @@ export async function revealCodenamesCard(formData: FormData) {
     shouldEndTurn = true;
   }
 
+  // قاعدة +1
+  if (
+    roomStatus === "active" &&
+    card.card_type === currentTeam &&
+    nextGuessesMade >= maxAllowedGuesses
+  ) {
+    shouldEndTurn = true;
+  }
+
   if (roomStatus === "finished") {
     const { error: finishRoomError } = await supabase
       .from("codenames_rooms")
@@ -339,7 +351,6 @@ export async function revealCodenamesCard(formData: FormData) {
         red_remaining: redRemaining,
         blue_remaining: blueRemaining,
         assassin_revealed: assassinRevealed,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", room.id);
 
@@ -384,7 +395,6 @@ export async function revealCodenamesCard(formData: FormData) {
         current_turn_team: nextTeam,
         red_remaining: redRemaining,
         blue_remaining: blueRemaining,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", room.id);
 
@@ -397,7 +407,6 @@ export async function revealCodenamesCard(formData: FormData) {
       .update({
         red_remaining: redRemaining,
         blue_remaining: blueRemaining,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", room.id);
 

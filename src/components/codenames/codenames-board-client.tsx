@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -44,6 +45,14 @@ type TurnRow = {
   created_at?: string | null;
 };
 
+type PreviewSelection = {
+  playerId: string;
+  playerName: string;
+  cardId: string;
+  word: string;
+  team: string | null;
+} | null;
+
 type RealtimePayload<T> = {
   new: T | null;
   old: T | null;
@@ -77,6 +86,8 @@ export default function CodenamesBoardClient({
   const [players, setPlayers] = useState<PlayerRow[]>(initialPlayers);
   const [turns, setTurns] = useState<TurnRow[]>(initialTurns);
   const [selectedCard, setSelectedCard] = useState<CardRow | null>(null);
+  const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
+  const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -100,19 +111,22 @@ export default function CodenamesBoardClient({
     return null;
   }
 
-  const isSpymaster = currentPlayer.role === "spymaster";
-  const isOperative = currentPlayer.role === "operative";
-  const isCurrentTeam = currentPlayer.team === room.current_turn_team;
+  const safeCurrentPlayer = currentPlayer as PlayerRow;
+  const isSpymaster = safeCurrentPlayer.role === "spymaster";
+  const isOperative = safeCurrentPlayer.role === "operative";
+  const isCurrentTeam = safeCurrentPlayer.team === room.current_turn_team;
   const canSubmitClue = Boolean(
-    isSpymaster && isCurrentTeam && room.status === "active"
+    isSpymaster && isCurrentTeam && room.status === "active" && !activeTurn
   );
   const canRevealCard = Boolean(
     isOperative && isCurrentTeam && activeTurn && room.status === "active"
   );
-  const canEndTurn = Boolean(isCurrentTeam && room.status === "active");
+  const canEndTurn = Boolean(isCurrentTeam && room.status === "active" && activeTurn);
 
   const bluePlayers = players.filter((player) => player.team === "blue");
   const redPlayers = players.filter((player) => player.team === "red");
+  const spectators = players.filter((player) => player.team === "spectator");
+
   const blueOperatives = bluePlayers.filter((player) => player.role === "operative");
   const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
   const redOperatives = redPlayers.filter((player) => player.role === "operative");
@@ -156,6 +170,7 @@ export default function CodenamesBoardClient({
   useEffect(() => {
     let isMounted = true;
     const supabase = getSupabaseBrowserClient();
+    const previewChannel = supabase.channel(`codenames-preview-${room.room_code}`);
 
     const safeRefresh = async () => {
       if (!isMounted) return;
@@ -226,7 +241,15 @@ export default function CodenamesBoardClient({
       )
       .subscribe();
 
-    // Polling fallback حتى لو realtime تعطل أو تأخر
+    previewChannel
+      .on("broadcast", { event: "preview-selection" }, ({ payload }: { payload: PreviewSelection }) => {
+        setPreviewSelection(payload);
+      })
+      .on("broadcast", { event: "clear-preview" }, () => {
+        setPreviewSelection(null);
+      })
+      .subscribe();
+
     const interval = setInterval(() => {
       safeRefresh();
     }, 1200);
@@ -238,15 +261,42 @@ export default function CodenamesBoardClient({
       supabase.removeChannel(cardsChannel);
       supabase.removeChannel(playersChannel);
       supabase.removeChannel(turnsChannel);
+      supabase.removeChannel(previewChannel);
     };
   }, [room.id, room.room_code]);
 
+  async function sendPreview(card: CardRow | null) {
+    const supabase = getSupabaseBrowserClient();
+    const channel = supabase.channel(`codenames-preview-${room.room_code}`);
+
+    if (!card) {
+      await channel.send({
+        type: "broadcast",
+        event: "clear-preview",
+        payload: {},
+      });
+      return;
+    }
+
+    await channel.send({
+      type: "broadcast",
+      event: "preview-selection",
+      payload: {
+        playerId: safeCurrentPlayer.id,
+        playerName: safeCurrentPlayer.guest_name || "لاعب",
+        cardId: card.id,
+        word: card.word,
+        team: safeCurrentPlayer.team,
+      } satisfies PreviewSelection,
+    });
+  }
+
   useEffect(() => {
     if (!selectedCard) return;
-
     const stillExists = cards.find((card) => card.id === selectedCard.id);
     if (!stillExists || stillExists.is_revealed) {
       setSelectedCard(null);
+      setPreviewSelection(null);
     }
   }, [cards, selectedCard]);
 
@@ -293,29 +343,7 @@ export default function CodenamesBoardClient({
     } bg-[#e7c8a9] text-[#6d533d] shadow-[inset_0_-8px_0_rgba(110,80,40,0.15)] hover:brightness-95`;
   }
 
-  function PlayerPill({
-    player,
-    theme,
-  }: {
-    player: PlayerRow;
-    theme: "blue" | "red";
-  }) {
-    return (
-      <div
-        className={`rounded-2xl border p-3 ${
-          theme === "blue"
-            ? "border-cyan-300/20 bg-cyan-500/10"
-            : "border-red-300/20 bg-red-500/10"
-        }`}
-      >
-        <div className="text-center text-lg font-black text-white">
-          {player.guest_name}
-        </div>
-      </div>
-    );
-  }
-
-  function TeamSide({
+  function SideTeam({
     theme,
     operatives,
     spymasters,
@@ -348,7 +376,14 @@ export default function CodenamesBoardClient({
           <div className="mt-3 space-y-3">
             {operatives.length > 0 ? (
               operatives.map((player) => (
-                <PlayerPill key={player.id} player={player} theme={theme} />
+                <div
+                  key={player.id}
+                  className="rounded-2xl border border-white/10 bg-black/20 p-3"
+                >
+                  <div className="text-center text-lg font-black text-white">
+                    {player.guest_name}
+                  </div>
+                </div>
               ))
             ) : (
               <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
@@ -358,20 +393,21 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-        <div
-          className={`rounded-[28px] border p-4 ${
-            theme === "blue"
-              ? "border-cyan-300/25 bg-cyan-500/10"
-              : "border-red-300/25 bg-red-500/10"
-          }`}
-        >
+        <div className={wrapper}>
           <div className="text-center text-sm font-black uppercase tracking-wide text-white/70">
             Spymasters
           </div>
           <div className="mt-3 space-y-3">
             {spymasters.length > 0 ? (
               spymasters.map((player) => (
-                <PlayerPill key={player.id} player={player} theme={theme} />
+                <div
+                  key={player.id}
+                  className="rounded-2xl border border-white/10 bg-black/20 p-3"
+                >
+                  <div className="text-center text-lg font-black text-white">
+                    {player.guest_name}
+                  </div>
+                </div>
               ))
             ) : (
               <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
@@ -381,9 +417,7 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-        <div
-          className={`rounded-[24px] border border-white/10 bg-black/25 px-4 py-5 text-center`}
-        >
+        <div className="rounded-[24px] border border-white/10 bg-black/25 px-4 py-5 text-center">
           <div className="text-sm font-semibold text-white/55">Cards Remaining</div>
           <div
             className={`mt-2 text-5xl font-black ${
@@ -397,23 +431,55 @@ export default function CodenamesBoardClient({
     );
   }
 
+  const finished = room.status === "finished";
+  const winnerLabel =
+    room.winner_team === "blue"
+      ? "الفريق الأزرق"
+      : room.winner_team === "red"
+      ? "الفريق الأحمر"
+      : "لا يوجد";
+
   return (
     <div className="mx-auto max-w-[1600px] p-3 md:p-5">
       <div className="grid gap-4 xl:grid-cols-[230px_minmax(0,1fr)_230px]">
-        <TeamSide
-          theme="blue"
-          operatives={blueOperatives}
-          spymasters={blueSpymasters}
-          remaining={room.blue_remaining}
-        />
+        <div className="space-y-4">
+          <SideTeam
+            theme="blue"
+            operatives={blueOperatives}
+            spymasters={blueSpymasters}
+            remaining={room.blue_remaining}
+          />
+
+          {spectators.length > 0 && (
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
+              <div className="mb-3 text-center text-sm font-black uppercase tracking-wide text-white/70">
+                Spectators
+              </div>
+              <div className="space-y-3">
+                {spectators.map((player) => (
+                  <div
+                    key={player.id}
+                    className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm font-bold text-white"
+                  >
+                    {player.guest_name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-4">
           <div className="rounded-[32px] border border-white/10 bg-[#101522] px-5 py-4 shadow-2xl">
             <div className="text-center text-2xl font-black uppercase tracking-wide text-white md:text-3xl">
-              {room.status === "finished"
-                ? "Game Finished"
+              {finished
+                ? room.assassin_revealed
+                  ? "Assassin was revealed"
+                  : "Game Finished"
                 : selectedCard
                 ? "Confirm your choice"
+                : previewSelection
+                ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
                 : activeTurn
                 ? "Give your operatives a clue"
                 : room.current_turn_team === "blue"
@@ -433,7 +499,8 @@ export default function CodenamesBoardClient({
               </div>
               {activeTurn && (
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white">
-                  CLUE: {activeTurn.clue_word} • {activeTurn.clue_number}
+                  CLUE: {activeTurn.clue_word} • {activeTurn.clue_number} • USED{" "}
+                  {activeTurn.guesses_made ?? 0}
                 </div>
               )}
             </div>
@@ -443,12 +510,28 @@ export default function CodenamesBoardClient({
             {cards.map((card) => {
               const classes = getCardClasses(card);
 
-              if (canRevealCard && !card.is_revealed) {
+              if (card.is_revealed) {
                 return (
                   <button
                     key={card.id}
                     type="button"
-                    onClick={() => setSelectedCard(card)}
+                    onClick={() => setInspectedCard(card)}
+                    className={`${classes} flex min-h-[98px] items-center justify-center px-2 py-4 text-center text-xl font-black uppercase tracking-wide md:min-h-[122px] md:text-2xl`}
+                  >
+                    تم الكشف
+                  </button>
+                );
+              }
+
+              if (canRevealCard) {
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={async () => {
+                      setSelectedCard(card);
+                      await sendPreview(card);
+                    }}
                     className={`${classes} flex min-h-[98px] items-center justify-center px-2 py-4 text-center text-xl font-black uppercase tracking-wide transition md:min-h-[122px] md:text-2xl`}
                   >
                     {card.word}
@@ -467,7 +550,7 @@ export default function CodenamesBoardClient({
             })}
           </div>
 
-          {selectedCard && canRevealCard && (
+          {selectedCard && canRevealCard && !finished && (
             <div className="rounded-[30px] border border-lime-300/25 bg-lime-500/10 p-4 shadow-xl">
               <div className="mb-3 text-center text-sm font-black uppercase tracking-widest text-lime-100">
                 Tap to confirm
@@ -480,7 +563,10 @@ export default function CodenamesBoardClient({
 
                 <button
                   type="button"
-                  onClick={() => setSelectedCard(null)}
+                  onClick={async () => {
+                    setSelectedCard(null);
+                    await sendPreview(null);
+                  }}
                   className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-black text-white hover:bg-white/10"
                 >
                   إلغاء
@@ -488,13 +574,13 @@ export default function CodenamesBoardClient({
 
                 <form
                   action={revealCardAction}
-                  onSubmit={() => {
-                    // clear local pending state instantly
+                  onSubmit={async () => {
                     setSelectedCard(null);
+                    await sendPreview(null);
                   }}
                 >
                   <input type="hidden" name="room_code" value={room.room_code} />
-                  <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                  <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                   <input type="hidden" name="card_id" value={selectedCard.id} />
                   <button
                     type="submit"
@@ -508,7 +594,7 @@ export default function CodenamesBoardClient({
           )}
 
           <div className="rounded-[30px] border border-white/10 bg-[#101522] p-4 shadow-2xl">
-            <div className="grid gap-4 lg:grid-cols-[1fr_180px]">
+            <div className="grid gap-4 lg:grid-cols-[1fr_190px]">
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white/60">آخر clue</div>
@@ -521,7 +607,10 @@ export default function CodenamesBoardClient({
                         {activeTurn.clue_number}
                       </div>
                       <div className="rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold text-white/70">
-                        Guesses: {activeTurn.guesses_made ?? 0}
+                        Used: {activeTurn.guesses_made ?? 0}
+                      </div>
+                      <div className="rounded-2xl bg-white/5 px-4 py-3 text-sm font-bold text-white/70">
+                        Max: {(activeTurn.clue_number ?? 0) + 1}
                       </div>
                     </div>
                   ) : (
@@ -532,7 +621,7 @@ export default function CodenamesBoardClient({
                 {canSubmitClue ? (
                   <form action={submitClueAction} className="space-y-3">
                     <input type="hidden" name="room_code" value={room.room_code} />
-                    <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                    <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
 
                     <div className="grid gap-3 md:grid-cols-[1fr_120px]">
                       <input
@@ -558,7 +647,9 @@ export default function CodenamesBoardClient({
                   </form>
                 ) : (
                   <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/55">
-                    فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue
+                    {activeTurn
+                      ? "تم إرسال clue بالفعل، الآن دور الـ operatives"
+                      : "فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue"}
                   </div>
                 )}
               </div>
@@ -567,7 +658,7 @@ export default function CodenamesBoardClient({
                 {canEndTurn && (
                   <form action={endTurnAction} className="w-full">
                     <input type="hidden" name="room_code" value={room.room_code} />
-                    <input type="hidden" name="actor_player_id" value={currentPlayer.id} />
+                    <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                     <button
                       type="submit"
                       className="w-full rounded-2xl bg-orange-500 px-6 py-4 text-xl font-black text-white hover:bg-orange-400"
@@ -582,7 +673,7 @@ export default function CodenamesBoardClient({
         </div>
 
         <div className="space-y-4">
-          <TeamSide
+          <SideTeam
             theme="red"
             operatives={redOperatives}
             spymasters={redSpymasters}
@@ -598,6 +689,15 @@ export default function CodenamesBoardClient({
             </div>
 
             <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
+              {previewSelection && (
+                <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
+                  <div className="text-xs font-black uppercase text-lime-100">Preview</div>
+                  <div className="mt-2 text-base font-black text-white">
+                    {previewSelection.playerName} حدّد: {previewSelection.word}
+                  </div>
+                </div>
+              )}
+
               {sortedTurns.length > 0 ? (
                 sortedTurns.map((turn, index) => (
                   <div
@@ -637,6 +737,83 @@ export default function CodenamesBoardClient({
           </div>
         </div>
       </div>
+
+      {inspectedCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-[28px] border border-white/10 bg-[#101522] p-6 shadow-2xl">
+            <div className="text-2xl font-black text-white">تفاصيل الكرت</div>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="text-sm font-semibold text-white/50">الكلمة</div>
+              <div className="mt-2 text-3xl font-black text-white">
+                {inspectedCard.word}
+              </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="text-sm font-semibold text-white/50">النوع</div>
+              <div className="mt-2 text-xl font-black text-white">
+                {inspectedCard.card_type}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setInspectedCard(null)}
+              className="mt-5 w-full rounded-2xl bg-white/10 px-5 py-3 font-black text-white hover:bg-white/15"
+            >
+              إغلاق
+            </button>
+          </div>
+        </div>
+      )}
+
+      {finished && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
+          <div className="w-full max-w-2xl rounded-[34px] border border-white/10 bg-[#101522] p-8 shadow-2xl">
+            <div className="text-center">
+              <div className="text-sm font-black uppercase tracking-[0.25em] text-white/50">
+                Game Over
+              </div>
+
+              <div className="mt-4 text-4xl font-black text-white md:text-5xl">
+                {room.assassin_revealed ? "تم كشف الكرت الأسود" : "انتهت اللعبة"}
+              </div>
+
+              <div className="mt-4 text-2xl font-bold text-white/80">
+                الفائز:{" "}
+                <span
+                  className={
+                    room.winner_team === "blue"
+                      ? "text-cyan-200"
+                      : room.winner_team === "red"
+                      ? "text-red-200"
+                      : "text-white"
+                  }
+                >
+                  {room.winner_team === "blue"
+                    ? "الفريق الأزرق"
+                    : room.winner_team === "red"
+                    ? "الفريق الأحمر"
+                    : "غير محدد"}
+                </span>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href={`/games/codenames/room/${room.room_code}?player_id=${safeCurrentPlayer.id}`}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-black text-white hover:bg-white/10"
+                >
+                  العودة للروم
+                </Link>
+                <Link
+                  href="/games/codenames/create"
+                  className="rounded-2xl bg-emerald-500 px-6 py-3 font-black text-white hover:bg-emerald-400"
+                >
+                  إنشاء لعبة جديدة
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

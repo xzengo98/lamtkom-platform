@@ -81,7 +81,7 @@ export async function updatePlayerTeam(formData: FormData) {
   const actorPlayerId = getString(formData, "actor_player_id");
 
   if (!playerId || !roomCode || !actorPlayerId) return;
-  if (!["red", "blue"].includes(team)) return;
+  if (!["red", "blue", "spectator"].includes(team)) return;
 
   const { supabase, room, actor } = await getRoomAndActor({
     roomCode,
@@ -106,9 +106,14 @@ export async function updatePlayerTeam(formData: FormData) {
     throw new Error("غير مسموح لك تعديل هذا اللاعب");
   }
 
+  const updatePayload =
+    team === "spectator"
+      ? { team: "spectator", role: "spectator" }
+      : { team, role: "operative" };
+
   const { error } = await supabase
     .from("codenames_players")
-    .update({ team })
+    .update(updatePayload)
     .eq("id", targetPlayer.id);
 
   if (error) {
@@ -134,7 +139,7 @@ export async function updatePlayerRole(formData: FormData) {
 
   const { data: targetData, error: targetError } = await supabase
     .from("codenames_players")
-    .select("id, room_id")
+    .select("id, room_id, team")
     .eq("id", playerId)
     .eq("room_id", room.id)
     .maybeSingle();
@@ -143,11 +148,15 @@ export async function updatePlayerRole(formData: FormData) {
     throw new Error(targetError?.message || "اللاعب الهدف غير موجود");
   }
 
-  const targetPlayer = targetData as TargetPlayerRow;
+  const targetPlayer = targetData as TargetPlayerRow & { team?: string | null };
 
   const canManage = Boolean(actor.is_host) || actor.id === targetPlayer.id;
   if (!canManage) {
     throw new Error("غير مسموح لك تعديل هذا اللاعب");
+  }
+
+  if (targetPlayer.team === "spectator") {
+    throw new Error("المشاهد لا يمكن إعطاؤه دورًا قبل نقله إلى فريق");
   }
 
   const { error } = await supabase
@@ -201,9 +210,10 @@ export async function startCodenamesGame(formData: FormData) {
     }
 
     const allPlayers = (playersData ?? []) as BasicPlayerRow[];
+    const activePlayers = allPlayers.filter((player) => player.team !== "spectator");
 
-    const redPlayers = allPlayers.filter((player) => player.team === "red");
-    const bluePlayers = allPlayers.filter((player) => player.team === "blue");
+    const redPlayers = activePlayers.filter((player) => player.team === "red");
+    const bluePlayers = activePlayers.filter((player) => player.team === "blue");
     const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
     const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
 
@@ -219,7 +229,7 @@ export async function startCodenamesGame(formData: FormData) {
       .from("codenames_word_bank")
       .select("word")
       .eq("is_active", true)
-      .limit(200);
+      .limit(500);
 
     if (wordsError) {
       throw new Error(wordsError.message);
