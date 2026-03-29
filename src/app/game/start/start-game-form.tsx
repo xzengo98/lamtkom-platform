@@ -217,14 +217,16 @@ function SummaryCard({
   return (
     <div
       className={[
-        "rounded-[1.15rem] border p-3 text-center shadow-[0_10px_20px_rgba(0,0,0,0.20)]",
+        "rounded-[1.15rem] border p-3 text-center shadow-[0_10px_22px_rgba(0,0,0,0.18)]",
         accent === "cyan"
           ? "border-cyan-300/20 bg-cyan-400/10"
           : "border-white/10 bg-white/5",
       ].join(" ")}
     >
-      <div className="text-xs font-black text-white/55">{label}</div>
-      <div className="mt-1.5 text-2xl font-black text-white">{value}</div>
+      <div className="text-[11px] font-black text-white/55">{label}</div>
+      <div className="mt-1.5 text-xl font-black text-white md:text-2xl">
+        {value}
+      </div>
     </div>
   );
 }
@@ -237,9 +239,11 @@ function MiniStat({
   value: string | number;
 }) {
   return (
-    <div className="rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-center">
-      <div className="text-[11px] font-black text-white/50">{label}</div>
-      <div className="mt-1 text-lg font-black text-white">{value}</div>
+    <div className="rounded-[0.95rem] border border-white/10 bg-white/5 px-3 py-2.5 text-center">
+      <div className="text-[10px] font-black text-white/50">{label}</div>
+      <div className="mt-1 text-base font-black text-white md:text-lg">
+        {value}
+      </div>
     </div>
   );
 }
@@ -357,7 +361,7 @@ export default function StartGameForm({
   const visibleError = localError || errorMessage;
 
   return (
-    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-8">
+    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-6">
       <input
         type="hidden"
         name="selectedCategories"
@@ -365,10 +369,10 @@ export default function StartGameForm({
       />
 
       {/* Hero / Header */}
-      <section className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.30)] md:p-5">
+      <section className="relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.30)] md:p-5">
         <div className="pointer-events-none absolute inset-0">
-          <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-          <div className="hero-glow absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl" />
+          <div className="hero-glow absolute -right-10 top-0 h-40 w-40 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="hero-glow absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-violet-400/10 blur-3xl" />
         </div>
 
         <div className="relative">
@@ -386,7 +390,7 @@ export default function StartGameForm({
             مباشرة، مع الحفاظ على جميع شروط الحساب والمنطق الحالي كما هو.
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
@@ -409,20 +413,19 @@ export default function StartGameForm({
       </section>
 
       {/* Main Grid */}
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        {/* Left: Inputs + Categories */}
-        <div className="space-y-6">
-          {/* Game Data */}
-          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+      <div className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
+        {/* Left */}
+        <div className="space-y-5">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
                 <SparkIcon className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
                   الخطوة الأولى
                 </div>
-                <h2 className="mt-1 text-2xl font-black text-white">
+                <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
                   بيانات اللعبة
                 </h2>
               </div>
@@ -433,15 +436,13 @@ export default function StartGameForm({
                 <div className="mb-2 text-sm font-black text-white/80">
                   اسم اللعبة
                 </div>
-                <div className="relative">
-                  <input
-                    name="gameName"
-                    value={gameName}
-                    onChange={(e) => setGameName(e.target.value)}
-                    placeholder="مثال: تحدي الأذكياء"
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
-                  />
-                </div>
+                <input
+                  name="gameName"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  placeholder="مثال: تحدي الأذكياء"
+                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
+                />
               </label>
 
               <label className="block">
@@ -453,7 +454,7 @@ export default function StartGameForm({
                   value={teamOne}
                   onChange={(e) => setTeamOne(e.target.value)}
                   placeholder="اسم الفريق الأول"
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
+                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
                 />
               </label>
 
@@ -466,30 +467,29 @@ export default function StartGameForm({
                   value={teamTwo}
                   onChange={(e) => setTeamTwo(e.target.value)}
                   placeholder="اسم الفريق الثاني"
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-14 md:text-base"
+                  className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
                 />
               </label>
             </div>
           </section>
 
-          {/* Categories */}
-          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
-                <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+                <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
                   <GridIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                  <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
                     الخطوة الثانية
                   </div>
-                  <h2 className="mt-1 text-2xl font-black text-white">
+                  <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
                     اختر الفئات
                   </h2>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 <MiniStat
                   label="عدد المختار"
                   value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
@@ -502,19 +502,19 @@ export default function StartGameForm({
               </div>
             </div>
 
-            <p className="mb-6 text-sm leading-7 text-white/70">
-              اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها. يجب اختيار
-              {` ${REQUIRED_CATEGORY_COUNT} `}فئات بالضبط قبل بدء اللعبة.
+            <p className="mb-5 text-sm leading-6 text-white/70">
+              اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها. يجب اختيار{" "}
+              {REQUIRED_CATEGORY_COUNT} فئات بالضبط قبل بدء اللعبة.
             </p>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {groupedSections.map((section) => {
                 const theme = getSectionTheme(section.slug);
 
                 return (
                   <div
                     key={section.id}
-                    className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4"
+                    className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4"
                   >
                     <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div>
@@ -567,7 +567,7 @@ export default function StartGameForm({
               })}
 
               {uncategorized.length > 0 ? (
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4">
                   <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-black text-white/85">
@@ -618,24 +618,24 @@ export default function StartGameForm({
           </section>
         </div>
 
-        {/* Right: Summary / Submit */}
-        <div className="space-y-6">
-          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+        {/* Right */}
+        <div className="space-y-5">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
                 <UsersIcon className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
                   ملخص سريع
                 </div>
-                <h2 className="mt-1 text-2xl font-black text-white">
+                <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
                   جاهزية اللعبة
                 </h2>
               </div>
             </div>
 
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 text-center">
+            <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
               <div className="text-sm font-black text-white/65">
                 {isReadyToSubmit
                   ? "تم اختيار العدد المطلوب. اضغط ابدأ اللعبة."
@@ -643,7 +643,7 @@ export default function StartGameForm({
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 grid gap-2.5">
               <SummaryCard label="اسم اللعبة" value={gameName.trim() || "-"} />
               <SummaryCard
                 label="الفريق الأول"
@@ -654,28 +654,28 @@ export default function StartGameForm({
             </div>
 
             {visibleError ? (
-              <div className="mt-4 rounded-[1.2rem] border border-red-500/30 bg-[#34161b] px-4 py-4 text-sm font-bold text-red-200">
+              <div className="mt-4 rounded-[1.1rem] border border-red-500/30 bg-[#34161b] px-4 py-4 text-sm font-bold text-red-200">
                 {visibleError}
               </div>
             ) : null}
           </section>
 
-          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
+          <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
                 <GamepadIcon className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-xs font-black tracking-[0.18em] text-white/45">
+                <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
                   الخطوة الأخيرة
                 </div>
-                <h3 className="mt-1 text-2xl font-black text-white">
+                <h3 className="mt-1 text-xl font-black text-white md:text-2xl">
                   ابدأ الجولة
                 </h3>
               </div>
             </div>
 
-            <p className="mb-5 text-sm leading-7 text-white/70">
+            <p className="mb-4 text-sm leading-6 text-white/70">
               بعد اختيار {REQUIRED_CATEGORY_COUNT} فئات وإدخال بيانات اللعبة،
               يمكنك البدء مباشرة دون التأثير على أي منطق أو شروط حالية داخل
               المشروع.
@@ -683,7 +683,7 @@ export default function StartGameForm({
 
             <button
               type="submit"
-              className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[1.1rem] bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400 md:min-h-14 md:text-base"
             >
               ابدأ اللعبة
             </button>
@@ -738,20 +738,18 @@ function CategoryCard({
       type="button"
       onClick={onToggle}
       className={[
-        "group relative overflow-hidden rounded-[1.45rem] border p-4 text-right shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition duration-300",
+        "group relative overflow-hidden rounded-[1.2rem] border p-3 text-right shadow-[0_10px_20px_rgba(0,0,0,0.16)] transition duration-300",
         active
           ? "border-cyan-300/30 bg-[linear-gradient(180deg,rgba(21,53,94,0.95)_0%,rgba(7,17,40,0.98)_100%)] shadow-[0_18px_36px_rgba(34,211,238,0.10)]"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] hover:-translate-y-1 hover:border-white/20",
       ].join(" ")}
     >
-      <div
-        className={`pointer-events-none absolute inset-0 bg-radial from-white/10 via-transparent to-transparent opacity-80`}
-      />
+      <div className="pointer-events-none absolute inset-0 bg-radial from-white/10 via-transparent to-transparent opacity-80" />
 
       <button
         type="button"
         onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
+        className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
         aria-label={`عرض وصف ${category.name}`}
       >
         <InfoIcon className="h-4 w-4" />
@@ -774,7 +772,7 @@ function CategoryCard({
 
         <div className="mb-4 flex justify-center">
           {category.image_url ? (
-            <div className="h-20 w-20 overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5 shadow-[0_10px_20px_rgba(0,0,0,0.18)]">
+            <div className="h-16 w-16 overflow-hidden rounded-[1rem] border border-white/10 bg-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.16)]">
               <img
                 src={category.image_url}
                 alt={category.name}
@@ -783,28 +781,30 @@ function CategoryCard({
             </div>
           ) : (
             <div
-              className={`inline-flex h-20 w-20 items-center justify-center rounded-[1.1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_10px_20px_rgba(0,0,0,0.18)]`}
+              className={`inline-flex h-16 w-16 items-center justify-center rounded-[1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_8px_16px_rgba(0,0,0,0.16)]`}
             >
-              <SparkIcon className="h-7 w-7" />
+              <SparkIcon className="h-6 w-6" />
             </div>
           )}
         </div>
 
         <div className="text-center">
-          <h3 className="text-lg font-black text-white">{category.name}</h3>
+          <h3 className="text-base font-black text-white md:text-lg">
+            {category.name}
+          </h3>
           <p className="mt-2 text-xs font-bold text-white/45">
             {active ? "اضغط لإلغاء الاختيار" : "اضغط لاختيار الفئة"}
           </p>
         </div>
 
         {!availability.isSelectable ? (
-          <div className="mt-4 rounded-[1rem] border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
+          <div className="mt-4 rounded-[0.95rem] border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
             لا توجد أسئلة كافية لبدء لعبة كاملة
           </div>
         ) : null}
 
         {infoOpen ? (
-          <div className="mt-4 rounded-[1rem] border border-white/10 bg-white/5 p-3 text-sm leading-7 text-white/75">
+          <div className="mt-4 rounded-[0.95rem] border border-white/10 bg-white/5 p-3 text-sm leading-7 text-white/75">
             <div className="mb-2 font-black text-white">{category.name}</div>
             <div>
               {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
