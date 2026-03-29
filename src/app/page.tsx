@@ -8,7 +8,17 @@ type Profile = {
   username: string | null;
 };
 
-const gameCards = [
+type GameCardItem = {
+  title: string;
+  subtitle: string;
+  description: string;
+  href: string;
+  image: string;
+  active: boolean;
+  badge: string;
+};
+
+const gameCards: GameCardItem[] = [
   {
     title: "لمّتنا",
     subtitle: "أسئلة وأجوبة",
@@ -17,6 +27,7 @@ const gameCards = [
     href: "/game/start",
     image: "https://a.top4top.io/p_3738qob7g1.png",
     active: true,
+    badge: "متاحة الآن",
   },
   {
     title: "برا السالفة",
@@ -26,6 +37,7 @@ const gameCards = [
     href: "/game/bara-alsalfah",
     image: "https://l.top4top.io/p_373887e151.png",
     active: true,
+    badge: "متاحة الآن",
   },
   {
     title: "قريبًا",
@@ -35,8 +47,93 @@ const gameCards = [
     href: "#",
     image: "https://i.top4top.io/p_3738ncix61.png",
     active: false,
+    badge: "قريبًا",
   },
 ];
+
+const featureItems = [
+  {
+    title: "ألعاب جماعية عربية",
+    description:
+      "تجربة مصممة لتناسب الجلسات والمجموعات واللعب المشترك بشكل واضح وسلس.",
+  },
+  {
+    title: "واجهة أنيقة وسريعة",
+    description:
+      "تنقل بسيط، تجربة حديثة، وشكل احترافي مناسب للهاتف والكمبيوتر.",
+  },
+  {
+    title: "أكثر من لعبة داخل منصة واحدة",
+    description:
+      "ابدأ بلعبة لمّتنا أو برا السالفة، ومع الوقت ستنضم ألعاب جديدة للمنصة.",
+  },
+  {
+    title: "مناسبة للترفيه والفعاليات",
+    description:
+      "يمكن استخدام المنصة في الجلسات الخاصة، اللقاءات، المسابقات، والأنشطة الجماعية.",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "اختر اللعبة",
+    description: "ابدأ باللعبة التي تناسب جلستك أو فريقك.",
+  },
+  {
+    number: "02",
+    title: "جهّز الجولة",
+    description: "اختر الإعدادات المناسبة وابدأ اللعب بسرعة.",
+  },
+  {
+    number: "03",
+    title: "استمتع بالمنافسة",
+    description: "تابع النتائج وشارك جو التحدي مع الجميع.",
+  },
+];
+
+function SectionBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-extrabold tracking-wide text-cyan-100">
+      {children}
+    </div>
+  );
+}
+
+function ArrowLeftIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-5 w-5"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 5 7 7-7 7" />
+    </svg>
+  );
+}
+
+function SparkIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-5 w-5"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
+    </svg>
+  );
+}
 
 function FeatureCard({
   title,
@@ -46,11 +143,87 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_10px_40px_rgba(0,0,0,0.2)]">
+    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] backdrop-blur">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
+        <SparkIcon />
+      </div>
       <h3 className="text-xl font-black text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-white/70 md:text-base">
-        {description}
-      </p>
+      <p className="mt-3 text-sm leading-8 text-white/70">{description}</p>
+    </div>
+  );
+}
+
+function StepCard({
+  number,
+  title,
+  description,
+}: {
+  number: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+      <div className="text-sm font-black tracking-[0.2em] text-cyan-300">
+        {number}
+      </div>
+      <h3 className="mt-3 text-2xl font-black text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-8 text-white/70">{description}</p>
+    </div>
+  );
+}
+
+function GameCard({ card }: { card: GameCardItem }) {
+  return (
+    <div
+      className={[
+        "group overflow-hidden rounded-[2rem] border shadow-[0_25px_60px_rgba(0,0,0,0.25)]",
+        card.active
+          ? "border-white/10 bg-white/5"
+          : "border-white/5 bg-white/[0.03] opacity-90",
+      ].join(" ")}
+    >
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-[#020817]/35 to-transparent" />
+        <img
+          src={card.image}
+          alt={card.title}
+          className="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+        />
+
+        <div className="absolute right-4 top-4">
+          <span
+            className={[
+              "rounded-full px-3 py-1 text-xs font-black",
+              card.active
+                ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                : "border border-amber-300/20 bg-amber-400/10 text-amber-100",
+            ].join(" ")}
+          >
+            {card.badge}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="text-sm font-bold text-cyan-300">{card.subtitle}</div>
+        <h3 className="mt-2 text-3xl font-black text-white">{card.title}</h3>
+        <p className="mt-4 text-sm leading-8 text-white/70">{card.description}</p>
+
+        {card.active ? (
+          <Link
+            href={card.href}
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+          >
+            افتح اللعبة
+            <ArrowLeftIcon />
+          </Link>
+        ) : (
+          <div className="mt-6 inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70">
+            قريبًا
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -60,6 +233,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+
+  const activeGamesCount = gameCards.filter((card) => card.active).length;
 
   useEffect(() => {
     let mounted = true;
@@ -87,7 +262,6 @@ export default function HomePage() {
       if (!mounted) return;
 
       const typedProfile = profile as Profile | null;
-
       setIsLoggedIn(true);
       setUsername(typedProfile?.username ?? null);
       setLoading(false);
@@ -108,233 +282,302 @@ export default function HomePage() {
   }, [supabase]);
 
   return (
-    <div className="min-h-screen bg-[#020817] text-white">
-      <main className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
-        <section className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_35%),linear-gradient(180deg,#071126_0%,#061020_100%)] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.35)] md:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div>
-              <div className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-100">
-                منصة عربية للألعاب الجماعية
-              </div>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_20%),linear-gradient(180deg,#020617_0%,#071126_40%,#020617_100%)] text-white">
+      <section className="mx-auto max-w-7xl px-4 pb-14 pt-10 md:px-6 md:pt-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <SectionBadge>منصة عربية للألعاب الجماعية</SectionBadge>
 
-              <h1 className="mt-5 text-4xl font-black leading-tight md:text-6xl">
-                لمّتنا
-                <span className="block text-cyan-300">
-                  منصة ألعاب عربية
-                </span>
-              </h1>
+            <h1 className="mt-5 text-4xl font-black leading-tight text-white md:text-6xl">
+              لمّتنا
+              <br />
+              منصة ألعاب عربية
+              <br />
+              بتجربة أجمل وأكثر حماسًا
+            </h1>
 
-              <p className="mt-5 max-w-3xl text-base leading-8 text-white/75 md:text-lg">
-                منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة
-                الاستخدام. ابدأ الآن بلعبة الأسئلة والأجوبة أو لعبة برا السالفة،
-                ومع الوقت ستنضم ألعاب جديدة للمنصة.
-              </p>
+            <p className="mt-5 max-w-2xl text-base leading-8 text-white/75 md:text-lg">
+              منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة
+              الاستخدام. ابدأ الآن بلعبة الأسئلة والأجوبة أو لعبة برا السالفة،
+              ومع الوقت ستنضم ألعاب جديدة للمنصة.
+            </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/games"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                استعرض الألعاب
+                <ArrowLeftIcon />
+              </Link>
+
+              {loading ? (
+                <div className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/70">
+                  جارٍ تحميل حالتك...
+                </div>
+              ) : isLoggedIn ? (
                 <Link
-                  href="/games"
-                  className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                  href="/account"
+                  className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
                 >
-                  استعرض الألعاب
+                  أهلاً {username || "بك"} — حسابي
                 </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                  >
+                    إنشاء حساب جديد
+                  </Link>
 
-                {loading ? (
-                  <div className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/75">
-                    جارٍ تحميل حالتك...
-                  </div>
-                ) : isLoggedIn ? (
-                  <>
-                    <div className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white">
-                      أهلاً {username || "بك"}
-                    </div>
-                    <Link
-                      href="/account"
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-                    >
-                      حسابي
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/register"
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-                    >
-                      إنشاء حساب جديد
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-                    >
-                      تسجيل الدخول
-                    </Link>
-                  </>
-                )}
-              </div>
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                </>
+              )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 text-center">
-                <div className="text-sm text-white/60">الألعاب المتاحة الآن</div>
-                <div className="mt-2 text-4xl font-black text-white">2</div>
+            <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-bold text-white/55">
+                  الألعاب المتاحة الآن
+                </div>
+                <div className="mt-2 text-3xl font-black text-white">
+                  {activeGamesCount}
+                </div>
               </div>
 
-              <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 text-center">
-                <div className="text-sm text-white/60">أسلوب المنصة</div>
-                <div className="mt-2 text-2xl font-black text-cyan-300">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-bold text-white/55">
+                  أسلوب المنصة
+                </div>
+                <div className="mt-2 text-2xl font-black text-cyan-100">
                   جماعي
                 </div>
               </div>
 
-              <div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-5 text-center">
-                <div className="text-sm text-white/60">الهدف</div>
-                <div className="mt-2 text-2xl font-black text-white">
+              <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-bold text-white/55">الهدف</div>
+                <div className="mt-2 text-2xl font-black text-emerald-100">
                   متعة وتنافس
                 </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <section className="mt-8">
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div>
-              <div className="text-cyan-300">الألعاب الحالية</div>
-              <h2 className="mt-2 text-3xl font-black md:text-4xl">
-                اختر اللعبة التي تريدها
-              </h2>
-            </div>
-
-            <Link
-              href="/games"
-              className="hidden rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10 md:inline-flex"
-            >
-              صفحة الألعاب
-            </Link>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {gameCards.map((card, index) =>
-              card.active ? (
-                <Link
-                  key={index}
-                  href={card.href}
-                  className="group overflow-hidden rounded-[2rem] border border-white/10 bg-[#071126] shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition hover:-translate-y-1 hover:border-cyan-300/30"
-                >
-                  <div className="relative h-60 overflow-hidden">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#071126] via-[#071126]/35 to-transparent" />
-                    <div className="absolute bottom-4 right-4 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
-                      متاحة الآن
+          <div className="relative">
+            <div className="absolute inset-0 rounded-[2.5rem] bg-cyan-400/10 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-4 shadow-[0_35px_90px_rgba(0,0,0,0.35)]">
+              <div className="rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_30%),linear-gradient(180deg,#061020_0%,#020817_100%)] p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-bold text-white/55">
+                      معاينة سريعة
+                    </div>
+                    <div className="mt-1 text-2xl font-black text-white">
+                      داخل المنصة
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="text-cyan-300">{card.subtitle}</div>
-                    <h3 className="mt-2 text-3xl font-black">{card.title}</h3>
-                    <p className="mt-4 leading-8 text-white/70">
-                      {card.description}
-                    </p>
-
-                    <div className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition group-hover:bg-cyan-400">
-                      افتح اللعبة
-                      <span>←</span>
-                    </div>
+                  <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                    لمّتنا
                   </div>
-                </Link>
-              ) : (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#071126] opacity-95 shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
-                >
-                  <div className="relative h-60 overflow-hidden">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#071126] via-[#071126]/35 to-transparent" />
-                    <div className="absolute bottom-4 right-4 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-100">
-                      قريبًا
+                </div>
+
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
+                    <div className="text-sm font-bold text-white/60">
+                      لوحة لعب أنيقة
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      {[200, 400, 600].map((point) => (
+                        <div
+                          key={point}
+                          className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center text-2xl font-black text-white"
+                        >
+                          {point}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="text-cyan-300">{card.subtitle}</div>
-                    <h3 className="mt-2 text-3xl font-black">{card.title}</h3>
-                    <p className="mt-4 leading-8 text-white/70">
-                      {card.description}
-                    </p>
-
-                    <div className="mt-6 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/80">
-                      قريبًا
+                  <div className="rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
+                    <div className="text-sm font-bold text-white/60">
+                      ألعاب متنوعة
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      <div className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-100">
+                        لمّتنا — أسئلة وأجوبة
+                      </div>
+                      <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm font-black text-emerald-100">
+                        برا السالفة — لعبة جماعية
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/70">
+                        ألعاب إضافية قريبًا
+                      </div>
                     </div>
                   </div>
                 </div>
-              ),
-            )}
+
+                <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-[#09142b] p-4">
+                  <div className="text-sm font-bold text-white/60">
+                    مناسبة للموبايل والكمبيوتر
+                  </div>
+                  <div className="mt-3 text-lg font-black text-white">
+                    تجربة مرتبة وسهلة الاستخدام للجلسات والمنافسات
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mt-8 grid gap-5 md:grid-cols-3">
-          <FeatureCard
-            title="ألعاب متعددة"
-            description="المنصة لم تعد خاصة بلعبة واحدة فقط، بل أصبحت قاعدة لألعاب جماعية متنوعة داخل نفس الستايل."
-          />
-          <FeatureCard
-            title="تجربة عربية مرتبة"
-            description="تصميم عربي واضح، مناسب للموبايل وسطح المكتب، مع تجربة لعب سهلة وسريعة بين الأصدقاء أو الفرق."
-          />
-          <FeatureCard
-            title="قابلة للتوسع"
-            description="يمكن إضافة ألعاب جديدة لاحقًا بسهولة مع الحفاظ على نفس الهوية البصرية والهيكل العام للموقع."
-          />
-        </section>
-        <section className="mt-8 rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-6">
-  <div className="flex flex-wrap gap-2">
-    <Link
-      href="/"
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
-    >
-      الرئيسية
-    </Link>
-    <Link
-      href="/pricing"
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
-    >
-      الباقات
-    </Link>
-    <Link
-      href="/terms"
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
-    >
-      الشروط والأحكام
-    </Link>
+      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <SectionBadge>الألعاب الحالية</SectionBadge>
+            <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
+              اختر اللعبة التي تريدها
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-8 text-white/70">
+              صفحة مخصصة للألعاب الحالية داخل المنصة، مع تصميم يوضح كل لعبة
+              بشكل مستقل وسهل وواضح.
+            </p>
+          </div>
 
-    <Link
-      href="/privacy"
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
-    >
-      الخصوصية
-    </Link>
+          <Link
+            href="/games"
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+          >
+            صفحة الألعاب
+            <ArrowLeftIcon />
+          </Link>
+        </div>
 
-    <Link
-      href="/about"
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-slate-200 transition hover:bg-white/10 hover:text-white sm:px-4 sm:text-sm"
-    >
-      من نحن
-    </Link>
-  </div>
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          {gameCards.map((card) => (
+            <GameCard key={card.title} card={card} />
+          ))}
+        </div>
+      </section>
 
-  <div className="mt-4 border-t border-white/10 pt-4 text-center text-[10px] text-slate-500 sm:mt-5 sm:text-xs lg:text-sm">
-    © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
-  </div>
-</section>
-      </main>
-    </div>
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <div className="mb-8">
+          <SectionBadge>لماذا لمّتنا؟</SectionBadge>
+          <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
+            منصة مبنية للمتعة والوضوح
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-8 text-white/70">
+            لمّتنا ليست مجرد صفحة ألعاب عادية، بل منصة عربية تحاول تقديم تجربة
+            جماعية جميلة وسلسة من أول لحظة.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {featureItems.map((item) => (
+            <FeatureCard
+              key={item.title}
+              title={item.title}
+              description={item.description}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <div className="mb-8">
+          <SectionBadge>كيف تبدأ؟</SectionBadge>
+          <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
+            ثلاث خطوات واضحة للبدء
+          </h2>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {steps.map((step) => (
+            <StepCard
+              key={step.number}
+              number={step.number}
+              title={step.title}
+              description={step.description}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+        <div className="overflow-hidden rounded-[2.4rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_25%),linear-gradient(180deg,#071126_0%,#020817_100%)] p-6 shadow-[0_35px_90px_rgba(0,0,0,0.3)] md:p-10">
+          <div className="max-w-3xl">
+            <SectionBadge>ابدأ الآن</SectionBadge>
+            <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
+              جاهز تبدأ أول جولة؟
+            </h2>
+            <p className="mt-4 text-base leading-8 text-white/75 md:text-lg">
+              استعرض الألعاب الحالية وابدأ مباشرة، أو أنشئ حسابك لتجربة أكثر
+              تنظيمًا واستمرارية داخل المنصة.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/games"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                ابدأ الآن
+                <ArrowLeftIcon />
+              </Link>
+
+              {!loading && !isLoggedIn ? (
+                <Link
+                  href="/register"
+                  className="inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
+                >
+                  إنشاء حساب
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="mt-10 border-t border-white/10">
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-md">
+              <div className="text-2xl font-black text-white">لمّتنا</div>
+              <p className="mt-3 text-sm leading-7 text-white/65">
+                منصة ألعاب عربية تجمع أكثر من تجربة في مكان واحد، بتصميم جميل
+                ومناسب للجلسات واللعب الجماعي.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 text-sm font-bold text-white/75">
+              <Link href="/" className="transition hover:text-white">
+                الرئيسية
+              </Link>
+              <Link href="/pricing" className="transition hover:text-white">
+                الباقات
+              </Link>
+              <Link href="/terms" className="transition hover:text-white">
+                الشروط والأحكام
+              </Link>
+              <Link href="/privacy" className="transition hover:text-white">
+                الخصوصية
+              </Link>
+              <Link href="/about" className="transition hover:text-white">
+                من نحن
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-6 text-sm text-white/45">
+            © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
+          </div>
+        </div>
+      </footer>
+    </main>
   );
 }
