@@ -152,10 +152,10 @@ function RichContent({
     <div
       className={[
         "max-w-none text-center text-white",
-        large ? "text-xl md:text-3xl" : "text-base md:text-lg",
-        "[&_p]:my-0 [&_p]:mb-4 [&_p]:text-center [&_p]:leading-9 md:[&_p]:leading-10",
+        large ? "text-lg md:text-3xl" : "text-base md:text-lg",
+        "[&_p]:my-0 [&_p]:mb-4 [&_p]:text-center [&_p]:leading-8 md:[&_p]:leading-10",
         "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
-        "[&_img]:mx-auto [&_img]:my-4 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[150px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+        "[&_img]:mx-auto [&_img]:my-4 [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:max-h-[140px] md:[&_img]:max-h-[220px] [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
         "[&_iframe]:mx-auto [&_iframe]:my-4 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:max-h-[220px] [&_iframe]:rounded-[1rem]",
         "[&_video]:mx-auto [&_video]:my-4 [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:max-h-[220px] [&_video]:rounded-[1rem]",
       ].join(" ")}
@@ -267,6 +267,34 @@ function AnswerIcon({ className = "h-4 w-4" }: { className?: string }) {
       <path d="M9 12l2 2 4-4" />
       <circle cx="12" cy="12" r="9" />
     </svg>
+  );
+}
+
+function TeamMini({
+  teamName,
+  avatarUrl,
+  accent,
+}: {
+  teamName: string;
+  avatarUrl: string;
+  accent: "blue" | "orange";
+}) {
+  const palette =
+    accent === "orange"
+      ? "border-orange-300/20 bg-orange-400/10 text-orange-100"
+      : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100";
+
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-2xl border px-3 py-2 ${palette}`}
+    >
+      <img
+        src={avatarUrl}
+        alt={teamName}
+        className="h-9 w-9 rounded-full border border-white/10 object-cover"
+      />
+      <div className="max-w-[90px] truncate text-xs font-black">{teamName}</div>
+    </div>
   );
 }
 
@@ -466,29 +494,32 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[1.2rem] border transition board-soft-glow",
+        "group relative overflow-hidden rounded-[1.2rem] border transition duration-300",
         compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
         disabled
-          ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500"
-          : "border-white/10 bg-[linear-gradient(180deg,rgba(22,38,78,0.96)_0%,rgba(5,15,37,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-0.5 hover:border-cyan-300/25 hover:shadow-[0_16px_30px_rgba(34,211,238,0.10)]",
+          ? "cursor-not-allowed border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500 opacity-70"
+          : "border-cyan-300/10 bg-[linear-gradient(180deg,rgba(20,40,85,1)_0%,rgba(4,14,34,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_18px_30px_rgba(34,211,238,0.14)]",
         active
-          ? "border-cyan-300/35 bg-[linear-gradient(180deg,rgba(14,62,112,0.96)_0%,rgba(8,29,59,1)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.22),0_16px_35px_rgba(34,211,238,0.14)]"
+          ? "border-cyan-300/50 bg-[linear-gradient(180deg,rgba(16,72,124,1)_0%,rgba(8,29,59,1)_100%)] shadow-[0_0_0_1px_rgba(34,211,238,0.3),0_20px_40px_rgba(34,211,238,0.16)]"
           : "",
       ].join(" ")}
     >
       {!disabled ? (
         <>
-          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)] opacity-70" />
+          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_45%)] opacity-80" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent opacity-60" />
         </>
-      ) : null}
+      ) : (
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,rgba(255,255,255,0)_100%)]" />
+      )}
 
       <div className="relative flex h-full items-center justify-center">
         <div
           className={[
-            "font-black tracking-tight text-white",
+            "font-black tracking-tight",
             compact ? "text-[1.2rem] md:text-[1.3rem]" : "text-[1.8rem] md:text-[2rem]",
-            used ? "opacity-40" : "opacity-100",
+            used ? "text-slate-500/80" : "text-white",
           ].join(" ")}
         >
           {points}
@@ -542,24 +573,20 @@ function QuestionOverlay({
     Math.min(100, (timeLeft / QUESTION_TIMER_SECONDS) * 100),
   );
 
-  const topPortraitCompact = false;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
       <div className="flex h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[92vh]">
         <div className="shrink-0 border-b border-white/10 px-3 py-3 md:px-6 md:py-5">
           <div className="flex flex-col gap-4">
-            <div className="grid items-start gap-3 md:grid-cols-[140px_minmax(0,1fr)_140px]">
-              <div className="hidden md:flex justify-start">
-                <TeamPortrait
-                  teamName={teamOne}
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  accent="blue"
-                  compact={topPortraitCompact}
-                />
-              </div>
+            <div className="hidden items-start justify-between md:flex">
+              <TeamPortrait
+                teamName={teamOne}
+                avatarUrl={TEAM_BLUE_AVATAR}
+                accent="blue"
+                compact
+              />
 
-              <div>
+              <div className="flex flex-1 flex-col items-center px-4">
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
                     {openQuestion.categoryName}
@@ -586,12 +613,38 @@ function QuestionOverlay({
                 </div>
               </div>
 
-              <div className="hidden md:flex justify-end">
-                <TeamPortrait
+              <TeamPortrait
+                teamName={teamTwo}
+                avatarUrl={TEAM_ORANGE_AVATAR}
+                accent="orange"
+                compact
+              />
+            </div>
+
+            <div className="md:hidden">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                  {openQuestion.categoryName}
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                  {openQuestion.points} نقطة
+                </span>
+              </div>
+
+              <div className="mt-3 text-center">
+                <h2 className="text-3xl font-black text-white">السؤال</h2>
+              </div>
+
+              <div className="mt-4 flex items-center justify-center gap-3">
+                <TeamMini
+                  teamName={teamOne}
+                  avatarUrl={TEAM_BLUE_AVATAR}
+                  accent="blue"
+                />
+                <TeamMini
                   teamName={teamTwo}
                   avatarUrl={TEAM_ORANGE_AVATAR}
                   accent="orange"
-                  compact={topPortraitCompact}
                 />
               </div>
             </div>
