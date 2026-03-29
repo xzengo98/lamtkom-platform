@@ -62,7 +62,12 @@ const QUESTION_TIMER_SECONDS = 60;
 const TEAM_BLUE_AVATAR = "https://k.top4top.io/p_3739o1dbh1.png";
 const TEAM_ORANGE_AVATAR = "https://l.top4top.io/p_3739qbt1f2.png";
 
-const categoryVisuals: Record<string, { gradient: string }> = {
+const categoryVisuals: Record<
+  string,
+  {
+    gradient: string;
+  }
+> = {
   history: { gradient: "from-amber-300/18 via-orange-400/10 to-transparent" },
   sports: { gradient: "from-emerald-300/18 via-green-400/10 to-transparent" },
   geography: { gradient: "from-sky-300/18 via-cyan-400/10 to-transparent" },
@@ -139,7 +144,7 @@ function RichContent({
 
   if (!safeHtml) {
     return (
-      <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4 text-center text-white/70">
+      <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-6 text-center text-white/70">
         لا يوجد محتوى محفوظ.
       </div>
     );
@@ -151,18 +156,26 @@ function RichContent({
         "max-w-none text-center text-white",
         large
           ? compact
-            ? "text-base md:text-2xl"
+            ? "text-lg md:text-2xl"
             : "text-xl md:text-3xl"
           : "text-base md:text-lg",
         "[&_p]:my-0 [&_p]:text-center",
         compact
-          ? "[&_p]:mb-5 [&_p]:leading-7 md:[&_p]:leading-8"
+          ? "[&_p]:mb-5 [&_p]:leading-8 md:[&_p]:leading-9"
           : "[&_p]:mb-7 [&_p]:leading-9 md:[&_p]:leading-10",
         "[&_h1]:text-center [&_h2]:text-center [&_h3]:text-center [&_h4]:text-center",
         "[&_img]:mx-auto [&_img]:block [&_img]:w-auto [&_img]:max-w-full [&_img]:rounded-[1rem] [&_img]:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
         compact
-          ? "[&_img]:my-5 [&_img]:max-h-[110px] md:[&_img]:max-h-[180px]"
+          ? "[&_img]:my-5 [&_img]:max-h-[120px] md:[&_img]:max-h-[180px]"
           : "[&_img]:my-7 [&_img]:max-h-[150px] md:[&_img]:max-h-[220px]",
+        "[&_iframe]:mx-auto [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-2xl [&_iframe]:rounded-[1rem]",
+        compact
+          ? "[&_iframe]:my-5 [&_iframe]:max-h-[180px]"
+          : "[&_iframe]:my-7 [&_iframe]:max-h-[220px]",
+        "[&_video]:mx-auto [&_video]:block [&_video]:w-full [&_video]:max-w-2xl [&_video]:rounded-[1rem]",
+        compact
+          ? "[&_video]:my-5 [&_video]:max-h-[180px]"
+          : "[&_video]:my-7 [&_video]:max-h-[220px]",
       ].join(" ")}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
@@ -290,13 +303,15 @@ function TeamMini({
       : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100";
 
   return (
-    <div className={`flex items-center gap-2 rounded-2xl border px-2.5 py-2 ${palette}`}>
+    <div
+      className={`flex items-center gap-2 rounded-2xl border px-3 py-2 ${palette}`}
+    >
       <img
         src={avatarUrl}
         alt={teamName}
-        className="h-8 w-8 rounded-full border border-white/10 object-cover"
+        className="h-9 w-9 rounded-full border border-white/10 object-cover"
       />
-      <div className="max-w-[70px] truncate text-[11px] font-black">{teamName}</div>
+      <div className="max-w-[90px] truncate text-xs font-black">{teamName}</div>
     </div>
   );
 }
@@ -320,19 +335,23 @@ function TeamPortrait({
   return (
     <div
       className={[
-        "rounded-[1.3rem] border p-2.5 text-center",
+        "rounded-[1.4rem] border p-3 text-center",
         palette,
-        compact ? "w-[76px]" : "w-[110px]",
+        compact ? "w-[84px]" : "w-[110px] md:w-[130px]",
       ].join(" ")}
     >
       <img
         src={avatarUrl}
         alt={teamName}
         className={`mx-auto rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)] ${
-          compact ? "h-12 w-12" : "h-20 w-20"
+          compact ? "h-14 w-14" : "h-20 w-20 md:h-24 md:w-24"
         }`}
       />
-      <div className={`mt-2 truncate font-black ${compact ? "text-[10px]" : "text-sm"}`}>
+      <div
+        className={`mt-3 truncate font-black ${
+          compact ? "text-[11px]" : "text-sm md:text-base"
+        }`}
+      >
         {teamName}
       </div>
     </div>
@@ -631,18 +650,18 @@ function QuestionOverlay({
       <div
         className={[
           "flex w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)]",
-          compact ? "h-[96svh]" : "h-[92vh]",
+          compact ? "h-[96vh]" : "h-[92vh]",
         ].join(" ")}
       >
         <div
           className={[
             "shrink-0 border-b border-white/10",
-            compact ? "px-3 py-2.5" : "px-6 py-5",
+            compact ? "px-3 py-3" : "px-6 py-5",
           ].join(" ")}
         >
-          {!compact ? (
-            <div className="flex flex-col gap-4">
-              <div className="grid items-start gap-3 md:grid-cols-[120px_minmax(0,1fr)_120px]">
+          <div className="flex flex-col gap-3">
+            {!compact ? (
+              <div className="grid items-start gap-3 md:grid-cols-[140px_minmax(0,1fr)_140px]">
                 <div className="flex justify-start">
                   <TeamPortrait
                     teamName={teamOne}
@@ -688,136 +707,101 @@ function QuestionOverlay({
                   />
                 </div>
               </div>
-
-              {!showAnswer && !showWinnerPicker ? (
-                <div className="rounded-[1.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] p-3.5 shadow-[0_16px_35px_rgba(0,0,0,0.2)]">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm font-black text-white/75">
-                      <TimerIcon className="h-4 w-4 text-cyan-300" />
-                      <span>المؤقت</span>
-                    </div>
-                    <div className="text-xl font-black text-white">
-                      {formatCountdown(timeLeft)}
-                    </div>
-                  </div>
-
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-cyan-400 transition-[width]"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={onToggleTimer}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
-                    >
-                      <TimerIcon className="h-4 w-4" />
-                      <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={onResetTimer}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/10"
-                    >
-                      <SparkIcon className="h-4 w-4" />
-                      <span>إعادة المؤقت</span>
-                    </button>
-                  </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                    {openQuestion.categoryName}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                    {openQuestion.points} نقطة
+                  </span>
                 </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-100">
-                  {openQuestion.categoryName}
-                </span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/85">
-                  {openQuestion.points} نقطة
-                </span>
-              </div>
 
-              <div className="flex items-center justify-center gap-2">
-                <TeamMini
-                  teamName={teamOne}
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  accent="blue"
-                />
-                <h2 className="px-2 text-2xl font-black text-white">
+                <h2 className="text-3xl font-black text-white">
                   {!showAnswer && !showWinnerPicker
                     ? "السؤال"
                     : showAnswer && !showWinnerPicker
-                      ? "الإجابة"
-                      : "الفائز"}
+                      ? "الإجابة الصحيحة"
+                      : "تحديد الفريق الفائز"}
                 </h2>
-                <TeamMini
-                  teamName={teamTwo}
-                  avatarUrl={TEAM_ORANGE_AVATAR}
-                  accent="orange"
-                />
+
+                <div className="flex items-center justify-center gap-3">
+                  <TeamMini
+                    teamName={teamOne}
+                    avatarUrl={TEAM_BLUE_AVATAR}
+                    accent="blue"
+                  />
+                  <TeamMini
+                    teamName={teamTwo}
+                    avatarUrl={TEAM_ORANGE_AVATAR}
+                    accent="orange"
+                  />
+                </div>
               </div>
+            )}
 
-              {!showAnswer && !showWinnerPicker ? (
-                <div className="rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] p-2.5">
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-black text-white/75">
-                      <TimerIcon className="h-3.5 w-3.5 text-cyan-300" />
-                      <span>المؤقت</span>
-                    </div>
-                    <div className="text-lg font-black text-white">
-                      {formatCountdown(timeLeft)}
-                    </div>
+            {!showAnswer && !showWinnerPicker ? (
+              <div
+                className={[
+                  "rounded-[1.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[0_16px_35px_rgba(0,0,0,0.2)]",
+                  compact ? "p-3" : "p-4",
+                ].join(" ")}
+              >
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs font-black text-white/75 md:text-sm">
+                    <TimerIcon className="h-4 w-4 text-cyan-300 md:h-5 md:w-5" />
+                    <span>المؤقت</span>
                   </div>
-
-                  <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-cyan-400 transition-[width]"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={onToggleTimer}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-[11px] font-black text-cyan-100 transition hover:bg-cyan-400/15"
-                    >
-                      <TimerIcon className="h-3.5 w-3.5" />
-                      <span>{timerRunning ? "إيقاف" : "تشغيل"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={onResetTimer}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10"
-                    >
-                      <SparkIcon className="h-3.5 w-3.5" />
-                      <span>إعادة</span>
-                    </button>
+                  <div className="text-xl font-black text-white md:text-2xl">
+                    {formatCountdown(timeLeft)}
                   </div>
                 </div>
-              ) : null}
-            </div>
-          )}
+
+                <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-cyan-400 transition-[width]"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+
+                <div className="mt-3 flex flex-wrap justify-center gap-2 md:gap-3">
+                  <button
+                    type="button"
+                    onClick={onToggleTimer}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-xs font-black text-cyan-100 transition hover:bg-cyan-400/15 md:px-5 md:py-3 md:text-sm"
+                  >
+                    <TimerIcon className="h-4 w-4" />
+                    <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={onResetTimer}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
+                  >
+                    <SparkIcon className="h-4 w-4" />
+                    <span>إعادة المؤقت</span>
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div
           className={[
             "min-h-0 flex-1 overflow-y-auto",
-            compact ? "px-3 py-2.5" : "px-6 py-6",
+            compact ? "px-3 py-3" : "px-6 py-6",
           ].join(" ")}
         >
           {!showAnswer && !showWinnerPicker ? (
-            <div className="rounded-[1.4rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
+            <div className="rounded-[1.5rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
               <RichContent html={openQuestion.question_text} large compact={compact} />
             </div>
           ) : showAnswer && !showWinnerPicker ? (
-            <div className="rounded-[1.4rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
-              <div className="mb-3 flex items-center justify-center gap-2 text-sm font-black text-emerald-100">
+            <div className="rounded-[1.5rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
+              <div className="mb-4 flex items-center justify-center gap-2 text-sm font-black text-emerald-100">
                 <AnswerIcon className="h-4 w-4" />
                 <span>الإجابة الصحيحة</span>
               </div>
@@ -900,7 +884,8 @@ function QuestionOverlay({
         >
           <div className="flex items-center justify-between gap-3">
             <div className="text-[11px] font-black text-white/55 md:text-sm">
-              الدور الحالي: <span className="text-cyan-100">{activeTurnName}</span>
+              الدور الحالي:{" "}
+              <span className="text-cyan-100">{activeTurnName}</span>
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
@@ -965,13 +950,563 @@ function QuestionOverlay({
                   className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
                 >
                   <AnswerIcon className="h-4 w-4" />
-                  <span> العودة للإجابة</span>
+                  <span>العودة للإجابة</span>
                 </button>
               </div>
             )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatusPill({
+  label,
+  icon,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/90 shadow-[0_8px_18px_rgba(0,0,0,0.14)]">
+      {icon}
+      <span>{label}</span>
+    </div>
+  );
+}
+
+export default function GameBoardClient({
+  sessionId,
+  initialBoardState,
+  gameName,
+  teamOne,
+  teamTwo,
+  categories,
+  questions,
+}: Props) {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const storageKey = `seenjeem-board-state:${sessionId}`;
+
+  const [isLandscapePhone, setIsLandscapePhone] = useState(false);
+
+  const initialState = useMemo(() => {
+    return normalizeBoardState(initialBoardState);
+  }, [initialBoardState]);
+
+  const [boardState, setBoardState] = useState<BoardState>(initialState);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [modalBusy, setModalBusy] = useState(false);
+  const saveTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const localState = readLocalBoardState(storageKey);
+    if (localState && localState.savedAt >= initialState.savedAt) {
+      setBoardState(localState);
+    } else {
+      setBoardState(initialState);
+    }
+  }, [initialState, storageKey]);
+
+  useEffect(() => {
+    const checkLandscapePhone = () => {
+      if (typeof window === "undefined") return;
+
+      const isLandscape =
+        window.matchMedia("(orientation: landscape)").matches &&
+        window.innerWidth <= 1024;
+
+      setIsLandscapePhone(isLandscape);
+    };
+
+    checkLandscapePhone();
+    window.addEventListener("resize", checkLandscapePhone);
+    window.addEventListener("orientationchange", checkLandscapePhone);
+
+    return () => {
+      window.removeEventListener("resize", checkLandscapePhone);
+      window.removeEventListener("orientationchange", checkLandscapePhone);
+    };
+  }, []);
+
+  useEffect(() => {
+    writeLocalBoardState(storageKey, boardState);
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = window.setTimeout(async () => {
+      await supabase
+        .from("game_sessions")
+        .update({
+          board_state: {
+            ...boardState,
+            savedAt: boardState.savedAt || Date.now(),
+          },
+        })
+        .eq("id", sessionId);
+    }, 350);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [boardState, sessionId, storageKey, supabase]);
+
+  useEffect(() => {
+    if (!boardState.openQuestionId || boardState.showAnswer || boardState.showWinnerPicker) {
+      setTimerRunning(false);
+      return;
+    }
+  }, [boardState.openQuestionId, boardState.showAnswer, boardState.showWinnerPicker]);
+
+  useEffect(() => {
+    if (!timerRunning) return;
+
+    const timer = window.setInterval(() => {
+      setBoardState((prev) => {
+        if (prev.timeLeft <= 1) {
+          window.clearInterval(timer);
+          return {
+            ...prev,
+            timeLeft: 0,
+            savedAt: Date.now(),
+          };
+        }
+
+        return {
+          ...prev,
+          timeLeft: prev.timeLeft - 1,
+          savedAt: Date.now(),
+        };
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [timerRunning]);
+
+  const questionMap = useMemo(() => {
+    return new Map(questions.map((question) => [question.id, question]));
+  }, [questions]);
+
+  const openQuestion = useMemo<OpenQuestion | null>(() => {
+    if (!boardState.openQuestionId) return null;
+
+    const found = questionMap.get(boardState.openQuestionId);
+    if (!found) return null;
+
+    const category = categories.find((item) => item.id === found.category_id);
+
+    return {
+      ...found,
+      categoryName: category?.name ?? "فئة",
+    };
+  }, [boardState.openQuestionId, categories, questionMap]);
+
+  const boardColumns = useMemo<CategoryColumn[]>(() => {
+    const pointsList: (200 | 400 | 600)[] = [200, 400, 600];
+
+    return categories.map((category) => {
+      const categoryQuestions = questions.filter(
+        (question) => question.category_id === category.id,
+      );
+
+      return {
+        category,
+        rows: pointsList.map((points) => {
+          const matching = categoryQuestions
+            .filter((question) => question.points === points)
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .slice(0, 2);
+
+          return {
+            points,
+            questions: matching,
+          };
+        }),
+      };
+    });
+  }, [categories, questions]);
+
+  const usedCount = boardState.usedQuestionIds.length;
+  const remainingCount = Math.max(
+    boardColumns.reduce(
+      (sum, column) =>
+        sum +
+        column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
+      0,
+    ) - usedCount,
+    0,
+  );
+
+  const teamOneLeading = boardState.teamOneScore > boardState.teamTwoScore;
+  const teamTwoLeading = boardState.teamTwoScore > boardState.teamOneScore;
+  const leaderLabel = teamOneLeading
+    ? teamOne
+    : teamTwoLeading
+      ? teamTwo
+      : "تعادل";
+
+  const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
+
+  function updateState(updater: (prev: BoardState) => BoardState) {
+    setBoardState((prev) => {
+      const next = updater(prev);
+      return {
+        ...next,
+        savedAt: Date.now(),
+      };
+    });
+  }
+
+  function handleOpenQuestion(question: QuestionRow | null) {
+    if (!question) return;
+    if (boardState.usedQuestionIds.includes(question.id)) return;
+
+    setTimerRunning(false);
+
+    updateState((prev) => ({
+      ...prev,
+      openQuestionId: question.id,
+      showAnswer: false,
+      showWinnerPicker: false,
+      timeLeft: QUESTION_TIMER_SECONDS,
+    }));
+  }
+
+  function handleCloseOverlay() {
+    setTimerRunning(false);
+
+    updateState((prev) => ({
+      ...prev,
+      openQuestionId: null,
+      showAnswer: false,
+      showWinnerPicker: false,
+      timeLeft: QUESTION_TIMER_SECONDS,
+    }));
+  }
+
+  function handleRevealAnswer() {
+    setTimerRunning(false);
+
+    updateState((prev) => ({
+      ...prev,
+      showAnswer: true,
+      showWinnerPicker: false,
+    }));
+  }
+
+  function handleGoToWinnerPicker() {
+    updateState((prev) => ({
+      ...prev,
+      showWinnerPicker: true,
+    }));
+  }
+
+  function handleBackToQuestion() {
+    updateState((prev) => ({
+      ...prev,
+      showAnswer: false,
+      showWinnerPicker: false,
+    }));
+  }
+
+  function handleBackToAnswer() {
+    updateState((prev) => ({
+      ...prev,
+      showAnswer: true,
+      showWinnerPicker: false,
+    }));
+  }
+
+  function handleResetTimer() {
+    updateState((prev) => ({
+      ...prev,
+      timeLeft: QUESTION_TIMER_SECONDS,
+    }));
+  }
+
+  function handleToggleTimer() {
+    setTimerRunning((prev) => !prev);
+  }
+
+  function adjustScore(team: "teamOne" | "teamTwo", delta: number) {
+    updateState((prev) => ({
+      ...prev,
+      teamOneScore:
+        team === "teamOne" ? Math.max(0, prev.teamOneScore + delta) : prev.teamOneScore,
+      teamTwoScore:
+        team === "teamTwo" ? Math.max(0, prev.teamTwoScore + delta) : prev.teamTwoScore,
+    }));
+  }
+
+  async function handleAwardPoints(winner: "teamOne" | "teamTwo" | "none") {
+    if (!openQuestion || modalBusy) return;
+
+    setModalBusy(true);
+    setTimerRunning(false);
+
+    updateState((prev) => {
+      const nextUsed = prev.usedQuestionIds.includes(openQuestion.id)
+        ? prev.usedQuestionIds
+        : [...prev.usedQuestionIds, openQuestion.id];
+
+      return {
+        ...prev,
+        teamOneScore:
+          winner === "teamOne"
+            ? prev.teamOneScore + openQuestion.points
+            : prev.teamOneScore,
+        teamTwoScore:
+          winner === "teamTwo"
+            ? prev.teamTwoScore + openQuestion.points
+            : prev.teamTwoScore,
+        usedQuestionIds: nextUsed,
+        openQuestionId: null,
+        showAnswer: false,
+        showWinnerPicker: false,
+        timeLeft: QUESTION_TIMER_SECONDS,
+      };
+    });
+
+    setModalBusy(false);
+  }
+
+  const compactLandscape = isLandscapePhone;
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.09),transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
+      <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
+        <div
+          className={[
+            "relative rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
+            compactLandscape ? "p-2.5" : "p-3 md:p-4",
+          ].join(" ")}
+        >
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.9rem]">
+            <div className="board-soft-glow absolute -right-20 top-10 h-72 w-72 rounded-full bg-cyan-400/8 blur-3xl" />
+            <div className="board-soft-glow absolute -left-20 bottom-10 h-72 w-72 rounded-full bg-violet-400/8 blur-3xl" />
+            <div className="board-soft-glow absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-400/6 blur-3xl" />
+          </div>
+
+          <div
+            className={[
+              "relative mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+              compactLandscape ? "p-3" : "p-4 md:p-5",
+            ].join(" ")}
+          >
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <div className="text-[10px] font-black tracking-[0.18em] text-cyan-300/90">
+                  لوحة اللعبة
+                </div>
+                <h1
+                  className={[
+                    "mt-1 font-black text-white",
+                    compactLandscape ? "text-lg" : "text-3xl md:text-5xl",
+                  ].join(" ")}
+                >
+                  {gameName}
+                </h1>
+                {!compactLandscape ? (
+                  <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
+                    اختر السؤال التالي وراقب النتيجة لحظة بلحظة ضمن واجهة مهيأة
+                    للعرض والهواتف.
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <StatusPill
+                  label={`الدور الآن: ${activeTurnName}`}
+                  icon={<GamepadIcon className="h-4 w-4 text-cyan-300" />}
+                />
+                <StatusPill
+                  label={`المتبقي: ${remainingCount} سؤال`}
+                  icon={<TimerIcon className="h-4 w-4 text-white/80" />}
+                />
+                <StatusPill
+                  label={`المتصدر: ${leaderLabel}`}
+                  icon={<CrownIcon className="h-4 w-4 text-emerald-300" />}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={
+              compactLandscape
+                ? "relative grid gap-3 grid-cols-[175px_minmax(0,1fr)]"
+                : "relative grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]"
+            }
+          >
+            <aside className="order-1">
+              <div
+                className={
+                  compactLandscape
+                    ? "grid gap-3 grid-cols-1"
+                    : "grid gap-4 sm:grid-cols-2 xl:grid-cols-1"
+                }
+              >
+                <TeamCard
+                  teamName={teamOne}
+                  score={boardState.teamOneScore}
+                  isLeading={teamOneLeading}
+                  isTurn={activeTurn === "teamOne"}
+                  onIncrease={() => adjustScore("teamOne", 100)}
+                  onDecrease={() => adjustScore("teamOne", -100)}
+                  accent="blue"
+                  avatarUrl={TEAM_BLUE_AVATAR}
+                  compact={compactLandscape}
+                />
+
+                <TeamCard
+                  teamName={teamTwo}
+                  score={boardState.teamTwoScore}
+                  isLeading={teamTwoLeading}
+                  isTurn={activeTurn === "teamTwo"}
+                  onIncrease={() => adjustScore("teamTwo", 100)}
+                  onDecrease={() => adjustScore("teamTwo", -100)}
+                  accent="orange"
+                  avatarUrl={TEAM_ORANGE_AVATAR}
+                  compact={compactLandscape}
+                />
+
+                <div
+                  className={[
+                    "rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)]",
+                    compactLandscape ? "p-3" : "p-4",
+                  ].join(" ")}
+                >
+                  <Link
+                    href="/account"
+                    className={`inline-flex w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 font-black text-white transition hover:bg-white/10 ${
+                      compactLandscape
+                        ? "min-h-11 px-4 py-2 text-xs"
+                        : "min-h-13 px-5 py-3 text-sm"
+                    }`}
+                  >
+                    الرجوع للحساب
+                  </Link>
+                </div>
+              </div>
+            </aside>
+
+            <div className="order-2">
+              <div
+                className={[
+                  "overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,19,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+                  compactLandscape ? "p-2" : "p-3",
+                ].join(" ")}
+              >
+                <div
+                  className={
+                    compactLandscape
+                      ? "grid grid-cols-6 gap-2"
+                      : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6"
+                  }
+                >
+                  {boardColumns.map((column) => {
+                    return (
+                      <div key={column.category.id} className="flex flex-col gap-2">
+                        <CategoryCard
+                          category={column.category}
+                          compact={compactLandscape}
+                        />
+
+                        {column.rows.map((row) => (
+                          <div
+                            key={`${column.category.id}-${row.points}`}
+                            className={compactLandscape ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-2 gap-2"}
+                          >
+                            {[0, 1].map((index) => {
+                              const question = row.questions[index] ?? null;
+                              const used = question
+                                ? boardState.usedQuestionIds.includes(question.id)
+                                : true;
+                              const active = question?.id === boardState.openQuestionId;
+
+                              return (
+                                <QuestionCell
+                                  key={`${column.category.id}-${row.points}-${index}`}
+                                  question={question}
+                                  points={row.points}
+                                  used={used}
+                                  active={active}
+                                  compact={compactLandscape}
+                                  onOpen={() => handleOpenQuestion(question)}
+                                />
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {openQuestion ? (
+        <QuestionOverlay
+          openQuestion={openQuestion}
+          teamOne={teamOne}
+          teamTwo={teamTwo}
+          activeTurnName={activeTurnName}
+          showAnswer={boardState.showAnswer}
+          showWinnerPicker={boardState.showWinnerPicker}
+          modalBusy={modalBusy}
+          timeLeft={boardState.timeLeft}
+          timerRunning={timerRunning}
+          isLandscapePhone={isLandscapePhone}
+          onClose={handleCloseOverlay}
+          onRevealAnswer={handleRevealAnswer}
+          onGoToWinnerPicker={handleGoToWinnerPicker}
+          onBackToQuestion={handleBackToQuestion}
+          onBackToAnswer={handleBackToAnswer}
+          onToggleTimer={handleToggleTimer}
+          onResetTimer={handleResetTimer}
+          onAwardPoints={handleAwardPoints}
+        />
+      ) : null}
+
+      <style>{`
+        @keyframes boardGlow {
+          0%,
+          100% {
+            opacity: 0.5;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.02);
+          }
+        }
+
+        @keyframes floatSoft {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+        }
+
+        .board-soft-glow {
+          animation: boardGlow 4.8s ease-in-out infinite;
+        }
+
+        .board-soft-float {
+          animation: floatSoft 5.6s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
