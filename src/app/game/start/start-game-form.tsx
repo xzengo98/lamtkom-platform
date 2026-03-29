@@ -205,14 +205,90 @@ function InfoIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function TicketIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 7a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4V7Z" />
+      <path d="M12 8v8" />
+    </svg>
+  );
+}
+
+function CheckListIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 6h10" />
+      <path d="M9 12h10" />
+      <path d="M9 18h10" />
+      <path d="m4 6 1.2 1.2L7.8 4.8" />
+      <path d="m4 12 1.2 1.2L7.8 10.8" />
+      <path d="m4 18 1.2 1.2L7.8 16.8" />
+    </svg>
+  );
+}
+
+function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path d="m3 12 9 5 9-5" />
+    </svg>
+  );
+}
+
+function RepeatIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17 2v5h-5" />
+      <path d="M7 22v-5h5" />
+      <path d="M20 9a7 7 0 0 0-12-4L7 7" />
+      <path d="M4 15a7 7 0 0 0 12 4l1-2" />
+    </svg>
+  );
+}
+
 function SummaryCard({
   label,
   value,
   accent = "default",
+  icon,
 }: {
   label: string;
   value: string;
-  accent?: "default" | "cyan";
+  accent?: "default" | "cyan" | "orange";
+  icon?: React.ReactNode;
 }) {
   return (
     <div
@@ -220,13 +296,16 @@ function SummaryCard({
         "rounded-[1rem] border px-4 py-3 text-center shadow-[0_8px_18px_rgba(0,0,0,0.16)]",
         accent === "cyan"
           ? "border-cyan-300/20 bg-cyan-400/10"
-          : "border-white/10 bg-white/5",
+          : accent === "orange"
+            ? "border-orange-300/20 bg-orange-400/10"
+            : "border-white/10 bg-white/5",
       ].join(" ")}
     >
-      <div className="text-[10px] font-black text-white/55">{label}</div>
-      <div className="mt-1 text-lg font-black text-white md:text-xl">
-        {value}
+      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-black text-white/55">
+        {icon}
+        <span>{label}</span>
       </div>
+      <div className="text-lg font-black text-white md:text-xl">{value}</div>
     </div>
   );
 }
@@ -234,14 +313,19 @@ function SummaryCard({
 function MiniStat({
   label,
   value,
+  icon,
 }: {
   label: string;
   value: string | number;
+  icon?: React.ReactNode;
 }) {
   return (
     <div className="rounded-[0.9rem] border border-white/10 bg-white/5 px-3 py-2.5 text-center">
-      <div className="text-[10px] font-black text-white/50">{label}</div>
-      <div className="mt-1 text-base font-black text-white">{value}</div>
+      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-black text-white/50">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <div className="text-base font-black text-white">{value}</div>
     </div>
   );
 }
@@ -389,28 +473,32 @@ export default function StartGameForm({
             </h1>
 
             <p className="mt-3 text-sm leading-7 text-white/72 md:text-base">
-              اختر اسم اللعبة ثم أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
+              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
               مباشرة.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <SummaryCard
-              label="الألعاب المتبقية"
-              value={String(gamesRemaining)}
-              accent="cyan"
-            />
-            <SummaryCard
-              label="عدد الفئات المطلوبة"
-              value={String(REQUIRED_CATEGORY_COUNT)}
+              label="منع التكرار"
+              value={selectionMode === "dynamic" ? "بدون تكرار" : "تكرار مسموح"}
+              icon={<RepeatIcon className="h-3.5 w-3.5" />}
             />
             <SummaryCard
               label="عدد المختار حاليًا"
               value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+              icon={<CheckListIcon className="h-3.5 w-3.5" />}
             />
             <SummaryCard
-              label="وضع التكرار"
-              value={selectionMode === "dynamic" ? "بدون تكرار" : "تكرار مسموح"}
+              label="عدد الفئات المطلوبة"
+              value={String(REQUIRED_CATEGORY_COUNT)}
+              icon={<LayersIcon className="h-3.5 w-3.5" />}
+            />
+            <SummaryCard
+              label="الألعاب المتبقية"
+              value={String(gamesRemaining)}
+              accent="cyan"
+              icon={<TicketIcon className="h-3.5 w-3.5" />}
             />
           </div>
         </div>
@@ -443,13 +531,23 @@ export default function StartGameForm({
           </div>
 
           <div className="mt-4 grid gap-2.5">
-            <SummaryCard label="اسم اللعبة" value={gameName.trim() || "-"} />
+            <SummaryCard
+              label="اسم اللعبة"
+              value={gameName.trim() || "-"}
+              icon={<SparkIcon className="h-3.5 w-3.5" />}
+            />
             <SummaryCard
               label="الفريق الأول"
               value={teamOne.trim() || "-"}
               accent="cyan"
+              icon={<UsersIcon className="h-3.5 w-3.5" />}
             />
-            <SummaryCard label="الفريق الثاني" value={teamTwo.trim() || "-"} />
+            <SummaryCard
+              label="الفريق الثاني"
+              value={teamTwo.trim() || "-"}
+              accent="orange"
+              icon={<UsersIcon className="h-3.5 w-3.5" />}
+            />
           </div>
 
           {visibleError ? (
@@ -518,14 +616,29 @@ export default function StartGameForm({
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
             <MiniStat
-              label="عدد المختار"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
-            />
-            <MiniStat label="المتبقي" value={remainingToSelect} />
-            <MiniStat
               label="الحالة"
               value={isReadyToSubmit ? "جاهزة" : "قيد الإعداد"}
+              icon={<SparkIcon className="h-3.5 w-3.5" />}
             />
+            <MiniStat
+              label="المتبقي"
+              value={remainingToSelect}
+              icon={<LayersIcon className="h-3.5 w-3.5" />}
+            />
+            <MiniStat
+              label="عدد المختار"
+              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+              icon={<CheckListIcon className="h-3.5 w-3.5" />}
+            />
+          </div>
+
+          <div className="mt-5 flex justify-start">
+            <button
+              type="submit"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.1rem] bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400 md:text-base"
+            >
+              ابدأ اللعبة
+            </button>
           </div>
         </section>
       </div>
@@ -547,12 +660,23 @@ export default function StartGameForm({
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.1rem] bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400 md:text-base"
-          >
-            ابدأ اللعبة
-          </button>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <MiniStat
+              label="عدد المختار"
+              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
+              icon={<CheckListIcon className="h-3.5 w-3.5" />}
+            />
+            <MiniStat
+              label="المتبقي"
+              value={remainingToSelect}
+              icon={<LayersIcon className="h-3.5 w-3.5" />}
+            />
+            <MiniStat
+              label="الحالة"
+              value={isReadyToSubmit ? "جاهزة" : "قيد الإعداد"}
+              icon={<SparkIcon className="h-3.5 w-3.5" />}
+            />
+          </div>
         </div>
 
         <p className="mb-5 text-sm leading-6 text-white/70">
@@ -569,15 +693,16 @@ export default function StartGameForm({
                 key={section.id}
                 className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4"
               >
-                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
+                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="flex-1">
                     <div
                       className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${theme.badge}`}
                     >
                       <SparkIcon className="h-4 w-4" />
                       <span>{section.name}</span>
                     </div>
-                    <div className="mt-3 text-sm text-white/65">
+
+                    <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/70">
                       {section.description ||
                         "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
                     </div>
@@ -621,13 +746,14 @@ export default function StartGameForm({
 
           {uncategorized.length > 0 ? (
             <div className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div className="flex-1">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-black text-white/85">
                     <GridIcon className="h-4 w-4" />
                     <span>فئات بدون قسم</span>
                   </div>
-                  <div className="mt-3 text-sm text-white/65">
+
+                  <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/70">
                     هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار واللعب.
                   </div>
                 </div>
@@ -734,23 +860,25 @@ function CategoryCard({
       </button>
 
       <div className="relative">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-3 flex items-center justify-end">
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${badge.className}`}
           >
             <span>{badge.text}</span>
           </div>
+        </div>
 
-          {active ? (
+        {active ? (
+          <div className="mb-3 flex justify-center">
             <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-100">
               تم الاختيار
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
         <div className="mb-4 flex justify-center">
           {category.image_url ? (
-            <div className="h-16 w-16 overflow-hidden rounded-[1rem] border border-white/10 bg-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.16)]">
+            <div className="h-20 w-20 overflow-hidden rounded-[1rem] border border-white/10 bg-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.16)]">
               <img
                 src={category.image_url}
                 alt={category.name}
@@ -759,7 +887,7 @@ function CategoryCard({
             </div>
           ) : (
             <div
-              className={`inline-flex h-16 w-16 items-center justify-center rounded-[1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_8px_16px_rgba(0,0,0,0.16)]`}
+              className={`inline-flex h-20 w-20 items-center justify-center rounded-[1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_8px_16px_rgba(0,0,0,0.16)]`}
             >
               <SparkIcon className="h-6 w-6" />
             </div>
