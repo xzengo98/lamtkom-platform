@@ -90,7 +90,7 @@ export default function CodenamesBoardClient({
     const roomChannel = supabase
       .channel(`board-room-${room.room_code}`)
       .on(
-        "postgres_changes",
+          "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
@@ -108,7 +108,7 @@ export default function CodenamesBoardClient({
     const cardsChannel = supabase
       .channel(`board-cards-${room.id}`)
       .on(
-        "postgres_changes",
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
@@ -130,7 +130,7 @@ export default function CodenamesBoardClient({
     const playersChannel = supabase
       .channel(`board-players-${room.id}`)
       .on(
-        "postgres_changes",
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
@@ -151,7 +151,7 @@ export default function CodenamesBoardClient({
     const turnsChannel = supabase
       .channel(`board-turns-${room.id}`)
       .on(
-        "postgres_changes",
+        "postgres_changes" as any,
         {
           event: "*",
           schema: "public",
