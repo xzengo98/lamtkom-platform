@@ -330,9 +330,7 @@ function GameCard({ card }: { card: GameCardItem }) {
           {getGameIcon(card.icon)}
           <span>{card.badge}</span>
         </div>
-        <div
-          className={`inline-flex rounded-2xl border p-2.5 ${styles.icon}`}
-        >
+        <div className={`inline-flex rounded-2xl border p-2.5 ${styles.icon}`}>
           {getGameIcon(card.icon)}
         </div>
       </div>
@@ -350,9 +348,7 @@ function GameCard({ card }: { card: GameCardItem }) {
           {card.subtitle}
         </div>
         <h3 className="mt-2 text-2xl font-black text-white">{card.title}</h3>
-        <p className="mt-3 text-sm leading-7 text-white/70">
-          {card.description}
-        </p>
+        <p className="mt-3 text-sm leading-7 text-white/70">{card.description}</p>
       </div>
 
       <div className="mt-5">
@@ -442,7 +438,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_20%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-8">
-        {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
           <div className="pointer-events-none absolute inset-0">
             <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
@@ -450,19 +445,8 @@ export default function HomePage() {
           </div>
 
           <div className="relative grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
-            {/* الصورة أولًا على الهاتف */}
-            <div className="order-1">
-              <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/5 p-2 shadow-[0_14px_32px_rgba(0,0,0,0.25)]">
-                <img
-                  src={heroMockupImage}
-                  alt="معاينة من داخل منصة لمّتنا"
-                  className="w-full rounded-[1.4rem] object-cover hero-float"
-                />
-              </div>
-            </div>
-
-            {/* النص ثانيًا على الهاتف */}
-            <div className="order-2 text-center lg:text-right">
+            {/* النص أولًا على سطح المكتب */}
+            <div className="order-2 lg:order-1 text-center lg:text-right">
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
                 <GamesIcon className="h-4 w-4" />
                 <span>منصة عربية للألعاب الجماعية</span>
@@ -561,10 +545,20 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            {/* الصورة ثانيًا على سطح المكتب وأولى على الهاتف */}
+            <div className="order-1 lg:order-2">
+              <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/5 p-2 shadow-[0_14px_32px_rgba(0,0,0,0.25)]">
+                <img
+                  src={heroMockupImage}
+                  alt="معاينة من داخل منصة لمّتنا"
+                  className="w-full rounded-[1.4rem] object-cover hero-float"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* FEATURES */}
         <section className="mt-8">
           <div className="mb-5 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
@@ -583,7 +577,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* GAMES */}
         <section className="mt-9">
           <div className="mb-5 flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="text-center md:text-right">
@@ -612,7 +605,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* STEPS */}
         <section className="mt-9">
           <div className="mb-5 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
@@ -631,7 +623,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FOOTER */}
         <footer className="mt-10 rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 text-center shadow-[0_14px_30px_rgba(0,0,0,0.22)] md:p-6">
           <div className="mb-5 flex flex-wrap items-center justify-center gap-3">
             <Link
