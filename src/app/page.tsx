@@ -465,7 +465,7 @@ export default function HomePage() {
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
-                  href="/game/start"
+                  href="/games"
                   className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
                 >
                   استعرض الألعاب
