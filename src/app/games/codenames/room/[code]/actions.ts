@@ -177,126 +177,134 @@ export async function startCodenamesGame(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
   const actorPlayerId = getString(formData, "actor_player_id");
 
-  if (!roomCode || !actorPlayerId) {
-    throw new Error("بيانات الغرفة غير مكتملة");
+  try {
+    if (!roomCode || !actorPlayerId) {
+      throw new Error("بيانات الغرفة غير مكتملة");
+    }
+
+    const { supabase, room, actor } = await getRoomAndActor({
+      roomCode,
+      actorPlayerId,
+    });
+
+    if (!actor.is_host) {
+      throw new Error("فقط منشئ الغرفة يستطيع بدء اللعبة");
+    }
+
+    const { data: playersData, error: playersError } = await supabase
+      .from("codenames_players")
+      .select("id, team, role")
+      .eq("room_id", room.id);
+
+    if (playersError) {
+      throw new Error(playersError.message);
+    }
+
+    const allPlayers = (playersData ?? []) as BasicPlayerRow[];
+
+    const redPlayers = allPlayers.filter((player) => player.team === "red");
+    const bluePlayers = allPlayers.filter((player) => player.team === "blue");
+    const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
+    const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
+
+    if (redPlayers.length === 0 || bluePlayers.length === 0) {
+      throw new Error("يجب وجود لاعب واحد على الأقل في كل فريق");
+    }
+
+    if (redSpymasters.length !== 1 || blueSpymasters.length !== 1) {
+      throw new Error("يجب أن يكون لكل فريق Spymaster واحد فقط");
+    }
+
+    const { data: wordsData, error: wordsError } = await supabase
+      .from("codenames_word_bank")
+      .select("word")
+      .eq("is_active", true)
+      .limit(200);
+
+    if (wordsError) {
+      throw new Error(wordsError.message);
+    }
+
+    const words = (wordsData ?? []) as WordBankRow[];
+
+    const uniqueWords = Array.from(
+      new Map<string, WordBankRow>(words.map((item) => [item.word, item])).values()
+    );
+
+    if (uniqueWords.length < 25) {
+      throw new Error("تحتاج على الأقل 25 كلمة نشطة لبدء اللعبة");
+    }
+
+    const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
+    const startingTeam = Math.random() < 0.5 ? "red" : "blue";
+
+    const cardTypes = shuffleArray<string>([
+      ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
+      ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
+      ...Array(7).fill("neutral"),
+      "assassin",
+    ]);
+
+    const cardsToInsert = selectedWords.map((item, index) => ({
+      room_id: room.id,
+      position_index: index,
+      word: item.word,
+      card_type: cardTypes[index],
+      is_revealed: false,
+    }));
+
+    const { error: deleteOldCardsError } = await supabase
+      .from("codenames_cards")
+      .delete()
+      .eq("room_id", room.id);
+
+    if (deleteOldCardsError) {
+      throw new Error(deleteOldCardsError.message);
+    }
+
+    const { error: insertCardsError } = await supabase
+      .from("codenames_cards")
+      .insert(cardsToInsert);
+
+    if (insertCardsError) {
+      throw new Error(insertCardsError.message);
+    }
+
+    const { error: deleteTurnsError } = await supabase
+      .from("codenames_turns")
+      .delete()
+      .eq("room_id", room.id);
+
+    if (deleteTurnsError) {
+      throw new Error(deleteTurnsError.message);
+    }
+
+    const { error: roomUpdateError } = await supabase
+      .from("codenames_rooms")
+      .update({
+        status: "active",
+        starting_team: startingTeam,
+        current_turn_team: startingTeam,
+        red_remaining: startingTeam === "red" ? 9 : 8,
+        blue_remaining: startingTeam === "blue" ? 9 : 8,
+        winner_team: null,
+        assassin_revealed: false,
+      })
+      .eq("id", room.id);
+
+    if (roomUpdateError) {
+      throw new Error(roomUpdateError.message);
+    }
+
+    revalidatePath(`/games/codenames/room/${roomCode}`);
+    redirect(`/games/codenames/board/${roomCode}?player_id=${actor.id}`);
+  } catch (error: any) {
+    console.error("START GAME ERROR:", error);
+
+    redirect(
+      `/games/codenames/room/${roomCode}?player_id=${actorPlayerId}&error=${encodeURIComponent(
+        error?.message || "unknown error"
+      )}`
+    );
   }
-
-  const { supabase, room, actor } = await getRoomAndActor({
-    roomCode,
-    actorPlayerId,
-  });
-
-  if (!actor.is_host) {
-    throw new Error("فقط منشئ الغرفة يستطيع بدء اللعبة");
-  }
-
-  const { data: playersData, error: playersError } = await supabase
-    .from("codenames_players")
-    .select("id, team, role")
-    .eq("room_id", room.id);
-
-  if (playersError) {
-    throw new Error(playersError.message);
-  }
-
-  const allPlayers = (playersData ?? []) as BasicPlayerRow[];
-
-  const redPlayers = allPlayers.filter((player) => player.team === "red");
-  const bluePlayers = allPlayers.filter((player) => player.team === "blue");
-  const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
-  const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
-
-  if (redPlayers.length === 0 || bluePlayers.length === 0) {
-    throw new Error("يجب وجود لاعب واحد على الأقل في كل فريق");
-  }
-
-  if (redSpymasters.length !== 1 || blueSpymasters.length !== 1) {
-    throw new Error("يجب أن يكون لكل فريق Spymaster واحد فقط");
-  }
-
-  const { data: wordsData, error: wordsError } = await supabase
-    .from("codenames_word_bank")
-    .select("word")
-    .eq("is_active", true)
-    .limit(200);
-
-  if (wordsError) {
-    throw new Error(wordsError.message);
-  }
-
-  const words = (wordsData ?? []) as WordBankRow[];
-
-  const uniqueWords = Array.from(
-    new Map<string, WordBankRow>(
-      words.map((item) => [item.word, item])
-    ).values()
-  );
-
-  if (uniqueWords.length < 25) {
-    throw new Error("تحتاج على الأقل 25 كلمة نشطة لبدء اللعبة");
-  }
-
-  const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
-  const startingTeam = Math.random() < 0.5 ? "red" : "blue";
-
-  const cardTypes = shuffleArray<string>([
-    ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
-    ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
-    ...Array(7).fill("neutral"),
-    "assassin",
-  ]);
-
-  const cardsToInsert = selectedWords.map((item, index) => ({
-    room_id: room.id,
-    position_index: index,
-    word: item.word,
-    card_type: cardTypes[index],
-    is_revealed: false,
-  }));
-
-  const { error: deleteOldCardsError } = await supabase
-    .from("codenames_cards")
-    .delete()
-    .eq("room_id", room.id);
-
-  if (deleteOldCardsError) {
-    throw new Error(deleteOldCardsError.message);
-  }
-
-  const { error: insertCardsError } = await supabase
-    .from("codenames_cards")
-    .insert(cardsToInsert);
-
-  if (insertCardsError) {
-    throw new Error(insertCardsError.message);
-  }
-
-  const { error: deleteTurnsError } = await supabase
-    .from("codenames_turns")
-    .delete()
-    .eq("room_id", room.id);
-
-  if (deleteTurnsError) {
-    throw new Error(deleteTurnsError.message);
-  }
-
-  const { error: roomUpdateError } = await supabase
-    .from("codenames_rooms")
-    .update({
-      status: "active",
-      starting_team: startingTeam,
-      current_turn_team: startingTeam,
-      red_remaining: startingTeam === "red" ? 9 : 8,
-      blue_remaining: startingTeam === "blue" ? 9 : 8,
-      winner_team: null,
-      assassin_revealed: false,
-    })
-    .eq("id", room.id);
-
-  if (roomUpdateError) {
-    throw new Error(roomUpdateError.message);
-  }
-
-  revalidatePath(`/games/codenames/room/${roomCode}`);
-  redirect(`/games/codenames/board/${roomCode}?player_id=${actor.id}`);
 }
