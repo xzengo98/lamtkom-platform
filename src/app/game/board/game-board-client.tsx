@@ -965,7 +965,7 @@ function QuestionOverlay({
                   className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-black text-white transition hover:bg-white/10 md:px-5 md:py-3 md:text-sm"
                 >
                   <AnswerIcon className="h-4 w-4" />
-                  <span>العودة للإجابة</span>
+                  <span> العودة للإجابة</span>
                 </button>
               </div>
             )}
