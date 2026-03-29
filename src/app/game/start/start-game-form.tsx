@@ -860,7 +860,7 @@ function CategoryCard({
       </button>
 
       <div className="relative">
-        <div className="mb-3 flex items-center justify-end">
+        <div className="mb-3 flex items-center justify-start">
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${badge.className}`}
           >
