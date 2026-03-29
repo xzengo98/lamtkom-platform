@@ -236,6 +236,40 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function UserIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="8" r="4" />
+    </svg>
+  );
+}
+
+function AnswerIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 12l2 2 4-4" />
+      <circle cx="12" cy="12" r="9" />
+    </svg>
+  );
+}
+
 function TeamPortrait({
   teamName,
   avatarUrl,
@@ -257,7 +291,7 @@ function TeamPortrait({
       className={[
         "rounded-[1.4rem] border p-3 text-center",
         palette,
-        compact ? "w-[86px]" : "w-[110px] md:w-[130px]",
+        compact ? "w-[84px]" : "w-[110px] md:w-[130px]",
       ].join(" ")}
     >
       <img
@@ -508,34 +542,58 @@ function QuestionOverlay({
     Math.min(100, (timeLeft / QUESTION_TIMER_SECONDS) * 100),
   );
 
+  const topPortraitCompact = false;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/90 p-2 md:p-6">
-      <div className="flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[90vh]">
-        <div className="shrink-0 border-b border-white/10 px-4 py-4 md:px-6 md:py-5">
+      <div className="flex h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[1.85rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_32%),linear-gradient(180deg,#071126_0%,#050b16_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:h-[92vh]">
+        <div className="shrink-0 border-b border-white/10 px-3 py-3 md:px-6 md:py-5">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
-                {openQuestion.categoryName}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
-                {openQuestion.points} نقطة
-              </span>
-              {toleranceVisible ? (
-                <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
-                  السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
-                  {openQuestion.year_tolerance_after ?? 0}
-                </span>
-              ) : null}
-            </div>
+            <div className="grid items-start gap-3 md:grid-cols-[140px_minmax(0,1fr)_140px]">
+              <div className="hidden md:flex justify-start">
+                <TeamPortrait
+                  teamName={teamOne}
+                  avatarUrl={TEAM_BLUE_AVATAR}
+                  accent="blue"
+                  compact={topPortraitCompact}
+                />
+              </div>
 
-            <div className="text-center">
-              <h2 className="text-3xl font-black text-white md:text-5xl">
-                {!showAnswer && !showWinnerPicker
-                  ? "السؤال"
-                  : showAnswer && !showWinnerPicker
-                    ? "الإجابة الصحيحة"
-                    : "تحديد الفريق الفائز"}
-              </h2>
+              <div>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-black text-cyan-100">
+                    {openQuestion.categoryName}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/85">
+                    {openQuestion.points} نقطة
+                  </span>
+                  {toleranceVisible ? (
+                    <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-1 text-xs font-black text-amber-100">
+                      السماحية: قبل {openQuestion.year_tolerance_before ?? 0} / بعد{" "}
+                      {openQuestion.year_tolerance_after ?? 0}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="mt-3 text-center">
+                  <h2 className="text-3xl font-black text-white md:text-5xl">
+                    {!showAnswer && !showWinnerPicker
+                      ? "السؤال"
+                      : showAnswer && !showWinnerPicker
+                        ? "الإجابة الصحيحة"
+                        : "تحديد الفريق الفائز"}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="hidden md:flex justify-end">
+                <TeamPortrait
+                  teamName={teamTwo}
+                  avatarUrl={TEAM_ORANGE_AVATAR}
+                  accent="orange"
+                  compact={topPortraitCompact}
+                />
+              </div>
             </div>
 
             {!showAnswer && !showWinnerPicker ? (
@@ -561,17 +619,19 @@ function QuestionOverlay({
                   <button
                     type="button"
                     onClick={onToggleTimer}
-                    className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
                   >
-                    {timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
+                    <TimerIcon className="h-4 w-4" />
+                    <span>{timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={onResetTimer}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
                   >
-                    إعادة المؤقت
+                    <SparkIcon className="h-4 w-4" />
+                    <span>إعادة المؤقت</span>
                   </button>
                 </div>
               </div>
@@ -579,63 +639,36 @@ function QuestionOverlay({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
           {!showAnswer && !showWinnerPicker ? (
-            <div className="grid items-start gap-5 md:grid-cols-[130px_minmax(0,1fr)_130px]">
-              <div className="hidden md:flex justify-center">
-                <TeamPortrait
-                  teamName={teamOne}
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  accent="blue"
-                />
-              </div>
-
-              <div>
-                <RichContent html={openQuestion.question_text} large />
-              </div>
-
-              <div className="hidden md:flex justify-center">
-                <TeamPortrait
-                  teamName={teamTwo}
-                  avatarUrl={TEAM_ORANGE_AVATAR}
-                  accent="orange"
-                />
-              </div>
+            <div className="rounded-[1.5rem] border border-white/10 bg-[#020817]/45 p-4 md:p-6">
+              <RichContent html={openQuestion.question_text} large />
             </div>
           ) : showAnswer && !showWinnerPicker ? (
-            <div className="grid items-start gap-5 md:grid-cols-[130px_minmax(0,1fr)_130px]">
-              <div className="hidden md:flex justify-center">
-                <TeamPortrait
-                  teamName={teamOne}
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  accent="blue"
-                />
+            <div className="rounded-[1.5rem] border border-emerald-300/15 bg-[linear-gradient(180deg,rgba(7,35,25,0.88)_0%,rgba(4,15,10,0.95)_100%)] p-4 md:p-6 shadow-[0_18px_40px_rgba(16,185,129,0.08)]">
+              <div className="mb-4 flex items-center justify-center gap-2 text-sm font-black text-emerald-100">
+                <AnswerIcon className="h-4 w-4" />
+                <span>الإجابة الصحيحة</span>
               </div>
-
-              <div>
-                <RichContent html={openQuestion.answer_text} large />
-              </div>
-
-              <div className="hidden md:flex justify-center">
-                <TeamPortrait
-                  teamName={teamTwo}
-                  avatarUrl={TEAM_ORANGE_AVATAR}
-                  accent="orange"
-                />
-              </div>
+              <RichContent html={openQuestion.answer_text} large />
             </div>
           ) : (
             <div>
-              <h3 className="mb-5 text-center text-2xl font-black text-white md:text-3xl">
-                أي فريق جاوب صح؟
-              </h3>
+              <div className="mb-5 text-center">
+                <h3 className="text-2xl font-black text-white md:text-3xl">
+                  أي فريق جاوب صح؟
+                </h3>
+                <p className="mt-2 text-sm text-white/65">
+                  اختر الفريق الصحيح لإضافة النقاط مباشرة
+                </p>
+              </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => onAwardPoints("teamOne")}
                   disabled={modalBusy}
-                  className="rounded-[1.3rem] border border-cyan-300/20 bg-cyan-400/10 p-4 text-white transition hover:bg-cyan-400/15 disabled:opacity-50"
+                  className="rounded-[1.35rem] border border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(34,211,238,0.08)] transition hover:-translate-y-0.5 hover:bg-cyan-400/10 disabled:opacity-50"
                 >
                   <div className="flex items-center gap-4">
                     <img
@@ -644,8 +677,9 @@ function QuestionOverlay({
                       className="h-16 w-16 rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
                     />
                     <div className="text-right">
-                      <div className="text-sm font-bold text-cyan-100/75">
-                        الفريق
+                      <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-100">
+                        <UserIcon className="h-3.5 w-3.5" />
+                        <span>الفريق</span>
                       </div>
                       <div className="text-2xl font-black">{teamOne}</div>
                     </div>
@@ -656,7 +690,7 @@ function QuestionOverlay({
                   type="button"
                   onClick={() => onAwardPoints("teamTwo")}
                   disabled={modalBusy}
-                  className="rounded-[1.3rem] border border-orange-300/20 bg-orange-400/10 p-4 text-white transition hover:bg-orange-400/15 disabled:opacity-50"
+                  className="rounded-[1.35rem] border border-orange-300/20 bg-[linear-gradient(180deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)] p-4 text-white shadow-[0_16px_35px_rgba(251,146,60,0.08)] transition hover:-translate-y-0.5 hover:bg-orange-400/10 disabled:opacity-50"
                 >
                   <div className="flex items-center gap-4">
                     <img
@@ -665,8 +699,9 @@ function QuestionOverlay({
                       className="h-16 w-16 rounded-full border border-white/10 object-cover shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
                     />
                     <div className="text-right">
-                      <div className="text-sm font-bold text-orange-100/75">
-                        الفريق
+                      <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-orange-300/20 bg-orange-400/10 px-3 py-1 text-[11px] font-black text-orange-100">
+                        <UserIcon className="h-3.5 w-3.5" />
+                        <span>الفريق</span>
                       </div>
                       <div className="text-2xl font-black">{teamTwo}</div>
                     </div>
@@ -686,22 +721,24 @@ function QuestionOverlay({
           )}
         </div>
 
-        <div className="shrink-0 border-t border-white/10 px-4 py-3 md:px-6 md:py-4">
+        <div className="shrink-0 border-t border-white/10 px-3 py-3 md:px-6 md:py-4">
           {!showAnswer && !showWinnerPicker ? (
             <div className="flex flex-wrap justify-center gap-3 md:justify-end">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
-                إغلاق
+                <SparkIcon className="h-4 w-4" />
+                <span>إغلاق</span>
               </button>
               <button
                 type="button"
                 onClick={onRevealAnswer}
-                className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                إظهار الإجابة
+                <AnswerIcon className="h-4 w-4" />
+                <span>إظهار الإجابة</span>
               </button>
             </div>
           ) : showAnswer && !showWinnerPicker ? (
@@ -709,23 +746,26 @@ function QuestionOverlay({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
-                إغلاق
+                <SparkIcon className="h-4 w-4" />
+                <span>إغلاق</span>
               </button>
               <button
                 type="button"
                 onClick={onBackToQuestion}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
-                ارجع للسؤال
+                <GamepadIcon className="h-4 w-4" />
+                <span>ارجع للسؤال</span>
               </button>
               <button
                 type="button"
                 onClick={onGoToWinnerPicker}
-                className="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                أي فريق؟
+                <CrownIcon className="h-4 w-4" />
+                <span>أي فريق؟</span>
               </button>
             </div>
           ) : (
@@ -733,16 +773,18 @@ function QuestionOverlay({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
-                إغلاق
+                <SparkIcon className="h-4 w-4" />
+                <span>إغلاق</span>
               </button>
               <button
                 type="button"
                 onClick={onBackToAnswer}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
               >
-                العودة للإجابة
+                <AnswerIcon className="h-4 w-4" />
+                <span>العودة للإجابة</span>
               </button>
             </div>
           )}
