@@ -26,6 +26,7 @@ type BoardState = {
   teamOneScore: number;
   teamTwoScore: number;
   usedQuestionIds: string[];
+  questionResults: Record<string, "teamOne" | "teamTwo" | "none">;
   openQuestionId: string | null;
   showAnswer: boolean;
   showWinnerPicker: boolean;
@@ -51,12 +52,26 @@ const NONE_AVATAR = "https://www.svgrepo.com/show/361654/value-none.svg";
 function normalizeBoardState(
   raw: Record<string, unknown> | null | undefined,
 ): BoardState {
+  const rawResults =
+    raw && typeof raw.questionResults === "object" && raw.questionResults
+      ? (raw.questionResults as Record<string, unknown>)
+      : {};
+
+  const questionResults: Record<string, "teamOne" | "teamTwo" | "none"> = {};
+
+  for (const [key, value] of Object.entries(rawResults)) {
+    if (value === "teamOne" || value === "teamTwo" || value === "none") {
+      questionResults[key] = value;
+    }
+  }
+
   return {
     teamOneScore: typeof raw?.teamOneScore === "number" ? raw.teamOneScore : 0,
     teamTwoScore: typeof raw?.teamTwoScore === "number" ? raw.teamTwoScore : 0,
     usedQuestionIds: Array.isArray(raw?.usedQuestionIds)
       ? raw.usedQuestionIds.map((value) => String(value))
       : [],
+    questionResults,
     openQuestionId:
       typeof raw?.openQuestionId === "string" ? raw.openQuestionId : null,
     showAnswer: Boolean(raw?.showAnswer ?? false),
@@ -247,17 +262,21 @@ export default function QuestionPageClient({
         : [...prev.usedQuestionIds, question.id];
 
       return {
-        ...prev,
-        teamOneScore:
-          winner === "teamOne" ? prev.teamOneScore + question.points : prev.teamOneScore,
-        teamTwoScore:
-          winner === "teamTwo" ? prev.teamTwoScore + question.points : prev.teamTwoScore,
-        usedQuestionIds: nextUsed,
-        openQuestionId: null,
-        showAnswer: false,
-        showWinnerPicker: false,
-        timeLeft: QUESTION_TIMER_SECONDS,
-      };
+  ...prev,
+  teamOneScore:
+    winner === "teamOne" ? prev.teamOneScore + question.points : prev.teamOneScore,
+  teamTwoScore:
+    winner === "teamTwo" ? prev.teamTwoScore + question.points : prev.teamTwoScore,
+  usedQuestionIds: nextUsed,
+  questionResults: {
+    ...prev.questionResults,
+    [question.id]: winner,
+  },
+  openQuestionId: null,
+  showAnswer: false,
+  showWinnerPicker: false,
+  timeLeft: QUESTION_TIMER_SECONDS,
+};
     });
 
     setModalBusy(false);
