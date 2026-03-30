@@ -43,51 +43,40 @@ export async function createCodenamesRoom(formData: FormData) {
   const supabase = await getSupabaseServerClient();
   const guestName = getString(formData, "guest_name");
 
-  try {
-    if (!guestName) {
-      throw new Error("الاسم مطلوب");
-    }
-
-    const roomCode = await createUniqueRoomCode(supabase);
-
-    // نحاول أولًا الإدخال بأقل قدر ممكن من الأعمدة
-    const { data: roomData, error: roomError } = await supabase
-      .from("codenames_rooms")
-      .insert({
-        room_code: roomCode,
-        status: "waiting",
-      })
-      .select("id, room_code")
-      .single();
-
-    if (roomError || !roomData) {
-      throw new Error(roomError?.message || "تعذر إنشاء الغرفة");
-    }
-
-    const { data: playerData, error: playerError } = await supabase
-      .from("codenames_players")
-      .insert({
-        room_id: roomData.id,
-        guest_name: guestName,
-        team: "spectator",
-        role: "spectator",
-        is_host: true,
-      })
-      .select("id")
-      .single();
-
-    if (playerError || !playerData) {
-      throw new Error(playerError?.message || "تعذر إضافة اللاعب إلى الغرفة");
-    }
-
-    redirect(`/games/codenames/room/${roomData.room_code}?player_id=${playerData.id}`);
-  } catch (error: any) {
-    console.error("CREATE CODENAMES ROOM ERROR:", error);
-
-    redirect(
-      `/games/codenames/create?error=${encodeURIComponent(
-        error?.message || "حدث خطأ أثناء إنشاء الغرفة"
-      )}`
-    );
+  if (!guestName) {
+    throw new Error("الاسم مطلوب");
   }
+
+  const roomCode = await createUniqueRoomCode(supabase);
+
+  const { data: roomData, error: roomError } = await supabase
+    .from("codenames_rooms")
+    .insert({
+      room_code: roomCode,
+      status: "waiting",
+    })
+    .select("id, room_code")
+    .single();
+
+  if (roomError || !roomData) {
+    throw new Error(roomError?.message || "تعذر إنشاء الغرفة");
+  }
+
+  const { data: playerData, error: playerError } = await supabase
+    .from("codenames_players")
+    .insert({
+      room_id: roomData.id,
+      guest_name: guestName,
+      team: "spectator",
+      role: "spectator",
+      is_host: true,
+    })
+    .select("id")
+    .single();
+
+  if (playerError || !playerData) {
+    throw new Error(playerError?.message || "تعذر إضافة اللاعب إلى الغرفة");
+  }
+
+  redirect(`/games/codenames/room/${roomData.room_code}?player_id=${playerData.id}`);
 }
