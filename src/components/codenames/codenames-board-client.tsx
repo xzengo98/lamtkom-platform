@@ -72,8 +72,8 @@ type Props = {
   resetGameAction: ServerAction;
 };
 
-const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
-const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
+const BLUE_TEAM_IMAGE = "https://i.top4top.io/p_37415yja12.png";
+const ORANGE_TEAM_IMAGE = "https://h.top4top.io/p_3741s1d6i1.jpg";
 
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
