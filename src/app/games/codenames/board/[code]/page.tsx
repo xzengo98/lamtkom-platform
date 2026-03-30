@@ -4,6 +4,7 @@ import CodenamesBoardClient from "@/components/codenames/codenames-board-client"
 import {
   endCodenamesTurn,
   revealCodenamesCard,
+  resetCodenamesGame,
   submitCodenamesClue,
 } from "./actions";
 
@@ -76,6 +77,7 @@ export default async function CodenamesBoardPage({
       submitClueAction={submitCodenamesClue}
       revealCardAction={revealCodenamesCard}
       endTurnAction={endCodenamesTurn}
+      resetGameAction={resetCodenamesGame}
     />
   );
 }

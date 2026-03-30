@@ -69,6 +69,7 @@ type Props = {
   submitClueAction: ServerAction;
   revealCardAction: ServerAction;
   endTurnAction: ServerAction;
+  resetGameAction: ServerAction;
 };
 
 const CARD_BACKGROUNDS = {
@@ -96,6 +97,14 @@ function getTurnLabel(team: string | null) {
   if (team === "blue") return "Blue Team";
   if (team === "red") return "Orange Team";
   return "-";
+}
+
+function normalizePlayers(rows: PlayerRow[]) {
+  return rows.map((player) => ({
+    ...player,
+    team: player.team?.toLowerCase() ?? null,
+    role: player.role?.toLowerCase() ?? null,
+  }));
 }
 
 function TeamPanel({
@@ -189,10 +198,11 @@ export default function CodenamesBoardClient({
   submitClueAction,
   revealCardAction,
   endTurnAction,
+  resetGameAction,
 }: Props) {
   const [room, setRoom] = useState<RoomRow>(initialRoom);
   const [cards, setCards] = useState<CardRow[]>(initialCards);
-  const [players, setPlayers] = useState<PlayerRow[]>(initialPlayers);
+  const [players, setPlayers] = useState<PlayerRow[]>(normalizePlayers(initialPlayers));
   const [turns, setTurns] = useState<TurnRow[]>(initialTurns);
   const [selectedCard, setSelectedCard] = useState<CardRow | null>(null);
   const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
@@ -270,7 +280,7 @@ export default function CodenamesBoardClient({
 
     if (roomRes.data) setRoom(roomRes.data as RoomRow);
     if (cardsRes.data) setCards(cardsRes.data as CardRow[]);
-    if (playersRes.data) setPlayers(playersRes.data as PlayerRow[]);
+    if (playersRes.data) setPlayers(normalizePlayers(playersRes.data as PlayerRow[]));
     if (turnsRes.data) setTurns(turnsRes.data as TurnRow[]);
   }
 
@@ -385,6 +395,14 @@ export default function CodenamesBoardClient({
     }
   }, [cards, selectedCard]);
 
+  useEffect(() => {
+    if (room.status === "waiting") {
+      window.location.replace(
+        `/games/codenames/room/${room.room_code}?player_id=${safeCurrentPlayer.id}`
+      );
+    }
+  }, [room.status, room.room_code, safeCurrentPlayer.id]);
+
   async function sendPreview(card: CardRow | null) {
     const supabase = getSupabaseBrowserClient();
     const channel = supabase.channel(`codenames-preview-${room.room_code}`);
@@ -413,7 +431,6 @@ export default function CodenamesBoardClient({
 
   function getCardView(card: CardRow) {
     const isPending = selectedCard?.id === card.id;
-    const isBlack = card.card_type === "assassin";
     const realBg = getCardBackground(card.card_type);
 
     const baseStyle: React.CSSProperties = {
@@ -439,17 +456,6 @@ export default function CodenamesBoardClient({
         style: {
           ...baseStyle,
           backgroundImage: `url(${realBg})`,
-        },
-        label: card.word,
-      };
-    }
-
-    if (!card.is_revealed) {
-      return {
-        className: `card-shell ${isPending ? "card-pending" : ""}`,
-        style: {
-          ...baseStyle,
-          backgroundImage: `url(${isBlack ? CARD_BACKGROUNDS.black : CARD_BACKGROUNDS.neutral})`,
         },
         label: card.word,
       };
@@ -691,7 +697,7 @@ export default function CodenamesBoardClient({
                 )}
               </div>
 
-              <div className="flex items-end">
+              <div className="flex flex-col justify-end gap-3">
                 {canEndTurn && (
                   <form action={endTurnAction} className="w-full">
                     <input type="hidden" name="room_code" value={room.room_code} />
@@ -701,6 +707,19 @@ export default function CodenamesBoardClient({
                       className="w-full rounded-2xl bg-orange-500 px-6 py-4 text-xl font-black text-white shadow-[0_10px_25px_rgba(249,115,22,0.25)] hover:bg-orange-400"
                     >
                       إنهاء الدور
+                    </button>
+                  </form>
+                )}
+
+                {safeCurrentPlayer.is_host && (
+                  <form action={resetGameAction} className="w-full">
+                    <input type="hidden" name="room_code" value={room.room_code} />
+                    <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
+                    <button
+                      type="submit"
+                      className="w-full rounded-2xl border border-red-300/20 bg-red-500/10 px-6 py-4 text-lg font-black text-red-100 hover:bg-red-500/20"
+                    >
+                      إعادة اللعبة
                     </button>
                   </form>
                 )}

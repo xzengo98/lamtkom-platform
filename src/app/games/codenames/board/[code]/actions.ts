@@ -21,6 +21,7 @@ type RoomRow = {
   red_remaining: number | null;
   blue_remaining: number | null;
   winner_team: string | null;
+  assassin_revealed?: boolean | null;
 };
 
 type PlayerRow = {
@@ -62,7 +63,9 @@ async function getRoomAndActor({
 
   const { data: roomData, error: roomError } = await supabase
     .from("codenames_rooms")
-    .select("id, room_code, status, current_turn_team, red_remaining, blue_remaining, winner_team")
+    .select(
+      "id, room_code, status, current_turn_team, red_remaining, blue_remaining, winner_team, assassin_revealed"
+    )
     .eq("room_code", roomCode)
     .maybeSingle();
 
@@ -333,7 +336,6 @@ export async function revealCodenamesCard(formData: FormData) {
     shouldEndTurn = true;
   }
 
-  // قاعدة +1
   if (
     roomStatus === "active" &&
     card.card_type === currentTeam &&
@@ -415,5 +417,61 @@ export async function revealCodenamesCard(formData: FormData) {
     }
   }
 
+  revalidatePath(`/games/codenames/board/${roomCode}`);
+}
+
+export async function resetCodenamesGame(formData: FormData) {
+  const roomCode = getString(formData, "room_code").toUpperCase();
+  const actorPlayerId = getString(formData, "actor_player_id");
+
+  if (!roomCode || !actorPlayerId) {
+    throw new Error("بيانات غير مكتملة");
+  }
+
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
+
+  if (!actor.is_host) {
+    throw new Error("فقط منشئ اللعبة يستطيع إعادة اللعبة");
+  }
+
+  const { error: deleteCardsError } = await supabase
+    .from("codenames_cards")
+    .delete()
+    .eq("room_id", room.id);
+
+  if (deleteCardsError) {
+    throw new Error(deleteCardsError.message);
+  }
+
+  const { error: deleteTurnsError } = await supabase
+    .from("codenames_turns")
+    .delete()
+    .eq("room_id", room.id);
+
+  if (deleteTurnsError) {
+    throw new Error(deleteTurnsError.message);
+  }
+
+  const { error: roomUpdateError } = await supabase
+    .from("codenames_rooms")
+    .update({
+      status: "waiting",
+      current_turn_team: null,
+      starting_team: null,
+      red_remaining: null,
+      blue_remaining: null,
+      winner_team: null,
+      assassin_revealed: false,
+    })
+    .eq("id", room.id);
+
+  if (roomUpdateError) {
+    throw new Error(roomUpdateError.message);
+  }
+
+  revalidatePath(`/games/codenames/room/${roomCode}`);
   revalidatePath(`/games/codenames/board/${roomCode}`);
 }
