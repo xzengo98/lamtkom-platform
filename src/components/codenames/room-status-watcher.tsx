@@ -19,7 +19,28 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
     const supabase = getSupabaseBrowserClient();
+
+    const goToBoard = () => {
+      router.replace(
+        `/games/codenames/board/${roomCode}?player_id=${encodeURIComponent(playerId)}`
+      );
+    };
+
+    const checkRoomStatus = async () => {
+      if (!isMounted) return;
+
+      const { data } = await supabase
+        .from("codenames_rooms")
+        .select("status")
+        .eq("room_code", roomCode)
+        .maybeSingle();
+
+      if (data?.status === "active") {
+        goToBoard();
+      }
+    };
 
     const channel = supabase
       .channel(`codenames-room-${roomCode}`)
@@ -33,16 +54,23 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
         },
         (payload: RoomRealtimePayload) => {
           const next = payload.new;
+
           if (next?.status === "active") {
-            router.replace(
-              `/games/codenames/board/${roomCode}?player_id=${encodeURIComponent(playerId)}`
-            );
+            goToBoard();
           }
         }
       )
       .subscribe();
 
+    const interval = setInterval(() => {
+      checkRoomStatus();
+    }, 1000);
+
+    checkRoomStatus();
+
     return () => {
+      isMounted = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [roomCode, playerId, router]);
