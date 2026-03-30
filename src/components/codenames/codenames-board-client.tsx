@@ -77,7 +77,7 @@ const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
 
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
-  blue: "https://c.top4top.io/p_3740wjx492.png",
+  blue: "https://k.top4top.io/p_3741q6x0a1.png",
   orange: "https://b.top4top.io/p_3740qmur71.png",
   black:
     "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
