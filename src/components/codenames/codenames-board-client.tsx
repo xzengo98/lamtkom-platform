@@ -72,6 +72,9 @@ type Props = {
   resetGameAction: ServerAction;
 };
 
+const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
+const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
+
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
   blue: "https://c.top4top.io/p_3740wjx492.png",
@@ -107,6 +110,40 @@ function normalizePlayers(rows: PlayerRow[]) {
   }));
 }
 
+function TeamPlayerCard({
+  player,
+  theme,
+}: {
+  player: PlayerRow;
+  theme: "blue" | "orange";
+}) {
+  const teamImage = theme === "blue" ? BLUE_TEAM_IMAGE : ORANGE_TEAM_IMAGE;
+  const wrapperClass =
+    theme === "blue"
+      ? "border-cyan-300/30 bg-cyan-500/18 shadow-[0_16px_40px_rgba(6,182,212,0.12)]"
+      : "border-orange-300/30 bg-orange-500/18 shadow-[0_16px_40px_rgba(249,115,22,0.14)]";
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[26px] border p-4 ${wrapperClass}`}
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(4,12,24,0.16), rgba(4,12,24,0.18)), url(${teamImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/18" />
+      <div className="relative z-10 rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur-[2px]">
+        <div className="text-center text-2xl font-black text-white">{player.guest_name}</div>
+        <div className="mt-2 text-center text-sm font-semibold text-white/80">
+          {player.role === "spymaster" ? "🕵️ Spymaster" : "🎯 Operative"}
+          {player.is_host ? " • Host" : ""}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TeamPanel({
   title,
   theme,
@@ -120,70 +157,89 @@ function TeamPanel({
   spymasters: PlayerRow[];
   remaining: number | null;
 }) {
-  const tint =
-    theme === "blue"
-      ? "border-cyan-300/20 bg-cyan-500/10"
-      : "border-orange-300/20 bg-orange-500/10";
+  const isBlue = theme === "blue";
+  const imageUrl = isBlue ? BLUE_TEAM_IMAGE : ORANGE_TEAM_IMAGE;
+  const titleClass = isBlue
+    ? "border-cyan-300/20 text-cyan-100"
+    : "border-orange-300/20 text-orange-100";
 
-  const countColor = theme === "blue" ? "text-cyan-100" : "text-orange-100";
+  const blockClass = isBlue
+    ? "border-cyan-300/25 bg-cyan-500/10"
+    : "border-orange-300/25 bg-orange-500/10";
+
+  const numberClass = isBlue ? "text-cyan-100" : "text-orange-100";
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[24px] border border-white/10 bg-black/25 px-4 py-3 text-center text-sm font-black uppercase tracking-[0.18em] text-white">
+      <div className={`rounded-full border bg-black/25 px-4 py-3 text-center text-sm font-black uppercase tracking-[0.22em] ${titleClass}`}>
         {title}
       </div>
 
-      <div className={`rounded-[24px] border p-4 ${tint}`}>
-        <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
-          Operatives
-        </div>
-        <div className="space-y-3">
-          {operatives.length > 0 ? (
-            operatives.map((player) => (
-              <div
-                key={player.id}
-                className="rounded-2xl border border-white/10 bg-black/20 p-3"
-              >
-                <div className="text-center text-lg font-black text-white">
+      <div
+        className={`rounded-[28px] border p-4 ${blockClass}`}
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url(${imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="rounded-[22px] bg-black/20 p-4 backdrop-blur-[2px]">
+          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/80">
+            👥 Operatives
+          </div>
+          <div className="space-y-3">
+            {operatives.length > 0 ? (
+              operatives.map((player) => (
+                <div
+                  key={player.id}
+                  className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-xl font-black text-white"
+                >
                   {player.guest_name}
                 </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-sm text-white/45">
+                لا يوجد
               </div>
-            ))
-          ) : (
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
-              لا يوجد
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      <div className={`rounded-[24px] border p-4 ${tint}`}>
-        <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
-          Spymasters
-        </div>
-        <div className="space-y-3">
-          {spymasters.length > 0 ? (
-            spymasters.map((player) => (
-              <div
-                key={player.id}
-                className="rounded-2xl border border-white/10 bg-black/20 p-3"
-              >
-                <div className="text-center text-lg font-black text-white">
+      <div
+        className={`rounded-[28px] border p-4 ${blockClass}`}
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url(${imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="rounded-[22px] bg-black/20 p-4 backdrop-blur-[2px]">
+          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/80">
+            🕵️ Spymasters
+          </div>
+          <div className="space-y-3">
+            {spymasters.length > 0 ? (
+              spymasters.map((player) => (
+                <div
+                  key={player.id}
+                  className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-xl font-black text-white"
+                >
                   {player.guest_name}
                 </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-sm text-white/45">
+                لا يوجد
               </div>
-            ))
-          ) : (
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
-              لا يوجد
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="rounded-[20px] border border-white/10 bg-black/25 px-4 py-5 text-center">
-        <div className="text-sm font-semibold text-white/55">Cards Remaining</div>
-        <div className={`mt-2 text-5xl font-black ${countColor}`}>{remaining ?? 0}</div>
+      <div className="rounded-[26px] border border-white/10 bg-black/25 px-4 py-6 text-center shadow-xl">
+        <div className="text-sm font-semibold text-white/55">🎴 Cards Remaining</div>
+        <div className={`mt-3 text-6xl font-black ${numberClass}`}>{remaining ?? 0}</div>
       </div>
     </div>
   );
@@ -464,45 +520,79 @@ export default function CodenamesBoardClient({
   }
 
   return (
-    <div className="relative mx-auto max-w-[1650px] p-3 md:p-5">
+    <div className="relative mx-auto max-w-[1700px] p-4 md:p-6">
       <div className="absolute inset-0 -z-10 rounded-[40px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#0d1320_0%,#16283a_100%)]" />
 
-      <div className="grid gap-4 xl:grid-cols-[235px_minmax(0,1fr)_235px]">
-        <div className="space-y-4">
+      <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_260px]">
+        <div className="space-y-5">
           <TeamPanel
-            title="Blue Team"
-            theme="blue"
-            operatives={blueOperatives}
-            spymasters={blueSpymasters}
-            remaining={room.blue_remaining}
+            title="Orange Team"
+            theme="orange"
+            operatives={orangeOperatives}
+            spymasters={orangeSpymasters}
+            remaining={room.red_remaining}
           />
 
-          <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
-              Spectators
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/75">
+                Live
+              </div>
+              <div className="text-2xl font-black text-white">Game Log</div>
             </div>
-            <div className="space-y-3">
-              {spectators.length > 0 ? (
-                spectators.map((player) => (
+
+            <div className="max-h-[320px] space-y-3 overflow-y-auto pr-1">
+              {previewSelection && (
+                <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
+                  <div className="text-xs font-black uppercase text-lime-100">Preview</div>
+                  <div className="mt-2 text-base font-black text-white">
+                    {previewSelection.playerName} حدّد: {previewSelection.word}
+                  </div>
+                </div>
+              )}
+
+              {sortedTurns.length > 0 ? (
+                sortedTurns.map((turn, index) => (
                   <div
-                    key={player.id}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm font-bold text-white"
+                    key={turn.id}
+                    className="rounded-2xl border border-white/10 bg-black/20 p-3"
                   >
-                    {player.guest_name}
+                    <div className="flex items-center justify-between gap-2">
+                      <div
+                        className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
+                          turn.team === "blue"
+                            ? "bg-cyan-500/15 text-cyan-100"
+                            : "bg-orange-500/15 text-orange-100"
+                        }`}
+                      >
+                        {turn.team === "red" ? "orange" : turn.team}
+                      </div>
+                      <div className="text-xs font-semibold text-white/40">
+                        #{sortedTurns.length - index}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 text-lg font-black text-white">
+                      {turn.clue_word} • {turn.clue_number}
+                    </div>
+
+                    <div className="mt-1 text-xs font-semibold text-white/45">
+                      guesses: {turn.guesses_made ?? 0} • {turn.turn_status}
+                    </div>
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
-                  لا يوجد مشاهدون
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm text-white/45">
+                  لا يوجد سجل بعد
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="rounded-[28px] border border-white/10 bg-[#101522]/90 px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-            <div className="text-center text-2xl font-black uppercase tracking-wide text-white md:text-3xl">
+        <div className="space-y-5">
+          <div className="rounded-[34px] border border-white/10 bg-[#101522]/90 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
               {room.status === "finished"
                 ? room.assassin_revealed
                   ? "Assassin was revealed"
@@ -511,27 +601,19 @@ export default function CodenamesBoardClient({
                 ? "Confirm your choice"
                 : previewSelection
                 ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
-                : activeTurn
-                ? "Give your operatives a clue"
                 : getTurnLabel(room.current_turn_team)}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-              <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-4 py-2 text-sm font-bold text-cyan-100">
-                BLUE {room.blue_remaining ?? 0}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <div className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white/85">
+                🎯 TURN: {getTurnLabel(room.current_turn_team)}
               </div>
-              <div className="rounded-full border border-orange-300/20 bg-orange-500/10 px-4 py-2 text-sm font-bold text-orange-100">
+              <div className="rounded-full border border-orange-300/20 bg-orange-500/10 px-5 py-3 text-sm font-bold text-orange-100">
                 ORANGE {room.red_remaining ?? 0}
               </div>
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/80">
-                TURN: {getTurnLabel(room.current_turn_team)}
+              <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-5 py-3 text-sm font-bold text-cyan-100">
+                BLUE {room.blue_remaining ?? 0}
               </div>
-              {activeTurn && (
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white">
-                  CLUE: {activeTurn.clue_word} • {activeTurn.clue_number} • USED{" "}
-                  {activeTurn.guesses_made ?? 0}
-                </div>
-              )}
             </div>
           </div>
 
@@ -628,11 +710,11 @@ export default function CodenamesBoardClient({
             </div>
           )}
 
-          <div className="rounded-[24px] border border-white/10 bg-[#101522]/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-            <div className="grid gap-4 lg:grid-cols-[1fr_210px]">
+          <div className="rounded-[26px] border border-white/10 bg-[#101522]/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+            <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <div className="text-sm font-semibold text-white/60">آخر clue</div>
+                  <div className="text-sm font-semibold text-white/60">🧠 آخر clue</div>
                   {activeTurn ? (
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                       <div className="rounded-2xl bg-white/5 px-4 py-3 text-2xl font-black text-white">
@@ -658,7 +740,7 @@ export default function CodenamesBoardClient({
                     <input type="hidden" name="room_code" value={room.room_code} />
                     <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
 
-                    <div className="grid gap-3 md:grid-cols-[1fr_120px]">
+                    <div className="grid gap-3 md:grid-cols-[1fr_130px]">
                       <input
                         name="clue_word"
                         placeholder="YOUR CLUE"
@@ -711,7 +793,7 @@ export default function CodenamesBoardClient({
                       type="submit"
                       className="w-full rounded-2xl border border-red-300/20 bg-red-500/10 px-6 py-4 text-lg font-black text-red-100 hover:bg-red-500/20"
                     >
-                      إعادة اللعبة
+                      🔄 إعادة اللعبة
                     </button>
                   </form>
                 )}
@@ -720,66 +802,32 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-5">
           <TeamPanel
-            title="Orange Team"
-            theme="orange"
-            operatives={orangeOperatives}
-            spymasters={orangeSpymasters}
-            remaining={room.red_remaining}
+            title="Blue Team"
+            theme="blue"
+            operatives={blueOperatives}
+            spymasters={blueSpymasters}
+            remaining={room.blue_remaining}
           />
 
-          <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-lg font-black text-white">Game Log</div>
-              <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/60">
-                Live
-              </div>
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-xl">
+            <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
+              👁️ Spectators
             </div>
-
-            <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
-              {previewSelection && (
-                <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
-                  <div className="text-xs font-black uppercase text-lime-100">Preview</div>
-                  <div className="mt-2 text-base font-black text-white">
-                    {previewSelection.playerName} حدّد: {previewSelection.word}
-                  </div>
-                </div>
-              )}
-
-              {sortedTurns.length > 0 ? (
-                sortedTurns.map((turn, index) => (
+            <div className="space-y-3">
+              {spectators.length > 0 ? (
+                spectators.map((player) => (
                   <div
-                    key={turn.id}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-3"
+                    key={player.id}
+                    className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-lg font-black text-white"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div
-                        className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
-                          turn.team === "blue"
-                            ? "bg-cyan-500/15 text-cyan-100"
-                            : "bg-orange-500/15 text-orange-100"
-                        }`}
-                      >
-                        {turn.team === "red" ? "orange" : turn.team}
-                      </div>
-                      <div className="text-xs font-semibold text-white/40">
-                        #{sortedTurns.length - index}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 text-lg font-black text-white">
-                      {turn.clue_word} • {turn.clue_number}
-                    </div>
-
-                    <div className="mt-1 text-xs font-semibold text-white/45">
-                      guesses: {turn.guesses_made ?? 0} • {turn.turn_status}
-                    </div>
+                    {player.guest_name}
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/45">
-                  لا يوجد سجل بعد
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-sm text-white/45">
+                  لا يوجد مشاهدون
                 </div>
               )}
             </div>
