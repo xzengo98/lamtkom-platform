@@ -29,7 +29,7 @@ type PlayerRow = {
   joined_at?: string | null;
 };
 
-const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
+const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3741q6x0a1.png";
 const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
 
 function getPlayerDisplayName(player: PlayerRow) {
