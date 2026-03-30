@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { createCodenamesRoom } from "./actions";
 
-export default function CreateCodenamesRoomPage() {
+type PageProps = {
+  searchParams?: Promise<{ error?: string }>;
+};
+
+export default async function CreateCodenamesRoomPage({
+  searchParams,
+}: PageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const errorMessage = resolvedSearchParams?.error?.trim() || "";
+
   return (
     <div className="mx-auto max-w-3xl p-4 md:p-6">
       <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a1020] p-6 shadow-2xl md:p-8">
@@ -18,6 +27,12 @@ export default function CreateCodenamesRoomPage() {
             أدخل اسمك ليتم إنشاء غرفة جديدة، وستصبح أنت منشئ الغرفة والهوست.
           </p>
         </div>
+
+        {errorMessage && (
+          <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">
+            {decodeURIComponent(errorMessage)}
+          </div>
+        )}
 
         <form action={createCodenamesRoom} className="space-y-5">
           <div>
