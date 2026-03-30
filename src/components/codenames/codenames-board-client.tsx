@@ -315,7 +315,11 @@ function MobileTeamTopCard({
         {title}
       </div>
 
-      <div className={`mt-2 text-center text-3xl font-black ${isBlue ? "text-cyan-100" : "text-orange-100"}`}>
+      <div
+        className={`mt-2 text-center text-3xl font-black ${
+          isBlue ? "text-cyan-100" : "text-orange-100"
+        }`}
+      >
         {remaining ?? 0}
       </div>
 
@@ -408,7 +412,16 @@ export default function CodenamesBoardClient({
   const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
   const [revealingCardId, setRevealingCardId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [cluePopup, setCluePopup] = useState<{
+    turnId: string;
+    word: string;
+    number: number;
+    team: string | null;
+  } | null>(null);
+
   const previousCardsRef = useRef<CardRow[]>(initialCards);
+  const lastShownTurnIdRef = useRef<string | null>(null);
+  const cluePopupTimeoutRef = useRef<number | null>(null);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -620,6 +633,43 @@ export default function CodenamesBoardClient({
       setPreviewSelection(null);
     }
   }, [cards]);
+
+  useEffect(() => {
+    if (!activeTurn) return;
+
+    if (lastShownTurnIdRef.current === activeTurn.id) return;
+
+    lastShownTurnIdRef.current = activeTurn.id;
+
+    if (cluePopupTimeoutRef.current) {
+      window.clearTimeout(cluePopupTimeoutRef.current);
+    }
+
+    setCluePopup({
+      turnId: activeTurn.id,
+      word: activeTurn.clue_word,
+      number: activeTurn.clue_number,
+      team: activeTurn.team,
+    });
+
+    cluePopupTimeoutRef.current = window.setTimeout(() => {
+      setCluePopup(null);
+    }, 4000);
+
+    return () => {
+      if (cluePopupTimeoutRef.current) {
+        window.clearTimeout(cluePopupTimeoutRef.current);
+      }
+    };
+  }, [activeTurn]);
+
+  useEffect(() => {
+    return () => {
+      if (cluePopupTimeoutRef.current) {
+        window.clearTimeout(cluePopupTimeoutRef.current);
+      }
+    };
+  }, []);
 
   async function sendPreview(card: CardRow | null) {
     const supabase = getSupabaseBrowserClient();
@@ -839,11 +889,100 @@ export default function CodenamesBoardClient({
     );
   }
 
+  function renderTurnIndicator() {
+    const isBlueTurn = room.current_turn_team === "blue";
+    const isOrangeTurn = room.current_turn_team === "red";
+
+    return (
+      <div
+        className="rounded-[22px] border border-white/10 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.24)]"
+        style={{
+          backgroundImage:
+            isBlueTurn
+              ? `linear-gradient(180deg, rgba(8,16,30,0.88), rgba(8,16,30,0.92)), url(${BLUE_PANEL_BG})`
+              : isOrangeTurn
+              ? `linear-gradient(180deg, rgba(20,10,6,0.86), rgba(20,10,6,0.92)), url(${ORANGE_PANEL_BG})`
+              : "linear-gradient(180deg, rgba(18,24,36,0.92), rgba(18,24,36,0.96))",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="text-center text-xs font-black uppercase tracking-[0.18em] text-white/55">
+          Turn Indicator
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+          <div
+            className={`rounded-full px-4 py-2 text-sm font-black uppercase ${
+              isBlueTurn
+                ? "bg-cyan-500/20 text-cyan-100 ring-2 ring-cyan-300/30"
+                : "bg-white/8 text-white/65"
+            }`}
+          >
+            🔵 Blue Team
+          </div>
+
+          <div className="text-sm font-black text-white/35">VS</div>
+
+          <div
+            className={`rounded-full px-4 py-2 text-sm font-black uppercase ${
+              isOrangeTurn
+                ? "bg-orange-500/20 text-orange-100 ring-2 ring-orange-300/30"
+                : "bg-white/8 text-white/65"
+            }`}
+          >
+            🟠 Orange Team
+          </div>
+        </div>
+
+        <div className="mt-3 text-center text-xl font-black text-white md:text-2xl">
+          {room.status === "finished"
+            ? "انتهت اللعبة"
+            : `الدور الحالي: ${getTurnLabel(room.current_turn_team)}`}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
       <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
 
       {renderSettingsModal()}
+
+      {cluePopup && (
+        <div className="pointer-events-none fixed inset-0 z-[95] flex items-center justify-center p-4">
+          <div
+            className={`clue-popup rounded-[30px] border px-10 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl ${
+              cluePopup.team === "blue"
+                ? "border-cyan-300/25 bg-cyan-950/60"
+                : cluePopup.team === "red"
+                ? "border-orange-300/25 bg-orange-950/60"
+                : "border-white/20 bg-black/70"
+            }`}
+          >
+            <div className="text-sm font-black uppercase tracking-[0.2em] text-white/60">
+              CLUE
+            </div>
+
+            <div className="mt-2 text-5xl font-black text-white md:text-6xl">
+              {cluePopup.word}
+            </div>
+
+            <div
+              className={`mt-2 text-xl font-black ${
+                cluePopup.team === "blue"
+                  ? "text-cyan-100"
+                  : cluePopup.team === "red"
+                  ? "text-orange-100"
+                  : "text-white/80"
+              }`}
+            >
+              {cluePopup.number}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-3 flex items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-black/20 px-3 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-4">
         <div className="flex items-center gap-2">
@@ -889,6 +1028,8 @@ export default function CodenamesBoardClient({
       {/* MOBILE / TABLET */}
       <div className="xl:hidden">
         <div className="space-y-3">
+          {renderTurnIndicator()}
+
           <div className="grid grid-cols-[92px_minmax(115px,1fr)_92px] gap-2">
             <MobileTeamTopCard
               title="Blue"
@@ -1187,6 +1328,7 @@ export default function CodenamesBoardClient({
         </div>
 
         <div className="space-y-5">
+          {renderTurnIndicator()}
           {renderSpectatorJoinBox()}
 
           <div className="grid grid-cols-5 gap-4">
@@ -1686,6 +1828,31 @@ export default function CodenamesBoardClient({
             0 0 12px rgba(0, 0, 0, 0.25);
           word-break: break-word;
           overflow-wrap: anywhere;
+        }
+
+        .clue-popup {
+          animation: cluePopIn 300ms ease, cluePopOut 400ms ease 3.6s forwards;
+        }
+
+        @keyframes cluePopIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.85) translateY(20px);
+            filter: blur(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes cluePopOut {
+          to {
+            opacity: 0;
+            transform: scale(0.92);
+            filter: blur(6px);
+          }
         }
 
         @keyframes flipRevealPro {
