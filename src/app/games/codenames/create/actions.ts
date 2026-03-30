@@ -2,18 +2,28 @@
 
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { generateRoomCode } from "@/lib/codenames/room-code";
+
+function generateRoomCode(length = 6) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+
+  for (let i = 0; i < length; i += 1) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  return result;
+}
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function generateUniqueRoomCode() {
-  const supabase = await getSupabaseServerClient();
-
+async function createUniqueRoomCode(
+  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>
+) {
   for (let i = 0; i < 20; i += 1) {
-    const code = generateRoomCode(6);
+    const code = generateRoomCode();
 
     const { data } = await supabase
       .from("codenames_rooms")
@@ -26,53 +36,53 @@ async function generateUniqueRoomCode() {
     }
   }
 
-  throw new Error("تعذر إنشاء رمز غرفة فريد");
+  throw new Error("تعذر توليد رمز غرفة جديد");
 }
 
 export async function createCodenamesRoom(formData: FormData) {
   const supabase = await getSupabaseServerClient();
-
   const guestName = getString(formData, "guest_name");
+
   if (!guestName) {
     throw new Error("الاسم مطلوب");
   }
 
-  const roomCode = await generateUniqueRoomCode();
+  const roomCode = await createUniqueRoomCode(supabase);
 
-  const { data: room, error: roomError } = await supabase
+  const { data: roomData, error: roomError } = await supabase
     .from("codenames_rooms")
     .insert({
       room_code: roomCode,
       status: "waiting",
-      starting_team: null,
       current_turn_team: null,
-      red_remaining: 0,
-      blue_remaining: 0,
+      starting_team: null,
+      red_remaining: null,
+      blue_remaining: null,
       winner_team: null,
       assassin_revealed: false,
     })
     .select("id, room_code")
     .single();
 
-  if (roomError || !room) {
-    throw new Error(roomError?.message || "فشل إنشاء الغرفة");
+  if (roomError || !roomData) {
+    throw new Error(roomError?.message || "تعذر إنشاء الغرفة");
   }
 
-  const { data: player, error: playerError } = await supabase
+  const { data: playerData, error: playerError } = await supabase
     .from("codenames_players")
     .insert({
-      room_id: room.id,
+      room_id: roomData.id,
       guest_name: guestName,
+      team: "spectator",
+      role: "spectator",
       is_host: true,
-      team: "red",
-      role: "spymaster",
     })
     .select("id")
     .single();
 
-  if (playerError || !player) {
-    throw new Error(playerError?.message || "فشل إنشاء اللاعب");
+  if (playerError || !playerData) {
+    throw new Error(playerError?.message || "تعذر إضافة اللاعب");
   }
 
-  redirect(`/games/codenames/room/${room.room_code}?player_id=${player.id}`);
+  redirect(`/games/codenames/room/${roomData.room_code}?player_id=${playerData.id}`);
 }
