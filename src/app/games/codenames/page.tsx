@@ -47,8 +47,8 @@ export default function CodenamesHomePage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
-                <div className="text-sm font-semibold text-red-200">الفريق البرتقالي</div>
+              <div className="rounded-3xl border border-orange-500/20 bg-orange-500/10 p-5">
+                <div className="text-sm font-semibold text-orange-200">الفريق البرتقالي</div>
                 <div className="mt-2 text-2xl font-black text-white">
                   Operatives + Spymaster
                 </div>
