@@ -77,8 +77,8 @@ const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
 
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
-  blue: "https://k.top4top.io/p_3741q6x0a1.png",
-  orange: "https://b.top4top.io/p_3740qmur71.png",
+  blue: "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg",
+  orange: "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg",
   black:
     "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
 };
