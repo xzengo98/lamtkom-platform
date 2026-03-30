@@ -625,20 +625,21 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-        <div className="space-y-5">
-<div
-  className="rounded-[34px] border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
-  style={{
-    backgroundImage:
-      room.current_turn_team === "blue"
-        ? `linear-gradient(180deg, rgba(8,16,30,0.86), rgba(8,16,30,0.88)), url(${BLUE_PANEL_BG})`
-        : room.current_turn_team === "red"
-        ? `linear-gradient(180deg, rgba(20,10,6,0.84), rgba(20,10,6,0.9)), url(${ORANGE_PANEL_BG})`
-        : "linear-gradient(180deg, rgba(16,21,34,0.92), rgba(16,21,34,0.9))",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  }}
->            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
+                <div className="space-y-5">
+          <div
+            className="rounded-[34px] border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
+            style={{
+              backgroundImage:
+                room.current_turn_team === "blue"
+                  ? `linear-gradient(180deg, rgba(8,16,30,0.86), rgba(8,16,30,0.88)), url(${BLUE_PANEL_BG})`
+                  : room.current_turn_team === "red"
+                  ? `linear-gradient(180deg, rgba(20,10,6,0.84), rgba(20,10,6,0.9)), url(${ORANGE_PANEL_BG})`
+                  : "linear-gradient(180deg, rgba(16,21,34,0.92), rgba(16,21,34,0.9))",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
               {room.status === "finished"
                 ? room.assassin_revealed
                   ? "Assassin was revealed"
@@ -651,42 +652,43 @@ export default function CodenamesBoardClient({
             </div>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-  <div
-    className="rounded-full border border-white/10 px-5 py-3 text-sm font-bold text-white shadow-lg"
-    style={{
-      background:
-        room.current_turn_team === "blue"
-          ? "linear-gradient(90deg, rgba(10,73,110,0.55), rgba(17,24,39,0.85))"
-          : room.current_turn_team === "red"
-          ? "linear-gradient(90deg, rgba(180,88,17,0.48), rgba(17,24,39,0.85))"
-          : "rgba(255,255,255,0.06)",
-    }}
-  >
-    🎯 TURN: {getTurnLabel(room.current_turn_team)}
-  </div>
+              <div
+                className="rounded-full border border-white/10 px-5 py-3 text-sm font-bold text-white shadow-lg"
+                style={{
+                  background:
+                    room.current_turn_team === "blue"
+                      ? "linear-gradient(90deg, rgba(10,73,110,0.55), rgba(17,24,39,0.85))"
+                      : room.current_turn_team === "red"
+                      ? "linear-gradient(90deg, rgba(180,88,17,0.48), rgba(17,24,39,0.85))"
+                      : "rgba(255,255,255,0.06)",
+                }}
+              >
+                🎯 TURN: {getTurnLabel(room.current_turn_team)}
+              </div>
 
-  <div
-    className="rounded-full border border-orange-300/25 px-5 py-3 text-sm font-bold text-orange-100 shadow-lg"
-    style={{
-      backgroundImage: `linear-gradient(90deg, rgba(170,74,8,0.55), rgba(46,20,8,0.72)), url(${ORANGE_PANEL_BG})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
-  >
-    ORANGE {room.red_remaining ?? 0}
-  </div>
+              <div
+                className="rounded-full border border-orange-300/25 px-5 py-3 text-sm font-bold text-orange-100 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(90deg, rgba(170,74,8,0.55), rgba(46,20,8,0.72)), url(${ORANGE_PANEL_BG})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                ORANGE {room.red_remaining ?? 0}
+              </div>
 
-  <div
-    className="rounded-full border border-cyan-300/25 px-5 py-3 text-sm font-bold text-cyan-100 shadow-lg"
-    style={{
-      backgroundImage: `linear-gradient(90deg, rgba(11,88,133,0.55), rgba(11,24,46,0.75)), url(${BLUE_PANEL_BG})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}
-  >
-    BLUE {room.blue_remaining ?? 0}
-  </div>
-</div>
+              <div
+                className="rounded-full border border-cyan-300/25 px-5 py-3 text-sm font-bold text-cyan-100 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(90deg, rgba(11,88,133,0.55), rgba(11,24,46,0.75)), url(${BLUE_PANEL_BG})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                BLUE {room.blue_remaining ?? 0}
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-5 gap-3 md:gap-4">
             {cards.map((card) => {
@@ -953,7 +955,7 @@ export default function CodenamesBoardClient({
         </div>
       )}
 
-      {room.status === "finished" && (
+            {room.status === "finished" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#101522] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
             <div className="text-center">
@@ -987,6 +989,7 @@ export default function CodenamesBoardClient({
                 >
                   العودة للروم
                 </Link>
+
                 <Link
                   href="/games/codenames/create"
                   className="rounded-2xl bg-emerald-500 px-6 py-3 font-black text-white hover:bg-emerald-400"
