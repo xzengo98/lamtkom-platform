@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type RoomRow = {
@@ -84,7 +84,8 @@ const ORANGE_PANEL_BG =
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
   blue: "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg",
-  orange: "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg",
+  orange:
+    "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg",
   black:
     "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
 };
@@ -115,41 +116,6 @@ function normalizePlayers(rows: PlayerRow[]) {
     role: player.role?.toLowerCase() ?? null,
   }));
 }
-
-function TeamPlayerCard({
-  player,
-  theme,
-}: {
-  player: PlayerRow;
-  theme: "blue" | "orange";
-}) {
-  const teamImage = theme === "blue" ? BLUE_TEAM_IMAGE : ORANGE_TEAM_IMAGE;
-  const wrapperClass =
-    theme === "blue"
-      ? "border-cyan-300/30 bg-cyan-500/18 shadow-[0_16px_40px_rgba(6,182,212,0.12)]"
-      : "border-orange-300/30 bg-orange-500/18 shadow-[0_16px_40px_rgba(249,115,22,0.14)]";
-
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[26px] border p-4 ${wrapperClass}`}
-      style={{
-        backgroundImage: `linear-gradient(180deg, rgba(4,12,24,0.16), rgba(4,12,24,0.18)), url(${teamImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="absolute inset-0 bg-black/18" />
-      <div className="relative z-10 rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur-[2px]">
-        <div className="text-center text-2xl font-black text-white">{player.guest_name}</div>
-        <div className="mt-2 text-center text-sm font-semibold text-white/80">
-          {player.role === "spymaster" ? "🕵️ Spymaster" : "🎯 Operative"}
-          {player.is_host ? " • Host" : ""}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 
 function TeamPanel({
   title,
@@ -266,7 +232,9 @@ function TeamPanel({
         <div className="absolute inset-0 bg-black/25" />
         <div className="relative z-10">
           <div className="text-sm font-semibold text-white/65">🎴 Cards Remaining</div>
-          <div className={`mt-3 text-6xl font-black drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)] ${numberClass}`}>
+          <div
+            className={`mt-3 text-6xl font-black drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)] ${numberClass}`}
+          >
             {remaining ?? 0}
           </div>
         </div>
@@ -293,6 +261,8 @@ export default function CodenamesBoardClient({
   const [selectedCard, setSelectedCard] = useState<CardRow | null>(null);
   const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
   const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
+  const [revealingCardId, setRevealingCardId] = useState<string | null>(null);
+  const previousCardsRef = useRef<CardRow[]>(initialCards);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -473,16 +443,31 @@ export default function CodenamesBoardClient({
   }, [room.id, room.room_code]);
 
   useEffect(() => {
-  if (!selectedCard) return;
+    const previousCards = previousCardsRef.current;
 
-  const stillExists = cards.find((card) => card.id === selectedCard.id);
+    for (const nextCard of cards) {
+      const previousCard = previousCards.find((card) => card.id === nextCard.id);
+      if (previousCard && !previousCard.is_revealed && nextCard.is_revealed) {
+        setRevealingCardId(nextCard.id);
+        const timeout = window.setTimeout(() => {
+          setRevealingCardId((current) => (current === nextCard.id ? null : current));
+        }, 760);
+        previousCardsRef.current = cards;
+        return () => window.clearTimeout(timeout);
+      }
+    }
 
-  // فقط احذف إذا تم كشف الكرت فعلاً
-  if (stillExists?.is_revealed) {
-    setSelectedCard(null);
-    setPreviewSelection(null);
-  }
-}, [cards]);
+    previousCardsRef.current = cards;
+  }, [cards]);
+
+  useEffect(() => {
+    if (!selectedCard) return;
+    const stillExists = cards.find((card) => card.id === selectedCard.id);
+    if (stillExists?.is_revealed) {
+      setSelectedCard(null);
+      setPreviewSelection(null);
+    }
+  }, [cards]);
 
   async function sendPreview(card: CardRow | null) {
     const supabase = getSupabaseBrowserClient();
@@ -522,7 +507,9 @@ export default function CodenamesBoardClient({
 
     if (card.is_revealed) {
       return {
-        className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
+        className: `card-shell ${revealingCardId === card.id ? "card-flip-reveal" : ""} ${
+          isPending ? "card-pending" : ""
+        }`,
         style: {
           ...baseStyle,
           backgroundImage: `url(${realBg})`,
@@ -567,11 +554,12 @@ export default function CodenamesBoardClient({
           />
 
           <div
-  className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
-  style={{
-    backgroundImage: "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
-  }}
->
+            className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
+            }}
+          >
             <div className="mb-3 flex items-center justify-between">
               <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/75">
                 Live
@@ -628,7 +616,7 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-                <div className="space-y-5">
+        <div className="space-y-5">
           <div
             className="rounded-[34px] border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
             style={{
@@ -703,7 +691,7 @@ export default function CodenamesBoardClient({
                     key={card.id}
                     type="button"
                     onClick={() => setInspectedCard(card)}
-                    className={`${cardView.className} card-fade-in flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
+                    className={`${cardView.className} flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
@@ -766,12 +754,12 @@ export default function CodenamesBoardClient({
                 </button>
 
                 <form
-  action={async (formData) => {
-    await revealCardAction(formData);
-    setSelectedCard(null);
-    await sendPreview(null);
-  }}
->
+                  action={async (formData) => {
+                    await revealCardAction(formData);
+                    setSelectedCard(null);
+                    await sendPreview(null);
+                  }}
+                >
                   <input type="hidden" name="room_code" value={room.room_code} />
                   <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                   <input type="hidden" name="card_id" value={selectedCard.id} />
@@ -888,11 +876,12 @@ export default function CodenamesBoardClient({
           />
 
           <div
-  className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
-  style={{
-    backgroundImage: "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
-  }}
->
+            className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
+            }}
+          >
             <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
               👁️ Spectators
             </div>
@@ -958,7 +947,7 @@ export default function CodenamesBoardClient({
         </div>
       )}
 
-            {room.status === "finished" && (
+      {room.status === "finished" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#101522] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
             <div className="text-center">
@@ -1018,6 +1007,8 @@ export default function CodenamesBoardClient({
             transform 180ms ease,
             box-shadow 180ms ease,
             border-color 180ms ease;
+          transform-style: preserve-3d;
+          backface-visibility: hidden;
         }
 
         .card-shell::before {
@@ -1058,12 +1049,10 @@ export default function CodenamesBoardClient({
           animation: pulseBorder 1.25s ease-in-out infinite;
         }
 
-        .card-revealed {
-          animation: revealFlip 320ms ease;
-        }
-
-        .card-fade-in {
-          animation: fadeCardIn 220ms ease;
+        .card-flip-reveal {
+          animation: flipRevealPro 760ms cubic-bezier(0.22, 1, 0.36, 1);
+          transform-origin: center center;
+          will-change: transform, filter, box-shadow;
         }
 
         .card-word-text {
@@ -1083,25 +1072,26 @@ export default function CodenamesBoardClient({
           word-break: break-word;
         }
 
-        @keyframes revealFlip {
+        @keyframes flipRevealPro {
           0% {
-            transform: rotateY(90deg) scale(0.96);
-            opacity: 0.25;
+            transform: perspective(1100px) rotateY(0deg) scale(1);
+            filter: brightness(0.95);
+          }
+          22% {
+            transform: perspective(1100px) rotateY(88deg) scale(0.985);
+            filter: brightness(0.75);
+          }
+          48% {
+            transform: perspective(1100px) rotateY(180deg) scale(1.015);
+            filter: brightness(1.18);
+          }
+          72% {
+            transform: perspective(1100px) rotateY(358deg) scale(1.02);
+            filter: brightness(1.08);
           }
           100% {
-            transform: rotateY(0deg) scale(1);
-            opacity: 1;
-          }
-        }
-
-        @keyframes fadeCardIn {
-          0% {
-            opacity: 0.4;
-            transform: scale(0.97);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
+            transform: perspective(1100px) rotateY(360deg) scale(1);
+            filter: brightness(1);
           }
         }
 
