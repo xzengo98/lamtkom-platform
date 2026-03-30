@@ -72,10 +72,9 @@ type Props = {
 };
 
 const CARD_BACKGROUNDS = {
-  neutral:
-    "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
-  blue: "https://e.top4top.io/p_3740ik4gk2.png",
-  orange: "https://f.top4top.io/p_3740463os3.png",
+  neutral: "https://d.top4top.io/p_3740ccnwr3.png",
+  blue: "https://c.top4top.io/p_3740wjx492.png",
+  orange: "https://b.top4top.io/p_3740qmur71.png",
   black:
     "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
 };
@@ -121,11 +120,11 @@ function TeamPanel({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[28px] border border-white/10 bg-black/25 px-4 py-3 text-center text-sm font-black uppercase tracking-[0.18em] text-white">
+      <div className="rounded-[24px] border border-white/10 bg-black/25 px-4 py-3 text-center text-sm font-black uppercase tracking-[0.18em] text-white">
         {title}
       </div>
 
-      <div className={`rounded-[28px] border p-4 ${tint}`}>
+      <div className={`rounded-[24px] border p-4 ${tint}`}>
         <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
           Operatives
         </div>
@@ -149,7 +148,7 @@ function TeamPanel({
         </div>
       </div>
 
-      <div className={`rounded-[28px] border p-4 ${tint}`}>
+      <div className={`rounded-[24px] border p-4 ${tint}`}>
         <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
           Spymasters
         </div>
@@ -173,7 +172,7 @@ function TeamPanel({
         </div>
       </div>
 
-      <div className="rounded-[24px] border border-white/10 bg-black/25 px-4 py-5 text-center">
+      <div className="rounded-[20px] border border-white/10 bg-black/25 px-4 py-5 text-center">
         <div className="text-sm font-semibold text-white/55">Cards Remaining</div>
         <div className={`mt-2 text-5xl font-black ${countColor}`}>{remaining ?? 0}</div>
       </div>
@@ -413,81 +412,46 @@ export default function CodenamesBoardClient({
   }
 
   function getCardView(card: CardRow) {
-  const isPending = selectedCard?.id === card.id;
-  const isBlack = card.card_type === "assassin";
-  const realBg = getCardBackground(card.card_type);
+    const isPending = selectedCard?.id === card.id;
+    const isBlack = card.card_type === "assassin";
+    const realBg = getCardBackground(card.card_type);
 
-  const baseStyle: React.CSSProperties = {
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  };
+    const baseStyle: React.CSSProperties = {
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    };
 
-  // revealed
-  if (card.is_revealed) {
-    if (isBlack) {
+    if (card.is_revealed) {
       return {
         className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
         style: {
           ...baseStyle,
-          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
-          backgroundPosition: "center",
+          backgroundImage: `url(${realBg})`,
         },
         label: "تم الكشف",
-        labelClass: "card-word-badge card-word-badge-dark",
       };
     }
 
-    return {
-      className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
-      style: {
-        ...baseStyle,
-        backgroundImage: `url(${realBg})`,
-      },
-      label: "تم الكشف",
-      labelClass: "card-word-badge",
-    };
-  }
-
-  // spymaster يرى الخلفية الحقيقية لكن بدون بهتان
-  if (isSpymaster) {
-    if (isBlack) {
+    if (isSpymaster) {
       return {
         className: `card-shell ${isPending ? "card-pending" : ""}`,
         style: {
           ...baseStyle,
-          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
+          backgroundImage: `url(${realBg})`,
         },
         label: card.word,
-        labelClass: "card-word-badge card-word-badge-dark",
       };
     }
 
-    return {
-      className: `card-shell ${isPending ? "card-pending" : ""}`,
-      style: {
-        ...baseStyle,
-        backgroundImage: `url(${realBg})`,
-      },
-      label: card.word,
-      labelClass: "card-word-badge",
-    };
-  }
-
-  // اللاعب العادي قبل الكشف يرى:
-  // blue/orange => neutral card
-  // neutral => grey card
-  // black => black card
-  if (!card.is_revealed) {
-    if (isBlack) {
+    if (!card.is_revealed) {
       return {
         className: `card-shell ${isPending ? "card-pending" : ""}`,
         style: {
           ...baseStyle,
-          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
+          backgroundImage: `url(${isBlack ? CARD_BACKGROUNDS.black : CARD_BACKGROUNDS.neutral})`,
         },
         label: card.word,
-        labelClass: "card-word-badge card-word-badge-dark",
       };
     }
 
@@ -498,20 +462,8 @@ export default function CodenamesBoardClient({
         backgroundImage: `url(${CARD_BACKGROUNDS.neutral})`,
       },
       label: card.word,
-      labelClass: "card-word-badge",
     };
   }
-
-  return {
-    className: `card-shell ${isPending ? "card-pending" : ""}`,
-    style: {
-      ...baseStyle,
-      backgroundImage: `url(${CARD_BACKGROUNDS.neutral})`,
-    },
-    label: card.word,
-    labelClass: "card-word-badge",
-  };
-}
 
   return (
     <div className="relative mx-auto max-w-[1650px] p-3 md:p-5">
@@ -527,7 +479,7 @@ export default function CodenamesBoardClient({
             remaining={room.blue_remaining}
           />
 
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
+          <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
             <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
               Spectators
             </div>
@@ -551,7 +503,7 @@ export default function CodenamesBoardClient({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[34px] border border-white/10 bg-[#101522]/90 px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+          <div className="rounded-[28px] border border-white/10 bg-[#101522]/90 px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
             <div className="text-center text-2xl font-black uppercase tracking-wide text-white md:text-3xl">
               {room.status === "finished"
                 ? room.assassin_revealed
@@ -595,13 +547,11 @@ export default function CodenamesBoardClient({
                     key={card.id}
                     type="button"
                     onClick={() => setInspectedCard(card)}
-                    className={`${cardView.className} card-fade-in flex min-h-[112px] items-center justify-center px-2 py-4 text-center md:min-h-[132px]`}
+                    className={`${cardView.className} card-fade-in flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
-                    <div className="relative z-10 text-base font-black uppercase tracking-[0.18em] text-white md:text-lg">
-                      {cardView.label}
-                    </div>
+                    <div className="relative z-10 card-word-text">{cardView.label}</div>
                   </button>
                 );
               }
@@ -615,13 +565,11 @@ export default function CodenamesBoardClient({
                       setSelectedCard(card);
                       await sendPreview(card);
                     }}
-                    className={`${cardView.className} card-hover-up flex min-h-[112px] items-center justify-center px-2 py-4 text-center md:min-h-[132px]`}
+                    className={`${cardView.className} card-hover-up flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
-                    <div className="relative z-10 flex w-full items-center justify-center px-3">
-  <span className={cardView.labelClass}>{cardView.label}</span>
-</div>
+                    <div className="relative z-10 card-word-text">{cardView.label}</div>
                   </button>
                 );
               }
@@ -629,20 +577,18 @@ export default function CodenamesBoardClient({
               return (
                 <div
                   key={card.id}
-                  className={`${cardView.className} flex min-h-[112px] items-center justify-center px-2 py-4 text-center md:min-h-[132px]`}
+                  className={`${cardView.className} flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
                   style={cardView.style}
                 >
                   <div className="card-inner-overlay" />
-                  <div className="relative z-10 flex w-full items-center justify-center px-3">
-  <span className={cardView.labelClass}>{cardView.label}</span>
-</div>
+                  <div className="relative z-10 card-word-text">{cardView.label}</div>
                 </div>
               );
             })}
           </div>
 
           {selectedCard && canRevealCard && room.status !== "finished" && (
-            <div className="rounded-[30px] border border-lime-300/25 bg-lime-500/10 p-4 shadow-xl backdrop-blur-sm">
+            <div className="rounded-[24px] border border-lime-300/25 bg-lime-500/10 p-4 shadow-xl backdrop-blur-sm">
               <div className="mb-3 text-center text-sm font-black uppercase tracking-[0.2em] text-lime-100">
                 Tap to confirm
               </div>
@@ -684,7 +630,7 @@ export default function CodenamesBoardClient({
             </div>
           )}
 
-          <div className="rounded-[30px] border border-white/10 bg-[#101522]/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+          <div className="rounded-[24px] border border-white/10 bg-[#101522]/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
             <div className="grid gap-4 lg:grid-cols-[1fr_210px]">
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -772,7 +718,7 @@ export default function CodenamesBoardClient({
             remaining={room.red_remaining}
           />
 
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
+          <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-lg font-black text-white">Game Log</div>
               <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/60">
@@ -832,16 +778,16 @@ export default function CodenamesBoardClient({
 
       {inspectedCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[30px] border border-white/10 bg-[#101522] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
+          <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-[#101522] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
             <div className="text-2xl font-black text-white">تفاصيل الكرت</div>
 
             <div
-              className="mt-5 h-32 rounded-[22px] border border-white/10 shadow-lg"
+              className="mt-5 h-32 rounded-2xl border border-white/10 shadow-lg"
               style={{
-                background:
-                  inspectedCard.card_type === "assassin"
-                    ? "linear-gradient(180deg, rgba(45,45,45,1) 0%, rgba(15,15,15,1) 100%)"
-                    : `url(${getCardBackground(inspectedCard.card_type)}) center / cover no-repeat`,
+                backgroundImage: `url(${getCardBackground(inspectedCard.card_type)})`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
               }}
             />
 
@@ -874,7 +820,7 @@ export default function CodenamesBoardClient({
 
       {room.status === "finished" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-[36px] border border-white/10 bg-[#101522] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
+          <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#101522] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
             <div className="text-center">
               <div className="text-sm font-black uppercase tracking-[0.3em] text-white/45">
                 Game Over
@@ -920,155 +866,123 @@ export default function CodenamesBoardClient({
 
       <style>{`
         .card-shell {
-    position: relative;
-    overflow: hidden;
-    min-height: 132px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow:
-      0 12px 28px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10);
-    transition:
-      transform 180ms ease,
-      box-shadow 180ms ease,
-      border-color 180ms ease,
-      opacity 180ms ease,
-      filter 180ms ease;
-    clip-path: polygon(
-      18px 0%,
-      calc(100% - 18px) 0%,
-      100% 18px,
-      100% calc(100% - 18px),
-      calc(100% - 18px) 100%,
-      18px 100%,
-      0% calc(100% - 18px),
-      0% 18px
-    );
-    border-radius: 0;
-  }
+          position: relative;
+          overflow: hidden;
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow:
+            0 12px 28px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          transition:
+            transform 180ms ease,
+            box-shadow 180ms ease,
+            border-color 180ms ease;
+        }
 
-  .card-shell::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 20%,
-        rgba(0, 0, 0, 0.04) 100%
-      );
-    pointer-events: none;
-  }
+        .card-shell::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(255, 255, 255, 0.04) 0%,
+              rgba(255, 255, 255, 0.01) 24%,
+              rgba(0, 0, 0, 0.08) 100%
+            );
+          pointer-events: none;
+        }
 
-  .card-inner-overlay {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 35%),
-      linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.12) 100%);
-    pointer-events: none;
-  }
+        .card-inner-overlay {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 35%),
+            linear-gradient(180deg, transparent 62%, rgba(0,0,0,0.12) 100%);
+          pointer-events: none;
+        }
 
-  .card-hover-up:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow:
-      0 18px 38px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  }
+        .card-hover-up:hover {
+          transform: translateY(-4px) scale(1.01);
+          box-shadow:
+            0 18px 38px rgba(0, 0, 0, 0.26),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
 
-  .card-pending {
-    border-color: rgba(163, 230, 53, 0.95) !important;
-    box-shadow:
-      0 0 0 2px rgba(163, 230, 53, 0.22),
-      0 16px 38px rgba(101, 163, 13, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.14);
-    animation: pulseBorder 1.25s ease-in-out infinite;
-  }
+        .card-pending {
+          border-color: rgba(163, 230, 53, 0.95) !important;
+          box-shadow:
+            0 0 0 2px rgba(163, 230, 53, 0.22),
+            0 16px 38px rgba(101, 163, 13, 0.22);
+          animation: pulseBorder 1.25s ease-in-out infinite;
+        }
 
-  .card-revealed {
-    animation: revealFlip 320ms ease;
-  }
+        .card-revealed {
+          animation: revealFlip 320ms ease;
+        }
 
-  .card-fade-in {
-    animation: fadeCardIn 220ms ease;
-  }
+        .card-fade-in {
+          animation: fadeCardIn 220ms ease;
+        }
 
-  .card-word-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 88%;
-    min-height: 48px;
-    padding: 10px 18px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.88);
-    color: #1f2937;
-    font-size: 1.55rem;
-    font-weight: 900;
-    line-height: 1.1;
-    text-align: center;
-    box-shadow:
-      0 8px 20px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.55);
-    word-break: break-word;
-    text-transform: none;
-    letter-spacing: 0;
-  }
+        .card-word-text {
+          width: 100%;
+          text-align: center;
+          color: #f7fafc;
+          font-size: 1.85rem;
+          font-weight: 900;
+          line-height: 1.15;
+          letter-spacing: 0;
+          text-transform: none;
+          text-shadow:
+            0 2px 0 rgba(0, 0, 0, 0.5),
+            0 6px 20px rgba(0, 0, 0, 0.55),
+            0 0 12px rgba(0, 0, 0, 0.25);
+          filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
+          word-break: break-word;
+        }
 
-  .card-word-badge-dark {
-    background: rgba(0, 0, 0, 0.72);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
+        @keyframes revealFlip {
+          0% {
+            transform: rotateY(90deg) scale(0.96);
+            opacity: 0.25;
+          }
+          100% {
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+          }
+        }
 
-  @keyframes revealFlip {
-    0% {
-      transform: rotateY(90deg) scale(0.96);
-      opacity: 0.25;
-    }
-    100% {
-      transform: rotateY(0deg) scale(1);
-      opacity: 1;
-    }
-  }
+        @keyframes fadeCardIn {
+          0% {
+            opacity: 0.4;
+            transform: scale(0.97);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
 
-  @keyframes fadeCardIn {
-    0% {
-      opacity: 0.4;
-      transform: scale(0.97);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
+        @keyframes pulseBorder {
+          0%,
+          100% {
+            box-shadow:
+              0 0 0 2px rgba(163, 230, 53, 0.22),
+              0 16px 38px rgba(101, 163, 13, 0.18);
+          }
+          50% {
+            box-shadow:
+              0 0 0 3px rgba(163, 230, 53, 0.32),
+              0 18px 42px rgba(101, 163, 13, 0.28);
+          }
+        }
 
-  @keyframes pulseBorder {
-    0%,
-    100% {
-      box-shadow:
-        0 0 0 2px rgba(163, 230, 53, 0.22),
-        0 16px 38px rgba(101, 163, 13, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.14);
-    }
-    50% {
-      box-shadow:
-        0 0 0 3px rgba(163, 230, 53, 0.32),
-        0 18px 42px rgba(101, 163, 13, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .card-word-badge {
-      font-size: 1.15rem;
-      min-height: 40px;
-      padding: 8px 14px;
-      max-width: 92%;
-    }
-
-    .card-shell {
-      min-height: 108px;
+        @media (max-width: 768px) {
+          .card-word-text {
+            font-size: 1.2rem;
+          }
+        }
       `}</style>
     </div>
   );
