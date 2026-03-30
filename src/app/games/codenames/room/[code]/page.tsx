@@ -26,7 +26,7 @@ type PlayerRow = {
   team: string | null;
   role: string | null;
   is_host: boolean | null;
-  joined_at: string | null;
+  joined_at?: string | null;
 };
 
 function getPlayerDisplayName(player: PlayerRow) {
@@ -37,6 +37,18 @@ function getRoleLabel(role: string | null) {
   if (role === "spymaster") return "Spymaster";
   if (role === "spectator") return "Spectator";
   return "Operative";
+}
+
+function normalizePlayer(player: PlayerRow): PlayerRow {
+  const normalizedTeam = player.team?.toLowerCase() || "spectator";
+  const normalizedRole =
+    player.role?.toLowerCase() || (normalizedTeam === "spectator" ? "spectator" : "operative");
+
+  return {
+    ...player,
+    team: normalizedTeam,
+    role: normalizedRole,
+  };
 }
 
 export default async function CodenamesRoomPage({
@@ -68,11 +80,7 @@ export default async function CodenamesRoomPage({
     .eq("room_id", room.id)
     .order("joined_at", { ascending: true });
 
-  const players = ((playersData ?? []) as PlayerRow[]).map((player) => ({
-    ...player,
-    team: player.team?.toLowerCase() ?? null,
-    role: player.role?.toLowerCase() ?? "operative",
-  }));
+  const players = ((playersData ?? []) as PlayerRow[]).map(normalizePlayer);
 
   const currentPlayer = players.find((player) => player.id === currentPlayerId) || null;
 
@@ -299,14 +307,9 @@ export default async function CodenamesRoomPage({
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-[24px] border border-cyan-300/20 bg-cyan-500/10 p-5">
-            <div className="text-sm font-semibold text-cyan-100/80">Blue Team</div>
-            <div className="mt-3 text-4xl font-black text-white">{bluePlayers.length}</div>
-          </div>
-
-          <div className="rounded-[24px] border border-red-300/20 bg-red-500/10 p-5">
-            <div className="text-sm font-semibold text-red-100/80">Red Team</div>
-            <div className="mt-3 text-4xl font-black text-white">{redPlayers.length}</div>
+          <div className="rounded-[24px] border border-white/10 bg-black/20 p-5">
+            <div className="text-sm font-semibold text-white/60">إجمالي اللاعبين</div>
+            <div className="mt-3 text-4xl font-black text-white">{players.length}</div>
           </div>
 
           <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
@@ -314,20 +317,25 @@ export default async function CodenamesRoomPage({
             <div className="mt-3 text-4xl font-black text-white">{spectators.length}</div>
           </div>
 
-          <div className="rounded-[24px] border border-white/10 bg-black/20 p-5">
-            <div className="text-sm font-semibold text-white/60">إجمالي اللاعبين</div>
-            <div className="mt-3 text-4xl font-black text-white">{players.length}</div>
+          <div className="rounded-[24px] border border-red-300/20 bg-red-500/10 p-5">
+            <div className="text-sm font-semibold text-red-100/80">Red Team</div>
+            <div className="mt-3 text-4xl font-black text-white">{redPlayers.length}</div>
+          </div>
+
+          <div className="rounded-[24px] border border-cyan-300/20 bg-cyan-500/10 p-5">
+            <div className="text-sm font-semibold text-cyan-100/80">Blue Team</div>
+            <div className="mt-3 text-4xl font-black text-white">{bluePlayers.length}</div>
           </div>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-cyan-300/25 bg-cyan-500/10 p-5">
-              <div className="mb-4 text-2xl font-black text-white">Blue Team</div>
+            <div className="rounded-[28px] border border-red-300/25 bg-red-500/10 p-5">
+              <div className="mb-4 text-2xl font-black text-white">Red Team</div>
               <div className="space-y-4">
-                {bluePlayers.length > 0 ? (
-                  bluePlayers.map((player) => (
-                    <PlayerCard key={player.id} player={player} theme="blue" />
+                {redPlayers.length > 0 ? (
+                  redPlayers.map((player) => (
+                    <PlayerCard key={player.id} player={player} theme="red" />
                   ))
                 ) : (
                   <div className="rounded-[24px] border border-white/10 bg-black/20 p-6 text-white/45">
@@ -356,12 +364,12 @@ export default async function CodenamesRoomPage({
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-red-300/25 bg-red-500/10 p-5">
-              <div className="mb-4 text-2xl font-black text-white">Red Team</div>
+            <div className="rounded-[28px] border border-cyan-300/25 bg-cyan-500/10 p-5">
+              <div className="mb-4 text-2xl font-black text-white">Blue Team</div>
               <div className="space-y-4">
-                {redPlayers.length > 0 ? (
-                  redPlayers.map((player) => (
-                    <PlayerCard key={player.id} player={player} theme="red" />
+                {bluePlayers.length > 0 ? (
+                  bluePlayers.map((player) => (
+                    <PlayerCard key={player.id} player={player} theme="blue" />
                   ))
                 ) : (
                   <div className="rounded-[24px] border border-white/10 bg-black/20 p-6 text-white/45">

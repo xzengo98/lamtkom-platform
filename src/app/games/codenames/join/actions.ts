@@ -11,49 +11,42 @@ function getString(formData: FormData, key: string) {
 export async function joinCodenamesRoom(formData: FormData) {
   const supabase = await getSupabaseServerClient();
 
-  const guestName = getString(formData, "guest_name");
   const roomCode = getString(formData, "room_code").toUpperCase();
+  const guestName = getString(formData, "guest_name");
 
-  if (!guestName || !roomCode) {
-    throw new Error("الاسم ورمز الغرفة مطلوبان");
+  if (!roomCode) {
+    throw new Error("رمز الغرفة مطلوب");
   }
 
-  const { data: room, error: roomError } = await supabase
+  if (!guestName) {
+    throw new Error("الاسم مطلوب");
+  }
+
+  const { data: roomData, error: roomError } = await supabase
     .from("codenames_rooms")
     .select("id, room_code")
     .eq("room_code", roomCode)
     .maybeSingle();
 
-  if (roomError || !room) {
+  if (roomError || !roomData) {
     throw new Error(roomError?.message || "الغرفة غير موجودة");
   }
 
-  const { data: existingPlayer } = await supabase
-    .from("codenames_players")
-    .select("id")
-    .eq("room_id", room.id)
-    .eq("guest_name", guestName)
-    .maybeSingle();
-
-  if (existingPlayer?.id) {
-    redirect(`/games/codenames/room/${roomCode}?player_id=${existingPlayer.id}`);
-  }
-
-  const { data: player, error: playerError } = await supabase
+  const { data: playerData, error: playerError } = await supabase
     .from("codenames_players")
     .insert({
-      room_id: room.id,
+      room_id: roomData.id,
       guest_name: guestName,
-      team: null,
-      role: "operative",
+      team: "spectator",
+      role: "spectator",
       is_host: false,
     })
     .select("id")
     .single();
 
-  if (playerError || !player) {
-    throw new Error(playerError?.message || "فشل إضافة اللاعب");
+  if (playerError || !playerData) {
+    throw new Error(playerError?.message || "تعذر الانضمام إلى الغرفة");
   }
 
-  redirect(`/games/codenames/room/${roomCode}?player_id=${player.id}`);
+  redirect(`/games/codenames/room/${roomData.room_code}?player_id=${playerData.id}`);
 }
