@@ -72,14 +72,18 @@ type Props = {
 };
 
 const CARD_BACKGROUNDS = {
-  neutral: "https://d.top4top.io/p_3740hsxyn1.png",
+  neutral:
+    "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
   blue: "https://e.top4top.io/p_3740ik4gk2.png",
   orange: "https://f.top4top.io/p_3740463os3.png",
+  black:
+    "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
 };
 
 function getCardBackground(cardType: string) {
   if (cardType === "blue") return CARD_BACKGROUNDS.blue;
   if (cardType === "red") return CARD_BACKGROUNDS.orange;
+  if (cardType === "assassin") return CARD_BACKGROUNDS.black;
   return CARD_BACKGROUNDS.neutral;
 }
 
@@ -409,62 +413,81 @@ export default function CodenamesBoardClient({
   }
 
   function getCardView(card: CardRow) {
-    const isPending = selectedCard?.id === card.id;
-    const isBlack = card.card_type === "assassin";
-    const realBg = getCardBackground(card.card_type);
+  const isPending = selectedCard?.id === card.id;
+  const isBlack = card.card_type === "assassin";
+  const realBg = getCardBackground(card.card_type);
 
-    const baseStyle: React.CSSProperties = {
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-    };
+  const baseStyle: React.CSSProperties = {
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  };
 
-    if (card.is_revealed) {
-      if (isBlack) {
-        return {
-          className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
-          style: {
-            ...baseStyle,
-            background:
-              "linear-gradient(180deg, rgba(45,45,45,1) 0%, rgba(15,15,15,1) 100%)",
-          },
-          label: "تم الكشف",
-        };
-      }
-
+  // revealed
+  if (card.is_revealed) {
+    if (isBlack) {
       return {
         className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
         style: {
           ...baseStyle,
-          backgroundImage: `url(${realBg})`,
+          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
+          backgroundPosition: "center",
         },
         label: "تم الكشف",
+        labelClass: "card-word-badge card-word-badge-dark",
       };
     }
 
-    if (isSpymaster) {
-      if (isBlack) {
-        return {
-          className: `card-shell ${isPending ? "card-pending" : ""}`,
-          style: {
-            ...baseStyle,
-            background:
-              "linear-gradient(180deg, rgba(40,40,40,1) 0%, rgba(14,14,14,1) 100%)",
-            opacity: 0.45,
-          },
-          label: card.word,
-        };
-      }
+    return {
+      className: `card-shell card-revealed ${isPending ? "card-pending" : ""}`,
+      style: {
+        ...baseStyle,
+        backgroundImage: `url(${realBg})`,
+      },
+      label: "تم الكشف",
+      labelClass: "card-word-badge",
+    };
+  }
 
+  // spymaster يرى الخلفية الحقيقية لكن بدون بهتان
+  if (isSpymaster) {
+    if (isBlack) {
       return {
         className: `card-shell ${isPending ? "card-pending" : ""}`,
         style: {
           ...baseStyle,
-          backgroundImage: `url(${realBg})`,
-          opacity: 0.42,
-          filter: "saturate(0.88)",
+          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
         },
         label: card.word,
+        labelClass: "card-word-badge card-word-badge-dark",
+      };
+    }
+
+    return {
+      className: `card-shell ${isPending ? "card-pending" : ""}`,
+      style: {
+        ...baseStyle,
+        backgroundImage: `url(${realBg})`,
+      },
+      label: card.word,
+      labelClass: "card-word-badge",
+    };
+  }
+
+  // اللاعب العادي قبل الكشف يرى:
+  // blue/orange => neutral card
+  // neutral => grey card
+  // black => black card
+  if (!card.is_revealed) {
+    if (isBlack) {
+      return {
+        className: `card-shell ${isPending ? "card-pending" : ""}`,
+        style: {
+          ...baseStyle,
+          backgroundImage: `url(${CARD_BACKGROUNDS.black})`,
+        },
+        label: card.word,
+        labelClass: "card-word-badge card-word-badge-dark",
       };
     }
 
@@ -475,8 +498,20 @@ export default function CodenamesBoardClient({
         backgroundImage: `url(${CARD_BACKGROUNDS.neutral})`,
       },
       label: card.word,
+      labelClass: "card-word-badge",
     };
   }
+
+  return {
+    className: `card-shell ${isPending ? "card-pending" : ""}`,
+    style: {
+      ...baseStyle,
+      backgroundImage: `url(${CARD_BACKGROUNDS.neutral})`,
+    },
+    label: card.word,
+    labelClass: "card-word-badge",
+  };
+}
 
   return (
     <div className="relative mx-auto max-w-[1650px] p-3 md:p-5">
@@ -584,9 +619,9 @@ export default function CodenamesBoardClient({
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
-                    <div className="relative z-10 px-2 text-xl font-black uppercase tracking-wide text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] md:text-2xl">
-                      {cardView.label}
-                    </div>
+                    <div className="relative z-10 flex w-full items-center justify-center px-3">
+  <span className={cardView.labelClass}>{cardView.label}</span>
+</div>
                   </button>
                 );
               }
@@ -598,9 +633,9 @@ export default function CodenamesBoardClient({
                   style={cardView.style}
                 >
                   <div className="card-inner-overlay" />
-                  <div className="relative z-10 px-2 text-xl font-black uppercase tracking-wide text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] md:text-2xl">
-                    {cardView.label}
-                  </div>
+                  <div className="relative z-10 flex w-full items-center justify-center px-3">
+  <span className={cardView.labelClass}>{cardView.label}</span>
+</div>
                 </div>
               );
             })}
@@ -885,102 +920,155 @@ export default function CodenamesBoardClient({
 
       <style>{`
         .card-shell {
-          position: relative;
-          overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow:
-            0 12px 28px rgba(0, 0, 0, 0.18),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12);
-          transition:
-            transform 180ms ease,
-            box-shadow 180ms ease,
-            border-color 180ms ease,
-            opacity 180ms ease;
-        }
+    position: relative;
+    overflow: hidden;
+    min-height: 132px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      opacity 180ms ease,
+      filter 180ms ease;
+    clip-path: polygon(
+      18px 0%,
+      calc(100% - 18px) 0%,
+      100% 18px,
+      100% calc(100% - 18px),
+      calc(100% - 18px) 100%,
+      18px 100%,
+      0% calc(100% - 18px),
+      0% 18px
+    );
+    border-radius: 0;
+  }
 
-        .card-shell::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.04) 0%,
-            rgba(255, 255, 255, 0) 42%,
-            rgba(0, 0, 0, 0.08) 100%
-          );
-          pointer-events: none;
-        }
+  .card-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 20%,
+        rgba(0, 0, 0, 0.04) 100%
+      );
+    pointer-events: none;
+  }
 
-        .card-inner-overlay {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 36%),
-            linear-gradient(180deg, transparent 62%, rgba(0, 0, 0, 0.1) 100%);
-          pointer-events: none;
-        }
+  .card-inner-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 35%),
+      linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.12) 100%);
+    pointer-events: none;
+  }
 
-        .card-hover-up:hover {
-          transform: translateY(-4px) scale(1.01);
-          box-shadow:
-            0 18px 38px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.14);
-        }
+  .card-hover-up:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow:
+      0 18px 38px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
 
-        .card-pending {
-          border-color: rgba(163, 230, 53, 0.9) !important;
-          box-shadow:
-            0 0 0 2px rgba(163, 230, 53, 0.22),
-            0 16px 38px rgba(101, 163, 13, 0.22),
-            inset 0 1px 0 rgba(255, 255, 255, 0.14);
-          animation: pulseBorder 1.25s ease-in-out infinite;
-        }
+  .card-pending {
+    border-color: rgba(163, 230, 53, 0.95) !important;
+    box-shadow:
+      0 0 0 2px rgba(163, 230, 53, 0.22),
+      0 16px 38px rgba(101, 163, 13, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    animation: pulseBorder 1.25s ease-in-out infinite;
+  }
 
-        .card-revealed {
-          animation: revealFlip 320ms ease;
-        }
+  .card-revealed {
+    animation: revealFlip 320ms ease;
+  }
 
-        .card-fade-in {
-          animation: fadeCardIn 220ms ease;
-        }
+  .card-fade-in {
+    animation: fadeCardIn 220ms ease;
+  }
 
-        @keyframes revealFlip {
-          0% {
-            transform: rotateY(90deg) scale(0.96);
-            opacity: 0.25;
-          }
-          100% {
-            transform: rotateY(0deg) scale(1);
-            opacity: 1;
-          }
-        }
+  .card-word-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 88%;
+    min-height: 48px;
+    padding: 10px 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    color: #1f2937;
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-align: center;
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    word-break: break-word;
+    text-transform: none;
+    letter-spacing: 0;
+  }
 
-        @keyframes fadeCardIn {
-          0% {
-            opacity: 0.4;
-            transform: scale(0.97);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
+  .card-word-badge-dark {
+    background: rgba(0, 0, 0, 0.72);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-        @keyframes pulseBorder {
-          0%,
-          100% {
-            box-shadow:
-              0 0 0 2px rgba(163, 230, 53, 0.22),
-              0 16px 38px rgba(101, 163, 13, 0.18),
-              inset 0 1px 0 rgba(255, 255, 255, 0.14);
-          }
-          50% {
-            box-shadow:
-              0 0 0 3px rgba(163, 230, 53, 0.32),
-              0 18px 42px rgba(101, 163, 13, 0.28),
-              inset 0 1px 0 rgba(255, 255, 255, 0.18);
-          }
-        }
+  @keyframes revealFlip {
+    0% {
+      transform: rotateY(90deg) scale(0.96);
+      opacity: 0.25;
+    }
+    100% {
+      transform: rotateY(0deg) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeCardIn {
+    0% {
+      opacity: 0.4;
+      transform: scale(0.97);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes pulseBorder {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 2px rgba(163, 230, 53, 0.22),
+        0 16px 38px rgba(101, 163, 13, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+    50% {
+      box-shadow:
+        0 0 0 3px rgba(163, 230, 53, 0.32),
+        0 18px 42px rgba(101, 163, 13, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card-word-badge {
+      font-size: 1.15rem;
+      min-height: 40px;
+      padding: 8px 14px;
+      max-width: 92%;
+    }
+
+    .card-shell {
+      min-height: 108px;
       `}</style>
     </div>
   );
