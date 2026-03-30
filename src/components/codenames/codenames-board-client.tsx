@@ -72,8 +72,14 @@ type Props = {
   resetGameAction: ServerAction;
 };
 
-const BLUE_TEAM_IMAGE = "https://i.top4top.io/p_37415yja12.png";
-const ORANGE_TEAM_IMAGE = "https://h.top4top.io/p_3741s1d6i1.jpg";
+const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
+const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
+
+const BLUE_PANEL_BG =
+  "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg";
+
+const ORANGE_PANEL_BG =
+  "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg";
 
 const CARD_BACKGROUNDS = {
   neutral: "https://d.top4top.io/p_3740ccnwr3.png",
@@ -144,6 +150,7 @@ function TeamPlayerCard({
   );
 }
 
+
 function TeamPanel({
   title,
   theme,
@@ -159,32 +166,43 @@ function TeamPanel({
 }) {
   const isBlue = theme === "blue";
   const imageUrl = isBlue ? BLUE_TEAM_IMAGE : ORANGE_TEAM_IMAGE;
+  const panelBg = isBlue ? BLUE_PANEL_BG : ORANGE_PANEL_BG;
+
   const titleClass = isBlue
     ? "border-cyan-300/20 text-cyan-100"
     : "border-orange-300/20 text-orange-100";
 
   const blockClass = isBlue
-    ? "border-cyan-300/25 bg-cyan-500/10"
-    : "border-orange-300/25 bg-orange-500/10";
+    ? "border-cyan-300/25 bg-cyan-500/12"
+    : "border-orange-300/25 bg-orange-500/14";
 
   const numberClass = isBlue ? "text-cyan-100" : "text-orange-100";
 
   return (
     <div className="space-y-4">
-      <div className={`rounded-full border bg-black/25 px-4 py-3 text-center text-sm font-black uppercase tracking-[0.22em] ${titleClass}`}>
+      <div
+        className={`rounded-full border px-4 py-3 text-center text-sm font-black uppercase tracking-[0.22em] shadow-lg ${titleClass}`}
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(6,10,20,0.88), rgba(6,10,20,0.78)), ${
+            isBlue
+              ? "linear-gradient(90deg, rgba(8,72,114,0.35), rgba(12,19,34,0.15))"
+              : "linear-gradient(90deg, rgba(157,64,11,0.34), rgba(34,18,10,0.18))"
+          }`,
+        }}
+      >
         {title}
       </div>
 
       <div
         className={`rounded-[28px] border p-4 ${blockClass}`}
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url(${imageUrl})`,
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.18)), url(${imageUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="rounded-[22px] bg-black/20 p-4 backdrop-blur-[2px]">
-          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/80">
+        <div className="rounded-[22px] bg-black/25 p-4 backdrop-blur-[2px]">
+          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/85">
             👥 Operatives
           </div>
           <div className="space-y-3">
@@ -192,7 +210,7 @@ function TeamPanel({
               operatives.map((player) => (
                 <div
                   key={player.id}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-xl font-black text-white"
+                  className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center text-xl font-black text-white shadow-inner"
                 >
                   {player.guest_name}
                 </div>
@@ -209,13 +227,13 @@ function TeamPanel({
       <div
         className={`rounded-[28px] border p-4 ${blockClass}`}
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url(${imageUrl})`,
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.18)), url(${imageUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="rounded-[22px] bg-black/20 p-4 backdrop-blur-[2px]">
-          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/80">
+        <div className="rounded-[22px] bg-black/25 p-4 backdrop-blur-[2px]">
+          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/85">
             🕵️ Spymasters
           </div>
           <div className="space-y-3">
@@ -223,7 +241,7 @@ function TeamPanel({
               spymasters.map((player) => (
                 <div
                   key={player.id}
-                  className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-xl font-black text-white"
+                  className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center text-xl font-black text-white shadow-inner"
                 >
                   {player.guest_name}
                 </div>
@@ -237,9 +255,21 @@ function TeamPanel({
         </div>
       </div>
 
-      <div className="rounded-[26px] border border-white/10 bg-black/25 px-4 py-6 text-center shadow-xl">
-        <div className="text-sm font-semibold text-white/55">🎴 Cards Remaining</div>
-        <div className={`mt-3 text-6xl font-black ${numberClass}`}>{remaining ?? 0}</div>
+      <div
+        className="relative overflow-hidden rounded-[26px] border border-white/10 px-4 py-6 text-center shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(6,10,20,0.86), rgba(6,10,20,0.78)), url(${panelBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/25" />
+        <div className="relative z-10">
+          <div className="text-sm font-semibold text-white/65">🎴 Cards Remaining</div>
+          <div className={`mt-3 text-6xl font-black drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)] ${numberClass}`}>
+            {remaining ?? 0}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -533,7 +563,12 @@ export default function CodenamesBoardClient({
             remaining={room.red_remaining}
           />
 
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-xl">
+          <div
+  className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
+  style={{
+    backgroundImage: "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
+  }}
+>
             <div className="mb-3 flex items-center justify-between">
               <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/75">
                 Live
@@ -591,8 +626,19 @@ export default function CodenamesBoardClient({
         </div>
 
         <div className="space-y-5">
-          <div className="rounded-[34px] border border-white/10 bg-[#101522]/90 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
+<div
+  className="rounded-[34px] border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
+  style={{
+    backgroundImage:
+      room.current_turn_team === "blue"
+        ? `linear-gradient(180deg, rgba(8,16,30,0.86), rgba(8,16,30,0.88)), url(${BLUE_PANEL_BG})`
+        : room.current_turn_team === "red"
+        ? `linear-gradient(180deg, rgba(20,10,6,0.84), rgba(20,10,6,0.9)), url(${ORANGE_PANEL_BG})`
+        : "linear-gradient(180deg, rgba(16,21,34,0.92), rgba(16,21,34,0.9))",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
               {room.status === "finished"
                 ? room.assassin_revealed
                   ? "Assassin was revealed"
@@ -605,17 +651,42 @@ export default function CodenamesBoardClient({
             </div>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <div className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white/85">
-                🎯 TURN: {getTurnLabel(room.current_turn_team)}
-              </div>
-              <div className="rounded-full border border-orange-300/20 bg-orange-500/10 px-5 py-3 text-sm font-bold text-orange-100">
-                ORANGE {room.red_remaining ?? 0}
-              </div>
-              <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-5 py-3 text-sm font-bold text-cyan-100">
-                BLUE {room.blue_remaining ?? 0}
-              </div>
-            </div>
-          </div>
+  <div
+    className="rounded-full border border-white/10 px-5 py-3 text-sm font-bold text-white shadow-lg"
+    style={{
+      background:
+        room.current_turn_team === "blue"
+          ? "linear-gradient(90deg, rgba(10,73,110,0.55), rgba(17,24,39,0.85))"
+          : room.current_turn_team === "red"
+          ? "linear-gradient(90deg, rgba(180,88,17,0.48), rgba(17,24,39,0.85))"
+          : "rgba(255,255,255,0.06)",
+    }}
+  >
+    🎯 TURN: {getTurnLabel(room.current_turn_team)}
+  </div>
+
+  <div
+    className="rounded-full border border-orange-300/25 px-5 py-3 text-sm font-bold text-orange-100 shadow-lg"
+    style={{
+      backgroundImage: `linear-gradient(90deg, rgba(170,74,8,0.55), rgba(46,20,8,0.72)), url(${ORANGE_PANEL_BG})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}
+  >
+    ORANGE {room.red_remaining ?? 0}
+  </div>
+
+  <div
+    className="rounded-full border border-cyan-300/25 px-5 py-3 text-sm font-bold text-cyan-100 shadow-lg"
+    style={{
+      backgroundImage: `linear-gradient(90deg, rgba(11,88,133,0.55), rgba(11,24,46,0.75)), url(${BLUE_PANEL_BG})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}
+  >
+    BLUE {room.blue_remaining ?? 0}
+  </div>
+</div>
 
           <div className="grid grid-cols-5 gap-3 md:gap-4">
             {cards.map((card) => {
@@ -811,7 +882,12 @@ export default function CodenamesBoardClient({
             remaining={room.blue_remaining}
           />
 
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-xl">
+          <div
+  className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
+  style={{
+    backgroundImage: "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
+  }}
+>
             <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
               👁️ Spectators
             </div>
