@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type RoomRow = {
@@ -70,6 +70,7 @@ type Props = {
   revealCardAction: ServerAction;
   endTurnAction: ServerAction;
   resetGameAction: ServerAction;
+  updatePlayerInGameAction: ServerAction;
 };
 
 const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
@@ -109,198 +110,228 @@ function getTurnLabel(team: string | null) {
   return "-";
 }
 
-function normalizePlayers(rows: PlayerRow[]) {
-  return rows.map((player) => ({
-    ...player,
-    team: player.team?.toLowerCase() ?? null,
-    role: player.role?.toLowerCase() ?? null,
-  }));
+function getPlayerDisplayName(player: PlayerRow) {
+  return player.guest_name?.trim() || "لاعب";
 }
 
-function TeamPanel({
+function getRoleLabel(role: string | null | undefined) {
+  if (role === "spymaster") return "Spymaster";
+  if (role === "spectator") return "Spectator";
+  return "Operative";
+}
+
+function normalizePlayers(rows: PlayerRow[]) {
+  return rows.map((player) => {
+    const normalizedTeam = player.team?.toLowerCase() ?? "spectator";
+    const normalizedRole =
+      player.role?.toLowerCase() ??
+      (normalizedTeam === "spectator" ? "spectator" : "operative");
+
+    return {
+      ...player,
+      team: normalizedTeam,
+      role: normalizedRole,
+    };
+  });
+}
+
+function TeamSidebarCard({
   title,
   theme,
   operatives,
   spymasters,
   remaining,
+  reverseScore = false,
 }: {
   title: string;
   theme: "blue" | "orange";
   operatives: PlayerRow[];
   spymasters: PlayerRow[];
   remaining: number | null;
+  reverseScore?: boolean;
 }) {
   const isBlue = theme === "blue";
   const imageUrl = isBlue ? BLUE_TEAM_IMAGE : ORANGE_TEAM_IMAGE;
   const panelBg = isBlue ? BLUE_PANEL_BG : ORANGE_PANEL_BG;
 
-  const titleClass = isBlue
-    ? "border-cyan-300/20 text-cyan-100"
-    : "border-orange-300/20 text-orange-100";
-
-  const blockClass = isBlue
-    ? "border-cyan-300/25 bg-cyan-500/12"
-    : "border-orange-300/25 bg-orange-500/14";
-
-  const numberClass = isBlue ? "text-cyan-100" : "text-orange-100";
-
   return (
     <div className="space-y-4">
       <div
-        className={`rounded-full border px-4 py-3 text-center text-sm font-black uppercase tracking-[0.22em] shadow-lg ${titleClass}`}
+        className={`sidebar-role-card relative overflow-hidden rounded-[28px] border ${
+          isBlue ? "border-cyan-300/25" : "border-orange-300/25"
+        }`}
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(6,10,20,0.88), rgba(6,10,20,0.78)), ${
-            isBlue
-              ? "linear-gradient(90deg, rgba(8,72,114,0.35), rgba(12,19,34,0.15))"
-              : "linear-gradient(90deg, rgba(157,64,11,0.34), rgba(34,18,10,0.18))"
-          }`,
-        }}
-      >
-        {title}
-      </div>
-
-      <div
-        className={`rounded-[28px] border p-4 ${blockClass}`}
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.18)), url(${imageUrl})`,
+          backgroundImage: `linear-gradient(180deg, rgba(16,26,40,0.78), rgba(16,26,40,0.9)), url(${imageUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="rounded-[22px] bg-black/25 p-4 backdrop-blur-[2px]">
-          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/85">
-            👥 Operatives
-          </div>
-          <div className="space-y-3">
-            {operatives.length > 0 ? (
-              operatives.map((player) => (
-                <div
-                  key={player.id}
-                  className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center text-xl font-black text-white shadow-inner"
-                >
-                  {player.guest_name}
-                </div>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-sm text-white/45">
-                لا يوجد
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div
-        className={`rounded-[28px] border p-4 ${blockClass}`}
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.18)), url(${imageUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="rounded-[22px] bg-black/25 p-4 backdrop-blur-[2px]">
-          <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/85">
-            🕵️ Spymasters
-          </div>
-          <div className="space-y-3">
-            {spymasters.length > 0 ? (
-              spymasters.map((player) => (
-                <div
-                  key={player.id}
-                  className="rounded-2xl border border-white/10 bg-black/30 p-3 text-center text-xl font-black text-white shadow-inner"
-                >
-                  {player.guest_name}
-                </div>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-black/25 p-3 text-center text-sm text-white/45">
-                لا يوجد
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="relative overflow-hidden rounded-[26px] border border-white/10 px-4 py-6 text-center shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(6,10,20,0.86), rgba(6,10,20,0.78)), url(${panelBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/25" />
-        <div className="relative z-10">
-          <div className="text-sm font-semibold text-white/65">🎴 Cards Remaining</div>
+        <div className="absolute inset-0 bg-black/15" />
+        <div className="relative z-10 p-4">
           <div
-            className={`mt-3 text-6xl font-black drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)] ${numberClass}`}
+            className={`text-center text-sm font-black uppercase tracking-wide ${
+              isBlue ? "text-cyan-100" : "text-orange-100"
+            }`}
           >
-            {remaining ?? 0}
+            Operatives
           </div>
+          <div className="mt-16 min-h-[16px]" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+        </div>
+      </div>
+
+      <div className={`score-strip ${reverseScore ? "flex-row-reverse" : ""}`}>
+        <div
+          className="score-number"
+          style={{
+            color: isBlue ? "#bff4ff" : "#fff5f5",
+            textShadow: isBlue
+              ? "0 0 0 rgba(0,0,0,0), 0 3px 0 #0266a8, 0 7px 18px rgba(0,0,0,.35)"
+              : "0 0 0 rgba(0,0,0,0), 0 3px 0 #b12f0e, 0 7px 18px rgba(0,0,0,.35)",
+          }}
+        >
+          {remaining ?? 0}
+        </div>
+
+        <div
+          className="relative overflow-hidden rounded-[18px] border border-white/15"
+          style={{
+            width: 126,
+            height: 86,
+            backgroundImage: `linear-gradient(180deg, rgba(10,16,28,0.68), rgba(10,16,28,0.8)), url(${imageUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+      </div>
+
+      <div
+        className={`sidebar-role-card relative overflow-hidden rounded-[28px] border ${
+          isBlue ? "border-cyan-300/25" : "border-orange-300/25"
+        }`}
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(16,26,40,0.78), rgba(16,26,40,0.9)), url(${imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/15" />
+        <div className="relative z-10 p-4">
+          <div
+            className={`text-center text-sm font-black uppercase tracking-wide ${
+              isBlue ? "text-cyan-100" : "text-orange-100"
+            }`}
+          >
+            Spymasters
+          </div>
+
+          <div className="mt-4">
+            {spymasters.length > 0 ? (
+              <div className="space-y-2">
+                {spymasters.map((player) => (
+                  <div
+                    key={player.id}
+                    className="rounded-2xl bg-black/25 px-3 py-2 text-center text-2xl font-black text-white"
+                  >
+                    {getPlayerDisplayName(player)}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-black/20 px-3 py-5 text-center text-sm text-white/45">
+                لا يوجد
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="relative overflow-hidden rounded-[24px] border border-white/12 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.26)]"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(14,25,40,0.88), rgba(14,25,40,0.94)), url(${panelBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="text-center text-sm font-black uppercase tracking-wide text-white/90">
+          Team Members
+        </div>
+
+        <div className="mt-3 space-y-2">
+          {[...spymasters, ...operatives].length > 0 ? (
+            [...spymasters, ...operatives].map((player) => (
+              <div
+                key={player.id}
+                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-center text-base font-black text-white"
+              >
+                {getPlayerDisplayName(player)}
+                <div className="mt-1 text-[11px] font-semibold uppercase text-white/50">
+                  {getRoleLabel(player.role)}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-4 text-center text-sm text-white/45">
+              لا يوجد لاعبون
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function MobileTeamSummary({
+function MobileTeamTopCard({
   title,
   theme,
-  operativesCount,
-  spymastersCount,
   remaining,
+  operatives,
+  spymasters,
 }: {
   title: string;
   theme: "blue" | "orange";
-  operativesCount: number;
-  spymastersCount: number;
   remaining: number | null;
+  operatives: PlayerRow[];
+  spymasters: PlayerRow[];
 }) {
   const isBlue = theme === "blue";
-  const bgImage = isBlue ? BLUE_PANEL_BG : ORANGE_PANEL_BG;
+  const bg = isBlue ? BLUE_PANEL_BG : ORANGE_PANEL_BG;
 
   return (
     <div
-      className={`mobile-summary-card relative overflow-hidden rounded-[18px] border p-2.5 ${
-        isBlue ? "border-cyan-300/20" : "border-orange-300/20"
-      }`}
+      className={`relative overflow-hidden rounded-[18px] border ${
+        isBlue ? "border-cyan-300/25" : "border-orange-300/25"
+      } p-2.5`}
       style={{
-        backgroundImage: `linear-gradient(180deg, rgba(12,18,30,0.82), rgba(12,18,30,0.9)), url(${bgImage})`,
+        backgroundImage: `linear-gradient(180deg, rgba(18,28,42,0.85), rgba(18,28,42,0.93)), url(${bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <div className="absolute inset-0 bg-black/20" />
-      <div className="relative z-10">
-        <div
-          className={`text-center text-[10px] font-black uppercase tracking-[0.12em] ${
-            isBlue ? "text-cyan-100" : "text-orange-100"
-          }`}
-        >
-          {title}
-        </div>
+      <div className="text-center text-[10px] font-black uppercase tracking-[0.14em] text-white/85">
+        {title}
+      </div>
 
-        <div className="mt-2 text-center">
-          <div className={`text-3xl font-black ${isBlue ? "text-cyan-100" : "text-orange-100"}`}>
-            {remaining ?? 0}
-          </div>
-          <div className="text-[10px] font-semibold text-white/65">Cards</div>
-        </div>
+      <div className={`mt-2 text-center text-3xl font-black ${isBlue ? "text-cyan-100" : "text-orange-100"}`}>
+        {remaining ?? 0}
+      </div>
 
-        <div className="mt-2 grid gap-1.5">
-          <div className="rounded-xl bg-black/30 px-2 py-1.5 text-center text-[10px] font-bold text-white">
-            Operatives {operativesCount}
-          </div>
-          <div className="rounded-xl bg-black/30 px-2 py-1.5 text-center text-[10px] font-bold text-white">
-            Spymasters {spymastersCount}
-          </div>
+      <div className="mt-2 space-y-1">
+        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white">
+          Operatives {operatives.length}
+        </div>
+        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white">
+          Spymasters {spymasters.length}
         </div>
       </div>
     </div>
   );
 }
 
-function MobileGameLog({
+function MobileLogCard({
   previewSelection,
   sortedTurns,
 }: {
@@ -308,8 +339,8 @@ function MobileGameLog({
   sortedTurns: TurnRow[];
 }) {
   return (
-    <div className="mobile-log-card rounded-[18px] border border-white/10 bg-[linear-gradient(180deg,rgba(58,64,74,0.92),rgba(36,40,46,0.96))] p-2.5 shadow-[0_14px_34px_rgba(0,0,0,0.28)]">
-      <div className="text-center text-[10px] font-black uppercase tracking-[0.16em] text-white/55">
+    <div className="rounded-[18px] border border-white/12 bg-[linear-gradient(180deg,rgba(78,78,82,0.86),rgba(42,42,46,0.96))] p-2.5 shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
+      <div className="text-center text-[10px] font-black uppercase tracking-[0.14em] text-white/60">
         Game Log
       </div>
 
@@ -366,6 +397,7 @@ export default function CodenamesBoardClient({
   revealCardAction,
   endTurnAction,
   resetGameAction,
+  updatePlayerInGameAction,
 }: Props) {
   const [room, setRoom] = useState<RoomRow>(initialRoom);
   const [cards, setCards] = useState<CardRow[]>(initialCards);
@@ -375,6 +407,7 @@ export default function CodenamesBoardClient({
   const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
   const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
   const [revealingCardId, setRevealingCardId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const previousCardsRef = useRef<CardRow[]>(initialCards);
 
   const currentPlayer = useMemo(
@@ -401,12 +434,15 @@ export default function CodenamesBoardClient({
   const isSpymaster = safeCurrentPlayer.role === "spymaster";
   const isOperative = safeCurrentPlayer.role === "operative";
   const isCurrentTeam = safeCurrentPlayer.team === room.current_turn_team;
+
   const canSubmitClue = Boolean(
     isSpymaster && isCurrentTeam && room.status === "active" && !activeTurn
   );
+
   const canRevealCard = Boolean(
     isOperative && isCurrentTeam && activeTurn && room.status === "active"
   );
+
   const canEndTurn = Boolean(isCurrentTeam && room.status === "active" && activeTurn);
 
   const bluePlayers = players.filter((player) => player.team === "blue");
@@ -429,15 +465,18 @@ export default function CodenamesBoardClient({
         )
         .eq("id", room.id)
         .maybeSingle(),
+
       supabase
         .from("codenames_cards")
         .select("id, room_id, position_index, word, card_type, is_revealed")
         .eq("room_id", room.id)
         .order("position_index", { ascending: true }),
+
       supabase
         .from("codenames_players")
         .select("id, room_id, guest_name, team, role, is_host")
         .eq("room_id", room.id),
+
       supabase
         .from("codenames_turns")
         .select(
@@ -612,7 +651,7 @@ export default function CodenamesBoardClient({
     const isPending = selectedCard?.id === card.id;
     const realBg = getCardBackground(card.card_type);
 
-    const baseStyle: React.CSSProperties = {
+    const baseStyle: CSSProperties = {
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
@@ -652,33 +691,224 @@ export default function CodenamesBoardClient({
     };
   }
 
-  return (
-    <div className="relative mx-auto max-w-[1700px] p-2 sm:p-4 md:p-6">
-      <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#0d1320_0%,#16283a_100%)] sm:rounded-[40px]" />
+  function renderSettingsModal() {
+    if (!showSettings || !safeCurrentPlayer.is_host) return null;
 
-      {/* MOBILE LAYOUT */}
+    return (
+      <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4">
+        <div className="w-full max-w-3xl rounded-[24px] border border-white/10 bg-[#15181f] shadow-[0_30px_90px_rgba(0,0,0,0.55)]">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-4 sm:px-5">
+            <div className="text-lg font-black text-white sm:text-2xl">⚙️ إعدادات اللعبة وإدارة اللاعبين</div>
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white hover:bg-white/10"
+            >
+              إغلاق
+            </button>
+          </div>
+
+          <div className="max-h-[72vh] overflow-y-auto p-4 sm:p-5">
+            <div className="mb-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+                <div className="text-sm font-semibold text-white/55">إجمالي اللاعبين</div>
+                <div className="mt-2 text-3xl font-black text-white">{players.length}</div>
+              </div>
+              <div className="rounded-2xl border border-cyan-300/20 bg-cyan-500/10 p-4 text-center">
+                <div className="text-sm font-semibold text-cyan-100/80">Blue Team</div>
+                <div className="mt-2 text-3xl font-black text-cyan-100">{bluePlayers.length}</div>
+              </div>
+              <div className="rounded-2xl border border-orange-300/20 bg-orange-500/10 p-4 text-center">
+                <div className="text-sm font-semibold text-orange-100/80">Orange Team</div>
+                <div className="mt-2 text-3xl font-black text-orange-100">{orangePlayers.length}</div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {players.map((player) => (
+                <form
+                  key={player.id}
+                  action={updatePlayerInGameAction}
+                  className="rounded-[20px] border border-white/10 bg-white/5 p-3 sm:p-4"
+                >
+                  <input type="hidden" name="room_code" value={room.room_code} />
+                  <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
+                  <input type="hidden" name="target_player_id" value={player.id} />
+
+                  <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="text-lg font-black text-white">
+                        {getPlayerDisplayName(player)}
+                      </div>
+                      <div className="mt-1 text-xs font-semibold uppercase text-white/45">
+                        {getRoleLabel(player.role)} • {player.team || "spectator"}
+                        {player.is_host ? " • Host" : ""}
+                      </div>
+                    </div>
+
+                    <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/70">
+                      ID: {player.id.slice(0, 8)}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                    <select
+                      name="team"
+                      defaultValue={player.team ?? "spectator"}
+                      className="rounded-2xl border border-white/10 bg-[#0d1118] px-4 py-3 font-bold text-white outline-none"
+                    >
+                      <option value="blue">Blue Team</option>
+                      <option value="red">Orange Team</option>
+                      <option value="spectator">Spectator</option>
+                    </select>
+
+                    <select
+                      name="role"
+                      defaultValue={
+                        player.team === "spectator"
+                          ? "spectator"
+                          : player.role ?? "operative"
+                      }
+                      className="rounded-2xl border border-white/10 bg-[#0d1118] px-4 py-3 font-bold text-white outline-none"
+                    >
+                      <option value="operative">Operative</option>
+                      <option value="spymaster">Spymaster</option>
+                      <option value="spectator">Spectator</option>
+                    </select>
+
+                    <button
+                      type="submit"
+                      className="rounded-2xl bg-emerald-500 px-5 py-3 font-black text-white hover:bg-emerald-400"
+                    >
+                      حفظ
+                    </button>
+                  </div>
+                </form>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderSpectatorJoinBox() {
+    if (safeCurrentPlayer.team !== "spectator") return null;
+
+    return (
+      <div className="rounded-[20px] border border-yellow-300/25 bg-yellow-500/10 p-3 shadow-[0_14px_32px_rgba(0,0,0,0.2)] sm:p-4">
+        <div className="text-center text-sm font-black uppercase tracking-[0.14em] text-yellow-100">
+          يمكنك الانضمام للعبة الآن
+        </div>
+
+        <div className="mt-2 text-center text-sm font-semibold text-white/75">
+          دخلت كمشاهد لأن اللعبة بدأت بالفعل لكن يمكنك اختيار فريقك الآن
+        </div>
+
+        <form action={updatePlayerInGameAction} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+          <input type="hidden" name="room_code" value={room.room_code} />
+          <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
+          <input type="hidden" name="target_player_id" value={safeCurrentPlayer.id} />
+
+          <select
+            name="team"
+            defaultValue="blue"
+            className="rounded-2xl border border-white/10 bg-[#0d1118] px-4 py-3 font-bold text-white outline-none"
+          >
+            <option value="blue">Blue Team</option>
+            <option value="red">Orange Team</option>
+          </select>
+
+          <select
+            name="role"
+            defaultValue="operative"
+            className="rounded-2xl border border-white/10 bg-[#0d1118] px-4 py-3 font-bold text-white outline-none"
+          >
+            <option value="operative">Operative</option>
+            <option value="spymaster">Spymaster</option>
+          </select>
+
+          <button
+            type="submit"
+            className="rounded-2xl bg-yellow-500 px-5 py-3 font-black text-black hover:bg-yellow-400"
+          >
+            انضم الآن
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
+      <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
+
+      {renderSettingsModal()}
+
+      <div className="mb-3 flex items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-black/20 px-3 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-4">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/games/codenames/room/${room.room_code}?player_id=${safeCurrentPlayer.id}`}
+            className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-black text-white hover:bg-white/10"
+          >
+            العودة للروم
+          </Link>
+
+          <div className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white">
+            {getPlayerDisplayName(safeCurrentPlayer)}
+          </div>
+        </div>
+
+        <div className="hidden text-center xl:block">
+          <div className="text-4xl font-black uppercase text-white">
+            {room.status === "finished"
+              ? room.assassin_revealed
+                ? "Assassin was revealed"
+                : "Game Finished"
+              : selectedCard
+              ? "Confirm your choice"
+              : previewSelection
+              ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
+              : "Give your operatives a clue"}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {safeCurrentPlayer.is_host && (
+            <button
+              type="button"
+              onClick={() => setShowSettings(true)}
+              className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white hover:bg-white/10"
+            >
+              ⚙️ Settings
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* MOBILE / TABLET */}
       <div className="xl:hidden">
         <div className="space-y-3">
-          <div className="grid grid-cols-[minmax(88px,1fr)_minmax(110px,1.15fr)_minmax(88px,1fr)] gap-2">
-            <MobileTeamSummary
+          <div className="grid grid-cols-[92px_minmax(115px,1fr)_92px] gap-2">
+            <MobileTeamTopCard
               title="Blue"
               theme="blue"
-              operativesCount={blueOperatives.length}
-              spymastersCount={blueSpymasters.length}
               remaining={room.blue_remaining}
+              operatives={blueOperatives}
+              spymasters={blueSpymasters}
             />
 
-            <MobileGameLog
+            <MobileLogCard
               previewSelection={previewSelection}
               sortedTurns={sortedTurns}
             />
 
-            <MobileTeamSummary
+            <MobileTeamTopCard
               title="Orange"
               theme="orange"
-              operativesCount={orangeOperatives.length}
-              spymastersCount={orangeSpymasters.length}
               remaining={room.red_remaining}
+              operatives={orangeOperatives}
+              spymasters={orangeSpymasters}
             />
           </div>
 
@@ -732,6 +962,8 @@ export default function CodenamesBoardClient({
             </div>
           </div>
 
+          {renderSpectatorJoinBox()}
+
           <div className="mobile-board-wrap rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2.5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
             <div className="grid grid-cols-5 gap-2">
               {cards.map((card) => {
@@ -743,13 +975,11 @@ export default function CodenamesBoardClient({
                       key={card.id}
                       type="button"
                       onClick={() => setInspectedCard(card)}
-                      className={`${cardView.className} mobile-card flex aspect-[0.74] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
+                      className={`${cardView.className} mobile-card flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
                       style={cardView.style}
                     >
                       <div className="card-inner-overlay" />
-                      <div className="relative z-10 card-word-text mobile-card-word">
-                        {cardView.label}
-                      </div>
+                      <div className="relative z-10 mobile-card-word">{cardView.label}</div>
                     </button>
                   );
                 }
@@ -763,13 +993,11 @@ export default function CodenamesBoardClient({
                         setSelectedCard(card);
                         await sendPreview(card);
                       }}
-                      className={`${cardView.className} mobile-card card-hover-up flex aspect-[0.74] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
+                      className={`${cardView.className} mobile-card card-hover-up flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
                       style={cardView.style}
                     >
                       <div className="card-inner-overlay" />
-                      <div className="relative z-10 card-word-text mobile-card-word">
-                        {cardView.label}
-                      </div>
+                      <div className="relative z-10 mobile-card-word">{cardView.label}</div>
                     </button>
                   );
                 }
@@ -777,13 +1005,11 @@ export default function CodenamesBoardClient({
                 return (
                   <div
                     key={card.id}
-                    className={`${cardView.className} mobile-card flex aspect-[0.74] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
+                    className={`${cardView.className} mobile-card flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
-                    <div className="relative z-10 card-word-text mobile-card-word">
-                      {cardView.label}
-                    </div>
+                    <div className="relative z-10 mobile-card-word">{cardView.label}</div>
                   </div>
                 );
               })}
@@ -933,7 +1159,7 @@ export default function CodenamesBoardClient({
                         key={player.id}
                         className="rounded-xl border border-white/10 bg-black/20 p-2.5 text-center text-sm font-black text-white"
                       >
-                        {player.guest_name}
+                        {getPlayerDisplayName(player)}
                       </div>
                     ))
                   ) : (
@@ -948,146 +1174,22 @@ export default function CodenamesBoardClient({
         </div>
       </div>
 
-      {/* DESKTOP LAYOUT */}
-      <div className="hidden xl:grid xl:grid-cols-[260px_minmax(0,1fr)_260px] xl:gap-5">
+      {/* DESKTOP */}
+      <div className="hidden xl:grid xl:grid-cols-[280px_minmax(0,1fr)_280px] xl:gap-6">
         <div className="space-y-5">
-          <TeamPanel
-            title="Orange Team"
-            theme="orange"
-            operatives={orangeOperatives}
-            spymasters={orangeSpymasters}
-            remaining={room.red_remaining}
+          <TeamSidebarCard
+            title="Blue Team"
+            theme="blue"
+            operatives={blueOperatives}
+            spymasters={blueSpymasters}
+            remaining={room.blue_remaining}
           />
-
-          <div
-            className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
-            style={{
-              backgroundImage:
-                "linear-gradient(180deg, rgba(34,44,60,0.86), rgba(28,36,50,0.92))",
-            }}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <div className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/75">
-                Live
-              </div>
-              <div className="text-2xl font-black text-white">Game Log</div>
-            </div>
-
-            <div className="max-h-[320px] space-y-3 overflow-y-auto pr-1">
-              {previewSelection && (
-                <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
-                  <div className="text-xs font-black uppercase text-lime-100">Preview</div>
-                  <div className="mt-2 text-base font-black text-white">
-                    {previewSelection.playerName} حدّد: {previewSelection.word}
-                  </div>
-                </div>
-              )}
-
-              {sortedTurns.length > 0 ? (
-                sortedTurns.map((turn, index) => (
-                  <div
-                    key={turn.id}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div
-                        className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
-                          turn.team === "blue"
-                            ? "bg-cyan-500/15 text-cyan-100"
-                            : "bg-orange-500/15 text-orange-100"
-                        }`}
-                      >
-                        {turn.team === "red" ? "orange" : turn.team}
-                      </div>
-                      <div className="text-xs font-semibold text-white/40">
-                        #{sortedTurns.length - index}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 text-lg font-black text-white">
-                      {turn.clue_word} • {turn.clue_number}
-                    </div>
-
-                    <div className="mt-1 text-xs font-semibold text-white/45">
-                      guesses: {turn.guesses_made ?? 0} • {turn.turn_status}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm text-white/45">
-                  لا يوجد سجل بعد
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         <div className="space-y-5">
-          <div
-            className="rounded-[34px] border border-white/10 px-5 py-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
-            style={{
-              backgroundImage:
-                room.current_turn_team === "blue"
-                  ? `linear-gradient(180deg, rgba(8,16,30,0.86), rgba(8,16,30,0.88)), url(${BLUE_PANEL_BG})`
-                  : room.current_turn_team === "red"
-                  ? `linear-gradient(180deg, rgba(20,10,6,0.84), rgba(20,10,6,0.9)), url(${ORANGE_PANEL_BG})`
-                  : "linear-gradient(180deg, rgba(16,21,34,0.92), rgba(16,21,34,0.9))",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="text-center text-3xl font-black uppercase tracking-wide text-white md:text-5xl">
-              {room.status === "finished"
-                ? room.assassin_revealed
-                  ? "Assassin was revealed"
-                  : "Game Finished"
-                : selectedCard
-                ? "Confirm your choice"
-                : previewSelection
-                ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
-                : getTurnLabel(room.current_turn_team)}
-            </div>
+          {renderSpectatorJoinBox()}
 
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <div
-                className="rounded-full border border-white/10 px-5 py-3 text-sm font-bold text-white shadow-lg"
-                style={{
-                  background:
-                    room.current_turn_team === "blue"
-                      ? "linear-gradient(90deg, rgba(10,73,110,0.55), rgba(17,24,39,0.85))"
-                      : room.current_turn_team === "red"
-                      ? "linear-gradient(90deg, rgba(180,88,17,0.48), rgba(17,24,39,0.85))"
-                      : "rgba(255,255,255,0.06)",
-                }}
-              >
-                🎯 TURN: {getTurnLabel(room.current_turn_team)}
-              </div>
-
-              <div
-                className="rounded-full border border-orange-300/25 px-5 py-3 text-sm font-bold text-orange-100 shadow-lg"
-                style={{
-                  backgroundImage: `linear-gradient(90deg, rgba(170,74,8,0.55), rgba(46,20,8,0.72)), url(${ORANGE_PANEL_BG})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                ORANGE {room.red_remaining ?? 0}
-              </div>
-
-              <div
-                className="rounded-full border border-cyan-300/25 px-5 py-3 text-sm font-bold text-cyan-100 shadow-lg"
-                style={{
-                  backgroundImage: `linear-gradient(90deg, rgba(11,88,133,0.55), rgba(11,24,46,0.75)), url(${BLUE_PANEL_BG})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                BLUE {room.blue_remaining ?? 0}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-5 gap-3 md:gap-4">
+          <div className="grid grid-cols-5 gap-4">
             {cards.map((card) => {
               const cardView = getCardView(card);
 
@@ -1097,7 +1199,7 @@ export default function CodenamesBoardClient({
                     key={card.id}
                     type="button"
                     onClick={() => setInspectedCard(card)}
-                    className={`${cardView.className} flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
+                    className={`${cardView.className} board-desktop-card flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
@@ -1115,7 +1217,7 @@ export default function CodenamesBoardClient({
                       setSelectedCard(card);
                       await sendPreview(card);
                     }}
-                    className={`${cardView.className} card-hover-up flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
+                    className={`${cardView.className} board-desktop-card card-hover-up flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
                     style={cardView.style}
                   >
                     <div className="card-inner-overlay" />
@@ -1127,7 +1229,7 @@ export default function CodenamesBoardClient({
               return (
                 <div
                   key={card.id}
-                  className={`${cardView.className} flex min-h-[112px] items-center justify-center px-3 py-4 text-center md:min-h-[132px]`}
+                  className={`${cardView.className} board-desktop-card flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
                   style={cardView.style}
                 >
                   <div className="card-inner-overlay" />
@@ -1181,7 +1283,7 @@ export default function CodenamesBoardClient({
           )}
 
           <div className="rounded-[26px] border border-white/10 bg-[#101522]/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-            <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
+            <div className="grid gap-4 lg:grid-cols-[1fr_230px]">
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <div className="text-sm font-semibold text-white/60">🧠 آخر clue</div>
@@ -1273,13 +1375,73 @@ export default function CodenamesBoardClient({
         </div>
 
         <div className="space-y-5">
-          <TeamPanel
-            title="Blue Team"
-            theme="blue"
-            operatives={blueOperatives}
-            spymasters={blueSpymasters}
-            remaining={room.blue_remaining}
+          <TeamSidebarCard
+            title="Orange Team"
+            theme="orange"
+            operatives={orangeOperatives}
+            spymasters={orangeSpymasters}
+            remaining={room.red_remaining}
+            reverseScore
           />
+
+          <div
+            className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(66,66,70,0.9), rgba(34,34,38,0.96))",
+            }}
+          >
+            <div className="mb-3 text-center text-sm font-black uppercase tracking-wider text-white/75">
+              Game Log
+            </div>
+
+            <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+              {previewSelection && (
+                <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
+                  <div className="text-xs font-black uppercase text-lime-100">Preview</div>
+                  <div className="mt-2 text-base font-black text-white">
+                    {previewSelection.playerName} حدّد: {previewSelection.word}
+                  </div>
+                </div>
+              )}
+
+              {sortedTurns.length > 0 ? (
+                sortedTurns.map((turn, index) => (
+                  <div
+                    key={turn.id}
+                    className="rounded-2xl border border-white/10 bg-black/20 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div
+                        className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
+                          turn.team === "blue"
+                            ? "bg-cyan-500/15 text-cyan-100"
+                            : "bg-orange-500/15 text-orange-100"
+                        }`}
+                      >
+                        {turn.team === "red" ? "orange" : turn.team}
+                      </div>
+                      <div className="text-xs font-semibold text-white/40">
+                        #{sortedTurns.length - index}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 text-lg font-black text-white">
+                      {turn.clue_word} • {turn.clue_number}
+                    </div>
+
+                    <div className="mt-1 text-xs font-semibold text-white/45">
+                      guesses: {turn.guesses_made ?? 0} • {turn.turn_status}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-center text-sm text-white/45">
+                  لا يوجد سجل بعد
+                </div>
+              )}
+            </div>
+          </div>
 
           <div
             className="rounded-[28px] border border-white/10 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
@@ -1298,7 +1460,7 @@ export default function CodenamesBoardClient({
                     key={player.id}
                     className="rounded-2xl border border-white/10 bg-black/20 p-3 text-center text-lg font-black text-white"
                   >
-                    {player.guest_name}
+                    {getPlayerDisplayName(player)}
                   </div>
                 ))
               ) : (
@@ -1312,7 +1474,7 @@ export default function CodenamesBoardClient({
       </div>
 
       {inspectedCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-[#101522] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
             <div className="text-2xl font-black text-white">تفاصيل الكرت</div>
 
@@ -1336,9 +1498,7 @@ export default function CodenamesBoardClient({
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="text-sm font-semibold text-white/50">النوع</div>
               <div className="mt-2 text-xl font-black text-white">
-                {inspectedCard.card_type === "red"
-                  ? "orange"
-                  : inspectedCard.card_type}
+                {inspectedCard.card_type === "red" ? "orange" : inspectedCard.card_type}
               </div>
             </div>
 
@@ -1354,7 +1514,7 @@ export default function CodenamesBoardClient({
       )}
 
       {room.status === "finished" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#101522] p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
             <div className="text-center">
               <div className="text-sm font-black uppercase tracking-[0.3em] text-white/45">
@@ -1404,8 +1564,8 @@ export default function CodenamesBoardClient({
         .card-shell {
           position: relative;
           overflow: hidden;
-          border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 18px;
+          border: 2px solid rgba(255, 255, 255, 0.12);
           box-shadow:
             0 12px 28px rgba(0, 0, 0, 0.18),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -1467,7 +1627,7 @@ export default function CodenamesBoardClient({
           color: #f7fafc;
           font-size: 1.85rem;
           font-weight: 900;
-          line-height: 1.1;
+          line-height: 1.08;
           letter-spacing: 0;
           text-transform: none;
           text-shadow:
@@ -1479,6 +1639,33 @@ export default function CodenamesBoardClient({
           overflow-wrap: anywhere;
         }
 
+        .board-desktop-card {
+          border-radius: 16px;
+          box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-role-card {
+          min-height: 170px;
+          box-shadow:
+            0 18px 38px rgba(0, 0, 0, 0.22),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .score-strip {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .score-number {
+          font-size: 4rem;
+          font-weight: 900;
+          line-height: 1;
+        }
+
         .mobile-card {
           border-radius: 14px;
           box-shadow:
@@ -1487,14 +1674,18 @@ export default function CodenamesBoardClient({
         }
 
         .mobile-card-word {
-          font-size: clamp(0.72rem, 3.1vw, 1rem);
-          line-height: 1.05;
-        }
-
-        .mobile-summary-card,
-        .mobile-log-card,
-        .mobile-board-wrap {
-          backdrop-filter: blur(6px);
+          width: 100%;
+          text-align: center;
+          color: #f7fafc;
+          font-size: clamp(0.75rem, 3vw, 1.1rem);
+          font-weight: 900;
+          line-height: 1.04;
+          text-shadow:
+            0 2px 0 rgba(0, 0, 0, 0.5),
+            0 6px 20px rgba(0, 0, 0, 0.55),
+            0 0 12px rgba(0, 0, 0, 0.25);
+          word-break: break-word;
+          overflow-wrap: anywhere;
         }
 
         @keyframes flipRevealPro {
@@ -1536,17 +1727,17 @@ export default function CodenamesBoardClient({
 
         @media (max-width: 420px) {
           .mobile-card-word {
-            font-size: clamp(0.68rem, 3vw, 0.92rem);
+            font-size: clamp(0.68rem, 3vw, 0.95rem);
           }
         }
 
         @media (orientation: landscape) and (max-width: 1180px) {
           .mobile-card {
-            aspect-ratio: 0.92 / 1 !important;
+            aspect-ratio: 1.1 / 1 !important;
           }
 
           .mobile-card-word {
-            font-size: clamp(0.68rem, 1.8vw, 0.95rem);
+            font-size: clamp(0.66rem, 1.8vw, 0.92rem);
             line-height: 1.02;
           }
         }

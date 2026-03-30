@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
+
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import CodenamesBoardClient from "@/components/codenames/codenames-board-client";
+
 import {
   endCodenamesTurn,
   revealCodenamesCard,
   resetCodenamesGame,
   submitCodenamesClue,
+  updatePlayerInGame,
 } from "./actions";
 
 type PageProps = {
@@ -78,6 +81,7 @@ export default async function CodenamesBoardPage({
       revealCardAction={revealCodenamesCard}
       endTurnAction={endCodenamesTurn}
       resetGameAction={resetCodenamesGame}
+      updatePlayerInGameAction={updatePlayerInGame}
     />
   );
 }

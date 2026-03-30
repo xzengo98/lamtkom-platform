@@ -52,6 +52,16 @@ type TurnRow = {
   guesses_made: number | null;
 };
 
+type WordBankRow = {
+  word: string;
+};
+
+type BasicPlayerRow = {
+  id: string;
+  team: string | null;
+  role: string | null;
+};
+
 async function getRoomAndActor({
   roomCode,
   actorPlayerId,
@@ -114,6 +124,107 @@ function oppositeTeam(team: string | null) {
   return team === "red" ? "blue" : "red";
 }
 
+function normalizeTeam(value: string) {
+  const team = value.toLowerCase();
+  if (team === "blue" || team === "red" || team === "spectator") return team;
+  return "spectator";
+}
+
+function normalizeRole(value: string, team: string) {
+  if (team === "spectator") return "spectator";
+  const role = value.toLowerCase();
+  if (role === "spymaster") return "spymaster";
+  return "operative";
+}
+
+export async function updatePlayerInGame(formData: FormData) {
+  const roomCode = getString(formData, "room_code").toUpperCase();
+  const actorPlayerId = getString(formData, "actor_player_id");
+  const targetPlayerId =
+    getString(formData, "target_player_id") || actorPlayerId;
+
+  const nextTeam = normalizeTeam(getString(formData, "team"));
+  const nextRole = normalizeRole(getString(formData, "role"), nextTeam);
+
+  if (!roomCode || !actorPlayerId || !targetPlayerId) {
+    throw new Error("بيانات غير مكتملة");
+  }
+
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
+
+  const { data: targetData, error: targetError } = await supabase
+    .from("codenames_players")
+    .select("id, room_id, guest_name, team, role, is_host")
+    .eq("room_id", room.id)
+    .eq("id", targetPlayerId)
+    .maybeSingle();
+
+  if (targetError || !targetData) {
+    throw new Error(targetError?.message || "اللاعب الهدف غير موجود");
+  }
+
+  const target = targetData as PlayerRow;
+  const isSelfUpdate = actor.id === target.id;
+  const isHost = Boolean(actor.is_host);
+
+  if (!isHost && !isSelfUpdate) {
+    throw new Error("فقط منشئ اللعبة يستطيع تعديل لاعبين آخرين");
+  }
+
+  if (!isHost && room.status === "active") {
+    const actorTeam = actor.team?.toLowerCase() ?? "spectator";
+    if (actorTeam !== "spectator") {
+      throw new Error("الانضمام أثناء اللعب مسموح فقط للمشاهدين المتأخرين");
+    }
+  }
+
+  if (nextRole === "spymaster" && nextTeam !== "spectator") {
+    const { data: existingSpyData, error: existingSpyError } = await supabase
+      .from("codenames_players")
+      .select("id")
+      .eq("room_id", room.id)
+      .eq("team", nextTeam)
+      .eq("role", "spymaster");
+
+    if (existingSpyError) {
+      throw new Error(existingSpyError.message);
+    }
+
+    const existingSpy = (existingSpyData ?? []).find((row: { id: string }) => row.id !== target.id);
+
+    if (existingSpy) {
+      throw new Error("يوجد Spymaster بالفعل في هذا الفريق");
+    }
+  }
+
+  const updatePayload =
+    nextTeam === "spectator"
+      ? {
+          team: "spectator",
+          role: "spectator",
+        }
+      : {
+          team: nextTeam,
+          role: nextRole,
+        };
+
+  const { error: updateError } = await supabase
+    .from("codenames_players")
+    .update(updatePayload)
+    .eq("id", target.id)
+    .eq("room_id", room.id);
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+
+  revalidatePath(`/games/codenames/board/${roomCode}`);
+  revalidatePath(`/games/codenames/room/${roomCode}`);
+}
+
 export async function submitCodenamesClue(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
   const actorPlayerId = getString(formData, "actor_player_id");
@@ -147,21 +258,20 @@ export async function submitCodenamesClue(formData: FormData) {
   }
 
   const activeTurn = await getActiveTurn(supabase, room.id);
+
   if (activeTurn) {
     throw new Error("تم إرسال clue بالفعل، يجب إنهاء هذا الدور أولًا");
   }
 
-  const { error: insertTurnError } = await supabase
-    .from("codenames_turns")
-    .insert({
-      room_id: room.id,
-      team: room.current_turn_team,
-      spymaster_player_id: actor.id,
-      clue_word: clueWord,
-      clue_number: clueNumber,
-      guesses_made: 0,
-      turn_status: "active",
-    });
+  const { error: insertTurnError } = await supabase.from("codenames_turns").insert({
+    room_id: room.id,
+    team: room.current_turn_team,
+    spymaster_player_id: actor.id,
+    clue_word: clueWord,
+    clue_number: clueNumber,
+    guesses_made: 0,
+    turn_status: "active",
+  });
 
   if (insertTurnError) {
     throw new Error(insertTurnError.message);
@@ -312,7 +422,6 @@ export async function revealCodenamesCard(formData: FormData) {
       roomStatus = "finished";
       winnerTeam = "red";
     }
-
     if (currentTeam !== "red") {
       shouldEndTurn = true;
     }
@@ -323,7 +432,6 @@ export async function revealCodenamesCard(formData: FormData) {
       roomStatus = "finished";
       winnerTeam = "blue";
     }
-
     if (currentTeam !== "blue") {
       shouldEndTurn = true;
     }
@@ -422,24 +530,12 @@ export async function revealCodenamesCard(formData: FormData) {
 
 function shuffleArray<T>(items: T[]) {
   const arr = [...items];
-
   for (let i = arr.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-
   return arr;
 }
-
-type WordBankRow = {
-  word: string;
-};
-
-type BasicPlayerRow = {
-  id: string;
-  team: string | null;
-  role: string | null;
-};
 
 export async function resetCodenamesGame(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
@@ -476,6 +572,7 @@ export async function resetCodenamesGame(formData: FormData) {
   const activePlayers = allPlayers.filter((player) => player.team !== "spectator");
   const redPlayers = activePlayers.filter((player) => player.team === "red");
   const bluePlayers = activePlayers.filter((player) => player.team === "blue");
+
   const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
   const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
 
@@ -498,10 +595,7 @@ export async function resetCodenamesGame(formData: FormData) {
   }
 
   const words = (wordsData ?? []) as WordBankRow[];
-
-  const uniqueWords = Array.from(
-    new Map<string, WordBankRow>(words.map((item) => [item.word, item])).values()
-  );
+  const uniqueWords = Array.from(new Map(words.map((item) => [item.word, item])).values());
 
   if (uniqueWords.length < 25) {
     throw new Error("تحتاج على الأقل 25 كلمة نشطة لإعادة اللعبة");
@@ -510,7 +604,7 @@ export async function resetCodenamesGame(formData: FormData) {
   const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
   const startingTeam = Math.random() < 0.5 ? "red" : "blue";
 
-  const cardTypes = shuffleArray<string>([
+  const cardTypes = shuffleArray([
     ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
     ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
     ...Array(7).fill("neutral"),
