@@ -395,14 +395,6 @@ export default function CodenamesBoardClient({
     }
   }, [cards, selectedCard]);
 
-  useEffect(() => {
-    if (room.status === "waiting") {
-      window.location.replace(
-        `/games/codenames/room/${room.room_code}?player_id=${safeCurrentPlayer.id}`
-      );
-    }
-  }, [room.status, room.room_code, safeCurrentPlayer.id]);
-
   async function sendPreview(card: CardRow | null) {
     const supabase = getSupabaseBrowserClient();
     const channel = supabase.channel(`codenames-preview-${room.room_code}`);

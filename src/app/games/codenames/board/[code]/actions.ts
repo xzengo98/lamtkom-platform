@@ -420,6 +420,27 @@ export async function revealCodenamesCard(formData: FormData) {
   revalidatePath(`/games/codenames/board/${roomCode}`);
 }
 
+function shuffleArray<T>(items: T[]) {
+  const arr = [...items];
+
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
+
+type WordBankRow = {
+  word: string;
+};
+
+type BasicPlayerRow = {
+  id: string;
+  team: string | null;
+  role: string | null;
+};
+
 export async function resetCodenamesGame(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
   const actorPlayerId = getString(formData, "actor_player_id");
@@ -437,13 +458,88 @@ export async function resetCodenamesGame(formData: FormData) {
     throw new Error("فقط منشئ اللعبة يستطيع إعادة اللعبة");
   }
 
-  const { error: deleteCardsError } = await supabase
+  const { data: playersData, error: playersError } = await supabase
+    .from("codenames_players")
+    .select("id, team, role")
+    .eq("room_id", room.id);
+
+  if (playersError) {
+    throw new Error(playersError.message);
+  }
+
+  const allPlayers = ((playersData ?? []) as BasicPlayerRow[]).map((player) => ({
+    ...player,
+    team: player.team?.toLowerCase() ?? null,
+    role: player.role?.toLowerCase() ?? null,
+  }));
+
+  const activePlayers = allPlayers.filter((player) => player.team !== "spectator");
+  const redPlayers = activePlayers.filter((player) => player.team === "red");
+  const bluePlayers = activePlayers.filter((player) => player.team === "blue");
+  const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
+  const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
+
+  if (redPlayers.length === 0 || bluePlayers.length === 0) {
+    throw new Error("يجب وجود لاعب واحد على الأقل في كل فريق");
+  }
+
+  if (redSpymasters.length !== 1 || blueSpymasters.length !== 1) {
+    throw new Error("يجب أن يكون لكل فريق Spymaster واحد فقط");
+  }
+
+  const { data: wordsData, error: wordsError } = await supabase
+    .from("codenames_word_bank")
+    .select("word")
+    .eq("is_active", true)
+    .limit(500);
+
+  if (wordsError) {
+    throw new Error(wordsError.message);
+  }
+
+  const words = (wordsData ?? []) as WordBankRow[];
+
+  const uniqueWords = Array.from(
+    new Map<string, WordBankRow>(words.map((item) => [item.word, item])).values()
+  );
+
+  if (uniqueWords.length < 25) {
+    throw new Error("تحتاج على الأقل 25 كلمة نشطة لإعادة اللعبة");
+  }
+
+  const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
+  const startingTeam = Math.random() < 0.5 ? "red" : "blue";
+
+  const cardTypes = shuffleArray<string>([
+    ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
+    ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
+    ...Array(7).fill("neutral"),
+    "assassin",
+  ]);
+
+  const cardsToInsert = selectedWords.map((item, index) => ({
+    room_id: room.id,
+    position_index: index,
+    word: item.word,
+    card_type: cardTypes[index],
+    is_revealed: false,
+  }));
+
+  const { error: deleteOldCardsError } = await supabase
     .from("codenames_cards")
     .delete()
     .eq("room_id", room.id);
 
-  if (deleteCardsError) {
-    throw new Error(deleteCardsError.message);
+  if (deleteOldCardsError) {
+    throw new Error(deleteOldCardsError.message);
+  }
+
+  const { error: insertCardsError } = await supabase
+    .from("codenames_cards")
+    .insert(cardsToInsert);
+
+  if (insertCardsError) {
+    throw new Error(insertCardsError.message);
   }
 
   const { error: deleteTurnsError } = await supabase
@@ -458,11 +554,11 @@ export async function resetCodenamesGame(formData: FormData) {
   const { error: roomUpdateError } = await supabase
     .from("codenames_rooms")
     .update({
-      status: "waiting",
-      current_turn_team: null,
-      starting_team: null,
-      red_remaining: null,
-      blue_remaining: null,
+      status: "active",
+      starting_team: startingTeam,
+      current_turn_team: startingTeam,
+      red_remaining: startingTeam === "red" ? 9 : 8,
+      blue_remaining: startingTeam === "blue" ? 9 : 8,
       winner_team: null,
       assassin_revealed: false,
     })
@@ -472,6 +568,5 @@ export async function resetCodenamesGame(formData: FormData) {
     throw new Error(roomUpdateError.message);
   }
 
-  revalidatePath(`/games/codenames/room/${roomCode}`);
   revalidatePath(`/games/codenames/board/${roomCode}`);
 }
