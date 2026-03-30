@@ -473,13 +473,16 @@ export default function CodenamesBoardClient({
   }, [room.id, room.room_code]);
 
   useEffect(() => {
-    if (!selectedCard) return;
-    const stillExists = cards.find((card) => card.id === selectedCard.id);
-    if (!stillExists || stillExists.is_revealed) {
-      setSelectedCard(null);
-      setPreviewSelection(null);
-    }
-  }, [cards, selectedCard]);
+  if (!selectedCard) return;
+
+  const stillExists = cards.find((card) => card.id === selectedCard.id);
+
+  // فقط احذف إذا تم كشف الكرت فعلاً
+  if (stillExists?.is_revealed) {
+    setSelectedCard(null);
+    setPreviewSelection(null);
+  }
+}, [cards]);
 
   async function sendPreview(card: CardRow | null) {
     const supabase = getSupabaseBrowserClient();
@@ -763,12 +766,12 @@ export default function CodenamesBoardClient({
                 </button>
 
                 <form
-                  action={revealCardAction}
-                  onSubmit={async () => {
-                    setSelectedCard(null);
-                    await sendPreview(null);
-                  }}
-                >
+  action={async (formData) => {
+    await revealCardAction(formData);
+    setSelectedCard(null);
+    await sendPreview(null);
+  }}
+>
                   <input type="hidden" name="room_code" value={room.room_code} />
                   <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                   <input type="hidden" name="card_id" value={selectedCard.id} />
