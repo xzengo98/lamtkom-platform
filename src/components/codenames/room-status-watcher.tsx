@@ -63,10 +63,12 @@ export default function RoomStatusWatcher({
         },
         (payload: RoomRealtimePayload) => {
           const next = payload.new;
+
           if (next?.status === "active") {
             goToBoard();
             return;
           }
+
           refreshRoom();
         }
       )

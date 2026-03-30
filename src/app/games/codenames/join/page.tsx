@@ -2,7 +2,7 @@ import Link from "next/link";
 import { joinCodenamesRoom } from "./actions";
 
 type PageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; room_code?: string }>;
 };
 
 const BLUE_PANEL_BG =
@@ -36,6 +36,7 @@ export default async function JoinCodenamesRoomPage({
 }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const errorMessage = resolvedSearchParams?.error?.trim() || "";
+  const roomCodeValue = resolvedSearchParams?.room_code?.trim() || "";
 
   return (
     <div className="mx-auto max-w-[1400px] p-3 md:p-5 xl:p-6">
@@ -81,8 +82,8 @@ export default async function JoinCodenamesRoomPage({
             </h1>
 
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
-              أدخل اسمك ورمز الغرفة، وسيتم إدخالك مباشرة إلى صفحة الانتظار ثم
-              تبدأ اللعبة عندما يضغط المنشئ على زر البدء.
+              أدخل اسمك ورمز الغرفة، وسيتم إدخالك مباشرة إلى صفحة الانتظار.
+              إذا دخلت عن طريق رابط دعوة مباشر فسيتم تعبئة رمز الغرفة تلقائيًا.
             </p>
 
             {errorMessage && (
@@ -124,6 +125,7 @@ export default async function JoinCodenamesRoomPage({
                   name="room_code"
                   type="text"
                   required
+                  defaultValue={roomCodeValue}
                   placeholder="مثال: ABC123"
                   className="w-full rounded-2xl border border-white/10 bg-white px-4 py-4 text-right text-lg font-black uppercase text-black outline-none placeholder:normal-case placeholder:text-black/35"
                 />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import RoomStatusWatcher from "@/components/codenames/room-status-watcher";
+import CodenamesInviteLink from "@/components/codenames/codenames-invite-link";
 import {
   removePlayerFromRoom,
   startCodenamesGame,
@@ -188,7 +189,7 @@ function TeamLobbyColumn({
 
       <div className="space-y-4">
         {players.length > 0 ? (
-          players.map((player) => {
+          players.map((player, index) => {
             const canManage = canManagePlayer(player);
             const isBlue = player.team === "blue";
             const isOrange = player.team === "red";
@@ -197,7 +198,10 @@ function TeamLobbyColumn({
             return (
               <div
                 key={player.id}
-                className="rounded-[24px] border border-white/10 bg-black/20 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+                className="lobby-player-card rounded-[24px] border border-white/10 bg-black/20 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+                style={{
+                  animationDelay: `${index * 70}ms`,
+                }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -474,6 +478,10 @@ export default async function CodenamesRoomPage({
             </div>
           </div>
 
+          <div className="mt-5">
+            <CodenamesInviteLink roomCode={room.room_code} />
+          </div>
+
           <div className="mt-6 grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)_250px] xl:items-start">
             <TeamHeaderCard
               title="Blue Team"
@@ -569,6 +577,27 @@ export default async function CodenamesRoomPage({
           />
         </div>
       </div>
+
+      <style>{`
+        .lobby-player-card {
+          opacity: 0;
+          transform: translateY(14px) scale(0.985);
+          animation: lobbyPlayerIn 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes lobbyPlayerIn {
+          0% {
+            opacity: 0;
+            transform: translateY(14px) scale(0.985);
+            filter: blur(4px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
