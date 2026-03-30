@@ -1,41 +1,40 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-
-type RoomLookupRow = {
-  id: string;
-  room_code: string;
-  status: string | null;
-};
-
-type ActorRow = {
-  id: string;
-  room_id: string;
-  guest_name: string | null;
-  is_host: boolean | null;
-};
-
-type TargetPlayerRow = {
-  id: string;
-  room_id: string;
-};
-
-type BasicPlayerRow = {
-  id: string;
-  team: string | null;
-  role: string | null;
-};
-
-type WordBankRow = {
-  word: string;
-};
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
 }
+
+function shuffleArray<T>(items: T[]) {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+type RoomRow = {
+  id: string;
+  room_code: string;
+  status: string | null;
+};
+
+type PlayerRow = {
+  id: string;
+  room_id: string;
+  guest_name: string | null;
+  team: string | null;
+  role: string | null;
+  is_host: boolean | null;
+};
+
+type WordRow = {
+  word: string;
+};
 
 async function getRoomAndActor({
   roomCode,
@@ -56,265 +55,294 @@ async function getRoomAndActor({
     throw new Error(roomError?.message || "الغرفة غير موجودة");
   }
 
-  const room = roomData as RoomLookupRow;
+  const room = roomData as RoomRow;
 
   const { data: actorData, error: actorError } = await supabase
     .from("codenames_players")
-    .select("id, room_id, guest_name, is_host")
+    .select("id, room_id, guest_name, team, role, is_host")
     .eq("room_id", room.id)
     .eq("id", actorPlayerId)
     .maybeSingle();
 
   if (actorError || !actorData) {
-    throw new Error(actorError?.message || "اللاعب الحالي غير موجود");
+    throw new Error(actorError?.message || "تعذر تحديد اللاعب الحالي");
   }
 
-  const actor = actorData as ActorRow;
+  const actor = actorData as PlayerRow;
 
   return { supabase, room, actor };
 }
 
 export async function updatePlayerTeam(formData: FormData) {
-  const playerId = getString(formData, "player_id");
   const roomCode = getString(formData, "room_code").toUpperCase();
-  const team = getString(formData, "team").toLowerCase();
   const actorPlayerId = getString(formData, "actor_player_id");
+  const playerId = getString(formData, "player_id");
+  const team = getString(formData, "team").toLowerCase();
 
-  if (!playerId || !roomCode || !actorPlayerId) return;
-  if (!["red", "blue", "spectator"].includes(team)) return;
+  if (!roomCode || !actorPlayerId || !playerId || !team) {
+    throw new Error("بيانات غير مكتملة");
+  }
+
+  const allowedTeams = ["blue", "red", "spectator"];
+  if (!allowedTeams.includes(team)) {
+    throw new Error("فريق غير صالح");
+  }
 
   const { supabase, room, actor } = await getRoomAndActor({
     roomCode,
     actorPlayerId,
   });
 
-  const { data: targetData, error: targetError } = await supabase
+  const { data: targetPlayer, error: targetPlayerError } = await supabase
     .from("codenames_players")
-    .select("id, room_id")
-    .eq("id", playerId)
+    .select("id, room_id, team, role")
     .eq("room_id", room.id)
+    .eq("id", playerId)
     .maybeSingle();
 
-  if (targetError || !targetData) {
-    throw new Error(targetError?.message || "اللاعب الهدف غير موجود");
+  if (targetPlayerError || !targetPlayer) {
+    throw new Error(targetPlayerError?.message || "اللاعب غير موجود");
   }
 
-  const targetPlayer = targetData as TargetPlayerRow;
-
-  const canManage = Boolean(actor.is_host) || actor.id === targetPlayer.id;
+  const canManage = actor.is_host || actor.id === playerId;
   if (!canManage) {
-    throw new Error("غير مسموح لك تعديل هذا اللاعب");
+    throw new Error("لا تملك صلاحية تعديل هذا اللاعب");
   }
 
-  const updatePayload =
-    team === "spectator"
-      ? { team: "spectator", role: "spectator" }
-      : { team, role: "operative" };
+  const nextRole = team === "spectator" ? "spectator" : "operative";
 
-  const { error } = await supabase
+  const { error: updateError } = await supabase
     .from("codenames_players")
-    .update(updatePayload)
-    .eq("id", targetPlayer.id);
+    .update({
+      team,
+      role: nextRole,
+    })
+    .eq("id", playerId);
 
-  if (error) {
-    throw new Error(error.message);
+  if (updateError) {
+    throw new Error(updateError.message);
   }
 
   revalidatePath(`/games/codenames/room/${roomCode}`);
 }
 
 export async function updatePlayerRole(formData: FormData) {
-  const playerId = getString(formData, "player_id");
   const roomCode = getString(formData, "room_code").toUpperCase();
-  const role = getString(formData, "role").toLowerCase();
   const actorPlayerId = getString(formData, "actor_player_id");
+  const playerId = getString(formData, "player_id");
+  const role = getString(formData, "role").toLowerCase();
 
-  if (!playerId || !roomCode || !actorPlayerId) return;
-  if (!["spymaster", "operative"].includes(role)) return;
+  if (!roomCode || !actorPlayerId || !playerId || !role) {
+    throw new Error("بيانات غير مكتملة");
+  }
+
+  const allowedRoles = ["operative", "spymaster"];
+  if (!allowedRoles.includes(role)) {
+    throw new Error("دور غير صالح");
+  }
 
   const { supabase, room, actor } = await getRoomAndActor({
     roomCode,
     actorPlayerId,
   });
 
-  const { data: targetData, error: targetError } = await supabase
+  const { data: targetPlayer, error: targetPlayerError } = await supabase
     .from("codenames_players")
-    .select("id, room_id, team")
-    .eq("id", playerId)
+    .select("id, room_id, team, role")
     .eq("room_id", room.id)
+    .eq("id", playerId)
     .maybeSingle();
 
-  if (targetError || !targetData) {
-    throw new Error(targetError?.message || "اللاعب الهدف غير موجود");
+  if (targetPlayerError || !targetPlayer) {
+    throw new Error(targetPlayerError?.message || "اللاعب غير موجود");
   }
 
-  const targetPlayer = targetData as TargetPlayerRow & { team?: string | null };
-
-  const canManage = Boolean(actor.is_host) || actor.id === targetPlayer.id;
+  const canManage = actor.is_host || actor.id === playerId;
   if (!canManage) {
-    throw new Error("غير مسموح لك تعديل هذا اللاعب");
+    throw new Error("لا تملك صلاحية تعديل هذا اللاعب");
   }
 
-  if (targetPlayer.team === "spectator") {
-    throw new Error("المشاهد لا يمكن إعطاؤه دورًا قبل نقله إلى فريق");
+  const target = targetPlayer as { team: string | null };
+  if ((target.team ?? "spectator").toLowerCase() === "spectator") {
+    throw new Error("المشاهد لا يمكن إعطاؤه دورًا قبل اختيار فريق");
   }
 
-  const { error } = await supabase
+  if (role === "spymaster") {
+    const { data: existingSpy } = await supabase
+      .from("codenames_players")
+      .select("id")
+      .eq("room_id", room.id)
+      .eq("team", target.team)
+      .eq("role", "spymaster");
+
+    const existingSpyId = (existingSpy ?? []).find((item) => item.id !== playerId)?.id;
+    if (existingSpyId) {
+      throw new Error("يوجد Spymaster لهذا الفريق بالفعل");
+    }
+  }
+
+  const { error: updateError } = await supabase
     .from("codenames_players")
     .update({ role })
-    .eq("id", targetPlayer.id);
+    .eq("id", playerId);
 
-  if (error) {
-    throw new Error(error.message);
+  if (updateError) {
+    throw new Error(updateError.message);
   }
 
   revalidatePath(`/games/codenames/room/${roomCode}`);
 }
 
-function shuffleArray<T>(items: T[]) {
-  const arr = [...items];
+export async function removePlayerFromRoom(formData: FormData) {
+  const roomCode = getString(formData, "room_code").toUpperCase();
+  const actorPlayerId = getString(formData, "actor_player_id");
+  const playerId = getString(formData, "player_id");
 
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  if (!roomCode || !actorPlayerId || !playerId) {
+    throw new Error("بيانات غير مكتملة");
   }
 
-  return arr;
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
+
+  if (!actor.is_host) {
+    throw new Error("فقط منشئ الغرفة يستطيع حذف اللاعبين");
+  }
+
+  if (actor.id === playerId) {
+    throw new Error("لا يمكنك حذف نفسك من الغرفة");
+  }
+
+  const { error: deleteError } = await supabase
+    .from("codenames_players")
+    .delete()
+    .eq("room_id", room.id)
+    .eq("id", playerId);
+
+  if (deleteError) {
+    throw new Error(deleteError.message);
+  }
+
+  revalidatePath(`/games/codenames/room/${roomCode}`);
 }
 
 export async function startCodenamesGame(formData: FormData) {
   const roomCode = getString(formData, "room_code").toUpperCase();
   const actorPlayerId = getString(formData, "actor_player_id");
 
-  try {
-    if (!roomCode || !actorPlayerId) {
-      throw new Error("بيانات الغرفة غير مكتملة");
-    }
+  if (!roomCode || !actorPlayerId) {
+    throw new Error("بيانات غير مكتملة");
+  }
 
-    const { supabase, room, actor } = await getRoomAndActor({
-      roomCode,
-      actorPlayerId,
-    });
+  const { supabase, room, actor } = await getRoomAndActor({
+    roomCode,
+    actorPlayerId,
+  });
 
-    if (!actor.is_host) {
-      throw new Error("فقط منشئ الغرفة يستطيع بدء اللعبة");
-    }
+  if (!actor.is_host) {
+    throw new Error("فقط منشئ الغرفة يستطيع بدء اللعبة");
+  }
 
-    const { data: playersData, error: playersError } = await supabase
-      .from("codenames_players")
-      .select("id, team, role")
-      .eq("room_id", room.id);
+  const { data: playersData, error: playersError } = await supabase
+    .from("codenames_players")
+    .select("id, team, role")
+    .eq("room_id", room.id);
 
-    if (playersError) {
-      throw new Error(playersError.message);
-    }
+  if (playersError) {
+    throw new Error(playersError.message);
+  }
 
-    const allPlayers = (playersData ?? []) as BasicPlayerRow[];
-    const activePlayers = allPlayers.filter((player) => player.team !== "spectator");
+  const players = (playersData ?? []).map((player) => ({
+    ...player,
+    team: player.team?.toLowerCase() ?? null,
+    role: player.role?.toLowerCase() ?? null,
+  }));
 
-    const redPlayers = activePlayers.filter((player) => player.team === "red");
-    const bluePlayers = activePlayers.filter((player) => player.team === "blue");
-    const redSpymasters = redPlayers.filter((player) => player.role === "spymaster");
-    const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
+  const bluePlayers = players.filter((player) => player.team === "blue");
+  const orangePlayers = players.filter((player) => player.team === "red");
+  const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
+  const orangeSpymasters = orangePlayers.filter((player) => player.role === "spymaster");
+  const blueOperatives = bluePlayers.filter((player) => player.role === "operative");
+  const orangeOperatives = orangePlayers.filter((player) => player.role === "operative");
 
-    if (redPlayers.length === 0 || bluePlayers.length === 0) {
-      throw new Error("يجب وجود لاعب واحد على الأقل في كل فريق");
-    }
-
-    if (redSpymasters.length !== 1 || blueSpymasters.length !== 1) {
-      throw new Error("يجب أن يكون لكل فريق Spymaster واحد فقط");
-    }
-
-    const { data: wordsData, error: wordsError } = await supabase
-      .from("codenames_word_bank")
-      .select("word")
-      .eq("is_active", true)
-      .limit(500);
-
-    if (wordsError) {
-      throw new Error(wordsError.message);
-    }
-
-    const words = (wordsData ?? []) as WordBankRow[];
-
-    const uniqueWords = Array.from(
-      new Map<string, WordBankRow>(words.map((item) => [item.word, item])).values()
-    );
-
-    if (uniqueWords.length < 25) {
-      throw new Error("تحتاج على الأقل 25 كلمة نشطة لبدء اللعبة");
-    }
-
-    const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
-    const startingTeam = Math.random() < 0.5 ? "red" : "blue";
-
-    const cardTypes = shuffleArray<string>([
-      ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
-      ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
-      ...Array(7).fill("neutral"),
-      "assassin",
-    ]);
-
-    const cardsToInsert = selectedWords.map((item, index) => ({
-      room_id: room.id,
-      position_index: index,
-      word: item.word,
-      card_type: cardTypes[index],
-      is_revealed: false,
-    }));
-
-    const { error: deleteOldCardsError } = await supabase
-      .from("codenames_cards")
-      .delete()
-      .eq("room_id", room.id);
-
-    if (deleteOldCardsError) {
-      throw new Error(deleteOldCardsError.message);
-    }
-
-    const { error: insertCardsError } = await supabase
-      .from("codenames_cards")
-      .insert(cardsToInsert);
-
-    if (insertCardsError) {
-      throw new Error(insertCardsError.message);
-    }
-
-    const { error: deleteTurnsError } = await supabase
-      .from("codenames_turns")
-      .delete()
-      .eq("room_id", room.id);
-
-    if (deleteTurnsError) {
-      throw new Error(deleteTurnsError.message);
-    }
-
-    const { error: roomUpdateError } = await supabase
-      .from("codenames_rooms")
-      .update({
-        status: "active",
-        starting_team: startingTeam,
-        current_turn_team: startingTeam,
-        red_remaining: startingTeam === "red" ? 9 : 8,
-        blue_remaining: startingTeam === "blue" ? 9 : 8,
-        winner_team: null,
-        assassin_revealed: false,
-      })
-      .eq("id", room.id);
-
-    if (roomUpdateError) {
-      throw new Error(roomUpdateError.message);
-    }
-
-    revalidatePath(`/games/codenames/room/${roomCode}`);
-    redirect(`/games/codenames/board/${roomCode}?player_id=${actor.id}`);
-  } catch (error: any) {
-    console.error("START GAME ERROR:", error);
-
-    redirect(
-      `/games/codenames/room/${roomCode}?player_id=${actorPlayerId}&error=${encodeURIComponent(
-        error?.message || "unknown error"
-      )}`
+  if (
+    blueOperatives.length < 1 ||
+    orangeOperatives.length < 1 ||
+    blueSpymasters.length !== 1 ||
+    orangeSpymasters.length !== 1
+  ) {
+    throw new Error(
+      "يجب أن يكون لكل فريق لاعب operative واحد على الأقل و Spymaster واحد فقط"
     );
   }
+
+  const { data: wordsData, error: wordsError } = await supabase
+    .from("codenames_word_bank")
+    .select("word")
+    .eq("is_active", true)
+    .limit(500);
+
+  if (wordsError) {
+    throw new Error(wordsError.message);
+  }
+
+  const words = (wordsData ?? []) as WordRow[];
+  const uniqueWords = Array.from(
+    new Map(words.map((item) => [item.word, item])).values()
+  );
+
+  if (uniqueWords.length < 25) {
+    throw new Error("يجب وجود 25 كلمة نشطة على الأقل");
+  }
+
+  const selectedWords = shuffleArray(uniqueWords).slice(0, 25);
+  const startingTeam = Math.random() < 0.5 ? "red" : "blue";
+
+  const cardTypes = shuffleArray<string>([
+    ...(startingTeam === "red" ? Array(9).fill("red") : Array(8).fill("red")),
+    ...(startingTeam === "blue" ? Array(9).fill("blue") : Array(8).fill("blue")),
+    ...Array(7).fill("neutral"),
+    "assassin",
+  ]);
+
+  await supabase.from("codenames_cards").delete().eq("room_id", room.id);
+  await supabase.from("codenames_turns").delete().eq("room_id", room.id);
+
+  const cardsToInsert = selectedWords.map((item, index) => ({
+    room_id: room.id,
+    position_index: index,
+    word: item.word,
+    card_type: cardTypes[index],
+    is_revealed: false,
+  }));
+
+  const { error: insertCardsError } = await supabase
+    .from("codenames_cards")
+    .insert(cardsToInsert);
+
+  if (insertCardsError) {
+    throw new Error(insertCardsError.message);
+  }
+
+  const { error: roomUpdateError } = await supabase
+    .from("codenames_rooms")
+    .update({
+      status: "active",
+      starting_team: startingTeam,
+      current_turn_team: startingTeam,
+      red_remaining: startingTeam === "red" ? 9 : 8,
+      blue_remaining: startingTeam === "blue" ? 9 : 8,
+      winner_team: null,
+      assassin_revealed: false,
+    })
+    .eq("id", room.id);
+
+  if (roomUpdateError) {
+    throw new Error(roomUpdateError.message);
+  }
+
+  revalidatePath(`/games/codenames/room/${roomCode}`);
+  revalidatePath(`/games/codenames/board/${roomCode}`);
 }

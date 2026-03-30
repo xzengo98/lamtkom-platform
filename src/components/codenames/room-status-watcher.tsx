@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Props = {
+  roomId: string;
   roomCode: string;
   playerId: string;
 };
@@ -15,7 +16,11 @@ type RoomRealtimePayload = {
   } | null;
 };
 
-export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
+export default function RoomStatusWatcher({
+  roomId,
+  roomCode,
+  playerId,
+}: Props) {
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +31,10 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
       router.replace(
         `/games/codenames/board/${roomCode}?player_id=${encodeURIComponent(playerId)}`
       );
+    };
+
+    const refreshRoom = () => {
+      router.refresh();
     };
 
     const checkRoomStatus = async () => {
@@ -42,7 +51,7 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
       }
     };
 
-    const channel = supabase
+    const roomChannel = supabase
       .channel(`codenames-room-${roomCode}`)
       .on(
         "postgres_changes" as any,
@@ -54,10 +63,27 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
         },
         (payload: RoomRealtimePayload) => {
           const next = payload.new;
-
           if (next?.status === "active") {
             goToBoard();
+            return;
           }
+          refreshRoom();
+        }
+      )
+      .subscribe();
+
+    const playersChannel = supabase
+      .channel(`codenames-room-players-${roomId}`)
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "*",
+          schema: "public",
+          table: "codenames_players",
+          filter: `room_id=eq.${roomId}`,
+        },
+        () => {
+          refreshRoom();
         }
       )
       .subscribe();
@@ -71,9 +97,10 @@ export default function RoomStatusWatcher({ roomCode, playerId }: Props) {
     return () => {
       isMounted = false;
       clearInterval(interval);
-      supabase.removeChannel(channel);
+      supabase.removeChannel(roomChannel);
+      supabase.removeChannel(playersChannel);
     };
-  }, [roomCode, playerId, router]);
+  }, [roomId, roomCode, playerId, router]);
 
   return null;
 }
