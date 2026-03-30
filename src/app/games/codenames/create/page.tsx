@@ -24,7 +24,7 @@ export default async function CreateCodenamesRoomPage({
           </h1>
 
           <p className="mt-3 text-white/70">
-            أدخل اسمك ليتم إنشاء غرفة جديدة، وستصبح أنت منشئ الغرفة والهوست.
+            أدخل اسمك ليتم إنشاء غرفة جديدة، وستصبح أنت منشئ الغرفة وبامكانك تحكم بها.
           </p>
         </div>
 

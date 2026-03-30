@@ -41,14 +41,14 @@ export default function CodenamesHomePage() {
           <div className="border-t border-white/10 bg-black/20 p-6 lg:border-r-0 lg:border-t-0 lg:border-l lg:border-white/10">
             <div className="grid gap-4">
               <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-5">
-                <div className="text-sm font-semibold text-blue-200">أزرق</div>
+                <div className="text-sm font-semibold text-blue-200">الفريق الأزرق</div>
                 <div className="mt-2 text-2xl font-black text-white">
                   Operatives + Spymaster
                 </div>
               </div>
 
               <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-5">
-                <div className="text-sm font-semibold text-red-200">أحمر</div>
+                <div className="text-sm font-semibold text-red-200">الفريق البرتقالي</div>
                 <div className="mt-2 text-2xl font-black text-white">
                   Operatives + Spymaster
                 </div>
@@ -57,7 +57,7 @@ export default function CodenamesHomePage() {
               <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                 <div className="text-sm font-semibold text-white/70">اللعب</div>
                 <div className="mt-2 text-xl font-bold text-white">
-                  Clue • كشف الكروت • تبديل الدور • الفوز والخسارة
+                  لعبة جماعية فيها فريقين كل فريق عنده قائد بيعطي كلمة تلميح + رقم والباقي يحاولوا يخمّنوا الكلمات الصح على اللوحة
                 </div>
               </div>
             </div>

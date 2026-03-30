@@ -41,7 +41,7 @@ const gameCards: GameCardItem[] = [
     title: "Codenames",
     subtitle: "لعبة جماعية",
     description:
-      "لعبة Codenames الشهيرة ولكن بشكل جديد , لبدء اللعبة تحتاج كحد ادنى الى 4 لاعبين",
+      "لعبة جماعية فيها فريقين كل فريق عنده قائد بيعطي كلمة تلميح + رقم والباقي يحاولوا يخمّنوا الكلمات الصح على اللوحة",
     href: "/games/codenames/",
     image: "https://b.top4top.io/p_374101e3s1.png",
     active: true,

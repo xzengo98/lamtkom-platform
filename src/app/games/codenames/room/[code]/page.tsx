@@ -370,7 +370,7 @@ export default async function CodenamesRoomPage({
 
           {isHost && !canStartGame && (
             <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100">
-              يجب أن يكون لكل فريق لاعب واحد على الأقل وSpymaster واحد فقط
+             يجب أن يكون لكل فريق لاعب واحد على الأقل operatives و لاعب spymasters اي لاعبين على الاقل لكل فريق.
             </div>
           )}
 
@@ -393,7 +393,7 @@ export default async function CodenamesRoomPage({
           </div>
 
           <div className="rounded-[24px] border border-orange-300/20 bg-orange-500/10 p-5 shadow-xl">
-            <div className="text-sm font-semibold text-orange-100/80">🟠 Red Team</div>
+            <div className="text-sm font-semibold text-orange-100/80">🟠 Orange Team</div>
             <div className="mt-3 text-4xl font-black text-white">{redPlayers.length}</div>
           </div>
 
@@ -405,20 +405,20 @@ export default async function CodenamesRoomPage({
 
         <div className="grid gap-6 xl:grid-cols-3">
           <TeamLobbyCard
-  title="Orange Team"
+  title="🟠 Orange Team"
   theme="orange"
   image={ORANGE_TEAM_IMAGE}
   players={redPlayers}
 />
 
 <TeamLobbyCard
-  title="Spectators"
+  title="👁️ Spectators"
   theme="neutral"
   players={spectators}
 />
 
 <TeamLobbyCard
-  title="Blue Team"
+  title="🔵 Blue Team"
   theme="blue"
   image={BLUE_TEAM_IMAGE}
   players={bluePlayers}
