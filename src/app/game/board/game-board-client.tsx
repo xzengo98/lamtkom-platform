@@ -305,54 +305,32 @@ function CategoryCard({
   category: Category;
   compact?: boolean;
 }) {
-  const visual = getVisualBySlug(category.slug);
-
   return (
-    <div
-      className={[
-        "group relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,28,54,0.98)_0%,rgba(5,12,28,0.99)_100%)] text-center shadow-[0_16px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-0.5",
-        compact ? "min-h-[92px] p-2" : "min-h-[144px] p-2.5",
-      ].join(" ")}
-    >
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${visual.gradient} opacity-90`} />
-      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-
-      <div
-        className={[
-          "relative h-full w-full overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(210,220,232,0.96)_0%,rgba(179,192,210,0.92)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]",
-          compact ? "pt-8" : "pt-10",
-        ].join(" ")}
-      >
-        <div className="absolute inset-x-3 top-2 z-20">
-          <div className="rounded-[0.95rem] border border-white/20 bg-[linear-gradient(180deg,#2aa0d8_0%,#1b8fca_100%)] px-3 py-2 text-center shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
-            <div
-              className={[
-                "overflow-hidden text-ellipsis whitespace-nowrap font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
-                compact ? "text-[10px]" : "text-sm md:text-[1.05rem]",
-              ].join(" ")}
-              title={category.name}
-            >
-              {category.name}
-            </div>
-          </div>
+    <div className={compact ? "rounded-[1.1rem] bg-[#d5dde7] p-2" : "rounded-[1.45rem] bg-[#d5dde7] p-3"}>
+      <div className={compact ? "mb-2" : "mb-3"}>
+        <div className="mx-auto w-fit rounded-[1rem] border border-white/20 bg-[linear-gradient(180deg,#2aa0d8_0%,#1b8fca_100%)] px-4 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.20)]">
+          <h3
+            className={[
+              "overflow-hidden text-ellipsis whitespace-nowrap font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
+              compact ? "text-[10px]" : "text-sm md:text-[1rem]",
+            ].join(" ")}
+            title={category.name}
+          >
+            {category.name}
+          </h3>
         </div>
+      </div>
 
-        <div className="relative flex h-full items-center justify-center px-3 pb-3 pt-8">
-          {category.image_url ? (
-            <img
-              src={category.image_url}
-              alt={category.name}
-              className={[
-                "object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.18)]",
-                compact ? "max-h-[42px] max-w-[42px]" : "max-h-[92px] max-w-[92px]",
-              ].join(" ")}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-slate-500/70">
-              فئة
-            </div>
-          )}
-        </div>
+      <div className={compact ? "flex min-h-[54px] items-center justify-center" : "flex min-h-[150px] items-center justify-center"}>
+        {category.image_url ? (
+          <img
+            src={category.image_url}
+            alt={category.name}
+            className={compact ? "max-h-[46px] max-w-[74px] object-contain" : "max-h-[118px] max-w-[150px] object-contain"}
+          />
+        ) : (
+          <div className="text-[10px] font-black text-slate-500/70">فئة</div>
+        )}
       </div>
     </div>
   );
@@ -389,25 +367,22 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[0.95rem] border transition duration-300 board-soft-float",
-        compact ? "min-h-[44px] px-1 py-1.5" : "min-h-[58px] px-1 py-2",
+        "group relative overflow-hidden rounded-[0.95rem] border transition duration-300",
+        compact ? "min-h-[40px] px-1 py-1.5" : "min-h-[54px] px-1 py-2",
         disabled
           ? usedClass
           : "border-cyan-300/10 bg-[linear-gradient(180deg,rgba(20,40,85,1)_0%,rgba(4,14,34,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_18px_30px_rgba(34,211,238,0.14)]",
       ].join(" ")}
     >
       {!disabled ? (
-        <>
-          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)] opacity-80" />
-        </>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)] opacity-80" />
       ) : null}
 
       <div className="relative flex h-full items-center justify-center">
         <div
           className={[
             "font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]",
-            compact ? "text-[0.8rem] md:text-[0.95rem]" : "text-[1.15rem] md:text-[1.3rem]",
+            compact ? "text-[0.78rem] md:text-[0.9rem]" : "text-[1.1rem] md:text-[1.25rem]",
           ].join(" ")}
         >
           {points}
@@ -724,7 +699,13 @@ export default function GameBoardClient({
                   }
                 >
                   {boardColumns.map((column) => (
-                    <div key={column.category.id} className="flex flex-col gap-2">
+                    <div
+                      key={column.category.id}
+                      className={[
+                        "flex flex-col rounded-[1.55rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,19,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[0_16px_30px_rgba(0,0,0,0.22)]",
+                        compactLandscape ? "gap-1.5 p-1.5" : "gap-2.5 p-2.5",
+                      ].join(" ")}
+                    >
                       <CategoryCard
                         category={column.category}
                         compact={compactLandscape}
