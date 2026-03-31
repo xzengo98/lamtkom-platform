@@ -241,7 +241,7 @@ function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-4">
-        <div className="flex h-[170px] w-[92%] items-center justify-center overflow-hidden rounded-[16px] border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex h-[175px] w-[126px] items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={category.image_url}
@@ -274,7 +274,7 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[82px] w-full items-center justify-center rounded-full border text-[22px] font-black transition";
+    "flex h-[78px] w-[145px] items-center justify-center rounded-full border text-[18px] font-black transition";
 
   if (!question) {
     return (
@@ -315,68 +315,105 @@ function CategoryBoardColumn({
   boardState: BoardState;
   onOpenQuestion: (question: QuestionRow | null) => void;
 }) {
+  const row200 = column.rows[0];
+  const row400 = column.rows[1];
+  const row600 = column.rows[2];
+
+  const left200 = row200?.questions[0] ?? null;
+  const right200 = row200?.questions[1] ?? null;
+
+  const left400 = row400?.questions[0] ?? null;
+  const right400 = row400?.questions[1] ?? null;
+
+  const left600 = row600?.questions[0] ?? null;
+  const right600 = row600?.questions[1] ?? null;
+
+  function getUsed(question: QuestionRow | null) {
+    return question ? boardState.usedQuestionIds.includes(question.id) : true;
+  }
+
+  function getResult(question: QuestionRow | null): QuestionResult {
+    return question ? boardState.questionResults[question.id] ?? "none" : "none";
+  }
+
   return (
-    <div className="flex w-full max-w-[470px] flex-col">
-      <div className="mx-auto w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+    <div className="flex w-full max-w-[500px] flex-col items-center">
+      <div className="mb-2 w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[18px] font-black text-white">
           {column.category.name}
         </div>
       </div>
 
-      <div className="mt-0 grid h-[470px] grid-cols-[1fr_150px_1fr] grid-rows-3 gap-x-4 gap-y-4">
-        {/* اليسار */}
-        {column.rows.map((row, rowIndex) => {
-          const leftQuestion = row.questions[0] ?? null;
-          const leftUsed = leftQuestion
-            ? boardState.usedQuestionIds.includes(leftQuestion.id)
-            : true;
-          const leftResult = leftQuestion
-            ? boardState.questionResults[leftQuestion.id] ?? "none"
-            : "none";
+      <div className="grid grid-cols-[145px_170px_145px] grid-rows-[100px_100px_100px] items-center justify-items-center gap-x-4 gap-y-4">
+        {/* يسار */}
+        <div className="col-start-1 row-start-1">
+          <QuestionPill
+            question={left200}
+            points={200}
+            used={getUsed(left200)}
+            result={getResult(left200)}
+            onOpen={() => onOpenQuestion(left200)}
+          />
+        </div>
 
-          return (
-            <div key={`${column.category.id}-${row.points}-left-${rowIndex}`} className="col-start-1 self-center">
-              <QuestionPill
-                question={leftQuestion}
-                points={row.points}
-                used={leftUsed}
-                result={leftResult}
-                onOpen={() => onOpenQuestion(leftQuestion)}
-              />
-            </div>
-          );
-        })}
+        <div className="col-start-1 row-start-2">
+          <QuestionPill
+            question={left400}
+            points={400}
+            used={getUsed(left400)}
+            result={getResult(left400)}
+            onOpen={() => onOpenQuestion(left400)}
+          />
+        </div>
 
-        {/* الوسط - الفئة والصورة */}
-        <div className="col-start-2 row-span-3 overflow-hidden rounded-[20px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
+        <div className="col-start-1 row-start-3">
+          <QuestionPill
+            question={left600}
+            points={600}
+            used={getUsed(left600)}
+            result={getResult(left600)}
+            onOpen={() => onOpenQuestion(left600)}
+          />
+        </div>
+
+        {/* الوسط */}
+        <div className="col-start-2 row-start-1 row-span-3 h-[276px] w-[170px] overflow-hidden rounded-[22px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
           <CategoryIllustration category={column.category} />
         </div>
 
-        {/* اليمين */}
-        {column.rows.map((row, rowIndex) => {
-          const rightQuestion = row.questions[1] ?? null;
-          const rightUsed = rightQuestion
-            ? boardState.usedQuestionIds.includes(rightQuestion.id)
-            : true;
-          const rightResult = rightQuestion
-            ? boardState.questionResults[rightQuestion.id] ?? "none"
-            : "none";
+        {/* يمين */}
+        <div className="col-start-3 row-start-1">
+          <QuestionPill
+            question={right200}
+            points={200}
+            used={getUsed(right200)}
+            result={getResult(right200)}
+            onOpen={() => onOpenQuestion(right200)}
+          />
+        </div>
 
-          return (
-            <div key={`${column.category.id}-${row.points}-right-${rowIndex}`} className="col-start-3 self-center">
-              <QuestionPill
-                question={rightQuestion}
-                points={row.points}
-                used={rightUsed}
-                result={rightResult}
-                onOpen={() => onOpenQuestion(rightQuestion)}
-              />
-            </div>
-          );
-        })}
+        <div className="col-start-3 row-start-2">
+          <QuestionPill
+            question={right400}
+            points={400}
+            used={getUsed(right400)}
+            result={getResult(right400)}
+            onOpen={() => onOpenQuestion(right400)}
+          />
+        </div>
+
+        <div className="col-start-3 row-start-3">
+          <QuestionPill
+            question={right600}
+            points={600}
+            used={getUsed(right600)}
+            result={getResult(right600)}
+            onOpen={() => onOpenQuestion(right600)}
+          />
+        </div>
       </div>
 
-      <div className="mx-auto w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+      <div className="mt-2 w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[16px] font-black text-white">
           {column.category.name}
         </div>
