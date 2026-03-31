@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 type GameCardItem = {
   title: string;
@@ -41,7 +42,7 @@ const gameCards: GameCardItem[] = [
     title: "Codenames",
     subtitle: "لعبة جماعية",
     description:
-      "لعبة جماعية فيها فريقين كل فريق عنده قائد بيعطي كلمة تلميح + رقم والباقي يحاولوا يخمّنوا الكلمات الصح على اللوحة",
+      "لعبة جماعية فيها فريقان، كل فريق عنده قائد يعطي كلمة تلميح مع رقم، والباقي يحاولون تخمين الكلمات الصحيحة على اللوحة.",
     href: "/games/codenames/",
     image: "https://b.top4top.io/p_374101e3s1.png",
     active: true,
@@ -141,6 +142,22 @@ function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function LightningIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+    </svg>
+  );
+}
+
 function getGameIcon(icon: GameCardItem["icon"]) {
   if (icon === "quiz") return <QuizIcon className="h-5 w-5" />;
   if (icon === "social") return <SocialIcon className="h-5 w-5" />;
@@ -151,27 +168,73 @@ function getAccentClasses(accent: GameCardItem["accent"]) {
   if (accent === "orange") {
     return {
       badge: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-      card: "hover:shadow-[0_24px_42px_rgba(251,146,60,0.14)]",
+      cardGlow:
+        "group-hover:shadow-[0_28px_70px_rgba(249,115,22,0.18)] group-hover:border-orange-300/15",
       icon: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-      button: "bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
+      button:
+        "bg-[linear-gradient(180deg,rgba(251,146,60,0.20)_0%,rgba(249,115,22,0.14)_100%)] text-orange-100 hover:bg-[linear-gradient(180deg,rgba(251,146,60,0.28)_0%,rgba(249,115,22,0.20)_100%)]",
+      panel:
+        "from-orange-400/16 via-orange-300/8 to-transparent",
+      ring: "shadow-[0_0_0_1px_rgba(251,146,60,0.14)]",
     };
   }
 
   if (accent === "violet") {
     return {
       badge: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-      card: "hover:shadow-[0_24px_42px_rgba(167,139,250,0.14)]",
+      cardGlow:
+        "group-hover:shadow-[0_28px_70px_rgba(168,85,247,0.18)] group-hover:border-violet-300/15",
       icon: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-      button: "bg-violet-400/10 text-violet-100 hover:bg-violet-400/15",
+      button:
+        "bg-[linear-gradient(180deg,rgba(167,139,250,0.20)_0%,rgba(139,92,246,0.14)_100%)] text-violet-100 hover:bg-[linear-gradient(180deg,rgba(167,139,250,0.28)_0%,rgba(139,92,246,0.20)_100%)]",
+      panel:
+        "from-violet-400/16 via-violet-300/8 to-transparent",
+      ring: "shadow-[0_0_0_1px_rgba(167,139,250,0.14)]",
     };
   }
 
   return {
     badge: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-    card: "hover:shadow-[0_24px_42px_rgba(34,211,238,0.14)]",
+    cardGlow:
+      "group-hover:shadow-[0_28px_70px_rgba(34,211,238,0.18)] group-hover:border-cyan-300/15",
     icon: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-    button: "bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
+    button:
+      "bg-[linear-gradient(180deg,rgba(34,211,238,0.18)_0%,rgba(14,165,233,0.14)_100%)] text-cyan-100 hover:bg-[linear-gradient(180deg,rgba(34,211,238,0.26)_0%,rgba(14,165,233,0.18)_100%)]",
+    panel:
+      "from-cyan-400/16 via-cyan-300/8 to-transparent",
+    ring: "shadow-[0_0_0_1px_rgba(34,211,238,0.14)]",
   };
+}
+
+function FeatureMiniCard({
+  title,
+  value,
+  icon,
+  accent,
+}: {
+  title: string;
+  value: string;
+  icon: ReactNode;
+  accent: "cyan" | "orange" | "violet" | "emerald";
+}) {
+  const palette =
+    accent === "orange"
+      ? "border-orange-300/20 bg-orange-400/10 text-orange-100"
+      : accent === "violet"
+        ? "border-violet-300/20 bg-violet-400/10 text-violet-100"
+        : accent === "emerald"
+          ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+          : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100";
+
+  return (
+    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
+      <div className={`mx-auto mb-3 inline-flex rounded-2xl border p-2.5 ${palette}`}>
+        {icon}
+      </div>
+      <div className="text-2xl font-black text-white">{value}</div>
+      <div className="mt-1 text-xs font-bold text-white/55">{title}</div>
+    </div>
+  );
 }
 
 function GameCard({ card }: { card: GameCardItem }) {
@@ -180,55 +243,62 @@ function GameCard({ card }: { card: GameCardItem }) {
   return (
     <div
       className={[
-        "group rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1",
-        styles.card,
+        "group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.30)] transition duration-300 hover:-translate-y-1",
+        styles.cardGlow,
+        styles.ring,
       ].join(" ")}
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div
-          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${styles.badge}`}
-        >
-          {getGameIcon(card.icon)}
-          <span>{card.badge}</span>
-        </div>
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${styles.panel}`} />
 
-        <div className={`inline-flex rounded-2xl border p-2.5 ${styles.icon}`}>
-          {getGameIcon(card.icon)}
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
-        <img
-          src={card.image}
-          alt={card.title}
-          className="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-
-      <div className="mt-5">
-        <div className="text-xs font-black tracking-[0.18em] text-white/50">
-          {card.subtitle}
-        </div>
-        <h2 className="mt-2 text-2xl font-black text-white">{card.title}</h2>
-        <p className="mt-3 text-sm leading-7 text-white/70">
-          {card.description}
-        </p>
-      </div>
-
-      <div className="mt-5">
-        {card.active ? (
-          <Link
-            href={card.href}
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] px-5 py-3.5 text-sm font-black transition ${styles.button}`}
+      <div className="relative">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${styles.badge}`}
           >
-            ابدأ اللعبة
-            <ArrowLeftIcon className="h-4 w-4" />
-          </Link>
-        ) : (
-          <div className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-black text-white/50">
-            قريبًا
+            {getGameIcon(card.icon)}
+            <span>{card.badge}</span>
           </div>
-        )}
+
+          <div className={`inline-flex rounded-2xl border p-2.5 ${styles.icon}`}>
+            {getGameIcon(card.icon)}
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5">
+          <img
+            src={card.image}
+            alt={card.title}
+            className="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          />
+        </div>
+
+        <div className="mt-5">
+          <div className="text-xs font-black tracking-[0.12em] text-white/45">
+            {card.subtitle}
+          </div>
+
+          <h2 className="mt-2 text-2xl font-black text-white">{card.title}</h2>
+
+          <p className="mt-3 text-sm leading-7 text-white/72">
+            {card.description}
+          </p>
+        </div>
+
+        <div className="mt-5">
+          {card.active ? (
+            <Link
+              href={card.href}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] px-5 py-3.5 text-sm font-black transition ${styles.button}`}
+            >
+              ابدأ اللعبة
+              <ArrowLeftIcon className="h-4 w-4" />
+            </Link>
+          ) : (
+            <div className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-black text-white/50">
+              قريبًا
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -240,77 +310,113 @@ export default function GamesPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_20%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-8">
-        {/* Header */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+        <section className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.97)_0%,rgba(6,12,28,0.99)_100%)] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.36)] md:p-8">
           <div className="pointer-events-none absolute inset-0">
-            <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-            <div className="hero-glow absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl" />
+            <div className="hero-glow absolute -right-12 top-0 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
+            <div className="hero-glow absolute left-0 bottom-0 h-56 w-56 rounded-full bg-violet-400/10 blur-3xl" />
+            <div className="hero-glow absolute right-1/3 bottom-6 h-40 w-40 rounded-full bg-orange-400/10 blur-3xl" />
           </div>
 
-          <div className="relative text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
-              <GamesIcon className="h-4 w-4" />
-              <span>صفحة الألعاب</span>
+          <div className="relative">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+                <GamesIcon className="h-4 w-4" />
+                <span>مكتبة الألعاب</span>
+              </div>
+
+              <h1 className="mt-5 text-4xl font-black text-white md:text-6xl">
+                كل ألعاب لمتكم
+                <span className="block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
+                  في صفحة واحدة
+                </span>
+              </h1>
+
+              <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-white/72">
+                تصفّح الألعاب الحالية داخل المنصة، واختر التجربة التي تناسب جلستك:
+                أسئلة وتحديات، ألعاب اجتماعية، أو ألعاب كلمات وتلميحات بتصميم واضح
+                وسريع ومتوافق مع كل الشاشات.
+              </p>
             </div>
 
-            <h1 className="mt-5 text-4xl font-black text-white md:text-6xl">
-              اختر اللعبة التي تريدها
-            </h1>
-
-            <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-white/72">
-              هنا ستجد ألعاب المنصة بالكامل في مكان واحد. اختر اللعبة التي تريد
-              بدءها الآن، ومع الوقت سنضيف ألعابًا جديدة بنفس روح لمتكم وبنفس
-              جودة التصميم.
-            </p>
-
             <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                <div className="mb-2 inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2 text-cyan-100">
-                  <GamesIcon className="h-4 w-4" />
-                </div>
-                <div className="text-2xl font-black text-white">
-                  {activeGamesCount}
-                </div>
-                <div className="mt-1 text-xs font-bold text-white/55">
-                  الألعاب المتاحة الآن
-                </div>
-              </div>
+              <FeatureMiniCard
+                title="الألعاب المتاحة الآن"
+                value={String(activeGamesCount)}
+                icon={<GamesIcon className="h-4 w-4" />}
+                accent="cyan"
+              />
+              <FeatureMiniCard
+                title="أسلوب اللعب"
+                value="جماعي"
+                icon={<SocialIcon className="h-4 w-4" />}
+                accent="orange"
+              />
+              <FeatureMiniCard
+                title="إيقاع التجربة"
+                value="سريع"
+                icon={<LightningIcon className="h-4 w-4" />}
+                accent="violet"
+              />
+              <FeatureMiniCard
+                title="الهدف"
+                value="متعة"
+                icon={<QuizIcon className="h-4 w-4" />}
+                accent="emerald"
+              />
+            </div>
 
-              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                <div className="mb-2 inline-flex rounded-2xl border border-orange-300/20 bg-orange-400/10 p-2 text-orange-100">
-                  <SocialIcon className="h-4 w-4" />
-                </div>
-                <div className="text-2xl font-black text-white">جماعي</div>
-                <div className="mt-1 text-xs font-bold text-white/55">
-                  أسلوب اللعب
-                </div>
-              </div>
+            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+              {gameCards.map((card) => (
+                <div
+                  key={`hero-${card.title}`}
+                  className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={[
+                        "inline-flex rounded-2xl border p-2.5",
+                        getAccentClasses(card.accent).icon,
+                      ].join(" ")}
+                    >
+                      {getGameIcon(card.icon)}
+                    </div>
 
-              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                <div className="mb-2 inline-flex rounded-2xl border border-violet-300/20 bg-violet-400/10 p-2 text-violet-100">
-                  <SparkIcon className="h-4 w-4" />
-                </div>
-                <div className="text-2xl font-black text-white">متجدد</div>
-                <div className="mt-1 text-xs font-bold text-white/55">
-                  ألعاب جديدة لاحقًا
-                </div>
-              </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-black text-white">
+                        {card.title}
+                      </div>
+                      <div className="truncate text-sm text-white/60">
+                        {card.subtitle}
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                <div className="mb-2 inline-flex rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-2 text-emerald-100">
-                  <QuizIcon className="h-4 w-4" />
+                  <p className="mt-3 line-clamp-2 text-sm leading-7 text-white/65">
+                    {card.description}
+                  </p>
                 </div>
-                <div className="text-2xl font-black text-white">انيق</div>
-                <div className="mt-1 text-xs font-bold text-white/55">
-                  تجربة واضحة
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Games Grid */}
         <section className="mt-8">
+          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-xs font-black tracking-[0.14em] text-cyan-200/70">
+                الألعاب الحالية
+              </div>
+              <h2 className="mt-2 text-3xl font-black text-white md:text-4xl">
+                اختر طابع الجلسة الذي يناسبكم
+              </h2>
+            </div>
+
+            <p className="max-w-xl text-sm leading-7 text-white/65 md:text-left">
+              كل لعبة هنا لها أسلوب مختلف، لكن كلها مبنية لتكون خفيفة، جماعية،
+              وسهلة البدء بدون تعقيد.
+            </p>
+          </div>
+
           <div className="grid gap-5 xl:grid-cols-3">
             {gameCards.map((card) => (
               <GameCard key={card.title} card={card} />
@@ -318,8 +424,7 @@ export default function GamesPage() {
           </div>
         </section>
 
-        {/* Bottom CTA */}
-        <section className="mt-9 rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 text-center shadow-[0_14px_30px_rgba(0,0,0,0.22)] md:p-7">
+        <section className="mt-9 rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 text-center shadow-[0_14px_30px_rgba(0,0,0,0.22)] md:p-7">
           <div className="mx-auto max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
               <SparkIcon className="h-4 w-4" />
@@ -327,12 +432,12 @@ export default function GamesPage() {
             </div>
 
             <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-              ابدأ لعبتك التالية من هنا
+              ابدأ جلستك التالية من هنا
             </h2>
 
             <p className="mt-4 text-sm leading-7 text-white/70 md:text-base">
-              اختر اللعبة المناسبة لك الآن، وابدأ بجولة جديدة بتجربة منظمة وسريعة
-              ومتوافقة مع جميع الشاشات.
+              سواء كنتم تريدون تحدي أسئلة، لعبة اجتماعية تكشف الشخص المختلف، أو
+              جولة كلمات وتلميحات، ستجدون كل ذلك هنا في مكان واحد.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -351,6 +456,14 @@ export default function GamesPage() {
                 ابدأ برا السالفة
                 <ArrowLeftIcon className="h-4 w-4" />
               </Link>
+
+              <Link
+                href="/games/codenames/"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/20 bg-violet-400/10 px-6 py-4 text-base font-black text-violet-100 transition hover:bg-violet-400/15"
+              >
+                افتح Codenames
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>
@@ -360,14 +473,16 @@ export default function GamesPage() {
         @keyframes glowPulse {
           0%, 100% {
             opacity: 0.55;
+            transform: scale(1);
           }
           50% {
             opacity: 1;
+            transform: scale(1.06);
           }
         }
 
         .hero-glow {
-          animation: glowPulse 4.6s ease-in-out infinite;
+          animation: glowPulse 5s ease-in-out infinite;
         }
       `}</style>
     </div>
