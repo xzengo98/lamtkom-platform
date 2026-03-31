@@ -295,7 +295,7 @@ function CategoryIllustration({ category }: { category: Category }) {
     return (
       <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-2 pt-2">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,transparent_70%)]" />
-        <div className="relative z-10 flex h-[190px] w-[92%] items-center justify-center rounded-[20px] bg-white/10 backdrop-blur-sm sm:h-[200px]">
+        <div className="relative z-10 flex h-[230px] w-[100%] items-center justify-center rounded-[20px] bg-white/10 backdrop-blur-sm sm:h-[200px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={category.image_url}
@@ -616,7 +616,7 @@ export default function GameBoardClient({
                 </h1>
 
                 <p className="mt-2 text-sm font-medium text-slate-200/80">
-                  اختر الأسئلة بشكل طبيعي أو أنهِ اللعبة يدويًا في أي وقت.
+                  اختر الأسئلة من لوحة اللعب في الاسفل وابدء باللعب.
                 </p>
               </div>
 
