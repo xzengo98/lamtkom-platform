@@ -42,41 +42,71 @@ const REQUIRED_CATEGORY_COUNT = 6;
 const sectionThemes: Record<
   string,
   {
-    badge: string;
-    glow: string;
-    iconBg: string;
-    iconText: string;
+    sectionBadge: string;
+    sectionGlow: string;
+    cardAccent: string;
+    cardSurface: string;
+    titleBar: string;
+    iconWrap: string;
+    availability: string;
+    selectedRing: string;
+    info: string;
   }
 > = {
   general: {
-    badge: "border-orange-400/30 bg-orange-500/10 text-orange-200",
-    glow: "from-orange-400/10 via-orange-300/5 to-transparent",
-    iconBg: "bg-orange-400/10 border-orange-300/20",
-    iconText: "text-orange-100",
+    sectionBadge: "border-orange-300/25 bg-orange-400/10 text-orange-100",
+    sectionGlow: "from-orange-400/10 via-orange-300/5 to-transparent",
+    cardAccent: "from-orange-500/90 to-orange-600/95",
+    cardSurface: "from-[#302010] to-[#191109]",
+    titleBar: "bg-[linear-gradient(180deg,#e18942_0%,#c36023_100%)] text-white",
+    iconWrap: "border-orange-300/20 bg-orange-400/10 text-orange-100",
+    availability: "border-orange-300/25 bg-[#13263b] text-orange-100",
+    selectedRing: "ring-orange-300/60 shadow-[0_0_0_2px_rgba(253,186,116,0.25)]",
+    info: "bg-[#ca4327] text-white",
   },
   islamic: {
-    badge: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
-    glow: "from-emerald-400/10 via-lime-300/5 to-transparent",
-    iconBg: "bg-emerald-400/10 border-emerald-300/20",
-    iconText: "text-emerald-100",
+    sectionBadge: "border-emerald-300/25 bg-emerald-400/10 text-emerald-100",
+    sectionGlow: "from-emerald-400/10 via-emerald-300/5 to-transparent",
+    cardAccent: "from-emerald-500/90 to-emerald-600/95",
+    cardSurface: "from-[#17352a] to-[#0f211c]",
+    titleBar: "bg-[linear-gradient(180deg,#2dbd8c_0%,#1c9b74_100%)] text-white",
+    iconWrap: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
+    availability: "border-emerald-300/25 bg-[#13263b] text-emerald-100",
+    selectedRing: "ring-emerald-300/60 shadow-[0_0_0_2px_rgba(110,231,183,0.22)]",
+    info: "bg-[#ca4327] text-white",
   },
   sports: {
-    badge: "border-cyan-400/30 bg-cyan-500/10 text-cyan-200",
-    glow: "from-cyan-400/10 via-sky-300/5 to-transparent",
-    iconBg: "bg-cyan-400/10 border-cyan-300/20",
-    iconText: "text-cyan-100",
+    sectionBadge: "border-cyan-300/25 bg-cyan-400/10 text-cyan-100",
+    sectionGlow: "from-cyan-400/10 via-cyan-300/5 to-transparent",
+    cardAccent: "from-cyan-500/90 to-sky-600/95",
+    cardSurface: "from-[#123452] to-[#0b1f32]",
+    titleBar: "bg-[linear-gradient(180deg,#1798df_0%,#0b7fca_100%)] text-white",
+    iconWrap: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+    availability: "border-cyan-300/25 bg-[#13263b] text-cyan-100",
+    selectedRing: "ring-cyan-300/60 shadow-[0_0_0_2px_rgba(103,232,249,0.22)]",
+    info: "bg-[#ca4327] text-white",
   },
   entertainment: {
-    badge: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200",
-    glow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
-    iconBg: "bg-fuchsia-400/10 border-fuchsia-300/20",
-    iconText: "text-fuchsia-100",
+    sectionBadge: "border-violet-300/25 bg-violet-400/10 text-violet-100",
+    sectionGlow: "from-violet-400/10 via-fuchsia-300/5 to-transparent",
+    cardAccent: "from-violet-500/90 to-fuchsia-600/95",
+    cardSurface: "from-[#2a1940] to-[#191126]",
+    titleBar: "bg-[linear-gradient(180deg,#8f67ff_0%,#6f47ec_100%)] text-white",
+    iconWrap: "border-violet-300/20 bg-violet-400/10 text-violet-100",
+    availability: "border-violet-300/25 bg-[#13263b] text-violet-100",
+    selectedRing: "ring-violet-300/60 shadow-[0_0_0_2px_rgba(196,181,253,0.22)]",
+    info: "bg-[#ca4327] text-white",
   },
   default: {
-    badge: "border-white/15 bg-white/5 text-white/85",
-    glow: "from-slate-400/10 via-slate-300/5 to-transparent",
-    iconBg: "bg-white/5 border-white/10",
-    iconText: "text-white/85",
+    sectionBadge: "border-white/15 bg-white/5 text-white/90",
+    sectionGlow: "from-slate-300/10 via-slate-200/5 to-transparent",
+    cardAccent: "from-slate-500/90 to-slate-700/95",
+    cardSurface: "from-[#1d2742] to-[#101828]",
+    titleBar: "bg-[linear-gradient(180deg,#2497dd_0%,#1280c9_100%)] text-white",
+    iconWrap: "border-white/10 bg-white/5 text-white",
+    availability: "border-white/15 bg-[#13263b] text-white",
+    selectedRing: "ring-white/50 shadow-[0_0_0_2px_rgba(255,255,255,0.14)]",
+    info: "bg-[#ca4327] text-white",
   },
 };
 
@@ -102,31 +132,15 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
 
   if (availability.mode === "fixed") {
     return {
-      text: "متاحة",
-      className: "border-white/15 bg-[#161f3d] text-white",
+      text: "لعبة واحدة",
+      className: "border-cyan-300/25 bg-[#13263b] text-cyan-100",
     };
   }
 
   return {
     text: formatAvailableGamesLabel(availability.availableGames),
-    className: "border-emerald-500/40 bg-[#0f2e2a] text-emerald-200",
+    className: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
   };
-}
-
-function SparkIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
-    </svg>
-  );
 }
 
 function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
@@ -222,7 +236,7 @@ function TicketIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function CheckListIcon({ className = "h-4 w-4" }: { className?: string }) {
+function SparkIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -233,53 +247,12 @@ function CheckListIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M9 6h10" />
-      <path d="M9 12h10" />
-      <path d="M9 18h10" />
-      <path d="m4 6 1.2 1.2L7.8 4.8" />
-      <path d="m4 12 1.2 1.2L7.8 10.8" />
-      <path d="m4 18 1.2 1.2L7.8 16.8" />
+      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
     </svg>
   );
 }
 
-function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
-      <path d="m3 12 9 5 9-5" />
-    </svg>
-  );
-}
-
-function RepeatIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17 2v5h-5" />
-      <path d="M7 22v-5h5" />
-      <path d="M20 9a7 7 0 0 0-12-4L7 7" />
-      <path d="M4 15a7 7 0 0 0 12 4l1-2" />
-    </svg>
-  );
-}
-
-function SummaryCard({
+function SummaryBadge({
   label,
   value,
   accent = "default",
@@ -287,45 +260,36 @@ function SummaryCard({
 }: {
   label: string;
   value: string;
-  accent?: "default" | "cyan" | "orange";
+  accent?: "default" | "cyan" | "orange" | "emerald";
   icon?: React.ReactNode;
 }) {
+  const tone =
+    accent === "cyan"
+      ? "border-cyan-300/20 bg-cyan-400/10 text-cyan-100"
+      : accent === "orange"
+      ? "border-orange-300/20 bg-orange-400/10 text-orange-100"
+      : accent === "emerald"
+      ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+      : "border-white/10 bg-white/5 text-white";
+
   return (
-    <div
-      className={[
-        "rounded-[1rem] border px-4 py-3 text-center shadow-[0_8px_18px_rgba(0,0,0,0.16)]",
-        accent === "cyan"
-          ? "border-cyan-300/20 bg-cyan-400/10"
-          : accent === "orange"
-            ? "border-orange-300/20 bg-orange-400/10"
-            : "border-white/10 bg-white/5",
-      ].join(" ")}
-    >
-      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-black text-white/55">
+    <div className={`rounded-[1rem] border px-4 py-3 text-center shadow-[0_8px_18px_rgba(0,0,0,0.16)] ${tone}`}>
+      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-black text-white/60">
         {icon}
         <span>{label}</span>
       </div>
-      <div className="text-lg font-black text-white md:text-xl">{value}</div>
+      <div className="text-lg font-black md:text-xl">{value}</div>
     </div>
   );
 }
 
-function MiniStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon?: React.ReactNode;
-}) {
+function SectionIconBubble({ slug }: { slug: string }) {
+  const icon =
+    slug === "islamic" ? "🕌" : slug === "sports" ? "🏆" : slug === "entertainment" ? "🎬" : "🌍";
+
   return (
-    <div className="rounded-[0.9rem] border border-white/10 bg-white/5 px-3 py-2.5 text-center">
-      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-black text-white/50">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <div className="text-base font-black text-white">{value}</div>
+    <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/8 text-2xl shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
+      {icon}
     </div>
   );
 }
@@ -353,9 +317,7 @@ export default function StartGameForm({
     return safeSections
       .map((section) => ({
         ...section,
-        categories: safeCategories.filter(
-          (category) => category.section_id === section.id,
-        ),
+        categories: safeCategories.filter((category) => category.section_id === section.id),
       }))
       .filter((section) => section.categories.length > 0);
   }, [safeSections, safeCategories]);
@@ -373,7 +335,7 @@ export default function StartGameForm({
 
     if (!availability?.isSelectable) {
       setLocalError(
-        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.",
+        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة."
       );
       return;
     }
@@ -420,14 +382,12 @@ export default function StartGameForm({
     }
 
     const invalidSelection = selectedCategories.find(
-      (id) => !categoryAvailability[id]?.isSelectable,
+      (id) => !categoryAvailability[id]?.isSelectable
     );
 
     if (invalidSelection) {
       event.preventDefault();
-      setLocalError(
-        "هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.",
-      );
+      setLocalError("هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.");
       return;
     }
 
@@ -446,337 +406,152 @@ export default function StartGameForm({
     <form
       action={action}
       onSubmit={validateBeforeSubmit}
-      className="mx-auto max-w-[1500px] space-y-5 px-2 md:px-4"
+      className="mx-auto max-w-[1600px] space-y-6 px-2 md:px-4"
     >
-      <input
-        type="hidden"
-        name="selectedCategories"
-        value={selectedCategories.join(",")}
-      />
+      <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />
 
-      {/* Header */}
-      <section className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="hero-glow absolute -right-10 top-0 h-36 w-36 rounded-full bg-cyan-400/10 blur-3xl" />
-          <div className="hero-glow absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-violet-400/10 blur-3xl" />
-        </div>
-
-        <div className="relative grid gap-4 xl:grid-cols-[1.15fr_0.85fr] xl:items-center">
-          <div className="text-center xl:text-right">
+      {/* Top setup */}
+      <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] md:p-6">
+        <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+          <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
               <GamepadIcon className="h-4 w-4" />
-              <span>إعداد لعبة جديدة</span>
+              <span>إعداد اللعبة</span>
             </div>
 
-            <h1 className="mt-3 text-3xl font-black text-white md:text-4xl">
-              جهّز اللعبة بسرعة
+            <h1 className="mt-4 text-3xl font-black text-white md:text-4xl">
+              جهّز الجولة قبل البدء
             </h1>
 
-            <p className="mt-3 text-sm leading-7 text-white/72 md:text-base">
-              اختر اسم اللعبة، أضف أسماء الفريقين، ثم حدد ست فئات لتبدأ الجولة
-              مباشرة.
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
+              اختر اسم اللعبة وأسماء الفرق، ثم انتقل لاختيار 6 فئات بطريقة عرض واضحة
+              ومناسبة للعب الجماعي.
             </p>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
+                <div className="mb-2 text-sm font-bold text-white/60">اسم اللعبة</div>
+                <input
+                  name="gameName"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  placeholder="مثال: تحدي الأذكياء"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
+                <div className="mb-2 text-sm font-bold text-white/60">الفريق الأول</div>
+                <input
+                  name="teamOne"
+                  value={teamOne}
+                  onChange={(e) => setTeamOne(e.target.value)}
+                  placeholder="اسم الفريق الأول"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                />
+              </div>
+
+              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
+                <div className="mb-2 text-sm font-bold text-white/60">الفريق الثاني</div>
+                <input
+                  name="teamTwo"
+                  value={teamTwo}
+                  onChange={(e) => setTeamTwo(e.target.value)}
+                  placeholder="اسم الفريق الثاني"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <SummaryCard
-              label="منع التكرار"
-              value={selectionMode === "dynamic" ? "بدون تكرار" : "تكرار مسموح"}
-              icon={<RepeatIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryCard
-              label="عدد المختار حاليًا"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
-              icon={<CheckListIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryCard
-              label="عدد الفئات المطلوبة"
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+            <SummaryBadge
+              label="الفئات المطلوبة"
               value={String(REQUIRED_CATEGORY_COUNT)}
-              icon={<LayersIcon className="h-3.5 w-3.5" />}
+              icon={<GridIcon className="h-3.5 w-3.5" />}
             />
-            <SummaryCard
+            <SummaryBadge
+              label="المختار حاليًا"
+              value={`${selectedCount}/${REQUIRED_CATEGORY_COUNT}`}
+              accent="cyan"
+              icon={<SparkIcon className="h-3.5 w-3.5" />}
+            />
+            <SummaryBadge
               label="الألعاب المتبقية"
               value={String(gamesRemaining)}
-              accent="cyan"
+              accent="orange"
               icon={<TicketIcon className="h-3.5 w-3.5" />}
             />
+            <SummaryBadge
+              label="حالة الاختيار"
+              value={isReadyToSubmit ? "جاهز" : `متبقي ${remainingToSelect}`}
+              accent={isReadyToSubmit ? "emerald" : "default"}
+              icon={<UsersIcon className="h-3.5 w-3.5" />}
+            />
           </div>
         </div>
+
+        {visibleError ? (
+          <div className="mt-5 rounded-[1rem] border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100">
+            {visibleError}
+          </div>
+        ) : null}
       </section>
 
-      {/* Summary + Inputs */}
-      <div className="grid gap-5 xl:grid-cols-[0.78fr_1.22fr]">
-        {/* Summary */}
-        <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
-              <UsersIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
-                ملخص سريع
-              </div>
-              <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
-                جاهزية اللعبة
-              </h2>
-            </div>
+      {/* Categories section */}
+      <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.04),transparent_24%),linear-gradient(180deg,#08152f_0%,#08162f_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] md:p-6">
+        <div className="mb-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+            <GridIcon className="h-4 w-4" />
+            <span>اختيار الفئات</span>
           </div>
 
-          <div className="rounded-[1.1rem] border border-white/10 bg-white/5 p-4 text-center">
-            <div className="text-sm font-black text-white/65">
-              {isReadyToSubmit
-                ? "تم اختيار العدد المطلوب. اضغط ابدأ اللعبة."
-                : `اختر ${remainingToSelect} فئات إضافية للمتابعة.`}
-            </div>
-          </div>
+          <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
+            اختر الفئات
+          </h2>
 
-          <div className="mt-4 grid gap-2.5">
-            <SummaryCard
-              label="اسم اللعبة"
-              value={gameName.trim() || "-"}
-              icon={<SparkIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryCard
-              label="الفريق الأول"
-              value={teamOne.trim() || "-"}
-              accent="cyan"
-              icon={<UsersIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryCard
-              label="الفريق الثاني"
-              value={teamTwo.trim() || "-"}
-              accent="orange"
-              icon={<UsersIcon className="h-3.5 w-3.5" />}
-            />
-          </div>
+          <p className="mt-3 text-sm text-white/65 md:text-base">
+            اختر {REQUIRED_CATEGORY_COUNT} فئات لبدء المسابقة
+          </p>
 
-          {visibleError ? (
-            <div className="mt-4 rounded-[1rem] border border-red-500/30 bg-[#34161b] px-4 py-4 text-sm font-bold text-red-200">
-              {visibleError}
-            </div>
-          ) : null}
-        </section>
-
-        {/* Inputs */}
-        <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
-              <SparkIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
-                الخطوة الأولى
-              </div>
-              <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
-                بيانات اللعبة
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <label className="block">
-              <div className="mb-2 text-sm font-black text-white/80">
-                اسم اللعبة
-              </div>
-              <input
-                name="gameName"
-                value={gameName}
-                onChange={(e) => setGameName(e.target.value)}
-                placeholder="مثال: تحدي الأذكياء"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
-              />
-            </label>
-
-            <label className="block">
-              <div className="mb-2 text-sm font-black text-white/80">
-                الفريق الأول
-              </div>
-              <input
-                name="teamOne"
-                value={teamOne}
-                onChange={(e) => setTeamOne(e.target.value)}
-                placeholder="اسم الفريق الأول"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
-              />
-            </label>
-
-            <label className="block">
-              <div className="mb-2 text-sm font-black text-white/80">
-                الفريق الثاني
-              </div>
-              <input
-                name="teamTwo"
-                value={teamTwo}
-                onChange={(e) => setTeamTwo(e.target.value)}
-                placeholder="اسم الفريق الثاني"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50 md:h-12 md:text-base"
-              />
-            </label>
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <MiniStat
-              label="الحالة"
-              value={isReadyToSubmit ? "جاهزة" : "قيد الإعداد"}
-              icon={<SparkIcon className="h-3.5 w-3.5" />}
-            />
-            <MiniStat
-              label="المتبقي"
-              value={remainingToSelect}
-              icon={<LayersIcon className="h-3.5 w-3.5" />}
-            />
-            <MiniStat
-              label="عدد المختار"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
-              icon={<CheckListIcon className="h-3.5 w-3.5" />}
-            />
-          </div>
-
-          <div className="mt-5 flex justify-start">
-            <button
-              type="submit"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1.1rem] bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400 md:text-base"
-            >
-              ابدأ اللعبة
-            </button>
-          </div>
-        </section>
-      </div>
-
-      {/* Categories Full Width */}
-      <section className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.24)]">
-        <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2.5 text-cyan-100">
-              <GridIcon className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[11px] font-black tracking-[0.18em] text-white/45">
-                الخطوة الثانية
-              </div>
-              <h2 className="mt-1 text-xl font-black text-white md:text-2xl">
-                اختر الفئات
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <MiniStat
-              label="عدد المختار"
-              value={`${selectedCount} / ${REQUIRED_CATEGORY_COUNT}`}
-              icon={<CheckListIcon className="h-3.5 w-3.5" />}
-            />
-            <MiniStat
-              label="المتبقي"
-              value={remainingToSelect}
-              icon={<LayersIcon className="h-3.5 w-3.5" />}
-            />
-            <MiniStat
-              label="الحالة"
-              value={isReadyToSubmit ? "جاهزة" : "قيد الإعداد"}
-              icon={<SparkIcon className="h-3.5 w-3.5" />}
-            />
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-base font-black text-white/85">
+            المختار: <span className="text-cyan-300">{selectedCount}</span> /{" "}
+            {REQUIRED_CATEGORY_COUNT}
           </div>
         </div>
 
-        <p className="mb-5 text-sm leading-6 text-white/70">
-          اضغط على البطاقة نفسها لاختيار الفئة أو إلغاء اختيارها. يجب اختيار{" "}
-          {REQUIRED_CATEGORY_COUNT} فئات بالضبط قبل بدء اللعبة.
-        </p>
-
-        <div className="space-y-5">
+        <div className="space-y-10">
           {groupedSections.map((section) => {
             const theme = getSectionTheme(section.slug);
 
             return (
-              <div
-                key={section.id}
-                className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4"
-              >
-                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="flex-1">
-                    <div
-                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${theme.badge}`}
-                    >
-                      <SparkIcon className="h-4 w-4" />
-                      <span>{section.name}</span>
+              <div key={section.id} className="relative">
+                <div
+                  className={`pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-br ${theme.sectionGlow} opacity-80 blur-3xl`}
+                />
+
+                <div className="relative">
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <div className="text-right">
+                      <div className="mb-2 text-sm font-black text-white/45">
+                        {section.categories.length} فئة فرعية
+                      </div>
+                      <div className="flex items-center justify-end gap-3">
+                        <div>
+                          <h3 className="text-3xl font-black text-white md:text-5xl">
+                            {section.name}
+                          </h3>
+                        </div>
+                        <div className={`rounded-[1rem] border p-2.5 ${theme.iconWrap}`}>
+                          <SectionIconBubble slug={section.slug} />
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/70">
-                      {section.description ||
-                        "قسم رئيسي يضم مجموعة من الفئات الجاهزة للعب."}
-                    </div>
                   </div>
 
-                  <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/70">
-                    {section.categories.length} فئات
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  {section.categories.map((category) => {
-                    const active = selectedCategories.includes(category.id);
-
-                    return (
-                      <CategoryCard
-                        key={category.id}
-                        category={category}
-                        active={active}
-                        infoOpen={openInfoId === category.id}
-                        onToggle={() => toggleCategory(category.id)}
-                        onInfoClick={handleInfoClick}
-                        theme={theme}
-                        availability={
-                          categoryAvailability[category.id] ?? {
-                            availableGames: 0,
-                            isSelectable: false,
-                            mode: selectionMode,
-                            easyCount: 0,
-                            mediumCount: 0,
-                            hardCount: 0,
-                          }
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-
-          {uncategorized.length > 0 ? (
-            <div className="rounded-[1.3rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-black text-white/85">
-                    <GridIcon className="h-4 w-4" />
-                    <span>فئات بدون قسم</span>
-                  </div>
-
-                  <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-7 text-white/70">
-                    هذه الفئات غير مربوطة بقسم رئيسي لكنها متاحة للاختيار واللعب.
-                  </div>
-                </div>
-
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/70">
-                  {uncategorized.length} فئات
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                {uncategorized.map((category) => {
-                  const active = selectedCategories.includes(category.id);
-
-                  return (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      active={active}
-                      infoOpen={openInfoId === category.id}
-                      onToggle={() => toggleCategory(category.id)}
-                      onInfoClick={handleInfoClick}
-                      theme={sectionThemes.default}
-                      availability={
+                  <div className="flex flex-wrap gap-4">
+                    {section.categories.map((category) => {
+                      const availability =
                         categoryAvailability[category.id] ?? {
                           availableGames: 0,
                           isSelectable: false,
@@ -784,21 +559,210 @@ export default function StartGameForm({
                           easyCount: 0,
                           mediumCount: 0,
                           hardCount: 0,
-                        }
-                      }
-                    />
+                        };
+
+                      const active = selectedCategories.includes(category.id);
+                      const badge = getAvailabilityBadge(availability);
+                      const infoOpen = openInfoId === category.id;
+
+                      return (
+                        <button
+                          key={category.id}
+                          type="button"
+                          onClick={() => toggleCategory(category.id)}
+                          className={`group relative w-[172px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
+                            active ? `ring-2 ${theme.selectedRing}` : ""
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={(event) => handleInfoClick(event, category.id)}
+                            className={`absolute left-[-10px] top-[-12px] z-30 inline-flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#08162f] text-lg font-black shadow-lg ${theme.info}`}
+                            aria-label={`عرض وصف ${category.name}`}
+                          >
+                            i
+                          </button>
+
+                          <div
+                            className={`absolute right-2 top-2 z-20 rounded-full border px-3 py-1 text-[11px] font-black ${badge.className}`}
+                          >
+                            {badge.text}
+                          </div>
+
+                          <div
+                            className={`relative h-[148px] overflow-hidden rounded-t-[1.55rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]`}
+                          >
+                            {category.image_url ? (
+                              <img
+                                src={category.image_url}
+                                alt={category.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div
+                                className={`h-full w-full bg-gradient-to-b ${theme.cardAccent} opacity-80`}
+                              />
+                            )}
+
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_58%)]" />
+                          </div>
+
+                          <div
+                            className={`relative rounded-b-[1.55rem] border-t-4 border-black/30 px-4 py-3 text-center ${theme.titleBar}`}
+                          >
+                            <div className="text-[1.1rem] font-black leading-tight text-white">
+                              {category.name}
+                            </div>
+                          </div>
+
+                          {active ? (
+                            <div className="absolute inset-0 rounded-[1.6rem] border-2 border-white/15 pointer-events-none" />
+                          ) : null}
+
+                          {infoOpen ? (
+                            <div className="absolute inset-x-2 bottom-[72px] z-30 rounded-[1rem] border border-white/10 bg-slate-950/95 p-3 text-right shadow-2xl">
+                              <div className="mb-1 text-sm font-black text-white">
+                                {category.name}
+                              </div>
+                              <div className="text-xs leading-6 text-white/70">
+                                {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+                              </div>
+                            </div>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {uncategorized.length > 0 ? (
+            <div className="relative">
+              <div className="mb-5 text-right">
+                <div className="mb-2 text-sm font-black text-white/45">
+                  {uncategorized.length} فئة فرعية
+                </div>
+                <h3 className="text-3xl font-black text-white md:text-5xl">
+                  فئات بدون قسم
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+                {uncategorized.map((category) => {
+                  const theme = getSectionTheme("default");
+                  const availability =
+                    categoryAvailability[category.id] ?? {
+                      availableGames: 0,
+                      isSelectable: false,
+                      mode: selectionMode,
+                      easyCount: 0,
+                      mediumCount: 0,
+                      hardCount: 0,
+                    };
+
+                  const active = selectedCategories.includes(category.id);
+                  const badge = getAvailabilityBadge(availability);
+                  const infoOpen = openInfoId === category.id;
+
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => toggleCategory(category.id)}
+                      className={`group relative w-[172px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
+                        active ? `ring-2 ${theme.selectedRing}` : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={(event) => handleInfoClick(event, category.id)}
+                        className={`absolute left-[-10px] top-[-12px] z-30 inline-flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#08162f] text-lg font-black shadow-lg ${theme.info}`}
+                        aria-label={`عرض وصف ${category.name}`}
+                      >
+                        i
+                      </button>
+
+                      <div
+                        className={`absolute right-2 top-2 z-20 rounded-full border px-3 py-1 text-[11px] font-black ${badge.className}`}
+                      >
+                        {badge.text}
+                      </div>
+
+                      <div className="relative h-[148px] overflow-hidden rounded-t-[1.55rem]">
+                        {category.image_url ? (
+                          <img
+                            src={category.image_url}
+                            alt={category.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className={`h-full w-full bg-gradient-to-b ${theme.cardAccent} opacity-80`} />
+                        )}
+
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_58%)]" />
+                      </div>
+
+                      <div
+                        className={`relative rounded-b-[1.55rem] border-t-4 border-black/30 px-4 py-3 text-center ${theme.titleBar}`}
+                      >
+                        <div className="text-[1.1rem] font-black leading-tight text-white">
+                          {category.name}
+                        </div>
+                      </div>
+
+                      {infoOpen ? (
+                        <div className="absolute inset-x-2 bottom-[72px] z-30 rounded-[1rem] border border-white/10 bg-slate-950/95 p-3 text-right shadow-2xl">
+                          <div className="mb-1 text-sm font-black text-white">
+                            {category.name}
+                          </div>
+                          <div className="text-xs leading-6 text-white/70">
+                            {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+                          </div>
+                        </div>
+                      ) : null}
+                    </button>
                   );
                 })}
               </div>
             </div>
           ) : null}
+
+          {groupedSections.length === 0 && uncategorized.length === 0 ? (
+            <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-8 text-center text-white/60">
+              لا توجد أقسام أو فئات جاهزة حاليًا.
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      {/* submit */}
+      <section className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
+        <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-right">
+          <div>
+            <div className="text-sm font-black text-white/45">جاهز لبدء اللعبة؟</div>
+            <div className="mt-2 text-xl font-black text-white md:text-2xl">
+              {isReadyToSubmit
+                ? "تم اختيار العدد المطلوب ويمكنك البدء الآن"
+                : `اختر ${remainingToSelect} فئات إضافية للمتابعة`}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="inline-flex min-h-[58px] items-center justify-center rounded-[1.2rem] bg-cyan-500 px-8 py-4 text-lg font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!isReadyToSubmit || gamesRemaining <= 0}
+          >
+            ابدأ اللعبة
+          </button>
         </div>
       </section>
 
       <style>{`
-        @keyframes glowPulse {
+        @keyframes heroGlow {
           0%, 100% {
-            opacity: 0.55;
+            opacity: 0.5;
           }
           50% {
             opacity: 1;
@@ -806,118 +770,9 @@ export default function StartGameForm({
         }
 
         .hero-glow {
-          animation: glowPulse 4.6s ease-in-out infinite;
+          animation: heroGlow 4.8s ease-in-out infinite;
         }
       `}</style>
     </form>
-  );
-}
-
-function CategoryCard({
-  category,
-  active,
-  infoOpen,
-  onToggle,
-  onInfoClick,
-  theme,
-  availability,
-}: {
-  category: Category;
-  active: boolean;
-  infoOpen: boolean;
-  onToggle: () => void;
-  onInfoClick: (event: ReactMouseEvent, categoryId: string) => void;
-  theme: {
-    badge: string;
-    glow: string;
-    iconBg: string;
-    iconText: string;
-  };
-  availability: CategoryAvailability;
-}) {
-  const badge = getAvailabilityBadge(availability);
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={[
-        "group relative overflow-hidden rounded-[1.2rem] border p-3 text-right shadow-[0_10px_20px_rgba(0,0,0,0.16)] transition duration-300",
-        active
-          ? "border-cyan-300/30 bg-[linear-gradient(180deg,rgba(21,53,94,0.95)_0%,rgba(7,17,40,0.98)_100%)] shadow-[0_18px_36px_rgba(34,211,238,0.10)]"
-          : "border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] hover:-translate-y-1 hover:border-white/20",
-      ].join(" ")}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-radial from-white/10 via-transparent to-transparent opacity-80" />
-
-      <button
-        type="button"
-        onClick={(event) => onInfoClick(event, category.id)}
-        className="absolute left-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-400/20 bg-sky-500 text-white shadow-lg"
-        aria-label={`عرض وصف ${category.name}`}
-      >
-        <InfoIcon className="h-4 w-4" />
-      </button>
-
-      <div className="relative">
-        <div className="mb-3 flex items-center justify-start">
-          <div
-            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${badge.className}`}
-          >
-            <span>{badge.text}</span>
-          </div>
-        </div>
-
-        {active ? (
-          <div className="mb-3 flex justify-center">
-            <div className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-100">
-              تم الاختيار
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mb-4 flex justify-center">
-          {category.image_url ? (
-            <div className="h-20 w-20 overflow-hidden rounded-[1rem] border border-white/10 bg-white/5 shadow-[0_8px_16px_rgba(0,0,0,0.16)]">
-              <img
-                src={category.image_url}
-                alt={category.name}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ) : (
-            <div
-              className={`inline-flex h-20 w-20 items-center justify-center rounded-[1rem] border ${theme.iconBg} ${theme.iconText} shadow-[0_8px_16px_rgba(0,0,0,0.16)]`}
-            >
-              <SparkIcon className="h-6 w-6" />
-            </div>
-          )}
-        </div>
-
-        <div className="text-center">
-          <h3 className="text-base font-black text-white md:text-lg">
-            {category.name}
-          </h3>
-          <p className="mt-2 text-xs font-bold text-white/45">
-            {active ? "اضغط لإلغاء الاختيار" : "اضغط لاختيار الفئة"}
-          </p>
-        </div>
-
-        {!availability.isSelectable ? (
-          <div className="mt-4 rounded-[0.95rem] border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
-            لا توجد أسئلة كافية لبدء لعبة كاملة
-          </div>
-        ) : null}
-
-        {infoOpen ? (
-          <div className="mt-4 rounded-[0.95rem] border border-white/10 bg-white/5 p-3 text-sm leading-7 text-white/75">
-            <div className="mb-2 font-black text-white">{category.name}</div>
-            <div>
-              {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </button>
   );
 }
