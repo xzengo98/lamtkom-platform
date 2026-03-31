@@ -278,12 +278,12 @@ function SessionCard({
 
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
-          href={`/game/start?session_id=${session.id}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 font-black text-slate-950 transition hover:bg-cyan-400"
-        >
-          <Icon name="continue" className="h-5 w-5" />
-          متابعة اللعبة
-        </Link>
+  href={`/game/board?sessionId=${session.id}`}
+  className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 font-black text-slate-950 transition hover:bg-cyan-400"
+>
+  <Icon name="continue" className="h-5 w-5" />
+  متابعة اللعبة
+</Link>
 
         <button
           type="button"
