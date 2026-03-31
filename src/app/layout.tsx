@@ -4,7 +4,7 @@ import Navbar from "@/components/layout/navbar";
 
 export const metadata: Metadata = {
   title: {
-    default: "منصة لمتنا - منصة ألعاب عربية",
+    default: "منصة لمتكم - منصة ألعاب عربية",
     template: "%s | لمتكم",
   },
   description:
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "لمتكم",
     description:
     "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
-    siteName: "لمتنا",
+    siteName: "لمتكم",
     locale: "ar_AR",
     type: "website",
   },

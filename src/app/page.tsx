@@ -33,7 +33,7 @@ type StepItem = {
 };
 
 const heroMockupImage = "https://f.top4top.io/p_3739zf7hj1.png";
-const heroLogo = "https://j.top4top.io/p_3742tc97v1.png";
+const heroLogo = "https://k.top4top.io/p_3742kost41.png";
 
 const gameCards: GameCardItem[] = [
   {
@@ -458,8 +458,8 @@ export default function HomePage() {
                 <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
                 <img
                   src={heroLogo}
-                  alt="شعار لمّتنا"
-                  className="h-28 w-28 object-contain md:h-36 md:w-36"
+                  alt="شعار لمتكم"
+                  className="h-28 w-28 object-contain md:h-45 md:w-45"
                 />
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function HomePage() {
             </div>
 
             <p className="mt-7 max-w-3xl text-base leading-8 text-white/72 md:text-lg">
-              منصّة لمّتنا تجمع الألعاب الجماعية في تجربة واحدة واضحة وسريعة،
+              منصّة لمتكم  تجمع الألعاب الجماعية في تجربة واحدة واضحة وسريعة،
               تتيح لك اللعب مع الأصدقاء، إنشاء الجولات، التنافس ضمن فرق،
               والاستمتاع بألعاب تعتمد على الذكاء والتفاعل على جميع الأجهزة.
             </p>
@@ -485,7 +485,7 @@ export default function HomePage() {
                 href="/games"
                 className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-7 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                جرّب لمّتنا
+                جرّب لمتكم
                 <ArrowLeftIcon className="h-4 w-4" />
               </Link>
 
@@ -663,7 +663,7 @@ export default function HomePage() {
           </div>
 
           <div className="text-sm font-bold text-white/50">
-            © {new Date().getFullYear()} لمّتنا — جميع الحقوق محفوظة.
+            © {new Date().getFullYear()} لمتكم — جميع الحقوق محفوظة.
           </div>
         </footer>
       </div>

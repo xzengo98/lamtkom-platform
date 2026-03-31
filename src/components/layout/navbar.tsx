@@ -107,8 +107,8 @@ export default function Navbar() {
         <div className="flex min-h-[84px] items-center justify-between gap-4">
           <Link href="/" className="flex shrink-0 items-center gap-3">
             <img
-              src="https://j.top4top.io/p_3742tc97v1.png"
-              alt="لمّتنا"
+              src="https://k.top4top.io/p_3742kost41.png"
+              alt="لمتكم"
               className="h-auto w-[96px] object-contain md:w-[122px]"
             />
           </Link>
