@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { CategoryAvailability } from "./page";
 
+
 type Category = {
   id: string;
   name: string;
@@ -47,10 +48,12 @@ const sectionThemes: Record<
     cardAccent: string;
     cardSurface: string;
     titleBar: string;
-    iconWrap: string;
     availability: string;
     selectedRing: string;
     info: string;
+    iconTint: string;
+    iconBg: string;
+    countBadge: string;
   }
 > = {
   general: {
@@ -59,10 +62,13 @@ const sectionThemes: Record<
     cardAccent: "from-orange-500/90 to-orange-600/95",
     cardSurface: "from-[#302010] to-[#191109]",
     titleBar: "bg-[linear-gradient(180deg,#e18942_0%,#c36023_100%)] text-white",
-    iconWrap: "border-orange-300/20 bg-orange-400/10 text-orange-100",
     availability: "border-orange-300/25 bg-[#13263b] text-orange-100",
-    selectedRing: "ring-orange-300/60 shadow-[0_0_0_2px_rgba(253,186,116,0.25)]",
+    selectedRing:
+      "ring-4 ring-orange-300/70 shadow-[0_0_0_3px_rgba(253,186,116,0.22),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
+    iconTint: "text-orange-100",
+    iconBg: "bg-[#112945]",
+    countBadge: "border-orange-300/20 bg-orange-400/10 text-orange-100",
   },
   islamic: {
     sectionBadge: "border-emerald-300/25 bg-emerald-400/10 text-emerald-100",
@@ -70,10 +76,13 @@ const sectionThemes: Record<
     cardAccent: "from-emerald-500/90 to-emerald-600/95",
     cardSurface: "from-[#17352a] to-[#0f211c]",
     titleBar: "bg-[linear-gradient(180deg,#2dbd8c_0%,#1c9b74_100%)] text-white",
-    iconWrap: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
     availability: "border-emerald-300/25 bg-[#13263b] text-emerald-100",
-    selectedRing: "ring-emerald-300/60 shadow-[0_0_0_2px_rgba(110,231,183,0.22)]",
+    selectedRing:
+      "ring-4 ring-emerald-300/70 shadow-[0_0_0_3px_rgba(110,231,183,0.22),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
+    iconTint: "text-emerald-100",
+    iconBg: "bg-[#112945]",
+    countBadge: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
   },
   sports: {
     sectionBadge: "border-cyan-300/25 bg-cyan-400/10 text-cyan-100",
@@ -81,10 +90,13 @@ const sectionThemes: Record<
     cardAccent: "from-cyan-500/90 to-sky-600/95",
     cardSurface: "from-[#123452] to-[#0b1f32]",
     titleBar: "bg-[linear-gradient(180deg,#1798df_0%,#0b7fca_100%)] text-white",
-    iconWrap: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
     availability: "border-cyan-300/25 bg-[#13263b] text-cyan-100",
-    selectedRing: "ring-cyan-300/60 shadow-[0_0_0_2px_rgba(103,232,249,0.22)]",
+    selectedRing:
+      "ring-4 ring-cyan-300/70 shadow-[0_0_0_3px_rgba(103,232,249,0.22),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
+    iconTint: "text-cyan-100",
+    iconBg: "bg-[#112945]",
+    countBadge: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
   },
   entertainment: {
     sectionBadge: "border-violet-300/25 bg-violet-400/10 text-violet-100",
@@ -92,10 +104,13 @@ const sectionThemes: Record<
     cardAccent: "from-violet-500/90 to-fuchsia-600/95",
     cardSurface: "from-[#2a1940] to-[#191126]",
     titleBar: "bg-[linear-gradient(180deg,#8f67ff_0%,#6f47ec_100%)] text-white",
-    iconWrap: "border-violet-300/20 bg-violet-400/10 text-violet-100",
     availability: "border-violet-300/25 bg-[#13263b] text-violet-100",
-    selectedRing: "ring-violet-300/60 shadow-[0_0_0_2px_rgba(196,181,253,0.22)]",
+    selectedRing:
+      "ring-4 ring-violet-300/70 shadow-[0_0_0_3px_rgba(196,181,253,0.22),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
+    iconTint: "text-violet-100",
+    iconBg: "bg-[#112945]",
+    countBadge: "border-violet-300/20 bg-violet-400/10 text-violet-100",
   },
   default: {
     sectionBadge: "border-white/15 bg-white/5 text-white/90",
@@ -103,10 +118,13 @@ const sectionThemes: Record<
     cardAccent: "from-slate-500/90 to-slate-700/95",
     cardSurface: "from-[#1d2742] to-[#101828]",
     titleBar: "bg-[linear-gradient(180deg,#2497dd_0%,#1280c9_100%)] text-white",
-    iconWrap: "border-white/10 bg-white/5 text-white",
     availability: "border-white/15 bg-[#13263b] text-white",
-    selectedRing: "ring-white/50 shadow-[0_0_0_2px_rgba(255,255,255,0.14)]",
+    selectedRing:
+      "ring-4 ring-white/60 shadow-[0_0_0_3px_rgba(255,255,255,0.14),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
+    iconTint: "text-white",
+    iconBg: "bg-[#112945]",
+    countBadge: "border-white/10 bg-white/5 text-white",
   },
 };
 
@@ -145,15 +163,7 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
 
 function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="8" width="16" height="8" rx="3" />
       <path d="M8 12h2" />
       <path d="M9 11v2" />
@@ -165,15 +175,7 @@ function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function UsersIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="9" cy="8" r="3" />
       <circle cx="17" cy="10" r="2.5" />
       <path d="M4 19a5 5 0 0 1 10 0" />
@@ -184,15 +186,7 @@ function UsersIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function GridIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7" rx="1.5" />
       <rect x="14" y="3" width="7" height="7" rx="1.5" />
       <rect x="3" y="14" width="7" height="7" rx="1.5" />
@@ -203,15 +197,7 @@ function GridIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function InfoIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 10v6" />
       <path d="M12 7h.01" />
@@ -221,15 +207,7 @@ function InfoIcon({ className = "h-4 w-4" }: { className?: string }) {
 
 function TicketIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 7a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4V7Z" />
       <path d="M12 8v8" />
     </svg>
@@ -238,18 +216,62 @@ function TicketIcon({ className = "h-4 w-4" }: { className?: string }) {
 
 function SparkIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
     </svg>
   );
+}
+
+function MosqueIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 20h14" />
+      <path d="M7 20v-7h10v7" />
+      <path d="M9 13V9l3-2 3 2v4" />
+      <path d="M18 20V8l-2-2" />
+      <path d="M6 20V10l2-2" />
+      <path d="M12 5h.01" />
+    </svg>
+  );
+}
+
+function GlobeIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a15 15 0 0 1 0 18" />
+      <path d="M12 3a15 15 0 0 0 0 18" />
+    </svg>
+  );
+}
+
+function FilmIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4" />
+    </svg>
+  );
+}
+
+function TrophyIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 21h8" />
+      <path d="M12 17v4" />
+      <path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" />
+      <path d="M5 6H3a3 3 0 0 0 3 3" />
+      <path d="M19 6h2a3 3 0 0 1-3 3" />
+    </svg>
+  );
+}
+
+function getSectionIcon(slug: string) {
+  if (slug === "islamic") return <MosqueIcon className="h-5 w-5" />;
+  if (slug === "sports") return <TrophyIcon className="h-5 w-5" />;
+  if (slug === "entertainment") return <FilmIcon className="h-5 w-5" />;
+  return <GlobeIcon className="h-5 w-5" />;
 }
 
 function SummaryBadge({
@@ -279,17 +301,6 @@ function SummaryBadge({
         <span>{label}</span>
       </div>
       <div className="text-lg font-black md:text-xl">{value}</div>
-    </div>
-  );
-}
-
-function SectionIconBubble({ slug }: { slug: string }) {
-  const icon =
-    slug === "islamic" ? "🕌" : slug === "sports" ? "🏆" : slug === "entertainment" ? "🎬" : "🌍";
-
-  return (
-    <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] border border-white/10 bg-white/8 text-2xl shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-      {icon}
     </div>
   );
 }
@@ -406,31 +417,16 @@ export default function StartGameForm({
     <form
       action={action}
       onSubmit={validateBeforeSubmit}
-      className="mx-auto max-w-[1600px] space-y-6 px-2 md:px-4"
-    >
+className="mx-auto max-w-[1650px] space-y-6 px-2 md:px-4"    >
       <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />
 
       {/* Top setup */}
       <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] md:p-6">
-        <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
-              <GamepadIcon className="h-4 w-4" />
-              <span>إعداد اللعبة</span>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-black text-white md:text-4xl">
-              جهّز الجولة قبل البدء
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
-              اختر اسم اللعبة وأسماء الفرق، ثم انتقل لاختيار 6 فئات بطريقة عرض واضحة
-              ومناسبة للعب الجماعي.
-            </p>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
-                <div className="mb-2 text-sm font-bold text-white/60">اسم اللعبة</div>
+        <div className="grid gap-5 xl:grid-cols-[1fr_1.25fr] xl:items-center">
+          <div className="order-2 xl:order-1">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[1rem] border border-white/10 bg-[#121d38] p-4">
+                <div className="mb-2 text-sm font-black text-white/70">اسم اللعبة</div>
                 <input
                   name="gameName"
                   value={gameName}
@@ -440,54 +436,74 @@ export default function StartGameForm({
                 />
               </div>
 
-              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
-                <div className="mb-2 text-sm font-bold text-white/60">الفريق الأول</div>
+              <div className="rounded-[1rem] border border-cyan-300/20 bg-cyan-500/10 p-4">
+                <div className="mb-2 text-sm font-black text-cyan-100">الفريق الأول</div>
                 <input
                   name="teamOne"
                   value={teamOne}
                   onChange={(e) => setTeamOne(e.target.value)}
                   placeholder="اسم الفريق الأول"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  className="w-full rounded-2xl border border-cyan-300/10 bg-[#0b1733] px-4 py-4 text-white outline-none transition focus:border-cyan-300/50"
                 />
               </div>
 
-              <div className="rounded-[1rem] border border-white/10 bg-white/5 p-4">
-                <div className="mb-2 text-sm font-bold text-white/60">الفريق الثاني</div>
+              <div className="rounded-[1rem] border border-orange-300/20 bg-orange-500/10 p-4">
+                <div className="mb-2 text-sm font-black text-orange-100">الفريق الثاني</div>
                 <input
                   name="teamTwo"
                   value={teamTwo}
                   onChange={(e) => setTeamTwo(e.target.value)}
                   placeholder="اسم الفريق الثاني"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+                  className="w-full rounded-2xl border border-orange-300/10 bg-[#24150d] px-4 py-4 text-white outline-none transition focus:border-orange-300/50"
                 />
               </div>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-            <SummaryBadge
-              label="الفئات المطلوبة"
-              value={String(REQUIRED_CATEGORY_COUNT)}
-              icon={<GridIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryBadge
-              label="المختار حاليًا"
-              value={`${selectedCount}/${REQUIRED_CATEGORY_COUNT}`}
-              accent="cyan"
-              icon={<SparkIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryBadge
-              label="الألعاب المتبقية"
-              value={String(gamesRemaining)}
-              accent="orange"
-              icon={<TicketIcon className="h-3.5 w-3.5" />}
-            />
-            <SummaryBadge
-              label="حالة الاختيار"
-              value={isReadyToSubmit ? "جاهز" : `متبقي ${remainingToSelect}`}
-              accent={isReadyToSubmit ? "emerald" : "default"}
-              icon={<UsersIcon className="h-3.5 w-3.5" />}
-            />
+          <div className="order-1 xl:order-2 text-right">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="submit"
+                disabled={!isReadyToSubmit || gamesRemaining <= 0}
+                className="inline-flex min-h-[56px] items-center justify-center rounded-[1.1rem] border border-cyan-300/20 bg-cyan-500 px-7 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                ابدأ اللعبة
+              </button>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+                <GamepadIcon className="h-4 w-4" />
+                <span>إعداد اللعبة</span>
+              </div>
+            </div>
+
+            <h1 className="mt-4 text-3xl font-black text-white md:text-5xl">
+              جهّز الجولة قبل البدء
+            </h1>
+
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
+              اختر اسم اللعبة وأسماء الفرق ثم انتقل لاختيار 6 فئات بطريقة عرض واضحة
+              ومناسبة للعب الجماعي.
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <SummaryBadge
+                label="الفئات المطلوبة"
+                value={String(REQUIRED_CATEGORY_COUNT)}
+                icon={<GridIcon className="h-3.5 w-3.5" />}
+              />
+              <SummaryBadge
+                label="المختار حاليًا"
+                value={`${selectedCount}/${REQUIRED_CATEGORY_COUNT}`}
+                accent="cyan"
+                icon={<SparkIcon className="h-3.5 w-3.5" />}
+              />
+              <SummaryBadge
+                label="الألعاب المتبقية"
+                value={String(gamesRemaining)}
+                accent="orange"
+                icon={<TicketIcon className="h-3.5 w-3.5" />}
+              />
+            </div>
           </div>
         </div>
 
@@ -498,9 +514,9 @@ export default function StartGameForm({
         ) : null}
       </section>
 
-      {/* Categories section */}
+      {/* Categories */}
       <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.04),transparent_24%),linear-gradient(180deg,#08152f_0%,#08162f_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] md:p-6">
-        <div className="mb-6 text-center">
+        <div className="mb-7 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
             <GridIcon className="h-4 w-4" />
             <span>اختيار الفئات</span>
@@ -515,8 +531,7 @@ export default function StartGameForm({
           </p>
 
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-base font-black text-white/85">
-            المختار: <span className="text-cyan-300">{selectedCount}</span> /{" "}
-            {REQUIRED_CATEGORY_COUNT}
+            المختار: <span className="text-cyan-300">{selectedCount}</span> / {REQUIRED_CATEGORY_COUNT}
           </div>
         </div>
 
@@ -532,19 +547,20 @@ export default function StartGameForm({
 
                 <div className="relative">
                   <div className="mb-5 flex items-center justify-between gap-4">
+                    <div className={`rounded-full border px-4 py-2 text-xs font-black ${theme.countBadge}`}>
+                      {section.categories.length} فئة فرعية
+                    </div>
+
                     <div className="text-right">
-                      <div className="mb-2 text-sm font-black text-white/45">
-                        {section.categories.length} فئة فرعية
-                      </div>
-                      <div className="flex items-center justify-end gap-3">
-                        <div>
-                          <h3 className="text-3xl font-black text-white md:text-5xl">
-                            {section.name}
-                          </h3>
+                      <div className="flex flex-row-reverse items-center justify-end gap-3">
+                        <div className={`relative flex h-14 w-14 items-center justify-center rounded-[1rem] border border-white/10 ${theme.iconBg} ${theme.iconTint} shadow-[0_8px_20px_rgba(0,0,0,0.18)]`}>
+                          <div className="absolute inset-[5px] rounded-[0.8rem] border border-white/10" />
+                          <div className="relative z-10">{getSectionIcon(section.slug)}</div>
                         </div>
-                        <div className={`rounded-[1rem] border p-2.5 ${theme.iconWrap}`}>
-                          <SectionIconBubble slug={section.slug} />
-                        </div>
+
+                        <h3 className="text-3xl font-black text-white md:text-5xl">
+                          {section.name}
+                        </h3>
                       </div>
                     </div>
                   </div>
@@ -570,8 +586,8 @@ export default function StartGameForm({
                           key={category.id}
                           type="button"
                           onClick={() => toggleCategory(category.id)}
-                          className={`group relative w-[172px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
-                            active ? `ring-2 ${theme.selectedRing}` : ""
+                          className={`group relative w-[calc(50%-0.5rem)] min-w-[150px] max-w-[180px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 sm:w-[172px] ${
+                            active ? `${theme.selectedRing} scale-[1.015]` : ""
                           }`}
                         >
                           <button
@@ -589,9 +605,13 @@ export default function StartGameForm({
                             {badge.text}
                           </div>
 
-                          <div
-                            className={`relative h-[148px] overflow-hidden rounded-t-[1.55rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]`}
-                          >
+                          {active ? (
+                            <div className="absolute bottom-2 left-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400 text-sm font-black text-slate-950 shadow-lg">
+                              ✓
+                            </div>
+                          ) : null}
+
+                          <div className="relative h-[148px] overflow-hidden rounded-t-[1.55rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]">
                             {category.image_url ? (
                               <img
                                 src={category.image_url}
@@ -599,9 +619,7 @@ export default function StartGameForm({
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div
-                                className={`h-full w-full bg-gradient-to-b ${theme.cardAccent} opacity-80`}
-                              />
+                              <div className={`h-full w-full bg-gradient-to-b ${theme.cardAccent} opacity-80`} />
                             )}
 
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_58%)]" />
@@ -616,7 +634,7 @@ export default function StartGameForm({
                           </div>
 
                           {active ? (
-                            <div className="absolute inset-0 rounded-[1.6rem] border-2 border-white/15 pointer-events-none" />
+                            <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] border-[3px] border-white/15" />
                           ) : null}
 
                           {infoOpen ? (
@@ -640,13 +658,25 @@ export default function StartGameForm({
 
           {uncategorized.length > 0 ? (
             <div className="relative">
-              <div className="mb-5 text-right">
-                <div className="mb-2 text-sm font-black text-white/45">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white">
                   {uncategorized.length} فئة فرعية
                 </div>
-                <h3 className="text-3xl font-black text-white md:text-5xl">
-                  فئات بدون قسم
-                </h3>
+
+                <div className="text-right">
+                  <div className="flex flex-row-reverse items-center justify-end gap-3">
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1rem] border border-white/10 bg-[#112945] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
+                      <div className="absolute inset-[5px] rounded-[0.8rem] border border-white/10" />
+                      <div className="relative z-10">
+                        <GlobeIcon className="h-5 w-5" />
+                      </div>
+                    </div>
+
+                    <h3 className="text-3xl font-black text-white md:text-5xl">
+                      فئات بدون قسم
+                    </h3>
+                  </div>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-4">
@@ -671,8 +701,8 @@ export default function StartGameForm({
                       key={category.id}
                       type="button"
                       onClick={() => toggleCategory(category.id)}
-                      className={`group relative w-[172px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
-                        active ? `ring-2 ${theme.selectedRing}` : ""
+                      className={`group relative w-[calc(50%-0.5rem)] min-w-[150px] max-w-[180px] shrink-0 rounded-[1.6rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 sm:w-[172px] ${
+                        active ? `${theme.selectedRing} scale-[1.015]` : ""
                       }`}
                     >
                       <button
@@ -690,6 +720,12 @@ export default function StartGameForm({
                         {badge.text}
                       </div>
 
+                      {active ? (
+                        <div className="absolute bottom-2 left-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400 text-sm font-black text-slate-950 shadow-lg">
+                          ✓
+                        </div>
+                      ) : null}
+
                       <div className="relative h-[148px] overflow-hidden rounded-t-[1.55rem]">
                         {category.image_url ? (
                           <img
@@ -700,7 +736,6 @@ export default function StartGameForm({
                         ) : (
                           <div className={`h-full w-full bg-gradient-to-b ${theme.cardAccent} opacity-80`} />
                         )}
-
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),transparent_58%)]" />
                       </div>
 
@@ -737,40 +772,9 @@ export default function StartGameForm({
         </div>
       </section>
 
-      {/* submit */}
-      <section className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
-        <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-right">
-          <div>
-            <div className="text-sm font-black text-white/45">جاهز لبدء اللعبة؟</div>
-            <div className="mt-2 text-xl font-black text-white md:text-2xl">
-              {isReadyToSubmit
-                ? "تم اختيار العدد المطلوب ويمكنك البدء الآن"
-                : `اختر ${remainingToSelect} فئات إضافية للمتابعة`}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="inline-flex min-h-[58px] items-center justify-center rounded-[1.2rem] bg-cyan-500 px-8 py-4 text-lg font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={!isReadyToSubmit || gamesRemaining <= 0}
-          >
-            ابدأ اللعبة
-          </button>
-        </div>
-      </section>
-
       <style>{`
-        @keyframes heroGlow {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
-
-        .hero-glow {
-          animation: heroGlow 4.8s ease-in-out infinite;
+        input::placeholder {
+          opacity: 0.7;
         }
       `}</style>
     </form>
