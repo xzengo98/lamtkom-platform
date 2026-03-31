@@ -240,21 +240,19 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-3">
-        <div className="flex h-[188px] w-[132px] items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={category.image_url}
-            alt={category.name}
-            className="h-full w-full object-cover object-center"
-          />
-        </div>
+      <div className="flex h-full w-full items-center justify-center bg-[#cbcccf] px-3 py-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={category.image_url}
+          alt={category.name}
+          className="h-full w-full object-contain"
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-4 py-4 text-center text-white">
+    <div className="flex h-full w-full items-center justify-center bg-[#cbcccf] px-4 py-4 text-center text-slate-900">
       <div className="text-base font-black">{category.name}</div>
     </div>
   );
@@ -274,23 +272,19 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[72px] w-[128px] items-center justify-center rounded-full border text-[16px] font-black transition";
+    "flex h-[82px] w-[136px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
 
   if (!question) {
-    return (
-      <div className={`${baseClass} border-slate-400/35 bg-[#cbcccf] text-red-700`}>
-        {points}
-      </div>
-    );
+    return <div className={baseClass}>{points}</div>;
   }
 
   if (used) {
     const usedClass =
       result === "teamOne"
-        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#44b9ea_0%,#2f9fd8_100%)] text-white"
+        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#45b9ea_0%,#2f9fd8_100%)] text-white"
         : result === "teamTwo"
-          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa75f_0%,#f28a34_100%)] text-white"
-          : "border-slate-700/50 bg-[linear-gradient(180deg,#162443_0%,#0b1530_100%)] text-white line-through decoration-2";
+          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa85f_0%,#f28a34_100%)] text-white"
+          : "border-slate-700/50 bg-[linear-gradient(180deg,#1a2746_0%,#101a34_100%)] text-white line-through decoration-2";
 
     return <div className={`${baseClass} ${usedClass}`}>{points}</div>;
   }
@@ -299,7 +293,7 @@ function QuestionPill({
     <button
       type="button"
       onClick={onOpen}
-      className={`${baseClass} border-slate-400/35 bg-[#cbcccf] text-red-700 hover:bg-[#d4d5d8] active:scale-[0.98]`}
+      className={`${baseClass} hover:bg-[#d5d6d8] active:scale-[0.98]`}
     >
       {points}
     </button>
@@ -337,15 +331,17 @@ function CategoryBoardColumn({
   }
 
   return (
-    <div className="flex w-full max-w-[445px] flex-col items-center">
-      <div className="mb-1 w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+    <div className="flex w-full max-w-[480px] flex-col items-center">
+      {/* العنوان العلوي */}
+      <div className="mb-0 w-[210px] rounded-t-[16px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[18px] font-black text-white">
           {column.category.name}
         </div>
       </div>
 
-      <div className="grid grid-cols-[128px_168px_128px] grid-rows-[90px_90px_90px] items-center justify-items-center gap-x-2 gap-y-1">
-        {/* يسار */}
+      {/* جسم الفئة */}
+      <div className="grid grid-cols-[136px_200px_136px] grid-rows-[90px_90px_90px] items-center justify-items-center gap-x-0 gap-y-[4px]">
+        {/* اليسار */}
         <div className="col-start-1 row-start-1">
           <QuestionPill
             question={left200}
@@ -377,11 +373,11 @@ function CategoryBoardColumn({
         </div>
 
         {/* الوسط */}
-        <div className="col-start-2 row-start-1 row-span-3 h-[274px] w-[168px] overflow-hidden rounded-[22px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
+        <div className="col-start-2 row-start-1 row-span-3 h-[278px] w-[200px] overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
           <CategoryIllustration category={column.category} />
         </div>
 
-        {/* يمين */}
+        {/* اليمين */}
         <div className="col-start-3 row-start-1">
           <QuestionPill
             question={right200}
@@ -413,7 +409,8 @@ function CategoryBoardColumn({
         </div>
       </div>
 
-      <div className="mt-1 w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+      {/* العنوان السفلي */}
+      <div className="mt-0 w-[210px] rounded-b-[16px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[16px] font-black text-white">
           {column.category.name}
         </div>
