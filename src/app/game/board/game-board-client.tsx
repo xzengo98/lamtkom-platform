@@ -272,7 +272,7 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[82px] w-[136px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
+    "flex h-[82px] w-[160px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
 
   if (!question) {
     return <div className={baseClass}>{points}</div>;
@@ -331,7 +331,7 @@ function CategoryBoardColumn({
   }
 
   return (
-    <div className="flex w-full max-w-[480px] flex-col items-center">
+    <div className="flex w-full max-w-[520px] flex-col items-center">
       {/* العنوان العلوي */}
       <div className="mb-0 w-[210px] rounded-t-[16px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[18px] font-black text-white">
@@ -339,10 +339,15 @@ function CategoryBoardColumn({
         </div>
       </div>
 
-      {/* جسم الفئة */}
-      <div className="grid grid-cols-[136px_200px_136px] grid-rows-[90px_90px_90px] items-center justify-items-center gap-x-0 gap-y-[4px]">
-        {/* اليسار */}
-        <div className="col-start-1 row-start-1">
+      {/* الجسم المدمج */}
+      <div className="relative h-[286px] w-[500px]">
+        {/* العمود الأوسط */}
+        <div className="absolute left-1/2 top-0 z-10 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
+          <CategoryIllustration category={column.category} />
+        </div>
+
+        {/* الصف الأول */}
+        <div className="absolute left-[0px] top-[6px] z-20">
           <QuestionPill
             question={left200}
             points={200}
@@ -351,34 +356,7 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left200)}
           />
         </div>
-
-        <div className="col-start-1 row-start-2">
-          <QuestionPill
-            question={left400}
-            points={400}
-            used={getUsed(left400)}
-            result={getResult(left400)}
-            onOpen={() => onOpenQuestion(left400)}
-          />
-        </div>
-
-        <div className="col-start-1 row-start-3">
-          <QuestionPill
-            question={left600}
-            points={600}
-            used={getUsed(left600)}
-            result={getResult(left600)}
-            onOpen={() => onOpenQuestion(left600)}
-          />
-        </div>
-
-        {/* الوسط */}
-        <div className="col-start-2 row-start-1 row-span-3 h-[278px] w-[200px] overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
-          <CategoryIllustration category={column.category} />
-        </div>
-
-        {/* اليمين */}
-        <div className="col-start-3 row-start-1">
+        <div className="absolute right-[0px] top-[6px] z-20">
           <QuestionPill
             question={right200}
             points={200}
@@ -388,7 +366,17 @@ function CategoryBoardColumn({
           />
         </div>
 
-        <div className="col-start-3 row-start-2">
+        {/* الصف الثاني */}
+        <div className="absolute left-[0px] top-[102px] z-20">
+          <QuestionPill
+            question={left400}
+            points={400}
+            used={getUsed(left400)}
+            result={getResult(left400)}
+            onOpen={() => onOpenQuestion(left400)}
+          />
+        </div>
+        <div className="absolute right-[0px] top-[102px] z-20">
           <QuestionPill
             question={right400}
             points={400}
@@ -398,7 +386,17 @@ function CategoryBoardColumn({
           />
         </div>
 
-        <div className="col-start-3 row-start-3">
+        {/* الصف الثالث */}
+        <div className="absolute left-[0px] top-[198px] z-20">
+          <QuestionPill
+            question={left600}
+            points={600}
+            used={getUsed(left600)}
+            result={getResult(left600)}
+            onOpen={() => onOpenQuestion(left600)}
+          />
+        </div>
+        <div className="absolute right-[0px] top-[198px] z-20">
           <QuestionPill
             question={right600}
             points={600}
