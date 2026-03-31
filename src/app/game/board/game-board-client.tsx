@@ -310,49 +310,48 @@ function CategoryCard({
   return (
     <div
       className={[
-        "group relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,31,60,0.98)_0%,rgba(7,14,30,0.99)_100%)] text-center shadow-[0_16px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-0.5",
-        compact ? "min-h-[86px] p-2" : "min-h-[126px] p-3",
+        "group relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,28,54,0.98)_0%,rgba(5,12,28,0.99)_100%)] text-center shadow-[0_16px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-0.5",
+        compact ? "min-h-[92px] p-2" : "min-h-[144px] p-2.5",
       ].join(" ")}
     >
       <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${visual.gradient} opacity-90`} />
       <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
-      <div className="relative flex h-full flex-col items-center justify-center">
-        <div
-          className={[
-            "relative mx-auto overflow-hidden rounded-[1rem] border border-white/10 shadow-[0_12px_24px_rgba(0,0,0,0.20)]",
-            compact ? "h-9 w-9" : "h-16 w-16",
-          ].join(" ")}
-        >
+      <div
+        className={[
+          "relative h-full w-full overflow-hidden rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(210,220,232,0.96)_0%,rgba(179,192,210,0.92)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]",
+          compact ? "pt-8" : "pt-10",
+        ].join(" ")}
+      >
+        <div className="absolute inset-x-3 top-2 z-20">
+          <div className="rounded-[0.95rem] border border-white/20 bg-[linear-gradient(180deg,#2aa0d8_0%,#1b8fca_100%)] px-3 py-2 text-center shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
+            <div
+              className={[
+                "overflow-hidden text-ellipsis whitespace-nowrap font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
+                compact ? "text-[10px]" : "text-sm md:text-[1.05rem]",
+              ].join(" ")}
+              title={category.name}
+            >
+              {category.name}
+            </div>
+          </div>
+        </div>
+
+        <div className="relative flex h-full items-center justify-center px-3 pb-3 pt-8">
           {category.image_url ? (
             <img
               src={category.image_url}
               alt={category.name}
-              className="h-full w-full object-cover"
+              className={[
+                "object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.18)]",
+                compact ? "max-h-[42px] max-w-[42px]" : "max-h-[92px] max-w-[92px]",
+              ].join(" ")}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-white/5 text-[10px] font-black text-white/60">
+            <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-slate-500/70">
               فئة
             </div>
           )}
-        </div>
-
-        <div
-          className={[
-            "relative mt-3 w-full overflow-hidden rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,21,48,0.98)_0%,rgba(4,12,28,1)_100%)] px-3 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
-            compact ? "py-2" : "py-3",
-          ].join(" ")}
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_55%)] opacity-80" />
-          <h3
-            className={[
-              "relative overflow-hidden text-ellipsis whitespace-nowrap font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
-              compact ? "text-[10px]" : "text-base md:text-[1.05rem]",
-            ].join(" ")}
-            title={category.name}
-          >
-            {category.name}
-          </h3>
         </div>
       </div>
     </div>
@@ -390,8 +389,8 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden rounded-[1.1rem] border transition duration-300 board-soft-float",
-        compact ? "min-h-[56px] px-1 py-2" : "min-h-[74px] px-1.5 py-2.5",
+        "group relative overflow-hidden rounded-[0.95rem] border transition duration-300 board-soft-float",
+        compact ? "min-h-[44px] px-1 py-1.5" : "min-h-[58px] px-1 py-2",
         disabled
           ? usedClass
           : "border-cyan-300/10 bg-[linear-gradient(180deg,rgba(20,40,85,1)_0%,rgba(4,14,34,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_18px_30px_rgba(34,211,238,0.14)]",
@@ -399,9 +398,8 @@ function QuestionCell({
     >
       {!disabled ? (
         <>
-          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_45%)] opacity-80" />
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent opacity-60" />
+          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_50%)] opacity-80" />
         </>
       ) : null}
 
@@ -409,7 +407,7 @@ function QuestionCell({
         <div
           className={[
             "font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]",
-            compact ? "text-[0.95rem] md:text-[1.1rem]" : "text-[1.35rem] md:text-[1.55rem]",
+            compact ? "text-[0.8rem] md:text-[0.95rem]" : "text-[1.15rem] md:text-[1.3rem]",
           ].join(" ")}
         >
           {points}
