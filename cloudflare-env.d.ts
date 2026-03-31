@@ -6,7 +6,7 @@ declare namespace Cloudflare {
 		IMAGES: ImagesBinding;
 		ASSETS: Fetcher;
 		NEXTJS_ENV: string;
-		WORKER_SELF_REFERENCE: Fetcher /* seenjeem-platform */;
+		WORKER_SELF_REFERENCE: Fetcher /* lamtkom-platform */;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}
