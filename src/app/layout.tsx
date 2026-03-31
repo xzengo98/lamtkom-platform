@@ -5,13 +5,13 @@ import Navbar from "@/components/layout/navbar";
 export const metadata: Metadata = {
   title: {
     default: "منصة لمتنا - منصة ألعاب عربية",
-    template: "%s | لمتنا",
+    template: "%s | لمتكم",
   },
   description:
     "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
-  applicationName: "لمتنا",
+  applicationName: "لمتكم",
   keywords: [
-    "لمّتنا",
+    "لمتكم",
     "ألعاب أسئلة",
     "مسابقات",
     "لعبة جماعية",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "codenames",
   ],
   openGraph: {
-    title: "لمتنا",
+    title: "لمتكم",
     description:
     "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
     siteName: "لمتنا",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "لمتنا",
+    title: "لمتكم",
     description:
     "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
   },

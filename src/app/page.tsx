@@ -33,11 +33,11 @@ type StepItem = {
 };
 
 const heroMockupImage = "https://f.top4top.io/p_3739zf7hj1.png";
-const heroLogo = "https://k.top4top.io/p_3722mj2o21.png";
+const heroLogo = "https://j.top4top.io/p_3742tc97v1.png";
 
 const gameCards: GameCardItem[] = [
   {
-    title: "لمّتنا",
+    title: "لمتكم",
     subtitle: "أسئلة وأجوبة",
     description:
       "اللعبة الرئيسية المبنية على الفئات والأسئلة والنقاط، مناسبة للعب الجماعي بين فريقين وبواجهة واضحة وسريعة.",
