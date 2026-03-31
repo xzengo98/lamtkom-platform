@@ -465,7 +465,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="mt-7 text-5xl font-black leading-none text-white md:text-7xl xl:text-[5.5rem]">
-             الجمعه عليك
+             الجمعه عليكم
             </h1>
 
             <div className="hero-ribbon mt-4 inline-flex rotate-[-2deg] items-center justify-center rounded-[1.4rem] border border-cyan-300/20 bg-cyan-500 px-6 py-4 shadow-[0_16px_40px_rgba(34,211,238,0.22)] md:px-10 md:py-5">
