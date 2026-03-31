@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "من نحن | لمّتنا",
+  title: "من نحن | لمتكم",
   description:
-    "تعرف على منصة لمّتنا، رؤيتها، فكرتها، والألعاب والتجارب التي تقدمها للمستخدمين والفعاليات.",
+    "تعرف على منصة لمتكم، رؤيتها، فكرتها، والألعاب والتجارب التي تقدمها للمستخدمين والفعاليات.",
 };
 
 type Pillar = {
@@ -233,7 +233,7 @@ export default function AboutPage() {
               </div>
 
               <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                لمّتنا منصة عربية للألعاب الجماعية
+                لمتكم منصة عربية للألعاب الجماعية
                 <br />
                 تجمع بين <span className="text-cyan-300">الترفيه</span> و
                 <span className="text-cyan-300"> التنظيم</span> و
@@ -241,7 +241,7 @@ export default function AboutPage() {
               </h1>
 
               <p className="mt-5 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                لمّتنا ليست مجرد صفحة لعبة واحدة، بل منصة مصممة لتقديم تجارب لعب
+                لمتكم ليست مجرد صفحة لعبة واحدة، بل منصة مصممة لتقديم تجارب لعب
                 جماعية أكثر ترتيبًا ووضوحًا، بحيث يستطيع المستخدم أو المجموعة
                 الدخول بسرعة والبدء في تجربة ممتعة، سواء داخل المنزل أو في جلسة
                 مع أصدقاء أو ضمن فعالية أو نشاط منظم.
@@ -275,7 +275,7 @@ export default function AboutPage() {
               <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-5">
                 <div className="text-sm font-bold text-slate-400">رؤيتنا</div>
                 <div className="mt-2 text-xl font-black text-white">
-                  أن تكون لمّتنا من أفضل التجارب العربية للألعاب الجماعية
+                  أن تكون لمتكم من أفضل التجارب العربية للألعاب الجماعية
                 </div>
                 <p className="mt-3 text-sm leading-7 text-slate-300">
                   تجربة حديثة، مرتبة، وسهلة الاستخدام، وتناسب أكثر من نوع جمهور
@@ -303,7 +303,7 @@ export default function AboutPage() {
             مرتكزات المنصة
           </div>
           <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-            ما الذي تقوم عليه لمّتنا؟
+            ما الذي تقوم عليه لمتكم؟
           </h2>
           <p className="mx-auto mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
             المنصة مبنية على فكرة أن الترفيه يمكن أن يكون منظمًا، وأن واجهة اللعب
@@ -332,7 +332,7 @@ export default function AboutPage() {
             <p className="mt-4 text-sm leading-8 text-slate-300 sm:text-base">
               في كثير من الأحيان تكون الفكرة نفسها ممتعة، لكن المشكلة تكون في
               طريقة التقديم أو إدارة الجولة أو التنقل بين الأسئلة أو متابعة ما
-              تم لعبه. هنا تأتي لمّتنا لتقدم تجربة منظمة من غير أن تقتل روح
+              تم لعبه. هنا تأتي لمتكم لتقدم تجربة منظمة من غير أن تقتل روح
               العفوية والمتعة.
             </p>
 
@@ -364,13 +364,13 @@ export default function AboutPage() {
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8 text-center">
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200">
-            داخل لمّتنا
+            داخل لمتكم
           </div>
           <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
             المنصة لا تتحدث عن لعبة واحدة فقط
           </h2>
           <p className="mx-auto mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-            الصفحة الجديدة توضح أن لمّتنا منصة متكاملة فيها أكثر من نوع تجربة،
+            الصفحة الجديدة توضح أن لمتكم منصة متكاملة فيها أكثر من نوع تجربة،
             مع حساب مستخدم وتنظيم أوضح واستمرارية أفضل.
           </p>
         </div>
@@ -388,7 +388,7 @@ export default function AboutPage() {
             قيمتنا
           </div>
           <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-            ماذا تريد لمّتنا أن تقدم للمستخدم؟
+            ماذا تريد لمتكم أن تقدم للمستخدم؟
           </h2>
         </div>
 
@@ -402,7 +402,7 @@ export default function AboutPage() {
       <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="rounded-[36px] border border-cyan-300/15 bg-gradient-to-br from-cyan-400/10 via-slate-900/95 to-slate-950/95 p-8 text-center shadow-[0_20px_80px_rgba(8,47,73,0.35)]">
           <div className="inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-extrabold text-cyan-100">
-            ابدأ رحلتك مع لمّتنا
+            ابدأ رحلتك مع لمتكم
           </div>
 
           <h2 className="mt-4 text-2xl font-black text-white sm:text-4xl">
@@ -411,7 +411,7 @@ export default function AboutPage() {
 
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
             سواء كنت تبحث عن تجربة خفيفة مع الأصدقاء أو منصة مرتبة لعرض الألعاب
-            والأنشطة بشكل أجمل، لمّتنا تعطيك بداية أقوى وتجربة أوضح.
+            والأنشطة بشكل أجمل، لمتكم تعطيك بداية أقوى وتجربة أوضح.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

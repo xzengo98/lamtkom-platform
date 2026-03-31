@@ -295,7 +295,7 @@ export default function PricingPage() {
               </div>
 
               <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                اختر الخطة المناسبة لتجربة <span className="text-cyan-300">لمّتنا</span>
+                اختر الخطة المناسبة لتجربة <span className="text-cyan-300">لمتكم</span>
                 <br />
                 واستفد من جميع ألعاب المنصة بشكل أوضح وأفضل
               </h1>

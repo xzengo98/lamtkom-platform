@@ -120,7 +120,7 @@ export default function RegisterPage() {
           </span>
 
           <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">
-            ابدأ استخدام منصة لمّتنا
+            ابدأ استخدام منصة لمتكم
             <span className="block text-cyan-300">بخطوات بسيطة وواضحة</span>
           </h1>
 

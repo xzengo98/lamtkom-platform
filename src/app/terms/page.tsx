@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "الشروط والأحكام | لمّتنا",
-  description: "الشروط والأحكام الخاصة باستخدام منصة لمّتنا.",
+  title: "الشروط والأحكام | لمتكم",
+  description: "الشروط والأحكام الخاصة باستخدام منصة لمتكم.",
 };
 
 export default function TermsPage() {
@@ -9,7 +9,7 @@ export default function TermsPage() {
       <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold">الشروط والأحكام</h1>
         <p className="mt-4 text-white/70">
-          باستخدامك منصة لمّتنا، فإنك توافق على هذه الشروط والأحكام.
+          باستخدامك منصة لمتكم، فإنك توافق على هذه الشروط والأحكام.
         </p>
 
         <div className="mt-10 space-y-8 text-white/80">

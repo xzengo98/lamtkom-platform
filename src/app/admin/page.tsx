@@ -195,7 +195,7 @@ export default async function AdminPage() {
     },
     {
       title: "إضافة قسم جديد",
-      description: "أنشئ قسمًا رئيسيًا جديدًا للعبة لمّتنا.",
+      description: "أنشئ قسمًا رئيسيًا جديدًا للعبة لمتكم.",
       href: "/admin/sections/new",
       tone: "orange",
       icon: "➕",
@@ -302,7 +302,7 @@ export default async function AdminPage() {
       icon: "👤",
     },
     {
-      title: "ألعاب لمّتنا المنتهية",
+      title: "ألعاب لمتكم المنتهية",
       description: "راجع الجلسات والألعاب السابقة الخاصة باللعبة الرئيسية.",
       href: "/admin/games",
       tone: "slate",
@@ -334,15 +334,15 @@ export default async function AdminPage() {
           </div>
           <h1 className="mt-4 text-4xl font-black text-white md:text-5xl">Admin Dashboard</h1>
           <p className="mt-3 max-w-3xl text-white/65">
-            صفحة موحدة لإدارة ألعاب المنصة: لمّتنا، برا السالفة، و Codenames، مع
+            صفحة موحدة لإدارة ألعاب المنصة: لمتكم، برا السالفة، و Codenames، مع
             وصول سريع لأهم الصفحات والإحصائيات.
           </p>
         </div>
 
         <section>
           <SectionHeader
-            badge="إحصائيات لمّتنا"
-            title="إدارة لمّتنا"
+            badge="إحصائيات لمتكم"
+            title="إدارة لمتكم"
             description="إدارة لعبة الأسئلة والأجوبة الرئيسية مع كل الأدوات اليومية الخاصة بالأقسام والفئات والأسئلة."
           />
 

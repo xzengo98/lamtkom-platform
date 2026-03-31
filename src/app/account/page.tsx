@@ -515,7 +515,7 @@ export default function AccountPage() {
         <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a1020] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-8">
           <div className="mb-6">
             <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/70">
-              لعبة لمّتنا
+              لعبة لمتكم
             </div>
             <h2 className="mt-4 text-3xl font-black text-white">الجولات غير المكتملة</h2>
             <p className="mt-2 text-white/65">

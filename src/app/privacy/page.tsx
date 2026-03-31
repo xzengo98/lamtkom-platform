@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "سياسة الخصوصية | لمّتنا",
-  description: "سياسة الخصوصية الخاصة بمنصة لمّتنا.",
+  title: "سياسة الخصوصية | لمتكم",
+  description: "سياسة الخصوصية الخاصة بمنصة لمتكم.",
 };
 
 export default function PrivacyPage() {
@@ -9,7 +9,7 @@ export default function PrivacyPage() {
       <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold">سياسة الخصوصية</h1>
         <p className="mt-4 text-white/70">
-          نحن نحترم خصوصيتك ونعمل على حماية بياناتك الشخصية عند استخدام منصة لمّتنا.
+          نحن نحترم خصوصيتك ونعمل على حماية بياناتك الشخصية عند استخدام منصة لمتكم.
         </p>
 
         <div className="mt-10 space-y-8 text-white/80">
