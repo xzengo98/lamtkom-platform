@@ -342,12 +342,12 @@ function CategoryBoardColumn({
       {/* الجسم المدمج */}
       <div className="relative h-[286px] w-[500px]">
         {/* العمود الأوسط */}
-        <div className="absolute left-1/2 top-0 z-10 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
+        <div className="absolute left-1/2 top-0 z-20 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
           <CategoryIllustration category={column.category} />
         </div>
 
         {/* الصف الأول */}
-        <div className="absolute left-[0px] top-[6px] z-20">
+        <div className="absolute left-[0px] top-[6px] z-0">
           <QuestionPill
             question={left200}
             points={200}
@@ -356,7 +356,7 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left200)}
           />
         </div>
-        <div className="absolute right-[0px] top-[6px] z-20">
+        <div className="absolute right-[0px] top-[6px] z-0">
           <QuestionPill
             question={right200}
             points={200}
@@ -367,7 +367,7 @@ function CategoryBoardColumn({
         </div>
 
         {/* الصف الثاني */}
-        <div className="absolute left-[0px] top-[102px] z-20">
+        <div className="absolute left-[0px] top-[102px] z-0">
           <QuestionPill
             question={left400}
             points={400}
@@ -376,7 +376,7 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left400)}
           />
         </div>
-        <div className="absolute right-[0px] top-[102px] z-20">
+        <div className="absolute right-[0px] top-[102px] z-0">
           <QuestionPill
             question={right400}
             points={400}
@@ -387,7 +387,7 @@ function CategoryBoardColumn({
         </div>
 
         {/* الصف الثالث */}
-        <div className="absolute left-[0px] top-[198px] z-20">
+        <div className="absolute left-[0px] top-[198px] z-0">
           <QuestionPill
             question={left600}
             points={600}
@@ -396,7 +396,7 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left600)}
           />
         </div>
-        <div className="absolute right-[0px] top-[198px] z-20">
+        <div className="absolute right-[0px] top-[198px] z-0">
           <QuestionPill
             question={right600}
             points={600}
