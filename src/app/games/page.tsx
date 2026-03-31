@@ -14,7 +14,7 @@ type GameCardItem = {
 
 const gameCards: GameCardItem[] = [
   {
-    title: "لمّتنا",
+    title: "لمتكم",
     subtitle: "أسئلة وأجوبة",
     description:
       "اللعبة الرئيسية المبنية على الفئات والأسئلة والنقاط بين فريقين، مناسبة للمنافسة الجماعية بجلسة واضحة وسريعة.",
@@ -340,7 +340,7 @@ export default function GamesPage() {
                 href="/game/start"
                 className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
               >
-                ابدأ لعبة لمّتنا
+                ابدأ لعبة لمتكم
                 <ArrowLeftIcon className="h-4 w-4" />
               </Link>
 
