@@ -240,8 +240,8 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-4">
-        <div className="flex h-[175px] w-[126px] items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+      <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-3">
+        <div className="flex h-[188px] w-[132px] items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={category.image_url}
@@ -274,7 +274,7 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[78px] w-[145px] items-center justify-center rounded-full border text-[18px] font-black transition";
+    "flex h-[72px] w-[128px] items-center justify-center rounded-full border text-[16px] font-black transition";
 
   if (!question) {
     return (
@@ -337,14 +337,14 @@ function CategoryBoardColumn({
   }
 
   return (
-    <div className="flex w-full max-w-[500px] flex-col items-center">
-      <div className="mb-2 w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+    <div className="flex w-full max-w-[445px] flex-col items-center">
+      <div className="mb-1 w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[18px] font-black text-white">
           {column.category.name}
         </div>
       </div>
 
-      <div className="grid grid-cols-[145px_170px_145px] grid-rows-[100px_100px_100px] items-center justify-items-center gap-x-4 gap-y-4">
+      <div className="grid grid-cols-[128px_168px_128px] grid-rows-[90px_90px_90px] items-center justify-items-center gap-x-2 gap-y-1">
         {/* يسار */}
         <div className="col-start-1 row-start-1">
           <QuestionPill
@@ -377,7 +377,7 @@ function CategoryBoardColumn({
         </div>
 
         {/* الوسط */}
-        <div className="col-start-2 row-start-1 row-span-3 h-[276px] w-[170px] overflow-hidden rounded-[22px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
+        <div className="col-start-2 row-start-1 row-span-3 h-[274px] w-[168px] overflow-hidden rounded-[22px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
           <CategoryIllustration category={column.category} />
         </div>
 
@@ -413,7 +413,7 @@ function CategoryBoardColumn({
         </div>
       </div>
 
-      <div className="mt-2 w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+      <div className="mt-1 w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[16px] font-black text-white">
           {column.category.name}
         </div>
