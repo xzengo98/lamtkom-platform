@@ -1112,43 +1112,95 @@ export default function CodenamesBoardClient({
   }
 
   function renderSpyMasterCard(card: CardRow, mobile: boolean) {
-    const cardView = getCardView(card);
-    const wrapperClass = mobile
-      ? "mobile-card aspect-[1.05] min-h-0"
-      : "board-desktop-card min-h-[122px]";
-    const textClass = mobile ? "mobile-card-word" : "card-word-text";
+  const cardView = getCardView(card);
+  const isPreviewed = previewCardSet.has(card.id);
+  const isRemotePreview =
+    isPreviewed && previewSelection && previewSelection.playerId !== safeCurrentPlayer.id;
 
-    return (
+  const wrapperClass = mobile
+    ? "mobile-card aspect-[1.05] min-h-0"
+    : "board-desktop-card min-h-[122px]";
+
+  const textClass = mobile ? "mobile-card-word" : "card-word-text";
+
+  return (
+    <div key={card.id} className="relative">
       <button
-        key={card.id}
         type="button"
-        className={`${cardView.className} ${wrapperClass} flex w-full items-center justify-center px-3 py-4 text-center`}
+        className={`${cardView.className} ${wrapperClass} flex w-full items-center justify-center px-3 py-4 text-center ${
+          isPreviewed ? "card-previewed" : ""
+        }`}
         style={cardView.style}
       >
         <div className="card-inner-overlay" />
         <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
       </button>
-    );
-  }
+
+      {isPreviewed && previewSelection && (
+        <div className="pointer-events-none absolute inset-x-2 bottom-2 z-20">
+          <div
+            className={`rounded-full px-2 py-1 text-center text-[10px] font-black uppercase shadow-lg ${
+              previewSelection.team === "blue"
+                ? "bg-cyan-500/90 text-white"
+                : previewSelection.team === "red"
+                ? "bg-orange-500/90 text-white"
+                : "bg-white/90 text-black"
+            }`}
+          >
+            {isRemotePreview
+              ? `${previewSelection.playerName} يفكر`
+              : "تم التحديد"}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   function renderNeutralUnrevealedCard(card: CardRow, mobile: boolean) {
-    const cardView = getCardView(card);
-    const wrapperClass = mobile
-      ? "mobile-card aspect-[1.05] min-h-0"
-      : "board-desktop-card min-h-[122px]";
-    const textClass = mobile ? "mobile-card-word" : "card-word-text";
+  const cardView = getCardView(card);
+  const isPreviewed = previewCardSet.has(card.id);
+  const isRemotePreview =
+    isPreviewed && previewSelection && previewSelection.playerId !== safeCurrentPlayer.id;
 
-    return (
+  const wrapperClass = mobile
+    ? "mobile-card aspect-[1.05] min-h-0"
+    : "board-desktop-card min-h-[122px]";
+
+  const textClass = mobile ? "mobile-card-word" : "card-word-text";
+
+  return (
+    <div key={card.id} className="relative">
       <div
-        key={card.id}
-        className={`${cardView.className} ${wrapperClass} flex items-center justify-center px-3 py-4 text-center`}
+        className={`${cardView.className} ${wrapperClass} flex items-center justify-center px-3 py-4 text-center ${
+          isPreviewed ? "card-previewed" : ""
+        }`}
         style={cardView.style}
       >
         <div className="card-inner-overlay" />
         <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
       </div>
-    );
-  }
+
+      {isPreviewed && previewSelection && (
+        <div className="pointer-events-none absolute inset-x-2 bottom-2 z-20">
+          <div
+            className={`rounded-full px-2 py-1 text-center text-[10px] font-black uppercase shadow-lg ${
+              previewSelection.team === "blue"
+                ? "bg-cyan-500/90 text-white"
+                : previewSelection.team === "red"
+                ? "bg-orange-500/90 text-white"
+                : "bg-white/90 text-black"
+            }`}
+          >
+            {isRemotePreview
+              ? `${previewSelection.playerName} يفكر`
+              : "تم التحديد"}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   function renderBoardCard(card: CardRow, mobile: boolean) {
     if (card.is_revealed) {
