@@ -450,7 +450,7 @@ export default function HomePage() {
           <div className="relative mx-auto flex max-w-5xl flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100 shadow-[0_8px_24px_rgba(34,211,238,0.12)]">
               <SparkIcon className="h-4 w-4" />
-              <span>منصة ألعاب جماعية أونلاين وأوفلاين</span>
+              <span>منصة ألعاب عربية جماعية</span>
             </div>
 
             <div className="mt-7 flex justify-center">
