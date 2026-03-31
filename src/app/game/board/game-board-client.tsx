@@ -293,14 +293,14 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-0 pb-0 pt-2">
+      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-0 pb-0 pt-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.16)_45%,transparent_72%)]" />
-        <div className="absolute inset-x-0 bottom-0 top-1 rounded-[28px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.78),rgba(255,255,255,0.2)_58%,transparent_78%)]" />
+        <div className="absolute inset-x-0 bottom-0 top-0 rounded-[26px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.82),rgba(255,255,255,0.20)_58%,transparent_78%)]" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={category.image_url}
           alt={category.name}
-          className="relative z-10 h-[228px] w-[99%] object-contain drop-shadow-[0_12px_22px_rgba(15,23,42,0.22)]"
+          className="relative z-10 h-[250px] w-[100%] object-contain drop-shadow-[0_14px_24px_rgba(15,23,42,0.22)]"
         />
       </div>
     );
@@ -327,9 +327,9 @@ function CategoryCard({
 
   return (
     <div
-      className={`relative flex h-[484px] w-[212px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 ${visual.glow}`}
+      className={`relative flex h-[518px] w-[214px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 ${visual.glow}`}
     >
-      <div className={`relative h-[316px] ${visual.body}`}>
+      <div className={`relative h-[310px] ${visual.body}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_55%)]" />
         <div className="absolute inset-x-0 top-0 h-[90px] bg-[linear-gradient(180deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0)_100%)]" />
 
@@ -339,12 +339,12 @@ function CategoryCard({
           </div>
         </div>
 
-        <div className="absolute inset-x-0 top-[44px] bottom-0">
+        <div className="absolute inset-x-0 top-[42px] bottom-0">
           <CategoryIllustration category={category} />
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1f3367_0%,#142853_100%)] p-[2px]">
+      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1f3367_0%,#142853_100%)] p-[3px]">
         {children}
       </div>
     </div>
@@ -355,28 +355,33 @@ function QuestionCell({
   question,
   points,
   used,
+  result = "none",
   onOpen,
 }: {
   question: QuestionRow | null;
   points: 200 | 400 | 600;
   used: boolean;
+  result?: QuestionResult;
   onOpen?: () => void;
 }) {
   const defaultPalette =
-    "bg-[linear-gradient(180deg,#58c6f2_0%,#37addf_100%)] text-white";
+    "bg-[linear-gradient(180deg,#203a73_0%,#162c5c_100%)] text-white";
 
-  const revealedPalette =
-    "bg-[linear-gradient(180deg,#5f718a_0%,#425370_100%)] text-white";
+  const answeredBluePalette =
+    "bg-[linear-gradient(180deg,#3aa8da_0%,#1f8fc5_100%)] text-white";
 
-  const emptyPalette =
-    "bg-[linear-gradient(180deg,#51617b_0%,#3d4e69_100%)] text-white/70";
+  const answeredOrangePalette =
+    "bg-[linear-gradient(180deg,#ff9f59_0%,#ef7f22_100%)] text-white";
+
+  const noAnswerPalette =
+    "bg-[linear-gradient(180deg,#1b2f5d_0%,#14264d_100%)] text-white";
 
   if (!question) {
     return (
       <button
         type="button"
         disabled
-        className={`flex h-[56px] w-full items-center justify-center rounded-[10px] text-[15px] font-black ${emptyPalette}`}
+        className={`flex h-[62px] w-full items-center justify-center rounded-[10px] text-[16px] font-black ${noAnswerPalette}`}
       >
         –
       </button>
@@ -384,11 +389,18 @@ function QuestionCell({
   }
 
   if (used) {
+    const usedClass =
+      result === "teamOne"
+        ? answeredBluePalette
+        : result === "teamTwo"
+          ? answeredOrangePalette
+          : noAnswerPalette;
+
     return (
       <button
         type="button"
         disabled
-        className={`flex h-[56px] w-full items-center justify-center rounded-[10px] border border-white/6 text-[15px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${revealedPalette}`}
+        className={`flex h-[62px] w-full items-center justify-center rounded-[10px] border border-white/6 text-[16px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${usedClass}`}
       >
         {points}
       </button>
@@ -399,7 +411,7 @@ function QuestionCell({
     <button
       type="button"
       onClick={onOpen}
-      className={`flex h-[56px] w-full items-center justify-center rounded-[10px] border border-white/8 text-[15px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] transition hover:brightness-105 active:scale-[0.99] ${defaultPalette}`}
+      className={`flex h-[62px] w-full items-center justify-center rounded-[10px] border border-white/8 text-[16px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] transition hover:brightness-105 active:scale-[0.99] ${defaultPalette}`}
     >
       {points}
     </button>
@@ -698,13 +710,16 @@ export default function GameBoardClient({
                 {column.rows.map((row) => (
                   <div
                     key={`${column.category.id}-${row.points}`}
-                    className="grid grid-cols-2 gap-[2px] bg-[#10254e] p-[2px]"
+                    className="grid grid-cols-2 gap-[3px] bg-[#0f2247] p-[3px]"
                   >
                     {[0, 1].map((index) => {
                       const question = row.questions[index] ?? null;
                       const used = question
                         ? boardState.usedQuestionIds.includes(question.id)
                         : true;
+                      const result = question
+                        ? boardState.questionResults[question.id] ?? "none"
+                        : "none";
 
                       return (
                         <QuestionCell
@@ -712,6 +727,7 @@ export default function GameBoardClient({
                           question={question}
                           points={row.points}
                           used={used}
+                          result={result}
                           onOpen={() => handleOpenQuestion(question)}
                         />
                       );
