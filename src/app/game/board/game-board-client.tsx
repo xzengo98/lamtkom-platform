@@ -241,12 +241,12 @@ function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-4">
-        <div className="flex h-[160px] w-[92%] items-center justify-center overflow-hidden rounded-[16px] border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex h-[170px] w-[92%] items-center justify-center overflow-hidden rounded-[16px] border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={category.image_url}
             alt={category.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-center"
           />
         </div>
       </div>
@@ -324,56 +324,53 @@ function CategoryBoardColumn({
       </div>
 
       <div className="mt-0 grid h-[470px] grid-cols-[1fr_150px_1fr] grid-rows-3 gap-x-4 gap-y-4">
-        <div className="row-span-3 overflow-hidden rounded-[20px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
-          <CategoryIllustration category={column.category} />
-        </div>
-
+        {/* اليسار */}
         {column.rows.map((row, rowIndex) => {
           const leftQuestion = row.questions[0] ?? null;
-          const rightQuestion = row.questions[1] ?? null;
-
           const leftUsed = leftQuestion
             ? boardState.usedQuestionIds.includes(leftQuestion.id)
             : true;
-
-          const rightUsed = rightQuestion
-            ? boardState.usedQuestionIds.includes(rightQuestion.id)
-            : true;
-
           const leftResult = leftQuestion
             ? boardState.questionResults[leftQuestion.id] ?? "none"
             : "none";
 
+          return (
+            <div key={`${column.category.id}-${row.points}-left-${rowIndex}`} className="col-start-1 self-center">
+              <QuestionPill
+                question={leftQuestion}
+                points={row.points}
+                used={leftUsed}
+                result={leftResult}
+                onOpen={() => onOpenQuestion(leftQuestion)}
+              />
+            </div>
+          );
+        })}
+
+        {/* الوسط - الفئة والصورة */}
+        <div className="col-start-2 row-span-3 overflow-hidden rounded-[20px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
+          <CategoryIllustration category={column.category} />
+        </div>
+
+        {/* اليمين */}
+        {column.rows.map((row, rowIndex) => {
+          const rightQuestion = row.questions[1] ?? null;
+          const rightUsed = rightQuestion
+            ? boardState.usedQuestionIds.includes(rightQuestion.id)
+            : true;
           const rightResult = rightQuestion
             ? boardState.questionResults[rightQuestion.id] ?? "none"
             : "none";
 
           return (
-            <div
-              key={`${column.category.id}-${row.points}-${rowIndex}`}
-              className="contents"
-            >
-              <div className="self-center">
-                <QuestionPill
-                  question={leftQuestion}
-                  points={row.points}
-                  used={leftUsed}
-                  result={leftResult}
-                  onOpen={() => onOpenQuestion(leftQuestion)}
-                />
-              </div>
-
-              <div className="hidden" />
-
-              <div className="self-center">
-                <QuestionPill
-                  question={rightQuestion}
-                  points={row.points}
-                  used={rightUsed}
-                  result={rightResult}
-                  onOpen={() => onOpenQuestion(rightQuestion)}
-                />
-              </div>
+            <div key={`${column.category.id}-${row.points}-right-${rowIndex}`} className="col-start-3 self-center">
+              <QuestionPill
+                question={rightQuestion}
+                points={row.points}
+                used={rightUsed}
+                result={rightResult}
+                onOpen={() => onOpenQuestion(rightQuestion)}
+              />
             </div>
           );
         })}
