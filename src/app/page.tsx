@@ -33,6 +33,7 @@ type StepItem = {
 };
 
 const heroMockupImage = "https://f.top4top.io/p_3739zf7hj1.png";
+const heroLogo = "https://k.top4top.io/p_3722mj2o21.png";
 
 const gameCards: GameCardItem[] = [
   {
@@ -438,120 +439,126 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_20%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
       <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-8">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+        <section className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,18,40,0.98)_0%,rgba(4,10,26,0.99)_100%)] px-5 py-10 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:px-8 md:py-14 xl:px-12 xl:py-16">
           <div className="pointer-events-none absolute inset-0">
-            <div className="hero-glow absolute -right-10 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-            <div className="hero-glow absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-violet-400/10 blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.22)_1px,transparent_1px)] [background-size:24px_24px]" />
+            <div className="hero-glow absolute left-1/2 top-16 h-40 w-40 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+            <div className="hero-glow absolute right-0 top-0 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
+            <div className="hero-glow absolute bottom-0 left-0 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl" />
           </div>
 
-          <div className="relative grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
-            {/* النص أولًا على سطح المكتب */}
-            <div className="order-2 lg:order-1 text-center lg:text-right">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
-                <GamesIcon className="h-4 w-4" />
-                <span>منصة عربية للألعاب الجماعية</span>
-              </div>
+          <div className="relative mx-auto flex max-w-5xl flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100 shadow-[0_8px_24px_rgba(34,211,238,0.12)]">
+              <SparkIcon className="h-4 w-4" />
+              <span>منصة ألعاب جماعية أونلاين وأوفلاين</span>
+            </div>
 
-              <h1 className="mt-5 text-4xl font-black leading-tight text-white md:text-5xl xl:text-6xl">
-                لمّتنا
-                <span className="block text-cyan-200">منصة ألعاب جماعية أونلاين و اوفلاين بتجربة احترافية</span>
-              </h1>
-
-              <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-white/72 lg:mx-0">
-               منصة لمّتنا هي موقع ألعاب جماعية أونلاين يقدم تجربة تفاعلية احترافية، تتيح إنشاء غرف ألعاب، دعوة الأصدقاء، اللعب ضمن فرق، والاستمتاع بألعاب تعتمد على الذكاء والتفكير، متوافقة مع جميع الأجهزة.
-              </p>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <Link
-                  href="/games"
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
-                >
-                  استعرض الألعاب
-                  <ArrowLeftIcon className="h-4 w-4" />
-                </Link>
-
-                {loading ? (
-                  <div className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white/60">
-                    جارٍ تحميل حالتك...
-                  </div>
-                ) : isLoggedIn ? (
-                  <Link
-                    href="/account"
-                    className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
-                  >
-                    أهلًا {username || "بك"} — حسابي
-                  </Link>
-                ) : (
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Link
-                      href="/register"
-                      className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
-                    >
-                      إنشاء حساب جديد
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
-                    >
-                      تسجيل الدخول
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-                <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                  <div className="mb-2 inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2 text-cyan-100">
-                    <GamesIcon className="h-4 w-4" />
-                  </div>
-                  <div className="text-2xl font-black text-white">
-                    {activeGamesCount}
-                  </div>
-                  <div className="mt-1 text-xs font-bold text-white/55">
-                    الألعاب المتاحة الآن
-                  </div>
-                </div>
-
-                <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                  <div className="mb-2 inline-flex rounded-2xl border border-orange-300/20 bg-orange-400/10 p-2 text-orange-100">
-                    <SocialIcon className="h-4 w-4" />
-                  </div>
-                  <div className="text-2xl font-black text-white">جماعي</div>
-                  <div className="mt-1 text-xs font-bold text-white/55">
-                    أسلوب المنصة
-                  </div>
-                </div>
-
-                <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                  <div className="mb-2 inline-flex rounded-2xl border border-violet-300/20 bg-violet-400/10 p-2 text-violet-100">
-                    <SparkIcon className="h-4 w-4" />
-                  </div>
-                  <div className="text-2xl font-black text-white">تسلية</div>
-                  <div className="mt-1 text-xs font-bold text-white/55">
-                    الهدف
-                  </div>
-                </div>
-
-                <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-                  <div className="mb-2 inline-flex rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-2 text-emerald-100">
-                    <MobileIcon className="h-4 w-4" />
-                  </div>
-                  <div className="text-2xl font-black text-white">مرن</div>
-                  <div className="mt-1 text-xs font-bold text-white/55">
-                    لجميع الشاشات
-                  </div>
-                </div>
+            <div className="mt-7 flex justify-center">
+              <div className="hero-logo-frame relative overflow-hidden rounded-[2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:p-5">
+                <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
+                <img
+                  src={heroLogo}
+                  alt="شعار لمّتنا"
+                  className="h-28 w-28 object-contain md:h-36 md:w-36"
+                />
               </div>
             </div>
 
-            {/* الصورة ثانيًا على سطح المكتب وأولى على الهاتف */}
-            <div className="order-1 lg:order-2">
-              <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/5 p-2 shadow-[0_14px_32px_rgba(0,0,0,0.25)]">
-                <img
-                  src={heroMockupImage}
-                  alt="معاينة من داخل منصة لمّتنا"
-                  className="w-full rounded-[1.4rem] object-cover hero-float"
-                />
+            <h1 className="mt-7 text-5xl font-black leading-none text-white md:text-7xl xl:text-[5.5rem]">
+              اللمة
+            </h1>
+
+            <div className="hero-ribbon mt-4 inline-flex rotate-[-2deg] items-center justify-center rounded-[1.4rem] border border-cyan-300/20 bg-cyan-500 px-6 py-4 shadow-[0_16px_40px_rgba(34,211,238,0.22)] md:px-10 md:py-5">
+              <span className="text-2xl font-black tracking-tight text-white md:text-5xl">
+                والفعالية علينا
+              </span>
+            </div>
+
+            <p className="mt-7 max-w-3xl text-base leading-8 text-white/72 md:text-lg">
+              منصّة لمّتنا تجمع الألعاب الجماعية في تجربة واحدة واضحة وسريعة،
+              تتيح لك اللعب مع الأصدقاء، إنشاء الجولات، التنافس ضمن فرق،
+              والاستمتاع بألعاب تعتمد على الذكاء والتفاعل على جميع الأجهزة.
+            </p>
+
+            <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row">
+              <Link
+                href="/games"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-7 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
+              >
+                جرّب لمّتنا
+                <ArrowLeftIcon className="h-4 w-4" />
+              </Link>
+
+              {loading ? (
+                <div className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white/60">
+                  جارٍ تحميل حالتك...
+                </div>
+              ) : isLoggedIn ? (
+                <Link
+                  href="/account"
+                  className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
+                >
+                  أهلًا {username || "بك"} — حسابي
+                </Link>
+              ) : (
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/register"
+                    className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
+                  >
+                    إنشاء حساب جديد
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="inline-flex min-h-14 items-center justify-center rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-10 grid w-full max-w-4xl gap-3 md:grid-cols-4">
+              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
+                <div className="mb-2 inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-2 text-cyan-100">
+                  <GamesIcon className="h-4 w-4" />
+                </div>
+                <div className="text-2xl font-black text-white">
+                  {activeGamesCount}
+                </div>
+                <div className="mt-1 text-xs font-bold text-white/55">
+                  الألعاب المتاحة الآن
+                </div>
+              </div>
+
+              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
+                <div className="mb-2 inline-flex rounded-2xl border border-orange-300/20 bg-orange-400/10 p-2 text-orange-100">
+                  <SocialIcon className="h-4 w-4" />
+                </div>
+                <div className="text-2xl font-black text-white">جماعي</div>
+                <div className="mt-1 text-xs font-bold text-white/55">
+                  أسلوب اللعب
+                </div>
+              </div>
+
+              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
+                <div className="mb-2 inline-flex rounded-2xl border border-violet-300/20 bg-violet-400/10 p-2 text-violet-100">
+                  <SparkIcon className="h-4 w-4" />
+                </div>
+                <div className="text-2xl font-black text-white">مرنة</div>
+                <div className="mt-1 text-xs font-bold text-white/55">
+                  للجلسات والفعاليات
+                </div>
+              </div>
+
+              <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
+                <div className="mb-2 inline-flex rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-2 text-emerald-100">
+                  <MobileIcon className="h-4 w-4" />
+                </div>
+                <div className="text-2xl font-black text-white">مناسبة</div>
+                <div className="mt-1 text-xs font-bold text-white/55">
+                  لكل الأجهزة
+                </div>
               </div>
             </div>
           </div>
@@ -564,7 +571,7 @@ export default function HomePage() {
               <span>ما الذي يميز المنصة؟</span>
             </div>
             <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-             تجربة متكاملة مصممة لتجمعكم وتبقيكم في أجواء اللعب
+              تجربة متكاملة مصممة لتجمعكم وتبقيكم في أجواء اللعب
             </h2>
           </div>
 
@@ -686,6 +693,16 @@ export default function HomePage() {
 
         .hero-glow {
           animation: glowPulse 4.6s ease-in-out infinite;
+        }
+
+        .hero-logo-frame {
+          animation: heroFloat 5.4s ease-in-out infinite;
+        }
+
+        .hero-ribbon {
+          box-shadow:
+            0 16px 40px rgba(34, 211, 238, 0.22),
+            inset 0 1px 0 rgba(255,255,255,0.15);
         }
       `}</style>
     </div>
