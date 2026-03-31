@@ -240,19 +240,21 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#7367c7] px-3 py-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={category.image_url}
-          alt={category.name}
-          className="h-full w-full object-contain"
-        />
+      <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-3 py-4">
+        <div className="flex h-[160px] w-[92%] items-center justify-center overflow-hidden rounded-[16px] border border-white/10 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={category.image_url}
+            alt={category.name}
+            className="h-full w-full object-cover"
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full items-center justify-center bg-[#7367c7] px-4 py-4 text-center text-white">
+    <div className="flex h-full w-full items-center justify-center bg-[#7568c9] px-4 py-4 text-center text-white">
       <div className="text-base font-black">{category.name}</div>
     </div>
   );
@@ -272,13 +274,11 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[78px] w-full items-center justify-center rounded-full border text-[20px] font-black transition";
+    "flex h-[82px] w-full items-center justify-center rounded-full border text-[22px] font-black transition";
 
   if (!question) {
     return (
-      <div
-        className={`${baseClass} border-slate-400/35 bg-[#c8c9cb] text-red-700`}
-      >
+      <div className={`${baseClass} border-slate-400/35 bg-[#cbcccf] text-red-700`}>
         {points}
       </div>
     );
@@ -287,25 +287,19 @@ function QuestionPill({
   if (used) {
     const usedClass =
       result === "teamOne"
-        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#43b8e9_0%,#2f9fd8_100%)] text-white"
+        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#44b9ea_0%,#2f9fd8_100%)] text-white"
         : result === "teamTwo"
-          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa55f_0%,#f28a34_100%)] text-white"
-          : "border-slate-700/50 bg-[linear-gradient(180deg,#142341_0%,#0b1530_100%)] text-white line-through decoration-2";
+          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa75f_0%,#f28a34_100%)] text-white"
+          : "border-slate-700/50 bg-[linear-gradient(180deg,#162443_0%,#0b1530_100%)] text-white line-through decoration-2";
 
-    return (
-      <div
-        className={`${baseClass} ${usedClass}`}
-      >
-        {points}
-      </div>
-    );
+    return <div className={`${baseClass} ${usedClass}`}>{points}</div>;
   }
 
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={`${baseClass} border-slate-400/35 bg-[#c8c9cb] text-red-700 hover:bg-[#d2d3d5] active:scale-[0.98]`}
+      className={`${baseClass} border-slate-400/35 bg-[#cbcccf] text-red-700 hover:bg-[#d4d5d8] active:scale-[0.98]`}
     >
       {points}
     </button>
@@ -322,15 +316,15 @@ function CategoryBoardColumn({
   onOpenQuestion: (question: QuestionRow | null) => void;
 }) {
   return (
-    <div className="flex w-[360px] shrink-0 flex-col">
-      <div className="mx-auto w-[230px] rounded-t-[18px] bg-[#252525] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+    <div className="flex w-full max-w-[470px] flex-col">
+      <div className="mx-auto w-[250px] rounded-t-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[18px] font-black text-white">
           {column.category.name}
         </div>
       </div>
 
-      <div className="relative mt-0 grid h-[430px] grid-cols-[110px_1fr_110px] grid-rows-3 gap-x-3 gap-y-3">
-        <div className="row-span-3 overflow-hidden rounded-[18px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
+      <div className="mt-0 grid h-[470px] grid-cols-[1fr_150px_1fr] grid-rows-3 gap-x-4 gap-y-4">
+        <div className="row-span-3 overflow-hidden rounded-[20px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.14)]">
           <CategoryIllustration category={column.category} />
         </div>
 
@@ -385,7 +379,7 @@ function CategoryBoardColumn({
         })}
       </div>
 
-      <div className="mx-auto mt-0 w-[230px] rounded-b-[18px] bg-[#252525] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+      <div className="mx-auto w-[250px] rounded-b-[18px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
         <div className="truncate text-[16px] font-black text-white">
           {column.category.name}
         </div>
@@ -653,18 +647,18 @@ export default function GameBoardClient({
           </div>
         </div>
 
-        <div className="overflow-x-auto overflow-y-hidden rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
-          <div className="flex min-w-max items-start justify-center gap-8 px-4">
-            {boardColumns.map((column) => (
-              <CategoryBoardColumn
-                key={column.category.id}
-                column={column}
-                boardState={boardState}
-                onOpenQuestion={handleOpenQuestion}
-              />
-            ))}
-          </div>
-        </div>
+        <div className="rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-5 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
+  <div className="grid grid-cols-1 justify-items-center gap-8 md:grid-cols-2 2xl:grid-cols-3">
+    {boardColumns.map((column) => (
+      <CategoryBoardColumn
+        key={column.category.id}
+        column={column}
+        boardState={boardState}
+        onOpenQuestion={handleOpenQuestion}
+      />
+    ))}
+  </div>
+</div>
       </div>
     </main>
   );
