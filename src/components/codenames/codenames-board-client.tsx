@@ -76,19 +76,14 @@ type Props = {
 const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
 const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
 
-const BLUE_PANEL_BG =
-  "https://k.top4top.io/p_3742ekh784.png";
-
-const ORANGE_PANEL_BG =
-  "https://j.top4top.io/p_3742lmfye3.png";
+const BLUE_PANEL_BG = "https://k.top4top.io/p_3742ekh784.png";
+const ORANGE_PANEL_BG = "https://j.top4top.io/p_3742lmfye3.png";
 
 const CARD_BACKGROUNDS = {
   neutral: "https://h.top4top.io/p_3742cs7mz1.png",
   blue: "https://k.top4top.io/p_3742ekh784.png",
-  orange:
-    "https://j.top4top.io/p_3742lmfye3.png",
-  black:
-    "https://i.top4top.io/p_3742tlx0q2.png",
+  orange: "https://j.top4top.io/p_3742lmfye3.png",
+  black: "https://i.top4top.io/p_3742tlx0q2.png",
 };
 
 function getCardBackground(cardType: string) {
@@ -420,6 +415,7 @@ export default function CodenamesBoardClient({
   const previousCardsRef = useRef<CardRow[]>(initialCards);
   const lastShownTurnIdRef = useRef<string | null>(null);
   const cluePopupTimeoutRef = useRef<number | null>(null);
+  const previewChannelRef = useRef<any>(null);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -524,6 +520,7 @@ export default function CodenamesBoardClient({
     let isMounted = true;
     const supabase = getSupabaseBrowserClient();
     const previewChannel = supabase.channel(`codenames-preview-${room.room_code}`);
+    previewChannelRef.current = previewChannel;
 
     const safeRefresh = async () => {
       if (!isMounted) return;
@@ -618,6 +615,7 @@ export default function CodenamesBoardClient({
       supabase.removeChannel(cardsChannel);
       supabase.removeChannel(playersChannel);
       supabase.removeChannel(turnsChannel);
+      previewChannelRef.current = null;
       supabase.removeChannel(previewChannel);
     };
   }, [room.id, room.room_code]);
@@ -713,8 +711,9 @@ export default function CodenamesBoardClient({
   }, []);
 
   async function sendPreview(selectedCards: CardRow[]) {
-    const supabase = getSupabaseBrowserClient();
-    const channel = supabase.channel(`codenames-preview-${room.room_code}`);
+    const channel = previewChannelRef.current;
+
+    if (!channel) return;
 
     if (!selectedCards.length) {
       await channel.send({
@@ -1730,12 +1729,26 @@ export default function CodenamesBoardClient({
           pointer-events: none;
         }
 
-.card-word-text {
-  font-size: clamp(1.2rem, 1.6vw, 1.9rem);
-  font-weight: 900;
-  line-height: 1.1;
-}
-
+        .card-word-text {
+          width: 100%;
+          text-align: center;
+          color: #f7fafc;
+          font-size: clamp(1.2rem, 1.6vw, 1.9rem);
+          font-weight: 900;
+          line-height: 1.1;
+          letter-spacing: 0;
+          text-transform: none;
+          -webkit-text-stroke: 1px rgba(0, 0, 0, 0.75);
+          paint-order: stroke fill;
+          text-shadow:
+            0 1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 0 rgba(0, 0, 0, 0.75),
+            0 6px 16px rgba(0, 0, 0, 0.7),
+            0 0 10px rgba(0, 0, 0, 0.45);
+          filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
 
         .card-inner-overlay {
           position: absolute;
@@ -1808,24 +1821,22 @@ export default function CodenamesBoardClient({
         }
 
         .mobile-card-word {
-  width: 100%;
-  text-align: center;
-  color: #f7fafc;
-
-  /* 👇 تكبير الخط بشكل واضح */
-  font-size: clamp(0.95rem, 3.8vw, 1.35rem);
-
-  font-weight: 900;
-  line-height: 1.15;
-
-  text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.6),
-    0 6px 20px rgba(0, 0, 0, 0.65),
-    0 0 12px rgba(0, 0, 0, 0.3);
-
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
+          width: 100%;
+          text-align: center;
+          color: #f7fafc;
+          font-size: clamp(0.95rem, 3.8vw, 1.35rem);
+          font-weight: 900;
+          line-height: 1.15;
+          -webkit-text-stroke: 0.9px rgba(0, 0, 0, 0.78);
+          paint-order: stroke fill;
+          text-shadow:
+            0 1px 0 rgba(0, 0, 0, 0.95),
+            0 2px 0 rgba(0, 0, 0, 0.8),
+            0 6px 14px rgba(0, 0, 0, 0.72),
+            0 0 10px rgba(0, 0, 0, 0.45);
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
 
         .confirm-card-btn {
           animation: confirmPopIn 180ms ease;
@@ -1856,9 +1867,12 @@ export default function CodenamesBoardClient({
           font-weight: 900;
           line-height: 1.05;
           text-transform: uppercase;
+          -webkit-text-stroke: 1px rgba(0, 0, 0, 0.72);
+          paint-order: stroke fill;
           text-shadow:
-            0 2px 0 rgba(0, 0, 0, 0.35),
-            0 8px 18px rgba(0, 0, 0, 0.28);
+            0 1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 0 rgba(0, 0, 0, 0.75),
+            0 8px 18px rgba(0, 0, 0, 0.45);
           word-break: break-word;
           overflow-wrap: anywhere;
         }
@@ -1945,15 +1959,9 @@ export default function CodenamesBoardClient({
         }
 
         @media (orientation: landscape) and (max-width: 1180px) {
-  .mobile-card-word {
-    font-size: clamp(0.8rem, 2.2vw, 1.1rem);
-    line-height: 1.05;
-  }
-}
-
           .mobile-card-word {
-            font-size: clamp(0.66rem, 1.8vw, 0.92rem);
-            line-height: 1.02;
+            font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+            line-height: 1.05;
           }
 
           .card-open-word-text {
