@@ -136,14 +136,12 @@ function normalizePlayers(rows: PlayerRow[]) {
 }
 
 function TeamSidebarCard({
-  title,
   theme,
   operatives,
   spymasters,
   remaining,
   reverseScore = false,
 }: {
-  title: string;
   theme: "blue" | "orange";
   operatives: PlayerRow[];
   spymasters: PlayerRow[];
@@ -409,7 +407,7 @@ export default function CodenamesBoardClient({
   const [turns, setTurns] = useState<TurnRow[]>(initialTurns);
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
-  const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
+  const [openedRevealedCardIds, setOpenedRevealedCardIds] = useState<string[]>([]);
   const [revealingCardId, setRevealingCardId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [cluePopup, setCluePopup] = useState<{
@@ -429,7 +427,14 @@ export default function CodenamesBoardClient({
   );
 
   const activeTurn = useMemo(
-    () => turns.find((turn) => turn.turn_status === "active") || null,
+    () =>
+      [...turns]
+        .filter((turn) => turn.turn_status === "active")
+        .sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return bTime - aTime;
+        })[0] || null,
     [turns]
   );
 
@@ -471,6 +476,10 @@ export default function CodenamesBoardClient({
   const previewCardSet = useMemo(
     () => new Set(previewSelection?.cardIds ?? []),
     [previewSelection]
+  );
+  const openedRevealedCardSet = useMemo(
+    () => new Set(openedRevealedCardIds),
+    [openedRevealedCardIds]
   );
 
   async function fetchLatestState() {
@@ -647,6 +656,17 @@ export default function CodenamesBoardClient({
   }, [cards, selectedCardIds]);
 
   useEffect(() => {
+    const validOpenedIds = openedRevealedCardIds.filter((id) => {
+      const target = cards.find((card) => card.id === id);
+      return Boolean(target?.is_revealed);
+    });
+
+    if (validOpenedIds.length !== openedRevealedCardIds.length) {
+      setOpenedRevealedCardIds(validOpenedIds);
+    }
+  }, [cards, openedRevealedCardIds]);
+
+  useEffect(() => {
     if (!canRevealCard || room.status === "finished") {
       if (selectedCardIds.length > 0) {
         setSelectedCardIds([]);
@@ -656,7 +676,7 @@ export default function CodenamesBoardClient({
   }, [canRevealCard, room.status, selectedCardIds.length]);
 
   useEffect(() => {
-    if (!activeTurn) return;
+    if (!activeTurn?.id) return;
 
     if (lastShownTurnIdRef.current === activeTurn.id) return;
 
@@ -675,14 +695,14 @@ export default function CodenamesBoardClient({
 
     cluePopupTimeoutRef.current = window.setTimeout(() => {
       setCluePopup(null);
-    }, 4000);
+    }, 5000);
 
     return () => {
       if (cluePopupTimeoutRef.current) {
         window.clearTimeout(cluePopupTimeoutRef.current);
       }
     };
-  }, [activeTurn]);
+  }, [activeTurn?.id, activeTurn?.clue_word, activeTurn?.clue_number, activeTurn?.team]);
 
   useEffect(() => {
     return () => {
@@ -733,6 +753,12 @@ export default function CodenamesBoardClient({
     });
   }
 
+  function toggleOpenedRevealedCard(cardId: string) {
+    setOpenedRevealedCardIds((prev) =>
+      prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]
+    );
+  }
+
   function getCardView(card: CardRow) {
     const isPending = selectedCardSet.has(card.id);
     const realBg = getCardBackground(card.card_type);
@@ -752,7 +778,7 @@ export default function CodenamesBoardClient({
           ...baseStyle,
           backgroundImage: `url(${realBg})`,
         },
-        label: "تم الكشف",
+        label: "",
       };
     }
 
@@ -980,7 +1006,35 @@ export default function CodenamesBoardClient({
     );
   }
 
-  function renderBoardCard(card: CardRow, mobile: boolean) {
+  function renderRevealedCard(card: CardRow, mobile: boolean) {
+    const cardView = getCardView(card);
+    const isOpened = openedRevealedCardSet.has(card.id);
+    const wrapperClass = mobile
+      ? "mobile-card aspect-[1.05] min-h-0"
+      : "board-desktop-card min-h-[122px]";
+
+    return (
+      <button
+        key={card.id}
+        type="button"
+        onClick={() => toggleOpenedRevealedCard(card.id)}
+        className={`${cardView.className} ${wrapperClass} group relative flex items-center justify-center px-3 py-4 text-center`}
+        style={cardView.style}
+      >
+        <div className="card-inner-overlay" />
+
+        {isOpened ? (
+          <div className="card-open-word-panel">
+            <div className="card-open-word-text">{card.word}</div>
+          </div>
+        ) : (
+          <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-white/5 opacity-0 transition group-hover:opacity-100" />
+        )}
+      </button>
+    );
+  }
+
+  function renderSelectableCard(card: CardRow, mobile: boolean) {
     const cardView = getCardView(card);
     const isSelected = selectedCardSet.has(card.id);
     const isPreviewed = previewCardSet.has(card.id);
@@ -993,29 +1047,6 @@ export default function CodenamesBoardClient({
 
     const textClass = mobile ? "mobile-card-word" : "card-word-text";
 
-    const content = (
-      <>
-        <div className="card-inner-overlay" />
-        <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
-      </>
-    );
-
-    if (card.is_revealed) {
-      return (
-        <button
-          key={card.id}
-          type="button"
-          onClick={() => setInspectedCard(card)}
-          className={`${cardView.className} ${wrapperClass} flex items-center justify-center px-3 py-4 text-center`}
-          style={cardView.style}
-        >
-          {content}
-        </button>
-      );
-    }
-
-    const showSelectionBadge = isPreviewed && previewSelection;
-
     return (
       <div key={card.id} className="relative">
         <button
@@ -1023,36 +1054,32 @@ export default function CodenamesBoardClient({
           onClick={() => {
             if (canRevealCard) {
               toggleCardSelection(card);
-              return;
-            }
-
-            if (isSpymaster) {
-              setInspectedCard(card);
             }
           }}
           className={`${cardView.className} ${wrapperClass} ${
             canRevealCard ? "card-hover-up" : ""
           } flex w-full items-center justify-center px-3 py-4 text-center ${
-            showSelectionBadge ? "card-previewed" : ""
+            isPreviewed ? "card-previewed" : ""
           }`}
           style={cardView.style}
         >
-          {content}
+          <div className="card-inner-overlay" />
+          <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
         </button>
 
-        {showSelectionBadge && (
+        {isPreviewed && previewSelection && (
           <div className="pointer-events-none absolute inset-x-2 bottom-2 z-20">
             <div
               className={`rounded-full px-2 py-1 text-center text-[10px] font-black uppercase shadow-lg ${
-                previewSelection?.team === "blue"
+                previewSelection.team === "blue"
                   ? "bg-cyan-500/90 text-white"
-                  : previewSelection?.team === "red"
+                  : previewSelection.team === "red"
                   ? "bg-orange-500/90 text-white"
                   : "bg-white/90 text-black"
               }`}
             >
               {isRemotePreview
-                ? `${previewSelection?.playerName} يفكر`
+                ? `${previewSelection.playerName} يفكر`
                 : "تم التحديد"}
             </div>
           </div>
@@ -1083,6 +1110,61 @@ export default function CodenamesBoardClient({
         )}
       </div>
     );
+  }
+
+  function renderSpyMasterCard(card: CardRow, mobile: boolean) {
+    const cardView = getCardView(card);
+    const wrapperClass = mobile
+      ? "mobile-card aspect-[1.05] min-h-0"
+      : "board-desktop-card min-h-[122px]";
+    const textClass = mobile ? "mobile-card-word" : "card-word-text";
+
+    return (
+      <button
+        key={card.id}
+        type="button"
+        className={`${cardView.className} ${wrapperClass} flex w-full items-center justify-center px-3 py-4 text-center`}
+        style={cardView.style}
+      >
+        <div className="card-inner-overlay" />
+        <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
+      </button>
+    );
+  }
+
+  function renderNeutralUnrevealedCard(card: CardRow, mobile: boolean) {
+    const cardView = getCardView(card);
+    const wrapperClass = mobile
+      ? "mobile-card aspect-[1.05] min-h-0"
+      : "board-desktop-card min-h-[122px]";
+    const textClass = mobile ? "mobile-card-word" : "card-word-text";
+
+    return (
+      <div
+        key={card.id}
+        className={`${cardView.className} ${wrapperClass} flex items-center justify-center px-3 py-4 text-center`}
+        style={cardView.style}
+      >
+        <div className="card-inner-overlay" />
+        <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
+      </div>
+    );
+  }
+
+  function renderBoardCard(card: CardRow, mobile: boolean) {
+    if (card.is_revealed) {
+      return renderRevealedCard(card, mobile);
+    }
+
+    if (canRevealCard) {
+      return renderSelectableCard(card, mobile);
+    }
+
+    if (isSpymaster) {
+      return renderSpyMasterCard(card, mobile);
+    }
+
+    return renderNeutralUnrevealedCard(card, mobile);
   }
 
   return (
@@ -1365,7 +1447,6 @@ export default function CodenamesBoardClient({
       <div className="hidden xl:grid xl:grid-cols-[280px_minmax(0,1fr)_280px] xl:gap-6">
         <div className="space-y-5">
           <TeamSidebarCard
-            title="Blue Team"
             theme="blue"
             operatives={blueOperatives}
             spymasters={blueSpymasters}
@@ -1475,7 +1556,6 @@ export default function CodenamesBoardClient({
 
         <div className="space-y-5">
           <TeamSidebarCard
-            title="Orange Team"
             theme="orange"
             operatives={orangeOperatives}
             spymasters={orangeSpymasters}
@@ -1571,46 +1651,6 @@ export default function CodenamesBoardClient({
           </div>
         </div>
       </div>
-
-      {inspectedCard && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[24px] border border-white/10 bg-[#101522] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)]">
-            <div className="text-2xl font-black text-white">تفاصيل الكرت</div>
-
-            <div
-              className="mt-5 h-32 rounded-2xl border border-white/10 shadow-lg"
-              style={{
-                backgroundImage: `url(${getCardBackground(inspectedCard.card_type)})`,
-                backgroundPosition: "center",
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-              }}
-            />
-
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-              <div className="text-sm font-semibold text-white/50">الكلمة</div>
-              <div className="mt-2 text-3xl font-black text-white">
-                {inspectedCard.word}
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-              <div className="text-sm font-semibold text-white/50">النوع</div>
-              <div className="mt-2 text-xl font-black text-white">
-                {inspectedCard.card_type === "red" ? "orange" : inspectedCard.card_type}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setInspectedCard(null)}
-              className="mt-5 w-full rounded-2xl bg-white/10 px-5 py-3 font-black text-white hover:bg-white/15"
-            >
-              إغلاق
-            </button>
-          </div>
-        </div>
-      )}
 
       {room.status === "finished" && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -1726,24 +1766,6 @@ export default function CodenamesBoardClient({
           will-change: transform, filter, box-shadow;
         }
 
-        .card-word-text {
-          width: 100%;
-          text-align: center;
-          color: #f7fafc;
-          font-size: 1.85rem;
-          font-weight: 900;
-          line-height: 1.08;
-          letter-spacing: 0;
-          text-transform: none;
-          text-shadow:
-            0 2px 0 rgba(0, 0, 0, 0.5),
-            0 6px 20px rgba(0, 0, 0, 0.55),
-            0 0 12px rgba(0, 0, 0, 0.25);
-          filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
-          word-break: break-word;
-          overflow-wrap: anywhere;
-        }
-
         .board-desktop-card {
           border-radius: 16px;
           box-shadow:
@@ -1798,7 +1820,46 @@ export default function CodenamesBoardClient({
         }
 
         .clue-popup {
-          animation: cluePopIn 300ms ease, cluePopOut 400ms ease 3.6s forwards;
+          animation: cluePopIn 320ms ease, cluePopOut 420ms ease 4.55s forwards;
+        }
+
+        .card-open-word-panel {
+          position: absolute;
+          inset: auto 12px 12px 12px;
+          z-index: 12;
+          border-radius: 14px;
+          border: 2px solid rgba(255,255,255,0.16);
+          background: rgba(14, 83, 138, 0.92);
+          box-shadow:
+            0 10px 24px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+          padding: 12px;
+          animation: cardPanelIn 180ms ease;
+        }
+
+        .card-open-word-text {
+          text-align: center;
+          color: #ffffff;
+          font-size: clamp(1rem, 2.4vw, 1.8rem);
+          font-weight: 900;
+          line-height: 1.05;
+          text-transform: uppercase;
+          text-shadow:
+            0 2px 0 rgba(0, 0, 0, 0.35),
+            0 8px 18px rgba(0, 0, 0, 0.28);
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
+
+        @keyframes cardPanelIn {
+          0% {
+            opacity: 0;
+            transform: translateY(8px) scale(0.96);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
 
         @keyframes confirmPopIn {
@@ -1860,6 +1921,15 @@ export default function CodenamesBoardClient({
           .mobile-card-word {
             font-size: clamp(0.68rem, 3vw, 0.95rem);
           }
+
+          .card-open-word-text {
+            font-size: clamp(0.82rem, 3.2vw, 1rem);
+          }
+
+          .card-open-word-panel {
+            inset: auto 8px 8px 8px;
+            padding: 8px;
+          }
         }
 
         @media (orientation: landscape) and (max-width: 1180px) {
@@ -1870,6 +1940,10 @@ export default function CodenamesBoardClient({
           .mobile-card-word {
             font-size: clamp(0.66rem, 1.8vw, 0.92rem);
             line-height: 1.02;
+          }
+
+          .card-open-word-text {
+            font-size: clamp(0.74rem, 1.8vw, 0.96rem);
           }
         }
       `}</style>
