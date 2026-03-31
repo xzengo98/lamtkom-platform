@@ -77,18 +77,18 @@ const BLUE_TEAM_IMAGE = "https://k.top4top.io/p_3739o1dbh1.png";
 const ORANGE_TEAM_IMAGE = "https://l.top4top.io/p_3739qbt1f2.png";
 
 const BLUE_PANEL_BG =
-  "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg";
+  "https://k.top4top.io/p_3742ekh784.png";
 
 const ORANGE_PANEL_BG =
-  "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg";
+  "https://j.top4top.io/p_3742lmfye3.png";
 
 const CARD_BACKGROUNDS = {
-  neutral: "https://d.top4top.io/p_3740ccnwr3.png",
-  blue: "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg",
+  neutral: "https://h.top4top.io/p_3742cs7mz1.png",
+  blue: "https://k.top4top.io/p_3742ekh784.png",
   orange:
-    "https://img.freepik.com/free-vector/grunge-diagonal-stripe-background_1409-1366.jpg",
+    "https://j.top4top.io/p_3742lmfye3.png",
   black:
-    "https://img.freepik.com/free-photo/dark-abstract-background_1048-1920.jpg",
+    "https://i.top4top.io/p_3742tlx0q2.png",
 };
 
 function getCardBackground(cardType: string) {
