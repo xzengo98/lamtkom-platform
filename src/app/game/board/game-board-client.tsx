@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Category = {
@@ -26,7 +26,7 @@ type QuestionRow = {
 
 type Props = {
   sessionId: string;
-  userId: string;
+  userId?: string;
   initialBoardState: Record<string, unknown> | null;
   gameName: string;
   teamOne: string;
@@ -35,11 +35,13 @@ type Props = {
   questions: QuestionRow[];
 };
 
+type QuestionResult = "teamOne" | "teamTwo" | "none";
+
 type BoardState = {
   teamOneScore: number;
   teamTwoScore: number;
   usedQuestionIds: string[];
-  questionResults: Record<string, "teamOne" | "teamTwo" | "none">;
+  questionResults: Record<string, QuestionResult>;
   savedAt: number;
 };
 
@@ -54,14 +56,70 @@ type CategoryColumn = {
 const TEAM_BLUE_AVATAR = "https://k.top4top.io/p_3739o1dbh1.png";
 const TEAM_ORANGE_AVATAR = "https://l.top4top.io/p_3739qbt1f2.png";
 
-const categoryVisuals: Record<string, { gradient: string }> = {
-  history: { gradient: "from-amber-300/18 via-orange-400/10 to-transparent" },
-  sports: { gradient: "from-emerald-300/18 via-green-400/10 to-transparent" },
-  geography: { gradient: "from-sky-300/18 via-cyan-400/10 to-transparent" },
-  science: { gradient: "from-violet-300/18 via-fuchsia-400/10 to-transparent" },
-  movies: { gradient: "from-rose-300/18 via-pink-400/10 to-transparent" },
-  islamic: { gradient: "from-yellow-300/18 via-amber-400/10 to-transparent" },
-  default: { gradient: "from-slate-300/18 via-slate-400/10 to-transparent" },
+const categoryVisuals: Record<
+  string,
+  {
+    glow: string;
+    header: string;
+    body: string;
+  }
+> = {
+  history: {
+    glow: "shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_18px_50px_rgba(245,158,11,0.12)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(228,234,242,0.98)_0%,rgba(180,191,208,0.96)_100%)]",
+  },
+  geography: {
+    glow: "shadow-[0_0_0_1px_rgba(56,189,248,0.18),0_18px_50px_rgba(14,165,233,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(230,236,245,0.98)_0%,rgba(177,189,207,0.96)_100%)]",
+  },
+  islamic: {
+    glow: "shadow-[0_0_0_1px_rgba(16,185,129,0.18),0_18px_50px_rgba(5,150,105,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(232,237,245,0.98)_0%,rgba(184,194,211,0.96)_100%)]",
+  },
+  sports: {
+    glow: "shadow-[0_0_0_1px_rgba(52,211,153,0.18),0_18px_50px_rgba(16,185,129,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(231,237,245,0.98)_0%,rgba(182,193,209,0.96)_100%)]",
+  },
+  science: {
+    glow: "shadow-[0_0_0_1px_rgba(167,139,250,0.18),0_18px_50px_rgba(139,92,246,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+  },
+  movies: {
+    glow: "shadow-[0_0_0_1px_rgba(244,114,182,0.18),0_18px_50px_rgba(236,72,153,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+  },
+  technology: {
+    glow: "shadow-[0_0_0_1px_rgba(59,130,246,0.18),0_18px_50px_rgba(37,99,235,0.13)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(232,237,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+  },
+  default: {
+    glow: "shadow-[0_0_0_1px_rgba(148,163,184,0.18),0_18px_50px_rgba(100,116,139,0.12)]",
+    header:
+      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    body:
+      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(180,190,208,0.96)_100%)]",
+  },
 };
 
 function getVisualBySlug(slug: string) {
@@ -72,11 +130,13 @@ function normalizeBoardState(
   raw: Record<string, unknown> | null | undefined,
 ): BoardState {
   const rawResults =
-    raw && typeof raw.questionResults === "object" && raw.questionResults
+    raw &&
+    typeof raw.questionResults === "object" &&
+    raw.questionResults !== null
       ? (raw.questionResults as Record<string, unknown>)
       : {};
 
-  const questionResults: Record<string, "teamOne" | "teamTwo" | "none"> = {};
+  const questionResults: Record<string, QuestionResult> = {};
 
   for (const [key, value] of Object.entries(rawResults)) {
     if (value === "teamOne" || value === "teamTwo" || value === "none") {
@@ -113,42 +173,47 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
 
   try {
     window.localStorage.setItem(storageKey, JSON.stringify(state));
-  } catch {}
+  } catch {
+    //
+  }
 }
 
 function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 18h16" />
-      <path d="m5 18 1.5-9 5 4 4-7 2.5 7 1.5-4 1 9" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M4 18 2.5 7.5l5.2 4.1L12 5l4.3 6.6 5.2-4.1L20 18H4Z"
+        className="fill-current"
+        opacity="0.9"
+      />
+      <path
+        d="M5 20h14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="4" y="8" width="16" height="8" rx="3" />
-      <path d="M8 12h2" />
-      <path d="M9 11v2" />
-      <path d="M16.5 12h.01" />
-      <path d="M18.5 12h.01" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect
+        x="3.5"
+        y="8"
+        width="17"
+        height="8.5"
+        rx="4.25"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M8 10.5v4M6 12.5h4M15.5 11.25h.01M17.5 13.25h.01"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -156,12 +221,16 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
 function StatusPill({
   label,
   icon,
+  className = "",
 }: {
   label: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/90 shadow-[0_8px_18px_rgba(0,0,0,0.14)]">
+    <div
+      className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-bold text-white/90 backdrop-blur ${className}`}
+    >
       {icon}
       <span>{label}</span>
     </div>
@@ -177,7 +246,6 @@ function TeamCard({
   onDecrease,
   accent,
   avatarUrl,
-  compact = false,
 }: {
   teamName: string;
   score: number;
@@ -187,109 +255,79 @@ function TeamCard({
   onDecrease: () => void;
   accent: "blue" | "orange";
   avatarUrl: string;
-  compact?: boolean;
 }) {
   const palette =
     accent === "orange"
       ? {
-          glow: "shadow-[0_0_0_1px_rgba(251,146,60,0.16),0_18px_50px_rgba(251,146,60,0.12)]",
-          card: "border-orange-300/20 bg-[linear-gradient(180deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)]",
-          chip: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-          btn: "border-orange-300/20 bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
-          score: "text-orange-50",
-          scoreGlow: "drop-shadow-[0_0_18px_rgba(251,146,60,0.18)]",
+          card:
+            "border-orange-300/20 bg-[linear-gradient(180deg,rgba(51,25,10,0.95)_0%,rgba(19,10,6,0.98)_100%)]",
+          glow:
+            "shadow-[0_0_0_1px_rgba(251,146,60,0.18),0_18px_50px_rgba(251,146,60,0.12)]",
+          text: "text-orange-50",
+          soft: "text-orange-100/80",
+          btn: "border-orange-300/20 bg-orange-400/10 hover:bg-orange-400/18 text-orange-50",
         }
       : {
-          glow: "shadow-[0_0_0_1px_rgba(34,211,238,0.16),0_18px_50px_rgba(34,211,238,0.10)]",
-          card: "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)]",
-          chip: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-          btn: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
-          score: "text-cyan-50",
-          scoreGlow: "drop-shadow-[0_0_18px_rgba(34,211,238,0.18)]",
+          card:
+            "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,41,64,0.95)_0%,rgba(4,15,28,0.98)_100%)]",
+          glow:
+            "shadow-[0_0_0_1px_rgba(34,211,238,0.16),0_18px_50px_rgba(34,211,238,0.10)]",
+          text: "text-cyan-50",
+          soft: "text-cyan-100/80",
+          btn: "border-cyan-300/20 bg-cyan-400/10 hover:bg-cyan-400/18 text-cyan-50",
         };
 
   return (
     <div
-      className={[
-        "rounded-[1.5rem] border p-4 transition board-soft-float",
-        compact ? "p-3" : "p-4",
-        palette.card,
-        palette.glow,
-      ].join(" ")}
+      className={`rounded-[24px] border p-3 ${palette.card} ${palette.glow}`}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative shrink-0">
-            <div className="absolute inset-0 rounded-full bg-white/10 blur-md" />
-            <img
-              src={avatarUrl}
-              alt={teamName}
-              className={`relative rounded-full border border-white/10 object-cover shadow-[0_12px_24px_rgba(0,0,0,0.18)] ${
-                compact ? "h-12 w-12" : "h-16 w-16"
-              }`}
-            />
+      <div className="flex items-center gap-3">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={avatarUrl} alt={teamName} className="h-full w-full object-cover" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className={`truncate text-sm font-black ${palette.text}`}>
+            {teamName}
           </div>
 
-          <div className="min-w-0">
-            <div className="text-[10px] font-bold text-white/55">لوحة فريق</div>
-            <div
-              className={`truncate font-black text-white ${
-                compact ? "text-base" : "text-xl"
-              }`}
-            >
-              {teamName}
-            </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {isTurn ? (
+              <StatusPill label="الدور الآن" className={palette.soft} />
+            ) : null}
+            {isLeading ? (
+              <StatusPill
+                label="متصدر"
+                icon={<CrownIcon className="h-3.5 w-3.5" />}
+                className={palette.soft}
+              />
+            ) : null}
           </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          {isTurn ? (
-            <span
-              className={`rounded-full border px-3 py-1 text-[10px] font-black ${palette.chip}`}
-            >
-              الدور الآن
-            </span>
-          ) : null}
-
-          {isLeading ? (
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-black text-emerald-100">
-              متصدر
-            </span>
-          ) : null}
+        <div className="text-right">
+          <div className={`text-2xl font-black leading-none ${palette.text}`}>
+            {score}
+          </div>
+          <div className={`mt-1 text-[11px] font-bold ${palette.soft}`}>
+            نقطة
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={onIncrease}
-          className={`flex items-center justify-center rounded-full border font-black transition ${palette.btn} ${
-            compact ? "h-10 w-10 text-2xl" : "h-12 w-12 text-3xl"
-          }`}
+          className={`rounded-2xl border px-3 py-2 text-sm font-black transition ${palette.btn}`}
         >
           +
         </button>
-
-        <div className="text-center">
-          <div
-            className={[
-              "font-black tracking-tight",
-              compact ? "text-4xl" : "text-5xl",
-              palette.score,
-              palette.scoreGlow,
-            ].join(" ")}
-          >
-            {score}
-          </div>
-          <div className="text-[11px] font-bold text-white/55">نقطة</div>
-        </div>
-
         <button
           type="button"
           onClick={onDecrease}
-          className={`flex items-center justify-center rounded-full border font-black transition ${palette.btn} ${
-            compact ? "h-10 w-10 text-2xl" : "h-12 w-12 text-3xl"
-          }`}
+          className={`rounded-2xl border px-3 py-2 text-sm font-black transition ${palette.btn}`}
         >
           −
         </button>
@@ -298,51 +336,66 @@ function TeamCard({
   );
 }
 
-function CategoryCard({
+function CategoryIllustration({
   category,
-  compact = false,
 }: {
   category: Category;
-  compact?: boolean;
+}) {
+  if (category.image_url) {
+    return (
+      <div className="flex h-full w-full items-center justify-center px-3 pt-7">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={category.image_url}
+          alt={category.name}
+          className="max-h-[148px] w-auto max-w-full object-contain drop-shadow-[0_10px_18px_rgba(15,23,42,0.18)]"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full items-center justify-center px-4 pt-7">
+      <div className="rounded-3xl border border-slate-400/30 bg-white/40 px-6 py-5 text-center text-slate-700 shadow-inner">
+        <div className="text-sm font-black">فئة</div>
+        <div className="mt-1 text-xs font-bold opacity-70">{category.name}</div>
+      </div>
+    </div>
+  );
+}
+
+function CategoryCard({
+  category,
+  children,
+}: {
+  category: Category;
+  children: ReactNode;
 }) {
   const visual = getVisualBySlug(category.slug);
 
   return (
     <div
-      className={[
-        "relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_12px_26px_rgba(0,0,0,0.20)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(34,211,238,0.12)]",
-        visual.gradient,
-        compact ? "p-2.5" : "p-3",
-      ].join(" ")}
+      className={`relative flex h-[438px] min-w-[198px] max-w-[198px] flex-col overflow-hidden rounded-[28px] border-4 border-slate-950/90 ${visual.glow}`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.09),transparent_50%)] opacity-80" />
-      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+      <div className={`relative h-[274px] ${visual.body}`}>
+        <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_70%)]" />
 
-      <div
-        className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-[1rem] border border-white/10 bg-white/10 shadow-[0_10px_20px_rgba(0,0,0,0.18)] ${
-          compact ? "h-10 w-10" : "h-16 w-16"
-        }`}
-      >
-        {category.image_url ? (
-          <img
-            src={category.image_url}
-            alt={category.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="text-[10px] font-black text-white/70">فئة</div>
-        )}
+        <div className="absolute left-1/2 top-[-2px] z-20 w-[82%] -translate-x-1/2">
+          <div
+            className={`rounded-b-[20px] rounded-t-[16px] px-4 py-3 text-center text-[15px] font-black text-white shadow-[0_8px_0_rgba(0,0,0,0.10)] ${visual.header}`}
+          >
+            <span className="block truncate">{category.name}</span>
+          </div>
+        </div>
+
+        <div className="absolute inset-x-0 top-[54px] bottom-0">
+          <CategoryIllustration category={category} />
+        </div>
       </div>
 
-      <h3
-        className={[
-          "relative mt-3 overflow-hidden text-ellipsis whitespace-nowrap font-black text-white",
-          compact ? "text-[10px]" : "text-base md:text-lg",
-        ].join(" ")}
-        title={category.name}
-      >
-        {category.name}
-      </h3>
+      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1c2f63_0%,#0f234d_100%)]">
+        {children}
+      </div>
     </div>
   );
 }
@@ -353,56 +406,51 @@ function QuestionCell({
   used,
   result = "none",
   onOpen,
-  compact = false,
 }: {
   question: QuestionRow | null;
-  points: number;
+  points: 200 | 400 | 600;
   used: boolean;
-  result?: "teamOne" | "teamTwo" | "none";
+  result?: QuestionResult;
   onOpen?: () => void;
-  compact?: boolean;
 }) {
   const disabled = !question || used;
 
-  const usedClass =
+  const pointPalette =
+    points === 200
+      ? "bg-[linear-gradient(180deg,#ffa45e_0%,#fb9252_100%)] text-slate-950"
+      : points === 400
+        ? "bg-[linear-gradient(180deg,#89c86d_0%,#7cbc60_100%)] text-slate-950"
+        : "bg-[linear-gradient(180deg,#4d90d8_0%,#3a79bf_100%)] text-white";
+
+  const usedPalette =
     result === "teamOne"
-      ? "border-cyan-300/10 bg-cyan-400/8 text-cyan-100/70"
+      ? "bg-[linear-gradient(180deg,rgba(20,52,103,0.95)_0%,rgba(11,31,67,0.98)_100%)] text-cyan-100/45"
       : result === "teamTwo"
-        ? "border-orange-300/10 bg-orange-400/8 text-orange-100/70"
-        : "border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500/80 opacity-70";
+        ? "bg-[linear-gradient(180deg,rgba(71,41,20,0.95)_0%,rgba(49,28,13,0.98)_100%)] text-orange-100/45"
+        : "bg-[linear-gradient(180deg,rgba(18,34,72,0.95)_0%,rgba(13,28,60,0.98)_100%)] text-white/30";
+
+  const baseClass =
+    "flex h-[54px] w-full items-center justify-center text-[14px] font-black tracking-[0.02em] transition";
+
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={`${baseClass} ${usedPalette}`}
+      >
+        {question ? points : "–"}
+      </button>
+    );
+  }
 
   return (
     <button
       type="button"
-      disabled={disabled}
       onClick={onOpen}
-      aria-label={`سؤال ${points}`}
-      className={[
-        "group relative overflow-hidden rounded-[1.2rem] border transition duration-300 board-soft-float",
-        compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
-        disabled
-          ? usedClass
-          : "border-cyan-300/10 bg-[linear-gradient(180deg,rgba(20,40,85,1)_0%,rgba(4,14,34,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_18px_30px_rgba(34,211,238,0.14)]",
-      ].join(" ")}
+      className={`${baseClass} ${pointPalette} hover:brightness-105 active:scale-[0.99]`}
     >
-      {!disabled ? (
-        <>
-          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_45%)] opacity-80" />
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent opacity-60" />
-        </>
-      ) : null}
-
-      <div className="relative flex h-full items-center justify-center">
-        <div
-          className={[
-            "font-black tracking-tight",
-            compact ? "text-[0.95rem] md:text-[1.15rem]" : "text-[1.65rem] md:text-[1.75rem]",
-          ].join(" ")}
-        >
-          {points}
-        </div>
-      </div>
+      <span className="text-[15px] font-black">{points}</span>
     </button>
   );
 }
@@ -428,10 +476,12 @@ export default function GameBoardClient({
 
   const [boardState, setBoardState] = useState<BoardState>(initialState);
   const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
+
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const localState = readLocalBoardState(storageKey);
+
     if (localState && localState.savedAt >= initialState.savedAt) {
       setBoardState(localState);
     } else {
@@ -512,6 +562,7 @@ export default function GameBoardClient({
   }, [categories, questions]);
 
   const usedCount = boardState.usedQuestionIds.length;
+
   const remainingCount = Math.max(
     boardColumns.reduce(
       (sum, column) =>
@@ -524,11 +575,7 @@ export default function GameBoardClient({
 
   const teamOneLeading = boardState.teamOneScore > boardState.teamTwoScore;
   const teamTwoLeading = boardState.teamTwoScore > boardState.teamOneScore;
-  const leaderLabel = teamOneLeading
-    ? teamOne
-    : teamTwoLeading
-      ? teamTwo
-      : "تعادل";
+  const leaderLabel = teamOneLeading ? teamOne : teamTwoLeading ? teamTwo : "تعادل";
 
   const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
   const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
@@ -583,209 +630,130 @@ export default function GameBoardClient({
   const compactLandscape = isLandscapePhone;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.09),transparent_18%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
-      <div className="mx-auto max-w-[1800px] px-2 py-2 md:px-5 md:py-5">
-        <div
-          className={[
-            "relative rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(5,15,37,0.98)_0%,rgba(2,9,24,0.98)_100%)] shadow-[0_25px_80px_rgba(0,0,0,0.38)]",
-            compactLandscape ? "p-2.5" : "p-3 md:p-4",
-          ].join(" ")}
-        >
-          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.9rem]">
-            <div className="board-soft-glow absolute -right-20 top-10 h-72 w-72 rounded-full bg-cyan-400/8 blur-3xl" />
-            <div className="board-soft-glow absolute -left-20 bottom-10 h-72 w-72 rounded-full bg-violet-400/8 blur-3xl" />
-            <div className="board-soft-glow absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-400/6 blur-3xl" />
-          </div>
-
-          <div
-            className={[
-              "relative mb-4 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(18,32,66,0.95)_0%,rgba(10,18,38,0.95)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-              compactLandscape ? "p-3" : "p-4 md:p-5",
-            ].join(" ")}
-          >
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,80,175,0.18),transparent_30%),linear-gradient(180deg,#041133_0%,#051742_45%,#051230_100%)] text-white">
+      <div className="mx-auto w-full max-w-[1540px] px-3 py-4 sm:px-4 lg:px-6">
+        <div className="mb-4 rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-[0_20px_80px_rgba(2,6,23,0.45)] backdrop-blur">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <div className="text-[10px] font-black tracking-[0.55em] text-cyan-300/90">
+                <div className="text-xs font-bold tracking-[0.25em] text-cyan-200/75">
                   لوحة اللعبة
                 </div>
-                <h1
-                  className={[
-                    "mt-1 font-black text-white",
-                    compactLandscape ? "text-lg" : "text-3xl md:text-5xl",
-                  ].join(" ")}
-                >
+                <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
                   {gameName}
                 </h1>
+
                 {!compactLandscape ? (
-                  <p className="mt-2 text-sm leading-7 text-white/70 md:text-base">
-                   قم باختيار الاسئلة بالترتيب من الاسفل الى حين انتهاء جميع الاسئلة وظهور اسم الفريق الفائز.
+                  <p className="mt-2 max-w-2xl text-sm font-medium text-slate-200/80">
+                    قم باختيار الأسئلة حتى انتهاء جميع الخانات ثم الانتقال تلقائيًا
+                    إلى صفحة النتيجة.
                   </p>
                 ) : null}
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <StatusPill
-                  label={`الدور الآن: ${activeTurnName}`}
-                  icon={<GamepadIcon className="h-4 w-4 text-cyan-300" />}
-                />
-                <StatusPill
-                  label={`المتبقي: ${remainingCount} سؤال`}
-                  icon={<CrownIcon className="h-4 w-4 text-white/80" />}
+                  label={`الدور: ${activeTurnName}`}
+                  icon={<GamepadIcon className="h-4 w-4" />}
                 />
                 <StatusPill
                   label={`المتصدر: ${leaderLabel}`}
-                  icon={<CrownIcon className="h-4 w-4 text-emerald-300" />}
+                  icon={<CrownIcon className="h-4 w-4" />}
                 />
+                <StatusPill label={`المتبقي: ${remainingCount}`} />
+                <Link
+                  href="/account"
+                  className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-4 py-2 text-sm font-black text-white transition hover:bg-white/12"
+                >
+                  الرجوع للحساب
+                </Link>
               </div>
             </div>
-          </div>
 
-          <div
-            className={
-              compactLandscape
-                ? "relative grid gap-3 grid-cols-[175px_minmax(0,1fr)]"
-                : "relative grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]"
-            }
-          >
-            <aside className="order-1">
-              <div
-                className={
-                  compactLandscape
-                    ? "grid gap-3 grid-cols-1"
-                    : "grid gap-4 sm:grid-cols-2 xl:grid-cols-1"
+            <div className="grid gap-3 lg:grid-cols-2">
+              <TeamCard
+                teamName={teamOne}
+                score={boardState.teamOneScore}
+                isLeading={teamOneLeading}
+                isTurn={activeTurn === "teamOne"}
+                onIncrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamOneScore: Math.max(0, prev.teamOneScore + 100),
+                  }))
                 }
-              >
-                <TeamCard
-                  teamName={teamOne}
-                  score={boardState.teamOneScore}
-                  isLeading={teamOneLeading}
-                  isTurn={activeTurn === "teamOne"}
-                  onIncrease={() => updateState((prev) => ({ ...prev, teamOneScore: Math.max(0, prev.teamOneScore + 100) }))}
-                  onDecrease={() => updateState((prev) => ({ ...prev, teamOneScore: Math.max(0, prev.teamOneScore - 100) }))}
-                  accent="blue"
-                  avatarUrl={TEAM_BLUE_AVATAR}
-                  compact={compactLandscape}
-                />
+                onDecrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamOneScore: Math.max(0, prev.teamOneScore - 100),
+                  }))
+                }
+                accent="blue"
+                avatarUrl={TEAM_BLUE_AVATAR}
+              />
 
-                <TeamCard
-                  teamName={teamTwo}
-                  score={boardState.teamTwoScore}
-                  isLeading={teamTwoLeading}
-                  isTurn={activeTurn === "teamTwo"}
-                  onIncrease={() => updateState((prev) => ({ ...prev, teamTwoScore: Math.max(0, prev.teamTwoScore + 100) }))}
-                  onDecrease={() => updateState((prev) => ({ ...prev, teamTwoScore: Math.max(0, prev.teamTwoScore - 100) }))}
-                  accent="orange"
-                  avatarUrl={TEAM_ORANGE_AVATAR}
-                  compact={compactLandscape}
-                />
-
-                <div
-                  className={[
-                    "rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)]",
-                    compactLandscape ? "p-3" : "p-4",
-                  ].join(" ")}
-                >
-                  <Link
-                    href="/account"
-                    className={`inline-flex w-full items-center justify-center rounded-[1rem] border border-white/10 bg-white/5 font-black text-white transition hover:bg-white/10 ${
-                      compactLandscape
-                        ? "min-h-11 px-4 py-2 text-xs"
-                        : "min-h-13 px-5 py-3 text-sm"
-                    }`}
-                  >
-                    الرجوع للحساب
-                  </Link>
-                </div>
-              </div>
-            </aside>
-
-            <div className="order-2">
-              <div
-                className={[
-                  "overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,19,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-                  compactLandscape ? "p-2" : "p-3",
-                ].join(" ")}
-              >
-                <div
-                  className={
-                    compactLandscape
-                      ? "grid grid-cols-6 gap-2"
-                      : "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6"
-                  }
-                >
-                  {boardColumns.map((column) => (
-                    <div key={column.category.id} className="flex flex-col gap-2">
-                      <CategoryCard
-                        category={column.category}
-                        compact={compactLandscape}
-                      />
-
-                      {column.rows.map((row) => (
-                        <div
-                          key={`${column.category.id}-${row.points}`}
-                          className={compactLandscape ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-2 gap-2"}
-                        >
-                          {[0, 1].map((index) => {
-                            const question = row.questions[index] ?? null;
-                            const used = question
-                              ? boardState.usedQuestionIds.includes(question.id)
-                              : true;
-                            const result = question
-                              ? boardState.questionResults[question.id] ?? "none"
-                              : "none";
-
-                            return (
-                              <QuestionCell
-                                key={`${column.category.id}-${row.points}-${index}`}
-                                question={question}
-                                points={row.points}
-                                used={used}
-                                result={result}
-                                compact={compactLandscape}
-                                onOpen={() => handleOpenQuestion(question)}
-                              />
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TeamCard
+                teamName={teamTwo}
+                score={boardState.teamTwoScore}
+                isLeading={teamTwoLeading}
+                isTurn={activeTurn === "teamTwo"}
+                onIncrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+                  }))
+                }
+                onDecrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+                  }))
+                }
+                accent="orange"
+                avatarUrl={TEAM_ORANGE_AVATAR}
+              />
             </div>
           </div>
         </div>
+
+        <div className="overflow-x-auto overflow-y-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(5,20,57,0.92)_0%,rgba(4,17,44,0.98)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
+          <div
+            className={`flex gap-4 ${compactLandscape ? "min-w-max scale-[0.92] origin-top-left" : "min-w-max"}`}
+          >
+            {boardColumns.map((column) => (
+              <CategoryCard key={column.category.id} category={column.category}>
+                {column.rows.map((row) => (
+                  <div
+                    key={`${column.category.id}-${row.points}`}
+                    className="grid grid-cols-2"
+                  >
+                    {[0, 1].map((index) => {
+                      const question = row.questions[index] ?? null;
+                      const used = question
+                        ? boardState.usedQuestionIds.includes(question.id)
+                        : true;
+                      const result = question
+                        ? boardState.questionResults[question.id] ?? "none"
+                        : "none";
+
+                      return (
+                        <QuestionCell
+                          key={`${column.category.id}-${row.points}-${index}`}
+                          question={question}
+                          points={row.points}
+                          used={used}
+                          result={result}
+                          onOpen={() => handleOpenQuestion(question)}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </CategoryCard>
+            ))}
+          </div>
+        </div>
       </div>
-
-      <style>{`
-        @keyframes boardGlow {
-          0%, 100% {
-            opacity: 0.5;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.9;
-            transform: scale(1.02);
-          }
-        }
-
-        @keyframes floatSoft {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-4px);
-          }
-        }
-
-        .board-soft-glow {
-          animation: boardGlow 4.8s ease-in-out infinite;
-        }
-
-        .board-soft-float {
-          animation: floatSoft 5.6s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }
