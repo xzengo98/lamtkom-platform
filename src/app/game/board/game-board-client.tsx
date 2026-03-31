@@ -305,40 +305,44 @@ function CategoryCard({
   category: Category;
   compact?: boolean;
 }) {
+  const visual = getVisualBySlug(category.slug);
+
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-t-[1.6rem] bg-[#d7dee8] border-b border-[#1f2a45]",
-        compact ? "min-h-[90px] px-2 pb-1 pt-2" : "min-h-[192px] px-2.5 pb-1 pt-2.5",
+        "relative overflow-hidden rounded-[1.25rem] border border-white/10 bg-gradient-to-b text-center shadow-[0_12px_26px_rgba(0,0,0,0.20)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(34,211,238,0.12)]",
+        visual.gradient,
+        compact ? "p-2.5" : "p-3",
       ].join(" ")}
     >
-      <div className={compact ? "absolute inset-x-2 top-2 z-20" : "absolute inset-x-3 top-2.5 z-20"}>
-        <div className="mx-auto w-full rounded-[1rem] border border-white/25 bg-[linear-gradient(180deg,#32a7df_0%,#1f94cd_100%)] px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
-          <h3
-            className={[
-              "overflow-hidden text-ellipsis whitespace-nowrap text-center font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
-              compact ? "text-[10px]" : "text-sm md:text-[1rem]",
-            ].join(" ")}
-            title={category.name}
-          >
-            {category.name}
-          </h3>
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.09),transparent_50%)] opacity-80" />
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
 
-      <div className={compact ? "flex min-h-[58px] items-center justify-center px-2 pt-9" : "flex min-h-[162px] items-center justify-center px-3 pt-12"}>
+      <div
+        className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-[1rem] border border-white/10 bg-white/10 shadow-[0_10px_20px_rgba(0,0,0,0.18)] ${
+          compact ? "h-10 w-10" : "h-16 w-16"
+        }`}
+      >
         {category.image_url ? (
           <img
             src={category.image_url}
             alt={category.name}
-            className={compact ? "max-h-[48px] max-w-[80px] object-contain" : "max-h-[118px] max-w-[155px] object-contain"}
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-slate-500/70">
-            فئة
-          </div>
+          <div className="text-[10px] font-black text-white/70">فئة</div>
         )}
       </div>
+
+      <h3
+        className={[
+          "relative mt-3 overflow-hidden text-ellipsis whitespace-nowrap font-black text-white",
+          compact ? "text-[10px]" : "text-base md:text-lg",
+        ].join(" ")}
+        title={category.name}
+      >
+        {category.name}
+      </h3>
     </div>
   );
 }
@@ -350,7 +354,6 @@ function QuestionCell({
   result = "none",
   onOpen,
   compact = false,
-  shapeClass = "",
 }: {
   question: QuestionRow | null;
   points: number;
@@ -358,16 +361,15 @@ function QuestionCell({
   result?: "teamOne" | "teamTwo" | "none";
   onOpen?: () => void;
   compact?: boolean;
-  shapeClass?: string;
 }) {
   const disabled = !question || used;
 
   const usedClass =
     result === "teamOne"
-      ? "bg-[linear-gradient(180deg,rgba(20,59,97,0.95)_0%,rgba(10,25,52,1)_100%)] text-cyan-50"
+      ? "border-cyan-300/10 bg-cyan-400/8 text-cyan-100/70"
       : result === "teamTwo"
-        ? "bg-[linear-gradient(180deg,rgba(120,69,36,0.95)_0%,rgba(78,44,24,1)_100%)] text-orange-50"
-        : "bg-[linear-gradient(180deg,rgba(10,14,26,0.95)_0%,rgba(3,7,18,1)_100%)] text-slate-500/80 opacity-70";
+        ? "border-orange-300/10 bg-orange-400/8 text-orange-100/70"
+        : "border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500/80 opacity-70";
 
   return (
     <button
@@ -376,23 +378,26 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden border border-white/5 transition duration-300",
-        compact ? "min-h-[40px] px-1 py-1.5" : "min-h-[58px] px-1 py-2",
-        shapeClass,
+        "group relative overflow-hidden rounded-[1.2rem] border transition duration-300 board-soft-float",
+        compact ? "min-h-[60px] px-1.5 py-2" : "min-h-[88px] px-2 py-3",
         disabled
           ? usedClass
-          : "bg-[linear-gradient(180deg,rgba(34,30,55,0.98)_0%,rgba(14,12,28,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:brightness-110",
+          : "border-cyan-300/10 bg-[linear-gradient(180deg,rgba(20,40,85,1)_0%,rgba(4,14,34,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_20px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 hover:border-cyan-300/30 hover:shadow-[0_18px_30px_rgba(34,211,238,0.14)]",
       ].join(" ")}
     >
       {!disabled ? (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_54%)] opacity-80" />
+        <>
+          <div className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_45%)] opacity-80" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent opacity-60" />
+        </>
       ) : null}
 
       <div className="relative flex h-full items-center justify-center">
         <div
           className={[
-            "font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.18)]",
-            compact ? "text-[0.78rem] md:text-[0.9rem]" : "text-[1.02rem] md:text-[1.16rem]",
+            "font-black tracking-tight",
+            compact ? "text-[0.95rem] md:text-[1.15rem]" : "text-[1.65rem] md:text-[1.75rem]",
           ].join(" ")}
         >
           {points}
@@ -709,56 +714,40 @@ export default function GameBoardClient({
                   }
                 >
                   {boardColumns.map((column) => (
-                    <div
-                      key={column.category.id}
-                      className={[
-                        "flex flex-col overflow-hidden rounded-[1.7rem] border border-[#20345b] bg-[linear-gradient(180deg,rgba(8,18,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[0_16px_30px_rgba(0,0,0,0.22)]",
-                        compactLandscape ? "p-1.5" : "p-2.5",
-                      ].join(" ")}
-                    >
+                    <div key={column.category.id} className="flex flex-col gap-2">
                       <CategoryCard
                         category={column.category}
                         compact={compactLandscape}
                       />
 
-                      <div className="space-y-0">
-                        {column.rows.map((row, rowIndex) => (
-                          <div
-                            key={`${column.category.id}-${row.points}`}
-                            className="grid grid-cols-2 gap-0"
-                          >
-                            {[0, 1].map((index) => {
-                              const question = row.questions[index] ?? null;
-                              const used = question
-                                ? boardState.usedQuestionIds.includes(question.id)
-                                : true;
-                              const result = question
-                                ? boardState.questionResults[question.id] ?? "none"
-                                : "none";
+                      {column.rows.map((row) => (
+                        <div
+                          key={`${column.category.id}-${row.points}`}
+                          className={compactLandscape ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-2 gap-2"}
+                        >
+                          {[0, 1].map((index) => {
+                            const question = row.questions[index] ?? null;
+                            const used = question
+                              ? boardState.usedQuestionIds.includes(question.id)
+                              : true;
+                            const result = question
+                              ? boardState.questionResults[question.id] ?? "none"
+                              : "none";
 
-                              const shapeClass =
-                                rowIndex === 2
-                                  ? index === 0
-                                    ? "rounded-bl-[1.35rem]"
-                                    : "rounded-br-[1.35rem]"
-                                  : "rounded-none";
-
-                              return (
-                                <QuestionCell
-                                  key={`${column.category.id}-${row.points}-${index}`}
-                                  question={question}
-                                  points={row.points}
-                                  used={used}
-                                  result={result}
-                                  compact={compactLandscape}
-                                  shapeClass={shapeClass}
-                                  onOpen={() => handleOpenQuestion(question)}
-                                />
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
+                            return (
+                              <QuestionCell
+                                key={`${column.category.id}-${row.points}-${index}`}
+                                question={question}
+                                points={row.points}
+                                used={used}
+                                result={result}
+                                compact={compactLandscape}
+                                onOpen={() => handleOpenQuestion(question)}
+                              />
+                            );
+                          })}
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
