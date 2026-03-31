@@ -308,16 +308,16 @@ function CategoryCard({
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-t-[1.45rem] bg-[#d5dde7]",
-        compact ? "min-h-[86px] px-2 pt-2 pb-1.5" : "min-h-[178px] px-2.5 pt-2.5 pb-0",
+        "relative overflow-hidden rounded-t-[1.6rem] bg-[#d7dee8] border-b border-[#1f2a45]",
+        compact ? "min-h-[90px] px-2 pb-1 pt-2" : "min-h-[192px] px-2.5 pb-1 pt-2.5",
       ].join(" ")}
     >
-      <div className={compact ? "absolute inset-x-2 top-1.5 z-20" : "absolute inset-x-3 top-2 z-20"}>
-        <div className="mx-auto w-full rounded-[1rem] border border-white/20 bg-[linear-gradient(180deg,#2aa0d8_0%,#1b8fca_100%)] px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.20)]">
+      <div className={compact ? "absolute inset-x-2 top-2 z-20" : "absolute inset-x-3 top-2.5 z-20"}>
+        <div className="mx-auto w-full rounded-[1rem] border border-white/25 bg-[linear-gradient(180deg,#32a7df_0%,#1f94cd_100%)] px-3 py-2 shadow-[0_8px_18px_rgba(0,0,0,0.22)]">
           <h3
             className={[
               "overflow-hidden text-ellipsis whitespace-nowrap text-center font-black text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
-              compact ? "text-[10px]" : "text-sm md:text-[0.98rem]",
+              compact ? "text-[10px]" : "text-sm md:text-[1rem]",
             ].join(" ")}
             title={category.name}
           >
@@ -326,12 +326,12 @@ function CategoryCard({
         </div>
       </div>
 
-      <div className={compact ? "flex min-h-[58px] items-center justify-center px-2 pt-9" : "flex min-h-[150px] items-center justify-center px-3 pt-11 pb-2"}>
+      <div className={compact ? "flex min-h-[58px] items-center justify-center px-2 pt-9" : "flex min-h-[162px] items-center justify-center px-3 pt-12"}>
         {category.image_url ? (
           <img
             src={category.image_url}
             alt={category.name}
-            className={compact ? "max-h-[46px] max-w-[72px] object-contain" : "max-h-[120px] max-w-[160px] object-contain"}
+            className={compact ? "max-h-[48px] max-w-[80px] object-contain" : "max-h-[118px] max-w-[155px] object-contain"}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-slate-500/70">
@@ -350,6 +350,7 @@ function QuestionCell({
   result = "none",
   onOpen,
   compact = false,
+  shapeClass = "",
 }: {
   question: QuestionRow | null;
   points: number;
@@ -357,15 +358,16 @@ function QuestionCell({
   result?: "teamOne" | "teamTwo" | "none";
   onOpen?: () => void;
   compact?: boolean;
+  shapeClass?: string;
 }) {
   const disabled = !question || used;
 
   const usedClass =
     result === "teamOne"
-      ? "border-cyan-300/15 bg-[linear-gradient(180deg,rgba(20,59,97,0.92)_0%,rgba(10,25,52,0.98)_100%)] text-cyan-50"
+      ? "bg-[linear-gradient(180deg,rgba(20,59,97,0.95)_0%,rgba(10,25,52,1)_100%)] text-cyan-50"
       : result === "teamTwo"
-        ? "border-orange-300/15 bg-[linear-gradient(180deg,rgba(78,44,24,0.92)_0%,rgba(29,17,10,0.98)_100%)] text-orange-50"
-        : "border-white/5 bg-[linear-gradient(180deg,rgba(2,8,23,0.84)_0%,rgba(2,8,23,0.96)_100%)] text-slate-500/80 opacity-70";
+        ? "bg-[linear-gradient(180deg,rgba(120,69,36,0.95)_0%,rgba(78,44,24,1)_100%)] text-orange-50"
+        : "bg-[linear-gradient(180deg,rgba(10,14,26,0.95)_0%,rgba(3,7,18,1)_100%)] text-slate-500/80 opacity-70";
 
   return (
     <button
@@ -374,22 +376,23 @@ function QuestionCell({
       onClick={onOpen}
       aria-label={`سؤال ${points}`}
       className={[
-        "group relative overflow-hidden border transition duration-300",
+        "group relative overflow-hidden border border-white/5 transition duration-300",
         compact ? "min-h-[40px] px-1 py-1.5" : "min-h-[58px] px-1 py-2",
+        shapeClass,
         disabled
           ? usedClass
-          : "border-white/5 bg-[linear-gradient(180deg,rgba(47,32,70,0.98)_0%,rgba(19,13,33,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:brightness-110",
+          : "bg-[linear-gradient(180deg,rgba(34,30,55,0.98)_0%,rgba(14,12,28,1)_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:brightness-110",
       ].join(" ")}
     >
       {!disabled ? (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_52%)] opacity-80" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_54%)] opacity-80" />
       ) : null}
 
       <div className="relative flex h-full items-center justify-center">
         <div
           className={[
             "font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.18)]",
-            compact ? "text-[0.78rem] md:text-[0.9rem]" : "text-[1.05rem] md:text-[1.18rem]",
+            compact ? "text-[0.78rem] md:text-[0.9rem]" : "text-[1.02rem] md:text-[1.16rem]",
           ].join(" ")}
         >
           {points}
@@ -709,7 +712,7 @@ export default function GameBoardClient({
                     <div
                       key={column.category.id}
                       className={[
-                        "flex flex-col overflow-hidden rounded-[1.55rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,19,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[0_16px_30px_rgba(0,0,0,0.22)]",
+                        "flex flex-col overflow-hidden rounded-[1.7rem] border border-[#20345b] bg-[linear-gradient(180deg,rgba(8,18,40,0.98)_0%,rgba(2,11,31,1)_100%)] shadow-[0_16px_30px_rgba(0,0,0,0.22)]",
                         compactLandscape ? "p-1.5" : "p-2.5",
                       ].join(" ")}
                     >
@@ -718,7 +721,7 @@ export default function GameBoardClient({
                         compact={compactLandscape}
                       />
 
-                      <div className={compactLandscape ? "space-y-0" : "space-y-0"}>
+                      <div className="space-y-0">
                         {column.rows.map((row, rowIndex) => (
                           <div
                             key={`${column.category.id}-${row.points}`}
@@ -733,6 +736,13 @@ export default function GameBoardClient({
                                 ? boardState.questionResults[question.id] ?? "none"
                                 : "none";
 
+                              const shapeClass =
+                                rowIndex === 2
+                                  ? index === 0
+                                    ? "rounded-bl-[1.35rem]"
+                                    : "rounded-br-[1.35rem]"
+                                  : "rounded-none";
+
                               return (
                                 <QuestionCell
                                   key={`${column.category.id}-${row.points}-${index}`}
@@ -741,6 +751,7 @@ export default function GameBoardClient({
                                   used={used}
                                   result={result}
                                   compact={compactLandscape}
+                                  shapeClass={shapeClass}
                                   onOpen={() => handleOpenQuestion(question)}
                                 />
                               );
