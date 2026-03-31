@@ -1730,6 +1730,13 @@ export default function CodenamesBoardClient({
           pointer-events: none;
         }
 
+.card-word-text {
+  font-size: clamp(1.2rem, 1.6vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+
         .card-inner-overlay {
           position: absolute;
           inset: 0;
@@ -1801,19 +1808,24 @@ export default function CodenamesBoardClient({
         }
 
         .mobile-card-word {
-          width: 100%;
-          text-align: center;
-          color: #f7fafc;
-          font-size: clamp(0.75rem, 3vw, 1.1rem);
-          font-weight: 900;
-          line-height: 1.04;
-          text-shadow:
-            0 2px 0 rgba(0, 0, 0, 0.5),
-            0 6px 20px rgba(0, 0, 0, 0.55),
-            0 0 12px rgba(0, 0, 0, 0.25);
-          word-break: break-word;
-          overflow-wrap: anywhere;
-        }
+  width: 100%;
+  text-align: center;
+  color: #f7fafc;
+
+  /* 👇 تكبير الخط بشكل واضح */
+  font-size: clamp(0.95rem, 3.8vw, 1.35rem);
+
+  font-weight: 900;
+  line-height: 1.15;
+
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.6),
+    0 6px 20px rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(0, 0, 0, 0.3);
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 
         .confirm-card-btn {
           animation: confirmPopIn 180ms ease;
@@ -1933,9 +1945,11 @@ export default function CodenamesBoardClient({
         }
 
         @media (orientation: landscape) and (max-width: 1180px) {
-          .mobile-card {
-            aspect-ratio: 1.1 / 1 !important;
-          }
+  .mobile-card-word {
+    font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+    line-height: 1.05;
+  }
+}
 
           .mobile-card-word {
             font-size: clamp(0.66rem, 1.8vw, 0.92rem);
