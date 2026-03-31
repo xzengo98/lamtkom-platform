@@ -281,11 +281,64 @@ function TrophyIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
+function CpuIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="7" y="7" width="10" height="10" rx="2" />
+      <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z" />
+      <path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" />
+    </svg>
+  );
+}
+
+function BookOpenIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 7a4 4 0 0 0-4-4H4v14h4a4 4 0 0 1 4 4" />
+      <path d="M12 7a4 4 0 0 1 4-4h4v14h-4a4 4 0 0 0-4 4" />
+    </svg>
+  );
+}
+
 function getSectionIcon(slug: string) {
   if (slug === "islamic") return <MosqueIcon className="h-5 w-5" />;
   if (slug === "sports") return <TrophyIcon className="h-5 w-5" />;
   if (slug === "entertainment") return <FilmIcon className="h-5 w-5" />;
-  return <GlobeIcon className="h-5 w-5" />;
+  if (slug === "general") return <BookOpenIcon className="h-5 w-5" />;
+  if (slug === "technology") return <CpuIcon className="h-5 w-5" />;
+  return <SparklesIcon className="h-5 w-5" />;
 }
 
 export default function StartGameForm({
@@ -403,11 +456,38 @@ export default function StartGameForm({
     >
       <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />
 
-      {/* Header */}
+      {/* Top setup */}
       <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_18px_45px_rgba(0,0,0,0.28)] md:p-6">
-        <div className="grid gap-5 xl:grid-cols-[1fr_1.3fr] xl:items-center">
-          <div className="order-2 xl:order-1">
-            <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+        <div className="grid gap-6 xl:grid-cols-[1.25fr_1fr] xl:items-center">
+          {/* Text block */}
+          <div className="order-2 xl:order-1 text-right">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+              <GamepadIcon className="h-4 w-4" />
+              <span>إعداد اللعبة</span>
+            </div>
+
+            <h1 className="mt-4 text-3xl font-black text-white md:text-5xl">
+              جهّز الجولة قبل البدء
+            </h1>
+
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
+              اختر اسم اللعبة وأسماء الفرق ثم انتقل لاختيار 6 فئات بطريقة عرض واضحة
+              ومناسبة للعب الجماعي.
+            </p>
+
+            <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-white/85">
+              <span>المختار</span>
+              <span className="text-cyan-300">{selectedCount}</span>
+              <span>/ {REQUIRED_CATEGORY_COUNT}</span>
+              <span className="mx-1 text-white/25">•</span>
+              <span>الألعاب المتبقية</span>
+              <span className="text-orange-300">{gamesRemaining}</span>
+            </div>
+          </div>
+
+          {/* Inputs block */}
+          <div className="order-1 xl:order-2">
+            <div className="grid gap-3 md:grid-cols-[1.15fr_1.15fr_1.15fr_auto]">
               <div className="rounded-[1rem] border border-white/10 bg-[#121d38] p-4">
                 <div className="mb-2 text-sm font-black text-white/70">اسم اللعبة</div>
                 <input
@@ -452,31 +532,6 @@ export default function StartGameForm({
               </div>
             </div>
           </div>
-
-          <div className="order-1 xl:order-2 text-right">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
-              <GamepadIcon className="h-4 w-4" />
-              <span>إعداد اللعبة</span>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-black text-white md:text-5xl">
-              جهّز الجولة قبل البدء
-            </h1>
-
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
-              اختر اسم اللعبة وأسماء الفرق ثم انتقل لاختيار 6 فئات بطريقة عرض واضحة
-              ومناسبة للعب الجماعي.
-            </p>
-
-            <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-white/85">
-              <span>المختار</span>
-              <span className="text-cyan-300">{selectedCount}</span>
-              <span>/ {REQUIRED_CATEGORY_COUNT}</span>
-              <span className="mx-1 text-white/25">•</span>
-              <span>الألعاب المتبقية</span>
-              <span className="text-orange-300">{gamesRemaining}</span>
-            </div>
-          </div>
         </div>
 
         {visibleError ? (
@@ -500,14 +555,9 @@ export default function StartGameForm({
 
                 <div className="relative">
                   <div className="mb-5 flex items-center justify-between gap-4">
-                    <div
-                      className={`rounded-full border px-4 py-2 text-xs font-black ${theme.countBadge}`}
-                    >
-                      {section.categories.length} فئة فرعية
-                    </div>
-
+                    {/* Name + icon on left side of header row now */}
                     <div className="text-right">
-                      <div className="flex flex-row-reverse items-center justify-end gap-3">
+                      <div className="flex items-center gap-3">
                         <div
                           className={`relative flex h-14 w-14 items-center justify-center rounded-[1rem] border border-white/10 ${theme.iconBg} ${theme.iconTint} shadow-[0_8px_20px_rgba(0,0,0,0.18)]`}
                         >
@@ -519,6 +569,13 @@ export default function StartGameForm({
                           {section.name}
                         </h3>
                       </div>
+                    </div>
+
+                    {/* subcategories count moved opposite side */}
+                    <div
+                      className={`rounded-full border px-4 py-2 text-xs font-black ${theme.countBadge}`}
+                    >
+                      {section.categories.length} فئة فرعية
                     </div>
                   </div>
 
@@ -618,16 +675,12 @@ export default function StartGameForm({
           {uncategorized.length > 0 ? (
             <div className="relative">
               <div className="mb-5 flex items-center justify-between gap-4">
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white">
-                  {uncategorized.length} فئة فرعية
-                </div>
-
                 <div className="text-right">
-                  <div className="flex flex-row-reverse items-center justify-end gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="relative flex h-14 w-14 items-center justify-center rounded-[1rem] border border-white/10 bg-[#112945] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
                       <div className="absolute inset-[5px] rounded-[0.8rem] border border-white/10" />
                       <div className="relative z-10">
-                        <GlobeIcon className="h-5 w-5" />
+                        <SparklesIcon className="h-5 w-5" />
                       </div>
                     </div>
 
@@ -635,6 +688,10 @@ export default function StartGameForm({
                       فئات بدون قسم
                     </h3>
                   </div>
+                </div>
+
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white">
+                  {uncategorized.length} فئة فرعية
                 </div>
               </div>
 
