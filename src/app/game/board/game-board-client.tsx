@@ -60,65 +60,48 @@ const categoryVisuals: Record<
   string,
   {
     glow: string;
-    header: string;
     body: string;
   }
 > = {
   history: {
-    glow: "shadow-[0_0_0_1px_rgba(251,191,36,0.16),0_18px_50px_rgba(245,158,11,0.12)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(245,158,11,0.12),0_22px_55px_rgba(245,158,11,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(228,234,242,0.98)_0%,rgba(180,191,208,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(235,240,247,0.98)_0%,rgba(191,201,216,0.97)_100%)]",
   },
   geography: {
-    glow: "shadow-[0_0_0_1px_rgba(56,189,248,0.18),0_18px_50px_rgba(14,165,233,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(56,189,248,0.14),0_22px_55px_rgba(14,165,233,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(230,236,245,0.98)_0%,rgba(177,189,207,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(193,202,216,0.97)_100%)]",
   },
   islamic: {
-    glow: "shadow-[0_0_0_1px_rgba(16,185,129,0.18),0_18px_50px_rgba(5,150,105,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(34,197,94,0.14),0_22px_55px_rgba(22,163,74,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(232,237,245,0.98)_0%,rgba(184,194,211,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
   sports: {
-    glow: "shadow-[0_0_0_1px_rgba(52,211,153,0.18),0_18px_50px_rgba(16,185,129,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(16,185,129,0.14),0_22px_55px_rgba(5,150,105,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(231,237,245,0.98)_0%,rgba(182,193,209,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
   science: {
-    glow: "shadow-[0_0_0_1px_rgba(167,139,250,0.18),0_18px_50px_rgba(139,92,246,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_22px_55px_rgba(124,58,237,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
   movies: {
-    glow: "shadow-[0_0_0_1px_rgba(244,114,182,0.18),0_18px_50px_rgba(236,72,153,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(236,72,153,0.14),0_22px_55px_rgba(219,39,119,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
   technology: {
-    glow: "shadow-[0_0_0_1px_rgba(59,130,246,0.18),0_18px_50px_rgba(37,99,235,0.13)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(59,130,246,0.14),0_22px_55px_rgba(37,99,235,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(232,237,245,0.98)_0%,rgba(181,190,208,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
   default: {
-    glow: "shadow-[0_0_0_1px_rgba(148,163,184,0.18),0_18px_50px_rgba(100,116,139,0.12)]",
-    header:
-      "bg-[linear-gradient(180deg,rgba(80,205,255,1)_0%,rgba(34,150,214,1)_100%)]",
+    glow: "shadow-[0_0_0_1px_rgba(148,163,184,0.14),0_22px_55px_rgba(100,116,139,0.10)]",
     body:
-      "bg-[linear-gradient(180deg,rgba(231,236,245,0.98)_0%,rgba(180,190,208,0.96)_100%)]",
+      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
   },
 };
 
@@ -218,137 +201,109 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function FlagIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M6 20V5m0 0c2.5-1.8 4.7-.2 7-1.2 2.1-.9 3.7-2 5-1.3V11c-1.3-.7-2.9.4-5 1.3-2.3 1-4.5-.6-7 1.2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function StatusPill({
   label,
   icon,
-  className = "",
 }: {
   label: string;
   icon?: ReactNode;
-  className?: string;
 }) {
   return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs font-bold text-white/90 backdrop-blur ${className}`}
-    >
+    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/28 bg-[linear-gradient(180deg,#58c6f2_0%,#3caee1_100%)] px-4 py-2 text-sm font-black text-white shadow-[0_4px_0_rgba(10,77,111,0.45)]">
       {icon}
       <span>{label}</span>
     </div>
   );
 }
 
-function TeamCard({
+function ScoreControl({
   teamName,
   score,
-  isLeading,
-  isTurn,
+  accent,
   onIncrease,
   onDecrease,
-  accent,
-  avatarUrl,
 }: {
   teamName: string;
   score: number;
-  isLeading: boolean;
-  isTurn: boolean;
+  accent: "blue" | "orange";
   onIncrease: () => void;
   onDecrease: () => void;
-  accent: "blue" | "orange";
-  avatarUrl: string;
 }) {
   const palette =
     accent === "orange"
       ? {
-          card:
-            "border-orange-300/20 bg-[linear-gradient(180deg,rgba(51,25,10,0.95)_0%,rgba(19,10,6,0.98)_100%)]",
-          glow:
-            "shadow-[0_0_0_1px_rgba(251,146,60,0.18),0_18px_50px_rgba(251,146,60,0.12)]",
-          text: "text-orange-50",
-          soft: "text-orange-100/80",
-          btn: "border-orange-300/20 bg-orange-400/10 hover:bg-orange-400/18 text-orange-50",
+          top: "bg-[linear-gradient(180deg,#fb9c5b_0%,#f59052_100%)]",
+          topShadow: "shadow-[0_4px_0_rgba(129,67,24,0.45)]",
+          circle:
+            "bg-[linear-gradient(180deg,#f79a3f_0%,#ef861c_100%)] shadow-[0_4px_0_rgba(131,73,16,0.55)]",
+          ring: "ring-orange-200/60",
         }
       : {
-          card:
-            "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(7,41,64,0.95)_0%,rgba(4,15,28,0.98)_100%)]",
-          glow:
-            "shadow-[0_0_0_1px_rgba(34,211,238,0.16),0_18px_50px_rgba(34,211,238,0.10)]",
-          text: "text-cyan-50",
-          soft: "text-cyan-100/80",
-          btn: "border-cyan-300/20 bg-cyan-400/10 hover:bg-cyan-400/18 text-cyan-50",
+          top: "bg-[linear-gradient(180deg,#39a8da_0%,#2795ca_100%)]",
+          topShadow: "shadow-[0_4px_0_rgba(18,82,113,0.45)]",
+          circle:
+            "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)] shadow-[0_4px_0_rgba(19,83,113,0.55)]",
+          ring: "ring-cyan-200/60",
         };
 
   return (
-    <div
-      className={`rounded-[24px] border p-3 ${palette.card} ${palette.glow}`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatarUrl} alt={teamName} className="h-full w-full object-cover" />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className={`truncate text-sm font-black ${palette.text}`}>
-            {teamName}
-          </div>
-
-          <div className="mt-1 flex flex-wrap gap-2">
-            {isTurn ? (
-              <StatusPill label="الدور الآن" className={palette.soft} />
-            ) : null}
-            {isLeading ? (
-              <StatusPill
-                label="متصدر"
-                icon={<CrownIcon className="h-3.5 w-3.5" />}
-                className={palette.soft}
-              />
-            ) : null}
-          </div>
-        </div>
-
-        <div className="text-right">
-          <div className={`text-2xl font-black leading-none ${palette.text}`}>
-            {score}
-          </div>
-          <div className={`mt-1 text-[11px] font-bold ${palette.soft}`}>
-            نقطة
-          </div>
-        </div>
+    <div className="w-full max-w-[320px]">
+      <div
+        className={`rounded-t-[28px] px-6 pb-5 pt-4 text-center text-[18px] font-black text-white ${palette.top} ${palette.topShadow}`}
+      >
+        <span className="block truncate">{teamName}</span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="relative -mt-1 rounded-b-[28px] border-t-4 border-slate-500/30 bg-[linear-gradient(180deg,#ece8e2_0%,#d9d4cc_100%)] px-5 py-4 shadow-[0_10px_25px_rgba(0,0,0,0.18)]">
         <button
           type="button"
           onClick={onIncrease}
-          className={`rounded-2xl border px-3 py-2 text-sm font-black transition ${palette.btn}`}
+          className={`absolute left-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 ${palette.ring} ${palette.circle}`}
         >
           +
         </button>
+
         <button
           type="button"
           onClick={onDecrease}
-          className={`rounded-2xl border px-3 py-2 text-sm font-black transition ${palette.btn}`}
+          className={`absolute right-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 ${palette.ring} ${palette.circle}`}
         >
           −
         </button>
+
+        <div className="text-center text-[28px] font-black leading-none text-slate-800">
+          {score}
+        </div>
       </div>
     </div>
   );
 }
 
-function CategoryIllustration({
-  category,
-}: {
-  category: Category;
-}) {
+function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="flex h-full w-full items-center justify-center px-3 pt-7">
+      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-3 pb-2 pt-7">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.16)_45%,transparent_72%)]" />
+        <div className="absolute inset-x-4 bottom-4 top-8 rounded-[34px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.72),rgba(255,255,255,0.18)_58%,transparent_78%)]" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={category.image_url}
           alt={category.name}
-          className="max-h-[148px] w-auto max-w-full object-contain drop-shadow-[0_10px_18px_rgba(15,23,42,0.18)]"
+          className="relative z-10 max-h-[162px] w-auto max-w-[88%] object-contain drop-shadow-[0_10px_18px_rgba(15,23,42,0.20)]"
         />
       </div>
     );
@@ -356,7 +311,7 @@ function CategoryIllustration({
 
   return (
     <div className="flex h-full items-center justify-center px-4 pt-7">
-      <div className="rounded-3xl border border-slate-400/30 bg-white/40 px-6 py-5 text-center text-slate-700 shadow-inner">
+      <div className="rounded-[28px] border border-slate-400/28 bg-white/40 px-6 py-5 text-center text-slate-700 shadow-inner">
         <div className="text-sm font-black">فئة</div>
         <div className="mt-1 text-xs font-bold opacity-70">{category.name}</div>
       </div>
@@ -375,25 +330,24 @@ function CategoryCard({
 
   return (
     <div
-      className={`relative flex h-[438px] min-w-[198px] max-w-[198px] flex-col overflow-hidden rounded-[28px] border-4 border-slate-950/90 ${visual.glow}`}
+      className={`relative flex h-[450px] w-[200px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 ${visual.glow}`}
     >
-      <div className={`relative h-[274px] ${visual.body}`}>
-        <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_70%)]" />
+      <div className={`relative h-[286px] ${visual.body}`}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_55%)]" />
+        <div className="absolute inset-x-0 top-0 h-[90px] bg-[linear-gradient(180deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0)_100%)]" />
 
-        <div className="absolute left-1/2 top-[-2px] z-20 w-[82%] -translate-x-1/2">
-          <div
-            className={`rounded-b-[20px] rounded-t-[16px] px-4 py-3 text-center text-[15px] font-black text-white shadow-[0_8px_0_rgba(0,0,0,0.10)] ${visual.header}`}
-          >
-            <span className="block truncate">{category.name}</span>
+        <div className="absolute left-1/2 top-0 z-20 w-[82%] -translate-x-1/2">
+          <div className="rounded-b-[20px] rounded-t-[16px] bg-[linear-gradient(180deg,#59c7f2_0%,#32a5d8_100%)] px-4 py-3 text-center text-[15px] font-black text-white shadow-[0_5px_0_rgba(18,89,123,0.42)]">
+            <span className="block truncate leading-tight">{category.name}</span>
           </div>
         </div>
 
-        <div className="absolute inset-x-0 top-[54px] bottom-0">
+        <div className="absolute inset-x-0 top-[52px] bottom-0">
           <CategoryIllustration category={category} />
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1c2f63_0%,#0f234d_100%)]">
+      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1f3367_0%,#142853_100%)]">
         {children}
       </div>
     </div>
@@ -404,42 +358,48 @@ function QuestionCell({
   question,
   points,
   used,
-  result = "none",
   onOpen,
 }: {
   question: QuestionRow | null;
   points: 200 | 400 | 600;
   used: boolean;
-  result?: QuestionResult;
   onOpen?: () => void;
 }) {
   const disabled = !question || used;
 
   const pointPalette =
     points === 200
-      ? "bg-[linear-gradient(180deg,#ffa45e_0%,#fb9252_100%)] text-slate-950"
+      ? "bg-[linear-gradient(180deg,#ffa15f_0%,#fa9554_100%)] text-slate-950"
       : points === 400
-        ? "bg-[linear-gradient(180deg,#89c86d_0%,#7cbc60_100%)] text-slate-950"
-        : "bg-[linear-gradient(180deg,#4d90d8_0%,#3a79bf_100%)] text-white";
+        ? "bg-[linear-gradient(180deg,#89c86e_0%,#7dbf63_100%)] text-slate-950"
+        : "bg-[linear-gradient(180deg,#4f92da_0%,#3a7abf_100%)] text-white";
 
-  const usedPalette =
-    result === "teamOne"
-      ? "bg-[linear-gradient(180deg,rgba(20,52,103,0.95)_0%,rgba(11,31,67,0.98)_100%)] text-cyan-100/45"
-      : result === "teamTwo"
-        ? "bg-[linear-gradient(180deg,rgba(71,41,20,0.95)_0%,rgba(49,28,13,0.98)_100%)] text-orange-100/45"
-        : "bg-[linear-gradient(180deg,rgba(18,34,72,0.95)_0%,rgba(13,28,60,0.98)_100%)] text-white/30";
+  const revealedPalette =
+    "bg-[linear-gradient(180deg,rgba(27,45,89,0.96)_0%,rgba(18,35,73,0.99)_100%)] text-white/34";
 
-  const baseClass =
-    "flex h-[54px] w-full items-center justify-center text-[14px] font-black tracking-[0.02em] transition";
+  const emptyPalette =
+    "bg-[linear-gradient(180deg,rgba(27,45,89,0.96)_0%,rgba(18,35,73,0.99)_100%)] text-white/34";
+
+  if (!question) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={`flex h-[54px] w-full items-center justify-center text-[14px] font-black ${emptyPalette}`}
+      >
+        –
+      </button>
+    );
+  }
 
   if (disabled) {
     return (
       <button
         type="button"
         disabled
-        className={`${baseClass} ${usedPalette}`}
+        className={`flex h-[54px] w-full items-center justify-center text-[15px] font-black tracking-[0.02em] ${revealedPalette}`}
       >
-        {question ? points : "–"}
+        {points}
       </button>
     );
   }
@@ -448,9 +408,9 @@ function QuestionCell({
     <button
       type="button"
       onClick={onOpen}
-      className={`${baseClass} ${pointPalette} hover:brightness-105 active:scale-[0.99]`}
+      className={`flex h-[54px] w-full items-center justify-center text-[15px] font-black tracking-[0.02em] transition hover:brightness-105 active:scale-[0.99] ${pointPalette}`}
     >
-      <span className="text-[15px] font-black">{points}</span>
+      {points}
     </button>
   );
 }
@@ -469,13 +429,13 @@ export default function GameBoardClient({
   const storageKey = `seenjeem-board-state:${sessionId}`;
 
   const [isLandscapePhone, setIsLandscapePhone] = useState(false);
+  const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
 
   const initialState = useMemo(() => {
     return normalizeBoardState(initialBoardState);
   }, [initialBoardState]);
 
   const [boardState, setBoardState] = useState<BoardState>(initialState);
-  const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
 
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -627,99 +587,135 @@ export default function GameBoardClient({
     router.push(`/game/question?sessionId=${sessionId}&questionId=${question.id}`);
   }
 
+  function handleFinishGame() {
+    if (hasRedirectedToResult) return;
+
+    setHasRedirectedToResult(true);
+
+    const params = new URLSearchParams({
+      sessionId,
+      gameName,
+      teamOne,
+      teamTwo,
+      teamOneScore: String(boardState.teamOneScore),
+      teamTwoScore: String(boardState.teamTwoScore),
+    });
+
+    router.push(`/game/result?${params.toString()}`);
+  }
+
   const compactLandscape = isLandscapePhone;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,80,175,0.18),transparent_30%),linear-gradient(180deg,#041133_0%,#051742_45%,#051230_100%)] text-white">
-      <div className="mx-auto w-full max-w-[1540px] px-3 py-4 sm:px-4 lg:px-6">
-        <div className="mb-4 rounded-[28px] border border-white/10 bg-white/5 p-4 shadow-[0_20px_80px_rgba(2,6,23,0.45)] backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(23,85,199,0.16),transparent_26%),linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
+      <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
+        <div className="mb-5 rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.50)] backdrop-blur">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="text-xs font-bold tracking-[0.25em] text-cyan-200/75">
+                <div className="text-xs font-bold tracking-[0.24em] text-cyan-200/75">
                   لوحة اللعبة
                 </div>
-                <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                <h1 className="mt-1 text-2xl font-black text-white sm:text-3xl">
                   {gameName}
                 </h1>
 
                 {!compactLandscape ? (
-                  <p className="mt-2 max-w-2xl text-sm font-medium text-slate-200/80">
-                    قم باختيار الأسئلة حتى انتهاء جميع الخانات ثم الانتقال تلقائيًا
-                    إلى صفحة النتيجة.
+                  <p className="mt-2 text-sm font-medium text-slate-200/80">
+                    اختر الأسئلة بشكل طبيعي أو أنهِ اللعبة يدويًا في أي وقت.
                   </p>
                 ) : null}
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusPill
-                  label={`الدور: ${activeTurnName}`}
+                  label={`الدور ${activeTurnName}`}
                   icon={<GamepadIcon className="h-4 w-4" />}
                 />
                 <StatusPill
-                  label={`المتصدر: ${leaderLabel}`}
+                  label={`المتصدر ${leaderLabel}`}
                   icon={<CrownIcon className="h-4 w-4" />}
                 />
-                <StatusPill label={`المتبقي: ${remainingCount}`} />
+                <StatusPill label={`المتبقي ${remainingCount}`} />
+
+                <button
+                  type="button"
+                  onClick={handleFinishGame}
+                  className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-6 py-3 text-sm font-black text-white shadow-[0_5px_0_rgba(109,12,55,0.45)] transition hover:brightness-105 active:translate-y-[1px]"
+                >
+                  <FlagIcon className="h-4 w-4" />
+                  إنهاء اللعب
+                </button>
+
                 <Link
                   href="/account"
-                  className="inline-flex items-center rounded-full border border-white/10 bg-white/7 px-4 py-2 text-sm font-black text-white transition hover:bg-white/12"
+                  className="inline-flex items-center rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
                 >
                   الرجوع للحساب
                 </Link>
               </div>
             </div>
 
-            <div className="grid gap-3 lg:grid-cols-2">
-              <TeamCard
-                teamName={teamOne}
-                score={boardState.teamOneScore}
-                isLeading={teamOneLeading}
-                isTurn={activeTurn === "teamOne"}
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore - 100),
-                  }))
-                }
-                accent="blue"
-                avatarUrl={TEAM_BLUE_AVATAR}
-              />
+            <div className="grid items-start gap-4 xl:grid-cols-[1fr_auto_1fr]">
+              <div className="flex justify-center xl:justify-start">
+                <ScoreControl
+                  teamName={teamOne}
+                  score={boardState.teamOneScore}
+                  accent="orange"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore - 100),
+                    }))
+                  }
+                />
+              </div>
 
-              <TeamCard
-                teamName={teamTwo}
-                score={boardState.teamTwoScore}
-                isLeading={teamTwoLeading}
-                isTurn={activeTurn === "teamTwo"}
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-                  }))
-                }
-                accent="orange"
-                avatarUrl={TEAM_ORANGE_AVATAR}
-              />
+              <div className="hidden xl:flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <StatusPill label={`المتبقي ${remainingCount}`} />
+                  <button
+                    type="button"
+                    onClick={handleFinishGame}
+                    className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-7 py-3 text-sm font-black text-white shadow-[0_5px_0_rgba(109,12,55,0.45)] transition hover:brightness-105 active:translate-y-[1px]"
+                  >
+                    <FlagIcon className="h-4 w-4" />
+                    إنهاء اللعب
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-center xl:justify-end">
+                <ScoreControl
+                  teamName={teamTwo}
+                  score={boardState.teamTwoScore}
+                  accent="blue"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+                    }))
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto overflow-y-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(5,20,57,0.92)_0%,rgba(4,17,44,0.98)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
-          <div
-            className={`flex gap-4 ${compactLandscape ? "min-w-max scale-[0.92] origin-top-left" : "min-w-max"}`}
-          >
+        <div className="overflow-x-auto overflow-y-hidden rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
+          <div className="flex min-w-max justify-center gap-4 px-2">
             {boardColumns.map((column) => (
               <CategoryCard key={column.category.id} category={column.category}>
                 {column.rows.map((row) => (
@@ -732,9 +728,6 @@ export default function GameBoardClient({
                       const used = question
                         ? boardState.usedQuestionIds.includes(question.id)
                         : true;
-                      const result = question
-                        ? boardState.questionResults[question.id] ?? "none"
-                        : "none";
 
                       return (
                         <QuestionCell
@@ -742,7 +735,6 @@ export default function GameBoardClient({
                           question={question}
                           points={row.points}
                           used={used}
-                          result={result}
                           onOpen={() => handleOpenQuestion(question)}
                         />
                       );
