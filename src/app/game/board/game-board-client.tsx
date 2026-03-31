@@ -269,7 +269,7 @@ function ScoreControl({
         <button
           type="button"
           onClick={onIncrease}
-          className={`absolute left-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 ${palette.ring} ${palette.circle}`}
+          className={`absolute left-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 ${palette.ring} ${palette.circle}`}
         >
           +
         </button>
@@ -277,7 +277,7 @@ function ScoreControl({
         <button
           type="button"
           onClick={onDecrease}
-          className={`absolute right-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 ${palette.ring} ${palette.circle}`}
+          className={`absolute right-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 ${palette.ring} ${palette.circle}`}
         >
           −
         </button>
@@ -293,25 +293,23 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-0 pb-0 pt-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0.16)_45%,transparent_72%)]" />
-        <div className="absolute inset-x-0 bottom-0 top-0 rounded-[26px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.82),rgba(255,255,255,0.20)_58%,transparent_78%)]" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={category.image_url}
-          alt={category.name}
-          className="relative z-10 h-[250px] w-[100%] object-contain drop-shadow-[0_14px_24px_rgba(15,23,42,0.22)]"
-        />
+      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-2 pt-2">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,transparent_70%)]" />
+        <div className="relative z-10 flex h-[190px] w-[92%] items-center justify-center rounded-[20px] bg-white/10 backdrop-blur-sm sm:h-[200px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={category.image_url}
+            alt={category.name}
+            className="h-full w-full object-contain"
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full items-center justify-center px-4 pt-7">
-      <div className="rounded-[28px] border border-slate-400/28 bg-white/40 px-6 py-5 text-center text-slate-700 shadow-inner">
-        <div className="text-sm font-black">فئة</div>
-        <div className="mt-1 text-xs font-bold opacity-70">{category.name}</div>
-      </div>
+    <div className="flex h-full items-center justify-center">
+      <div className="text-slate-600 font-bold">No Image</div>
     </div>
   );
 }
@@ -327,19 +325,19 @@ function CategoryCard({
 
   return (
     <div
-      className={`relative flex h-[518px] w-[214px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 ${visual.glow}`}
+      className={`group relative flex h-[540px] w-[214px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 transition duration-200 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(96,165,250,0.25),0_30px_60px_rgba(37,99,235,0.20)] ${visual.glow}`}
     >
-      <div className={`relative h-[310px] ${visual.body}`}>
+      <div className={`relative h-[270px] ${visual.body}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_55%)]" />
         <div className="absolute inset-x-0 top-0 h-[90px] bg-[linear-gradient(180deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0)_100%)]" />
 
-        <div className="absolute left-1/2 top-0 z-20 w-[82%] -translate-x-1/2">
+        <div className="absolute left-1/2 top-0 z-20 w-[82%] -translate-x-1/2 transition duration-200 group-hover:scale-[1.02]">
           <div className="rounded-b-[20px] rounded-t-[16px] bg-[linear-gradient(180deg,#59c7f2_0%,#32a5d8_100%)] px-4 py-3 text-center text-[15px] font-black text-white shadow-[0_5px_0_rgba(18,89,123,0.42)]">
             <span className="block truncate leading-tight">{category.name}</span>
           </div>
         </div>
 
-        <div className="absolute inset-x-0 top-[42px] bottom-0">
+        <div className="absolute inset-x-0 top-[42px] bottom-0 transition duration-200 group-hover:scale-[1.02]">
           <CategoryIllustration category={category} />
         </div>
       </div>
@@ -374,17 +372,15 @@ function QuestionCell({
     "bg-[linear-gradient(180deg,#ff9f59_0%,#ef7f22_100%)] text-white";
 
   const noAnswerPalette =
-    "bg-[linear-gradient(180deg,#1b2f5d_0%,#14264d_100%)] text-white";
+    "bg-[linear-gradient(180deg,#0f1f46_0%,#09132f_100%)] text-white line-through decoration-2";
 
   if (!question) {
     return (
-      <button
-        type="button"
-        disabled
-        className={`flex h-[62px] w-full items-center justify-center rounded-[10px] text-[16px] font-black ${noAnswerPalette}`}
+      <div
+        className={`flex h-[70px] w-full items-center justify-center rounded-[10px] text-[18px] font-black ${noAnswerPalette}`}
       >
         –
-      </button>
+      </div>
     );
   }
 
@@ -397,13 +393,11 @@ function QuestionCell({
           : noAnswerPalette;
 
     return (
-      <button
-        type="button"
-        disabled
-        className={`flex h-[62px] w-full items-center justify-center rounded-[10px] border border-white/6 text-[16px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${usedClass}`}
+      <div
+        className={`flex h-[70px] w-full items-center justify-center rounded-[10px] border border-white/6 text-[18px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${usedClass}`}
       >
         {points}
-      </button>
+      </div>
     );
   }
 
@@ -411,7 +405,7 @@ function QuestionCell({
     <button
       type="button"
       onClick={onOpen}
-      className={`flex h-[62px] w-full items-center justify-center rounded-[10px] border border-white/8 text-[16px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] transition hover:brightness-105 active:scale-[0.99] ${defaultPalette}`}
+      className={`flex h-[70px] w-full items-center justify-center rounded-[10px] border border-white/8 text-[18px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] transition duration-150 hover:-translate-y-[1px] hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(96,165,250,0.28),0_10px_20px_rgba(37,99,235,0.18)] active:scale-[0.96] ${defaultPalette}`}
     >
       {points}
     </button>
@@ -607,8 +601,6 @@ export default function GameBoardClient({
     router.push(`/game/result?${params.toString()}`);
   }
 
-  const compactLandscape = isLandscapePhone;
-
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(23,85,199,0.16),transparent_26%),linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
@@ -623,11 +615,9 @@ export default function GameBoardClient({
                   {gameName}
                 </h1>
 
-                {!compactLandscape ? (
-                  <p className="mt-2 text-sm font-medium text-slate-200/80">
-                    اختر الأسئلة بشكل طبيعي أو أنهِ اللعبة يدويًا في أي وقت.
-                  </p>
-                ) : null}
+                <p className="mt-2 text-sm font-medium text-slate-200/80">
+                  اختر الأسئلة بشكل طبيعي أو أنهِ اللعبة يدويًا في أي وقت.
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -644,7 +634,7 @@ export default function GameBoardClient({
                 <button
                   type="button"
                   onClick={handleFinishGame}
-                  className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-6 py-3 text-sm font-black text-white shadow-[0_5px_0_rgba(109,12,55,0.45)] transition hover:brightness-105 active:translate-y-[1px]"
+                  className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-6 py-3 text-sm font-black text-white shadow-[0_5px_0_rgba(109,12,55,0.45)] transition duration-150 hover:scale-[1.02] hover:brightness-105 active:scale-95"
                 >
                   <FlagIcon className="h-4 w-4" />
                   إنهاء اللعب
@@ -652,7 +642,7 @@ export default function GameBoardClient({
 
                 <Link
                   href="/account"
-                  className="inline-flex items-center rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                  className="inline-flex items-center rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm font-black text-white transition duration-150 hover:bg-white/10 hover:scale-[1.02] active:scale-95"
                 >
                   الرجوع للحساب
                 </Link>
