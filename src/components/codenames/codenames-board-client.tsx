@@ -48,8 +48,8 @@ type TurnRow = {
 type PreviewSelection = {
   playerId: string;
   playerName: string;
-  cardId: string;
-  word: string;
+  cardIds: string[];
+  words: string[];
   team: string | null;
 } | null;
 
@@ -353,7 +353,7 @@ function MobileLogCard({
           <div className="rounded-xl border border-lime-300/20 bg-lime-500/10 p-2">
             <div className="text-[10px] font-black uppercase text-lime-100">Preview</div>
             <div className="mt-1 text-xs font-black text-white">
-              {previewSelection.playerName}: {previewSelection.word}
+              {previewSelection.playerName}: {previewSelection.words.join(" • ")}
             </div>
           </div>
         ) : sortedTurns.length > 0 ? (
@@ -407,7 +407,7 @@ export default function CodenamesBoardClient({
   const [cards, setCards] = useState<CardRow[]>(initialCards);
   const [players, setPlayers] = useState<PlayerRow[]>(normalizePlayers(initialPlayers));
   const [turns, setTurns] = useState<TurnRow[]>(initialTurns);
-  const [selectedCard, setSelectedCard] = useState<CardRow | null>(null);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const [previewSelection, setPreviewSelection] = useState<PreviewSelection>(null);
   const [inspectedCard, setInspectedCard] = useState<CardRow | null>(null);
   const [revealingCardId, setRevealingCardId] = useState<string | null>(null);
@@ -466,6 +466,12 @@ export default function CodenamesBoardClient({
   const blueSpymasters = bluePlayers.filter((player) => player.role === "spymaster");
   const orangeOperatives = orangePlayers.filter((player) => player.role === "operative");
   const orangeSpymasters = orangePlayers.filter((player) => player.role === "spymaster");
+
+  const selectedCardSet = useMemo(() => new Set(selectedCardIds), [selectedCardIds]);
+  const previewCardSet = useMemo(
+    () => new Set(previewSelection?.cardIds ?? []),
+    [previewSelection]
+  );
 
   async function fetchLatestState() {
     const supabase = getSupabaseBrowserClient();
@@ -626,13 +632,28 @@ export default function CodenamesBoardClient({
   }, [cards]);
 
   useEffect(() => {
-    if (!selectedCard) return;
-    const stillExists = cards.find((card) => card.id === selectedCard.id);
-    if (stillExists?.is_revealed) {
-      setSelectedCard(null);
-      setPreviewSelection(null);
+    if (!selectedCardIds.length) return;
+
+    const remainingSelectedIds = selectedCardIds.filter((id) => {
+      const target = cards.find((card) => card.id === id);
+      return target && !target.is_revealed;
+    });
+
+    if (remainingSelectedIds.length !== selectedCardIds.length) {
+      setSelectedCardIds(remainingSelectedIds);
+      const selectedCards = cards.filter((card) => remainingSelectedIds.includes(card.id));
+      void sendPreview(selectedCards);
     }
-  }, [cards]);
+  }, [cards, selectedCardIds]);
+
+  useEffect(() => {
+    if (!canRevealCard || room.status === "finished") {
+      if (selectedCardIds.length > 0) {
+        setSelectedCardIds([]);
+        void sendPreview([]);
+      }
+    }
+  }, [canRevealCard, room.status, selectedCardIds.length]);
 
   useEffect(() => {
     if (!activeTurn) return;
@@ -671,11 +692,11 @@ export default function CodenamesBoardClient({
     };
   }, []);
 
-  async function sendPreview(card: CardRow | null) {
+  async function sendPreview(selectedCards: CardRow[]) {
     const supabase = getSupabaseBrowserClient();
     const channel = supabase.channel(`codenames-preview-${room.room_code}`);
 
-    if (!card) {
+    if (!selectedCards.length) {
       await channel.send({
         type: "broadcast",
         event: "clear-preview",
@@ -690,15 +711,30 @@ export default function CodenamesBoardClient({
       payload: {
         playerId: safeCurrentPlayer.id,
         playerName: safeCurrentPlayer.guest_name || "لاعب",
-        cardId: card.id,
-        word: card.word,
+        cardIds: selectedCards.map((card) => card.id),
+        words: selectedCards.map((card) => card.word),
         team: safeCurrentPlayer.team,
       } satisfies PreviewSelection,
     });
   }
 
+  function toggleCardSelection(card: CardRow) {
+    if (!canRevealCard || card.is_revealed) return;
+
+    setSelectedCardIds((prev) => {
+      const next = prev.includes(card.id)
+        ? prev.filter((id) => id !== card.id)
+        : [...prev, card.id];
+
+      const nextSelectedCards = cards.filter((item) => next.includes(item.id));
+      void sendPreview(nextSelectedCards);
+
+      return next;
+    });
+  }
+
   function getCardView(card: CardRow) {
-    const isPending = selectedCard?.id === card.id;
+    const isPending = selectedCardSet.has(card.id);
     const realBg = getCardBackground(card.card_type);
 
     const baseStyle: CSSProperties = {
@@ -944,6 +980,111 @@ export default function CodenamesBoardClient({
     );
   }
 
+  function renderBoardCard(card: CardRow, mobile: boolean) {
+    const cardView = getCardView(card);
+    const isSelected = selectedCardSet.has(card.id);
+    const isPreviewed = previewCardSet.has(card.id);
+    const isRemotePreview =
+      isPreviewed && previewSelection && previewSelection.playerId !== safeCurrentPlayer.id;
+
+    const wrapperClass = mobile
+      ? "mobile-card aspect-[1.05] min-h-0"
+      : "board-desktop-card min-h-[122px]";
+
+    const textClass = mobile ? "mobile-card-word" : "card-word-text";
+
+    const content = (
+      <>
+        <div className="card-inner-overlay" />
+        <div className={`relative z-10 ${textClass}`}>{cardView.label}</div>
+      </>
+    );
+
+    if (card.is_revealed) {
+      return (
+        <button
+          key={card.id}
+          type="button"
+          onClick={() => setInspectedCard(card)}
+          className={`${cardView.className} ${wrapperClass} flex items-center justify-center px-3 py-4 text-center`}
+          style={cardView.style}
+        >
+          {content}
+        </button>
+      );
+    }
+
+    const showSelectionBadge = isPreviewed && previewSelection;
+
+    return (
+      <div key={card.id} className="relative">
+        <button
+          type="button"
+          onClick={() => {
+            if (canRevealCard) {
+              toggleCardSelection(card);
+              return;
+            }
+
+            if (isSpymaster) {
+              setInspectedCard(card);
+            }
+          }}
+          className={`${cardView.className} ${wrapperClass} ${
+            canRevealCard ? "card-hover-up" : ""
+          } flex w-full items-center justify-center px-3 py-4 text-center ${
+            showSelectionBadge ? "card-previewed" : ""
+          }`}
+          style={cardView.style}
+        >
+          {content}
+        </button>
+
+        {showSelectionBadge && (
+          <div className="pointer-events-none absolute inset-x-2 bottom-2 z-20">
+            <div
+              className={`rounded-full px-2 py-1 text-center text-[10px] font-black uppercase shadow-lg ${
+                previewSelection?.team === "blue"
+                  ? "bg-cyan-500/90 text-white"
+                  : previewSelection?.team === "red"
+                  ? "bg-orange-500/90 text-white"
+                  : "bg-white/90 text-black"
+              }`}
+            >
+              {isRemotePreview
+                ? `${previewSelection?.playerName} يفكر`
+                : "تم التحديد"}
+            </div>
+          </div>
+        )}
+
+        {isSelected && canRevealCard && (
+          <form
+            action={async (formData) => {
+              await revealCardAction(formData);
+              const nextIds = selectedCardIds.filter((id) => id !== card.id);
+              setSelectedCardIds(nextIds);
+              const nextCards = cards.filter((item) => nextIds.includes(item.id));
+              await sendPreview(nextCards);
+            }}
+            className="absolute right-2 top-2 z-30"
+          >
+            <input type="hidden" name="room_code" value={room.room_code} />
+            <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
+            <input type="hidden" name="card_id" value={card.id} />
+            <button
+              type="submit"
+              className="confirm-card-btn flex h-10 w-10 items-center justify-center rounded-full bg-lime-500 text-lg font-black text-white shadow-[0_8px_22px_rgba(101,163,13,0.35)] hover:bg-lime-400"
+              title="تأكيد الاختيار"
+            >
+              ✓
+            </button>
+          </form>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
       <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
@@ -1004,10 +1145,8 @@ export default function CodenamesBoardClient({
               ? room.assassin_revealed
                 ? "Assassin was revealed"
                 : "Game Finished"
-              : selectedCard
-              ? "Confirm your choice"
               : previewSelection
-              ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
+              ? `${previewSelection.playerName} يفكر في ${previewSelection.words.join(" • ")}`
               : "Give your operatives a clue"}
           </div>
         </div>
@@ -1071,10 +1210,8 @@ export default function CodenamesBoardClient({
                 ? room.assassin_revealed
                   ? "Assassin was revealed"
                   : "Game Finished"
-                : selectedCard
-                ? "Confirm your choice"
                 : previewSelection
-                ? `${previewSelection.playerName} يفكر في ${previewSelection.word}`
+                ? `${previewSelection.playerName} يفكر في ${previewSelection.words.join(" • ")}`
                 : getTurnLabel(room.current_turn_team)}
             </div>
 
@@ -1107,100 +1244,9 @@ export default function CodenamesBoardClient({
 
           <div className="mobile-board-wrap rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2.5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
             <div className="grid grid-cols-5 gap-2">
-              {cards.map((card) => {
-                const cardView = getCardView(card);
-
-                if (card.is_revealed) {
-                  return (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={() => setInspectedCard(card)}
-                      className={`${cardView.className} mobile-card flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
-                      style={cardView.style}
-                    >
-                      <div className="card-inner-overlay" />
-                      <div className="relative z-10 mobile-card-word">{cardView.label}</div>
-                    </button>
-                  );
-                }
-
-                if (canRevealCard) {
-                  return (
-                    <button
-                      key={card.id}
-                      type="button"
-                      onClick={async () => {
-                        setSelectedCard(card);
-                        await sendPreview(card);
-                      }}
-                      className={`${cardView.className} mobile-card card-hover-up flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
-                      style={cardView.style}
-                    >
-                      <div className="card-inner-overlay" />
-                      <div className="relative z-10 mobile-card-word">{cardView.label}</div>
-                    </button>
-                  );
-                }
-
-                return (
-                  <div
-                    key={card.id}
-                    className={`${cardView.className} mobile-card flex aspect-[1.05] min-h-0 items-center justify-center px-1.5 py-2 text-center`}
-                    style={cardView.style}
-                  >
-                    <div className="card-inner-overlay" />
-                    <div className="relative z-10 mobile-card-word">{cardView.label}</div>
-                  </div>
-                );
-              })}
+              {cards.map((card) => renderBoardCard(card, true))}
             </div>
           </div>
-
-          {selectedCard && canRevealCard && room.status !== "finished" && (
-            <div className="rounded-[18px] border border-lime-300/25 bg-lime-500/10 p-3 shadow-xl backdrop-blur-sm">
-              <div className="mb-2 text-center text-[11px] font-black uppercase tracking-[0.15em] text-lime-100">
-                Tap to confirm
-              </div>
-
-              <div className="grid gap-2">
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-center text-lg font-black text-white">
-                  {selectedCard.word}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setSelectedCard(null);
-                      await sendPreview(null);
-                    }}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-black text-white hover:bg-white/10"
-                  >
-                    إلغاء
-                  </button>
-
-                  <form
-                    action={async (formData) => {
-                      await revealCardAction(formData);
-                      setSelectedCard(null);
-                      await sendPreview(null);
-                    }}
-                  >
-                    <input type="hidden" name="room_code" value={room.room_code} />
-                    <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
-                    <input type="hidden" name="card_id" value={selectedCard.id} />
-                    <button
-                      type="submit"
-                      className="w-full rounded-2xl bg-lime-500 px-4 py-3 font-black text-white hover:bg-lime-400"
-                    >
-                      تأكيد
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="rounded-[20px] border border-white/10 bg-[#101522]/90 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.3)] backdrop-blur-sm">
             <div className="space-y-3">
@@ -1332,97 +1378,8 @@ export default function CodenamesBoardClient({
           {renderSpectatorJoinBox()}
 
           <div className="grid grid-cols-5 gap-4">
-            {cards.map((card) => {
-              const cardView = getCardView(card);
-
-              if (card.is_revealed) {
-                return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={() => setInspectedCard(card)}
-                    className={`${cardView.className} board-desktop-card flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
-                    style={cardView.style}
-                  >
-                    <div className="card-inner-overlay" />
-                    <div className="relative z-10 card-word-text">{cardView.label}</div>
-                  </button>
-                );
-              }
-
-              if (canRevealCard) {
-                return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={async () => {
-                      setSelectedCard(card);
-                      await sendPreview(card);
-                    }}
-                    className={`${cardView.className} board-desktop-card card-hover-up flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
-                    style={cardView.style}
-                  >
-                    <div className="card-inner-overlay" />
-                    <div className="relative z-10 card-word-text">{cardView.label}</div>
-                  </button>
-                );
-              }
-
-              return (
-                <div
-                  key={card.id}
-                  className={`${cardView.className} board-desktop-card flex min-h-[122px] items-center justify-center px-3 py-4 text-center`}
-                  style={cardView.style}
-                >
-                  <div className="card-inner-overlay" />
-                  <div className="relative z-10 card-word-text">{cardView.label}</div>
-                </div>
-              );
-            })}
+            {cards.map((card) => renderBoardCard(card, false))}
           </div>
-
-          {selectedCard && canRevealCard && room.status !== "finished" && (
-            <div className="rounded-[24px] border border-lime-300/25 bg-lime-500/10 p-4 shadow-xl backdrop-blur-sm">
-              <div className="mb-3 text-center text-sm font-black uppercase tracking-[0.2em] text-lime-100">
-                Tap to confirm
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-center text-2xl font-black text-white">
-                  {selectedCard.word}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setSelectedCard(null);
-                    await sendPreview(null);
-                  }}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-black text-white hover:bg-white/10"
-                >
-                  إلغاء
-                </button>
-
-                <form
-                  action={async (formData) => {
-                    await revealCardAction(formData);
-                    setSelectedCard(null);
-                    await sendPreview(null);
-                  }}
-                >
-                  <input type="hidden" name="room_code" value={room.room_code} />
-                  <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
-                  <input type="hidden" name="card_id" value={selectedCard.id} />
-                  <button
-                    type="submit"
-                    className="rounded-2xl bg-lime-500 px-6 py-4 font-black text-white hover:bg-lime-400"
-                  >
-                    تأكيد الاختيار
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
 
           <div className="rounded-[26px] border border-white/10 bg-[#101522]/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">
             <div className="grid gap-4 lg:grid-cols-[1fr_230px]">
@@ -1542,7 +1499,7 @@ export default function CodenamesBoardClient({
                 <div className="rounded-2xl border border-lime-300/20 bg-lime-500/10 p-3">
                   <div className="text-xs font-black uppercase text-lime-100">Preview</div>
                   <div className="mt-2 text-base font-black text-white">
-                    {previewSelection.playerName} حدّد: {previewSelection.word}
+                    {previewSelection.playerName} حدّد: {previewSelection.words.join(" • ")}
                   </div>
                 </div>
               )}
@@ -1754,7 +1711,13 @@ export default function CodenamesBoardClient({
           box-shadow:
             0 0 0 2px rgba(163, 230, 53, 0.22),
             0 16px 38px rgba(101, 163, 13, 0.22);
-          animation: pulseBorder 1.25s ease-in-out infinite;
+        }
+
+        .card-previewed {
+          border-color: rgba(255, 255, 255, 0.42) !important;
+          box-shadow:
+            0 0 0 2px rgba(255, 255, 255, 0.08),
+            0 16px 32px rgba(0, 0, 0, 0.2);
         }
 
         .card-flip-reveal {
@@ -1830,8 +1793,23 @@ export default function CodenamesBoardClient({
           overflow-wrap: anywhere;
         }
 
+        .confirm-card-btn {
+          animation: confirmPopIn 180ms ease;
+        }
+
         .clue-popup {
           animation: cluePopIn 300ms ease, cluePopOut 400ms ease 3.6s forwards;
+        }
+
+        @keyframes confirmPopIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.7);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
 
         @keyframes cluePopIn {
@@ -1875,20 +1853,6 @@ export default function CodenamesBoardClient({
           100% {
             transform: perspective(1100px) rotateY(360deg) scale(1);
             filter: brightness(1);
-          }
-        }
-
-        @keyframes pulseBorder {
-          0%,
-          100% {
-            box-shadow:
-              0 0 0 2px rgba(163, 230, 53, 0.22),
-              0 16px 38px rgba(101, 163, 13, 0.18);
-          }
-          50% {
-            box-shadow:
-              0 0 0 3px rgba(163, 230, 53, 0.32),
-              0 18px 42px rgba(101, 163, 13, 0.28);
           }
         }
 
