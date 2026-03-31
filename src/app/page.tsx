@@ -26,13 +26,6 @@ type FeatureItem = {
   icon: "speed" | "screen" | "mobile" | "games";
 };
 
-type StepItem = {
-  step: string;
-  title: string;
-  description: string;
-};
-
-const heroMockupImage = "https://f.top4top.io/p_3739zf7hj1.png";
 const heroLogo = "https://k.top4top.io/p_3742kost41.png";
 
 const gameCards: GameCardItem[] = [
@@ -64,7 +57,7 @@ const gameCards: GameCardItem[] = [
     title: "Codenames",
     subtitle: "لعبة جماعية",
     description:
-      "لعبة Codenames الشهيرة ولكن بشكل جديد , لبدء اللعبة تحتاج كحد ادنى الى 4 لاعبين",
+      "لعبة Codenames الشهيرة ولكن بشكل جديد، وللبدء تحتاج إلى 4 لاعبين كحد أدنى.",
     href: "/games/codenames/",
     image: "https://b.top4top.io/p_374101e3s1.png",
     active: true,
@@ -76,46 +69,28 @@ const gameCards: GameCardItem[] = [
 
 const features: FeatureItem[] = [
   {
-    title: "⚡ واجهة واضحة وسريعة",
+    title: "واجهة سريعة وواضحة",
     description:
-      "كل شيء مصمم ليكون مباشر وسهل بدون تعقيد. تبدأ اللعب خلال ثواني وتبقى مركز على المتعة بدون تشتيت.",
+      "كل شيء مصمم ليكون مباشرًا وسهلًا بدون تعقيد، لتبدأ اللعب خلال ثوانٍ.",
     icon: "speed",
   },
   {
-    title: "🖥️ مثالية للعرض والجلسات",
+    title: "مثالية للجلسات والتجمعات",
     description:
-      "مناسبة للشاشات الكبيرة والعروض الجماعية. مثالية للجلسات، الفعاليات، والتجمعات حيث التفاعل الحقيقي يصنع الفرق.",
+      "مناسبة للشاشات الكبيرة والجلسات العائلية والفعاليات والتنافس بين الفرق.",
     icon: "screen",
   },
   {
-    title: "📱 مصممة لتناسب جميع الأجهزة",
+    title: "جاهزة لكل الأجهزة",
     description:
-      "تجربة سلسة على الهاتف، التابلت، والكمبيوتر , واجهة ذكية تتكيّف مع حجم الشاشة لتضمن راحة اللعب في أي وقت ومن أي مكان.",
+      "تجربة سلسة على الهاتف والتابلت والكمبيوتر بنفس وضوح التصميم.",
     icon: "mobile",
   },
   {
-    title: "🎮 أكثر من مجرد لعبة",
+    title: "منصة تضم أكثر من تجربة",
     description:
-      "المنصة ليست لعبة واحدة فقط، بل بيئة متكاملة للألعاب الجماعية.",
+      "ليست لعبة واحدة فقط، بل مساحة متكاملة لألعاب جماعية متنوعة.",
     icon: "games",
-  },
-];
-
-const steps: StepItem[] = [
-  {
-    step: "01",
-    title: "اختر اللعبة",
-    description: "ابدأ من اللعبة التي تناسب جلستك الحالية داخل المنصة.",
-  },
-  {
-    step: "02",
-    title: "ابدأ الجولة",
-    description: "جهّز اللاعبين أو الفرق ثم افتح اللوحة وابدأ اللعب مباشرة.",
-  },
-  {
-    step: "03",
-    title: "تابع النتيجة",
-    description: "احسب النقاط وشاهد الفائز النهائي ضمن تجربة انيقة وواضحة.",
   },
 ];
 
@@ -278,33 +253,42 @@ function getFeatureIcon(icon: FeatureItem["icon"]) {
 function getAccentClasses(accent: GameCardItem["accent"]) {
   if (accent === "orange") {
     return {
-      badge: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-      card: "hover:shadow-[0_22px_40px_rgba(251,146,60,0.12)]",
-      icon: "border-orange-300/20 bg-orange-400/10 text-orange-100",
-      button: "bg-orange-400/10 text-orange-100 hover:bg-orange-400/15",
+      soft: "border-orange-300/20 bg-orange-400/10 text-orange-100",
+      button:
+        "bg-[linear-gradient(180deg,rgba(251,146,60,0.18)_0%,rgba(249,115,22,0.14)_100%)] text-orange-100 hover:bg-[linear-gradient(180deg,rgba(251,146,60,0.24)_0%,rgba(249,115,22,0.18)_100%)]",
+      glow:
+        "group-hover:shadow-[0_24px_50px_rgba(249,115,22,0.18)]",
+      hero:
+        "from-orange-400/18 via-orange-300/8 to-transparent",
     };
   }
 
   if (accent === "violet") {
     return {
-      badge: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-      card: "hover:shadow-[0_22px_40px_rgba(167,139,250,0.12)]",
-      icon: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-      button: "bg-violet-400/10 text-violet-100 hover:bg-violet-400/15",
+      soft: "border-violet-300/20 bg-violet-400/10 text-violet-100",
+      button:
+        "bg-[linear-gradient(180deg,rgba(167,139,250,0.18)_0%,rgba(139,92,246,0.14)_100%)] text-violet-100 hover:bg-[linear-gradient(180deg,rgba(167,139,250,0.24)_0%,rgba(139,92,246,0.18)_100%)]",
+      glow:
+        "group-hover:shadow-[0_24px_50px_rgba(139,92,246,0.18)]",
+      hero:
+        "from-violet-400/18 via-violet-300/8 to-transparent",
     };
   }
 
   return {
-    badge: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-    card: "hover:shadow-[0_22px_40px_rgba(34,211,238,0.12)]",
-    icon: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
-    button: "bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/15",
+    soft: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+    button:
+      "bg-[linear-gradient(180deg,rgba(34,211,238,0.18)_0%,rgba(14,165,233,0.14)_100%)] text-cyan-100 hover:bg-[linear-gradient(180deg,rgba(34,211,238,0.24)_0%,rgba(14,165,233,0.18)_100%)]",
+    glow:
+      "group-hover:shadow-[0_24px_50px_rgba(34,211,238,0.18)]",
+    hero:
+      "from-cyan-400/18 via-cyan-300/8 to-transparent",
   };
 }
 
 function FeatureCard({ item }: { item: FeatureItem }) {
   return (
-    <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:bg-[linear-gradient(180deg,rgba(20,34,64,0.98)_0%,rgba(8,14,32,0.98)_100%)]">
+    <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1">
       <div className="mb-4 inline-flex rounded-2xl border border-cyan-300/20 bg-cyan-400/10 p-3 text-cyan-100">
         {getFeatureIcon(item.icon)}
       </div>
@@ -320,65 +304,123 @@ function GameCard({ card }: { card: GameCardItem }) {
   return (
     <div
       className={[
-        "group rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1",
-        styles.card,
+        "group relative overflow-hidden rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_34px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1",
+        styles.glow,
       ].join(" ")}
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${styles.hero}`} />
+
+      <div className="relative mb-4 flex items-center justify-between gap-3">
         <div
-          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${styles.badge}`}
+          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black ${styles.soft}`}
         >
           {getGameIcon(card.icon)}
           <span>{card.badge}</span>
         </div>
-        <div className={`inline-flex rounded-2xl border p-2.5 ${styles.icon}`}>
+
+        <div className={`inline-flex rounded-2xl border p-2.5 ${styles.soft}`}>
           {getGameIcon(card.icon)}
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-white/5">
+      <div className="relative overflow-hidden rounded-[1.45rem] border border-white/10 bg-white/5">
         <img
           src={card.image}
           alt={card.title}
-          className="h-48 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
         />
       </div>
 
       <div className="mt-5">
-        <div className="text-xs font-black tracking-[0.18em] text-white/50">
-          {card.subtitle}
-        </div>
+        <div className="text-xs font-black text-white/48">{card.subtitle}</div>
         <h3 className="mt-2 text-2xl font-black text-white">{card.title}</h3>
         <p className="mt-3 text-sm leading-7 text-white/70">{card.description}</p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/65">
+            جماعي
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/65">
+            سريع
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/65">
+            مناسب للجلسات
+          </span>
+        </div>
       </div>
 
       <div className="mt-5">
-        {card.active ? (
-          <Link
-            href={card.href}
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-[1.2rem] px-5 py-3.5 text-sm font-black transition ${styles.button}`}
-          >
-            افتح اللعبة
-            <ArrowLeftIcon className="h-4 w-4" />
-          </Link>
-        ) : (
-          <div className="inline-flex w-full items-center justify-center gap-2 rounded-[1.2rem] border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-black text-white/50">
-            قريبًا
-          </div>
-        )}
+        <Link
+          href={card.href}
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-[1.2rem] px-5 py-3.5 text-sm font-black transition ${styles.button}`}
+        >
+          افتح اللعبة
+          <ArrowLeftIcon className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );
 }
 
-function StepCard({ item }: { item: StepItem }) {
+function ModeCard({ card }: { card: GameCardItem }) {
+  const styles = getAccentClasses(card.accent);
+
   return (
-    <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
-      <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-sm font-black text-cyan-100">
-        {item.step}
+    <div className="rounded-[1.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.94)_0%,rgba(6,12,28,0.96)_100%)] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
+      <div className={`mb-4 inline-flex rounded-2xl border p-3 ${styles.soft}`}>
+        {getGameIcon(card.icon)}
       </div>
-      <h3 className="mt-4 text-lg font-black text-white">{item.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-white/70">{item.description}</p>
+
+      <h3 className="text-2xl font-black text-white">{card.title}</h3>
+      <div className="mt-2 text-sm font-bold text-white/50">{card.subtitle}</div>
+
+      <p className="mt-4 text-sm leading-7 text-white/70">{card.description}</p>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/65">
+          {card.title === "لمتكم" ? "فئات ونقاط" : card.title === "برا السالفة" ? "لعبة اجتماعية" : "كلمات وتلميحات"}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/65">
+          {card.title === "Codenames" ? "4 لاعبين+" : "جلسة جماعية"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function StepLine() {
+  const items = [
+    {
+      n: "01",
+      title: "اختر اللعبة",
+      desc: "ابدأ من نوع الجلسة التي تناسبكم الآن.",
+    },
+    {
+      n: "02",
+      title: "ابدأ مباشرة",
+      desc: "افتح اللعبة وجهّز الجولة خلال ثوانٍ.",
+    },
+    {
+      n: "03",
+      title: "استمتع بالتجربة",
+      desc: "تنافس، اكتشف، وواصل اللعب بسهولة.",
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {items.map((item) => (
+        <div
+          key={item.n}
+          className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22)]"
+        >
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-400/10 text-sm font-black text-cyan-100">
+            {item.n}
+          </div>
+          <h3 className="mt-4 text-lg font-black text-white">{item.title}</h3>
+          <p className="mt-3 text-sm leading-7 text-white/70">{item.desc}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -465,7 +507,7 @@ export default function HomePage() {
             </div>
 
             <h1 className="mt-7 text-5xl font-black leading-none text-white md:text-7xl xl:text-[5.5rem]">
-             الجمعه عليكم
+              الجمعه عليكم
             </h1>
 
             <div className="hero-ribbon mt-4 inline-flex rotate-[-2deg] items-center justify-center rounded-[1.4rem] border border-cyan-300/20 bg-cyan-500 px-6 py-4 shadow-[0_16px_40px_rgba(34,211,238,0.22)] md:px-10 md:py-5">
@@ -475,7 +517,7 @@ export default function HomePage() {
             </div>
 
             <p className="mt-7 max-w-3xl text-base leading-8 text-white/72 md:text-lg">
-              منصّة لمتكم  تجمع الألعاب الجماعية في تجربة واحدة واضحة وسريعة،
+              منصّة لمتكم تجمع الألعاب الجماعية في تجربة واحدة واضحة وسريعة،
               تتيح لك اللعب مع الأصدقاء، إنشاء الجولات، التنافس ضمن فرق،
               والاستمتاع بألعاب تعتمد على الذكاء والتفاعل على جميع الأجهزة.
             </p>
@@ -567,8 +609,33 @@ export default function HomePage() {
         <section className="mt-8">
           <div className="mb-5 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+              <GamesIcon className="h-4 w-4" />
+              <span>أنواع اللعب داخل المنصة</span>
+            </div>
+
+            <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
+              ثلاث تجارب مختلفة داخل لمتكم
+            </h2>
+
+            <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-white/68 md:text-base">
+              كل لعبة داخل المنصة تقدم أجواء مختلفة، من الأسئلة والنقاط، إلى
+              اللعب الاجتماعي وكشف الشخص المختلف، وصولًا إلى ألعاب الكلمات
+              والتلميحات.
+            </p>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            {gameCards.map((card) => (
+              <ModeCard key={`mode-${card.title}`} card={card} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-9">
+          <div className="mb-5 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
               <SparkIcon className="h-4 w-4" />
-              <span>ما الذي يميز المنصة؟</span>
+              <span>لماذا المنصة؟</span>
             </div>
             <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
               تجربة متكاملة مصممة لتجمعكم وتبقيكم في أجواء اللعب
@@ -590,12 +657,12 @@ export default function HomePage() {
                 <span>الألعاب الحالية</span>
               </div>
               <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-                اختر اللعبة التي تريدها
+                اختر اللعبة التي تناسب جلستكم
               </h2>
             </div>
 
             <Link
-              href="/game/start"
+              href="/games"
               className="inline-flex items-center gap-2 rounded-[1.15rem] border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
             >
               صفحة الألعاب
@@ -617,15 +684,11 @@ export default function HomePage() {
               <span>كيف تبدأ بسرعة؟</span>
             </div>
             <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-              ثلاث خطوات بسيطة وواضحة
+              ابدأ الجلسة خلال دقائق
             </h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {steps.map((item) => (
-              <StepCard key={item.step} item={item} />
-            ))}
-          </div>
+          <StepLine />
         </section>
 
         <footer className="mt-10 rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 text-center shadow-[0_14px_30px_rgba(0,0,0,0.22)] md:p-6">
@@ -685,10 +748,6 @@ export default function HomePage() {
           50% {
             opacity: 1;
           }
-        }
-
-        .hero-float {
-          animation: heroFloat 5.4s ease-in-out infinite;
         }
 
         .hero-glow {
