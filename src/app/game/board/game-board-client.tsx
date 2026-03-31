@@ -53,59 +53,6 @@ type CategoryColumn = {
   }[];
 };
 
-const categoryVisuals: Record<
-  string,
-  {
-    glow: string;
-    body: string;
-  }
-> = {
-  history: {
-    glow: "shadow-[0_0_0_1px_rgba(245,158,11,0.12),0_22px_55px_rgba(245,158,11,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(235,240,247,0.98)_0%,rgba(191,201,216,0.97)_100%)]",
-  },
-  geography: {
-    glow: "shadow-[0_0_0_1px_rgba(56,189,248,0.14),0_22px_55px_rgba(14,165,233,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(193,202,216,0.97)_100%)]",
-  },
-  islamic: {
-    glow: "shadow-[0_0_0_1px_rgba(34,197,94,0.14),0_22px_55px_rgba(22,163,74,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-  sports: {
-    glow: "shadow-[0_0_0_1px_rgba(16,185,129,0.14),0_22px_55px_rgba(5,150,105,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-  science: {
-    glow: "shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_22px_55px_rgba(124,58,237,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-  movies: {
-    glow: "shadow-[0_0_0_1px_rgba(236,72,153,0.14),0_22px_55px_rgba(219,39,119,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-  technology: {
-    glow: "shadow-[0_0_0_1px_rgba(59,130,246,0.14),0_22px_55px_rgba(37,99,235,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-  default: {
-    glow: "shadow-[0_0_0_1px_rgba(148,163,184,0.14),0_22px_55px_rgba(100,116,139,0.10)]",
-    body:
-      "bg-[linear-gradient(180deg,rgba(236,241,247,0.98)_0%,rgba(192,201,216,0.97)_100%)]",
-  },
-};
-
-function getVisualBySlug(slug: string) {
-  return categoryVisuals[slug] ?? categoryVisuals.default;
-}
-
 function normalizeBoardState(
   raw: Record<string, unknown> | null | undefined,
 ): BoardState {
@@ -293,63 +240,25 @@ function ScoreControl({
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
     return (
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-2 pt-2">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.35)_0%,transparent_70%)]" />
-        <div className="relative z-10 flex h-[230px] w-[100%] items-center justify-center rounded-[20px] bg-white/10 backdrop-blur-sm sm:h-[200px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={category.image_url}
-            alt={category.name}
-            className="h-full w-full object-contain"
-          />
-        </div>
+      <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#7367c7] px-3 py-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={category.image_url}
+          alt={category.name}
+          className="h-full w-full object-contain"
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full items-center justify-center">
-      <div className="text-slate-600 font-bold">No Image</div>
+    <div className="flex h-full items-center justify-center bg-[#7367c7] px-4 py-4 text-center text-white">
+      <div className="text-base font-black">{category.name}</div>
     </div>
   );
 }
 
-function CategoryCard({
-  category,
-  children,
-}: {
-  category: Category;
-  children: ReactNode;
-}) {
-  const visual = getVisualBySlug(category.slug);
-
-  return (
-    <div
-      className={`group relative flex h-[540px] w-[214px] shrink-0 flex-col overflow-hidden rounded-[28px] border-[4px] border-slate-950/95 transition duration-200 hover:-translate-y-1 hover:shadow-[0_0_0_1px_rgba(96,165,250,0.25),0_30px_60px_rgba(37,99,235,0.20)] ${visual.glow}`}
-    >
-      <div className={`relative h-[270px] ${visual.body}`}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.55),transparent_55%)]" />
-        <div className="absolute inset-x-0 top-0 h-[90px] bg-[linear-gradient(180deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0)_100%)]" />
-
-        <div className="absolute left-1/2 top-0 z-20 w-[82%] -translate-x-1/2 transition duration-200 group-hover:scale-[1.02]">
-          <div className="rounded-b-[20px] rounded-t-[16px] bg-[linear-gradient(180deg,#59c7f2_0%,#32a5d8_100%)] px-4 py-3 text-center text-[15px] font-black text-white shadow-[0_5px_0_rgba(18,89,123,0.42)]">
-            <span className="block truncate leading-tight">{category.name}</span>
-          </div>
-        </div>
-
-        <div className="absolute inset-x-0 top-[42px] bottom-0 transition duration-200 group-hover:scale-[1.02]">
-          <CategoryIllustration category={category} />
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col overflow-hidden bg-[linear-gradient(180deg,#1f3367_0%,#142853_100%)] p-[3px]">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function QuestionCell({
+function QuestionPill({
   question,
   points,
   used,
@@ -362,24 +271,15 @@ function QuestionCell({
   result?: QuestionResult;
   onOpen?: () => void;
 }) {
-  const defaultPalette =
-    "bg-[linear-gradient(180deg,#203a73_0%,#162c5c_100%)] text-white";
-
-  const answeredBluePalette =
-    "bg-[linear-gradient(180deg,#3aa8da_0%,#1f8fc5_100%)] text-white";
-
-  const answeredOrangePalette =
-    "bg-[linear-gradient(180deg,#ff9f59_0%,#ef7f22_100%)] text-white";
-
-  const noAnswerPalette =
-    "bg-[linear-gradient(180deg,#0f1f46_0%,#09132f_100%)] text-white line-through decoration-2";
+  const baseClass =
+    "flex h-[78px] w-full items-center justify-center rounded-full border text-[20px] font-black transition";
 
   if (!question) {
     return (
       <div
-        className={`flex h-[70px] w-full items-center justify-center rounded-[10px] text-[18px] font-black ${noAnswerPalette}`}
+        className={`${baseClass} border-slate-400/35 bg-[#c8c9cb] text-red-700`}
       >
-        –
+        {points}
       </div>
     );
   }
@@ -387,14 +287,14 @@ function QuestionCell({
   if (used) {
     const usedClass =
       result === "teamOne"
-        ? answeredBluePalette
+        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#43b8e9_0%,#2f9fd8_100%)] text-white"
         : result === "teamTwo"
-          ? answeredOrangePalette
-          : noAnswerPalette;
+          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa55f_0%,#f28a34_100%)] text-white"
+          : "border-slate-700/50 bg-[linear-gradient(180deg,#142341_0%,#0b1530_100%)] text-white line-through decoration-2";
 
     return (
       <div
-        className={`flex h-[70px] w-full items-center justify-center rounded-[10px] border border-white/6 text-[18px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${usedClass}`}
+        className={`${baseClass} ${usedClass}`}
       >
         {points}
       </div>
@@ -405,10 +305,92 @@ function QuestionCell({
     <button
       type="button"
       onClick={onOpen}
-      className={`flex h-[70px] w-full items-center justify-center rounded-[10px] border border-white/8 text-[18px] font-black tracking-[0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] transition duration-150 hover:-translate-y-[1px] hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(96,165,250,0.28),0_10px_20px_rgba(37,99,235,0.18)] active:scale-[0.96] ${defaultPalette}`}
+      className={`${baseClass} border-slate-400/35 bg-[#c8c9cb] text-red-700 hover:bg-[#d2d3d5] active:scale-[0.98]`}
     >
       {points}
     </button>
+  );
+}
+
+function CategoryBoardColumn({
+  column,
+  boardState,
+  onOpenQuestion,
+}: {
+  column: CategoryColumn;
+  boardState: BoardState;
+  onOpenQuestion: (question: QuestionRow | null) => void;
+}) {
+  return (
+    <div className="flex w-[360px] shrink-0 flex-col">
+      <div className="mx-auto w-[230px] rounded-t-[18px] bg-[#252525] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+        <div className="truncate text-[18px] font-black text-white">
+          {column.category.name}
+        </div>
+      </div>
+
+      <div className="relative mt-0 grid h-[430px] grid-cols-[110px_1fr_110px] grid-rows-3 gap-x-3 gap-y-3">
+        <div className="row-span-3 overflow-hidden rounded-[18px] border border-black/20 shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
+          <CategoryIllustration category={column.category} />
+        </div>
+
+        {column.rows.map((row, rowIndex) => {
+          const leftQuestion = row.questions[0] ?? null;
+          const rightQuestion = row.questions[1] ?? null;
+
+          const leftUsed = leftQuestion
+            ? boardState.usedQuestionIds.includes(leftQuestion.id)
+            : true;
+
+          const rightUsed = rightQuestion
+            ? boardState.usedQuestionIds.includes(rightQuestion.id)
+            : true;
+
+          const leftResult = leftQuestion
+            ? boardState.questionResults[leftQuestion.id] ?? "none"
+            : "none";
+
+          const rightResult = rightQuestion
+            ? boardState.questionResults[rightQuestion.id] ?? "none"
+            : "none";
+
+          return (
+            <div
+              key={`${column.category.id}-${row.points}-${rowIndex}`}
+              className="contents"
+            >
+              <div className="self-center">
+                <QuestionPill
+                  question={leftQuestion}
+                  points={row.points}
+                  used={leftUsed}
+                  result={leftResult}
+                  onOpen={() => onOpenQuestion(leftQuestion)}
+                />
+              </div>
+
+              <div className="hidden" />
+
+              <div className="self-center">
+                <QuestionPill
+                  question={rightQuestion}
+                  points={row.points}
+                  used={rightUsed}
+                  result={rightResult}
+                  onOpen={() => onOpenQuestion(rightQuestion)}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mx-auto mt-0 w-[230px] rounded-b-[18px] bg-[#252525] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
+        <div className="truncate text-[16px] font-black text-white">
+          {column.category.name}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -425,7 +407,6 @@ export default function GameBoardClient({
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const storageKey = `seenjeem-board-state:${sessionId}`;
 
-  const [isLandscapePhone, setIsLandscapePhone] = useState(false);
   const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
 
   const initialState = useMemo(() => {
@@ -445,27 +426,6 @@ export default function GameBoardClient({
       setBoardState(initialState);
     }
   }, [initialState, storageKey]);
-
-  useEffect(() => {
-    const checkLandscapePhone = () => {
-      if (typeof window === "undefined") return;
-
-      const isLandscape =
-        window.matchMedia("(orientation: landscape)").matches &&
-        window.innerWidth <= 1024;
-
-      setIsLandscapePhone(isLandscape);
-    };
-
-    checkLandscapePhone();
-    window.addEventListener("resize", checkLandscapePhone);
-    window.addEventListener("orientationchange", checkLandscapePhone);
-
-    return () => {
-      window.removeEventListener("resize", checkLandscapePhone);
-      window.removeEventListener("orientationchange", checkLandscapePhone);
-    };
-  }, []);
 
   useEffect(() => {
     writeLocalBoardState(storageKey, boardState);
@@ -616,7 +576,7 @@ export default function GameBoardClient({
                 </h1>
 
                 <p className="mt-2 text-sm font-medium text-slate-200/80">
-                  اختر الأسئلة من لوحة اللعب في الاسفل وابدء باللعب.
+                  اختر الأسئلة من لوحة اللعب في الأسفل وابدأ باللعب.
                 </p>
               </div>
 
@@ -694,37 +654,14 @@ export default function GameBoardClient({
         </div>
 
         <div className="overflow-x-auto overflow-y-hidden rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
-          <div className="flex min-w-max justify-center gap-4 px-2">
+          <div className="flex min-w-max items-start justify-center gap-8 px-4">
             {boardColumns.map((column) => (
-              <CategoryCard key={column.category.id} category={column.category}>
-                {column.rows.map((row) => (
-                  <div
-                    key={`${column.category.id}-${row.points}`}
-                    className="grid grid-cols-2 gap-[3px] bg-[#0f2247] p-[3px]"
-                  >
-                    {[0, 1].map((index) => {
-                      const question = row.questions[index] ?? null;
-                      const used = question
-                        ? boardState.usedQuestionIds.includes(question.id)
-                        : true;
-                      const result = question
-                        ? boardState.questionResults[question.id] ?? "none"
-                        : "none";
-
-                      return (
-                        <QuestionCell
-                          key={`${column.category.id}-${row.points}-${index}`}
-                          question={question}
-                          points={row.points}
-                          used={used}
-                          result={result}
-                          onOpen={() => handleOpenQuestion(question)}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
-              </CategoryCard>
+              <CategoryBoardColumn
+                key={column.category.id}
+                column={column}
+                boardState={boardState}
+                onOpenQuestion={handleOpenQuestion}
+              />
             ))}
           </div>
         </div>
