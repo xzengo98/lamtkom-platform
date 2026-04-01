@@ -109,7 +109,7 @@ export default function Navbar() {
             <img
               src="https://j.top4top.io/p_3742tjd5a1.png"
               alt="لمتكم"
-              className="h-auto w-[100px] object-contain md:w-[130px]"
+              className="h-auto w-[120px] object-contain md:w-[145px]"
             />
           </Link>
 

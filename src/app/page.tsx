@@ -499,10 +499,10 @@ export default function HomePage() {
               <div className="hero-logo-frame relative overflow-hidden rounded-[2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:p-5">
                 <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
                 <img
-                  src={heroLogo}
-                  alt="شعار لمتكم"
-                  className="h-45 w-45 object-contain md:h-45 md:w-45"
-                />
+  src={heroLogo}
+  alt="شعار لمتكم"
+  className="h-[160px] w-[160px] object-contain md:h-[180px] md:w-[180px]"
+/>
               </div>
             </div>
 
