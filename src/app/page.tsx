@@ -26,7 +26,7 @@ type FeatureItem = {
   icon: "speed" | "screen" | "mobile" | "games";
 };
 
-const heroLogo = "https://g.top4top.io/p_3742w2zae1.png";
+const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
 
 const gameCards: GameCardItem[] = [
   {
@@ -501,7 +501,7 @@ export default function HomePage() {
                 <img
                   src={heroLogo}
                   alt="شعار لمتكم"
-                  className="h-28 w-28 object-contain md:h-45 md:w-45"
+                  className="h-45 w-45 object-contain md:h-45 md:w-45"
                 />
               </div>
             </div>
