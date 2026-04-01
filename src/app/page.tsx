@@ -501,7 +501,7 @@ export default function HomePage() {
                 <img
   src={heroLogo}
   alt="شعار لمتكم"
-  className="h-[160px] w-[160px] object-contain md:h-[180px] md:w-[180px]"
+  className="h-[160px] w-[160px] object-contain md:h-[220px] md:w-[220px]"
 />
               </div>
             </div>
