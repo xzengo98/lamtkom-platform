@@ -272,7 +272,7 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[82px] w-[190px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
+    "flex h-[68px] w-[118px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[16px] font-black text-red-700 transition md:h-[82px] md:w-[190px] md:text-[18px]";
 
   if (!question) {
     return <div className={baseClass}>{points}</div>;
@@ -331,23 +331,23 @@ function CategoryBoardColumn({
   }
 
   return (
-    <div className="flex w-full max-w-[520px] flex-col items-center">
+    <div className="flex w-full max-w-[320px] flex-col items-center md:max-w-[520px]">
       {/* العنوان العلوي */}
-      <div className="mb-0 w-[210px] rounded-t-[16px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
-        <div className="truncate text-[18px] font-black text-white">
+      <div className="mb-0 w-[170px] rounded-t-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-t-[16px] md:px-4 md:py-3">
+        <div className="truncate text-[15px] font-black text-white md:text-[18px]">
           {column.category.name}
         </div>
       </div>
 
-      {/* الجسم المدمج */}
-      <div className="relative h-[286px] w-[500px]">
+      {/* الجسم */}
+      <div className="relative h-[240px] w-[320px] md:h-[286px] md:w-[500px]">
         {/* العمود الأوسط */}
-        <div className="absolute left-1/2 top-0 z-20 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
+        <div className="absolute left-1/2 top-0 z-20 h-[240px] w-[140px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)] md:h-[286px] md:w-[210px]">
           <CategoryIllustration category={column.category} />
         </div>
 
         {/* الصف الأول */}
-        <div className="absolute left-[0px] top-[6px] z-0">
+        <div className="absolute left-[0px] top-[5px] z-0 md:left-[0px] md:top-[6px]">
           <QuestionPill
             question={left200}
             points={200}
@@ -356,7 +356,8 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left200)}
           />
         </div>
-        <div className="absolute right-[0px] top-[6px] z-0">
+
+        <div className="absolute right-[0px] top-[5px] z-0 md:right-[0px] md:top-[6px]">
           <QuestionPill
             question={right200}
             points={200}
@@ -367,7 +368,7 @@ function CategoryBoardColumn({
         </div>
 
         {/* الصف الثاني */}
-        <div className="absolute left-[0px] top-[102px] z-0">
+        <div className="absolute left-[0px] top-[86px] z-0 md:left-[0px] md:top-[102px]">
           <QuestionPill
             question={left400}
             points={400}
@@ -376,7 +377,8 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left400)}
           />
         </div>
-        <div className="absolute right-[0px] top-[102px] z-0">
+
+        <div className="absolute right-[0px] top-[86px] z-0 md:right-[0px] md:top-[102px]">
           <QuestionPill
             question={right400}
             points={400}
@@ -387,7 +389,7 @@ function CategoryBoardColumn({
         </div>
 
         {/* الصف الثالث */}
-        <div className="absolute left-[0px] top-[198px] z-0">
+        <div className="absolute left-[0px] top-[167px] z-0 md:left-[0px] md:top-[198px]">
           <QuestionPill
             question={left600}
             points={600}
@@ -396,7 +398,8 @@ function CategoryBoardColumn({
             onOpen={() => onOpenQuestion(left600)}
           />
         </div>
-        <div className="absolute right-[0px] top-[198px] z-0">
+
+        <div className="absolute right-[0px] top-[167px] z-0 md:right-[0px] md:top-[198px]">
           <QuestionPill
             question={right600}
             points={600}
@@ -408,8 +411,8 @@ function CategoryBoardColumn({
       </div>
 
       {/* العنوان السفلي */}
-      <div className="mt-0 w-[210px] rounded-b-[16px] bg-[#262626] px-4 py-3 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)]">
-        <div className="truncate text-[16px] font-black text-white">
+      <div className="mt-0 w-[170px] rounded-b-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-b-[16px] md:px-4 md:py-3">
+        <div className="truncate text-[14px] font-black text-white md:text-[16px]">
           {column.category.name}
         </div>
       </div>
@@ -676,8 +679,8 @@ export default function GameBoardClient({
           </div>
         </div>
 
-        <div className="rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-5 shadow-[0_18px_80px_rgba(2,6,23,0.55)]">
-  <div className="grid grid-cols-1 justify-items-center gap-8 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.55)] sm:p-4 md:p-5">
+  <div className="grid grid-cols-1 justify-items-center gap-6 md:grid-cols-2 2xl:grid-cols-3">
     {boardColumns.map((column) => (
       <CategoryBoardColumn
         key={column.category.id}
