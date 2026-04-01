@@ -26,7 +26,7 @@ type FeatureItem = {
   icon: "speed" | "screen" | "mobile" | "games";
 };
 
-const heroLogo = "https://k.top4top.io/p_3742kost41.png";
+const heroLogo = "https://g.top4top.io/p_3742w2zae1.png";
 
 const gameCards: GameCardItem[] = [
   {
