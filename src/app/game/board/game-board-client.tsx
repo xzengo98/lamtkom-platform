@@ -272,7 +272,7 @@ function QuestionPill({
   onOpen?: () => void;
 }) {
   const baseClass =
-    "flex h-[82px] w-[180px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
+    "flex h-[82px] w-[190px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[18px] font-black text-red-700 transition";
 
   if (!question) {
     return <div className={baseClass}>{points}</div>;
@@ -342,7 +342,7 @@ function CategoryBoardColumn({
       {/* الجسم المدمج */}
       <div className="relative h-[286px] w-[500px]">
         {/* العمود الأوسط */}
-        <div className="absolute left-1/2 top-0 z-20 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden rounded-[18px] bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
+        <div className="absolute left-1/2 top-0 z-20 h-[286px] w-[210px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)]">
           <CategoryIllustration category={column.category} />
         </div>
 
