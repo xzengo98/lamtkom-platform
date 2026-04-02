@@ -56,17 +56,12 @@ function toneClasses(tone: Tone) {
   }
 }
 
-function StatCard({
-  label,
-  value,
-  tone = "slate",
-  icon,
-}: StatCardProps) {
+function StatCard({ label, value, tone = "slate", icon }: StatCardProps) {
   const classes = toneClasses(tone);
 
   return (
     <div
-      className={`rounded-[1.6rem] border p-4 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ${classes.card}`}
+      className={`rounded-[1.6rem] border p-4 shadow-[0_12px_28px_rgba(0,0,0,0.20)] backdrop-blur-sm ${classes.card}`}
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className={`text-sm font-black ${classes.soft}`}>{label}</div>
@@ -89,7 +84,7 @@ function ActionCard({
   const classes = toneClasses(tone);
 
   return (
-    <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)]">
+    <div className="rounded-[1.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,28,52,0.95)_0%,rgba(7,13,29,0.98)_100%)] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition hover:-translate-y-[2px]">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-2xl">
           {icon}
@@ -97,7 +92,7 @@ function ActionCard({
 
         {badge ? (
           <span
-            className={`rounded-full border px-3 py-1 text-xs font-black ${classes.card} ${classes.soft}`}
+            className={`rounded-full border px-3 py-1 text-[11px] font-black ${classes.card} ${classes.soft}`}
           >
             {badge}
           </span>
@@ -220,42 +215,42 @@ export default async function AdminPage() {
   const lammatnaActions: ActionCardProps[] = [
     {
       title: "إدارة الأقسام الرئيسية",
-      description: "استعرض الأقسام الرئيسية وعدّلها أو ادخل عليها مباشرة.",
+      description: "استعراض الأقسام الرئيسية وتعديلها بسرعة.",
       href: "/admin/sections",
       tone: "orange",
       icon: "🧱",
     },
     {
       title: "إضافة قسم جديد",
-      description: "أنشئ قسمًا رئيسيًا جديدًا للعبة لمتكم.",
+      description: "إنشاء قسم جديد للعبة لمتكم.",
       href: "/admin/sections/new",
       tone: "orange",
       icon: "➕",
     },
     {
       title: "إدارة الفئات",
-      description: "تحكم في الفئات الحالية واعرض تفاصيلها بسرعة.",
+      description: "التحكم بالفئات الحالية وعرض تفاصيلها.",
       href: "/admin/categories",
       tone: "cyan",
       icon: "🗂️",
     },
     {
       title: "إضافة فئة جديدة",
-      description: "أضف فئة جديدة واربطها بالقسم المناسب.",
+      description: "إضافة فئة جديدة وربطها بالقسم المناسب.",
       href: "/admin/categories/new",
       tone: "cyan",
       icon: "➕",
     },
     {
       title: "إدارة الأسئلة",
-      description: "فلترة، تعديل، حذف، ومراجعة الأسئلة الحالية بسهولة.",
+      description: "فلترة وتعديل وحذف ومراجعة الأسئلة.",
       href: "/admin/questions",
       tone: "emerald",
       icon: "❓",
     },
     {
       title: "رفع أسئلة دفعة واحدة",
-      description: "استورد عددًا كبيرًا من الأسئلة دفعة واحدة.",
+      description: "استيراد عدد كبير من الأسئلة بسهولة.",
       href: "/admin/questions/import",
       tone: "emerald",
       icon: "⬆️",
@@ -265,28 +260,28 @@ export default async function AdminPage() {
   const baraActions: ActionCardProps[] = [
     {
       title: "إدارة برا السالفة",
-      description: "الصفحة الرئيسية لإدارة لعبة برا السالفة.",
+      description: "الدخول إلى الصفحة الرئيسية لإدارة اللعبة.",
       href: "/admin/bara-alsalfah",
       tone: "cyan",
       icon: "🎭",
     },
     {
       title: "إدارة الفئات",
-      description: "تحكم بالأقسام والفئات الخاصة بلعبة برا السالفة.",
+      description: "إدارة الأقسام والفئات الخاصة باللعبة.",
       href: "/admin/bara-alsalfah/categories",
       tone: "orange",
       icon: "🗂️",
     },
     {
       title: "إضافة قسم أو فئة",
-      description: "أنشئ قسمًا أو فئة جديدة للعبة برا السالفة.",
+      description: "إنشاء قسم أو فئة جديدة لبرا السالفة.",
       href: "/admin/bara-alsalfah/categories/new",
       tone: "orange",
       icon: "➕",
     },
     {
       title: "إضافة عنصر جديد",
-      description: "أضف الجواب الصحيح والخيارات الخاطئة للعبة.",
+      description: "إضافة الجواب الصحيح والخيارات الخاطئة.",
       href: "/admin/bara-alsalfah/new",
       tone: "emerald",
       icon: "✨",
@@ -296,7 +291,7 @@ export default async function AdminPage() {
   const codenamesActions: ActionCardProps[] = [
     {
       title: "إدارة Codenames",
-      description: "لوحة إدارة الكلمات والغرف الخاصة بلعبة Codenames.",
+      description: "لوحة الكلمات والغرف الخاصة باللعبة.",
       href: "/admin/codenames",
       tone: "cyan",
       icon: "🧩",
@@ -304,21 +299,21 @@ export default async function AdminPage() {
     },
     {
       title: "إدارة الكلمات",
-      description: "إضافة، تعديل، حذف، وتفعيل كلمات اللعبة.",
+      description: "إضافة وتعديل وتفعيل كلمات اللعبة.",
       href: "/admin/codenames/words",
       tone: "orange",
       icon: "🔤",
     },
     {
       title: "رفع جماعي",
-      description: "رفع مجموعة كلمات دفعة واحدة إلى بنك كلمات Codenames.",
+      description: "رفع بنك كلمات كامل دفعة واحدة.",
       href: "/admin/codenames/upload",
       tone: "emerald",
       icon: "⬆️",
     },
     {
       title: "إدارة الغرف",
-      description: "متابعة الغرف والجلسات الحالية والمنتهية الخاصة باللعبة.",
+      description: "متابعة الغرف الحالية والمنتهية.",
       href: "/admin/codenames/rooms",
       tone: "violet",
       icon: "🚪",
@@ -328,21 +323,21 @@ export default async function AdminPage() {
   const systemActions: ActionCardProps[] = [
     {
       title: "الأعضاء",
-      description: "استعرض المستخدمين وحالاتهم داخل النظام.",
+      description: "استعراض المستخدمين وحالاتهم داخل النظام.",
       href: "/admin/users",
       tone: "slate",
       icon: "👥",
     },
     {
       title: "الألعاب المكتملة",
-      description: "راجع الجلسات والألعاب المكتملة الخاصة بلعبة لمتكم.",
+      description: "مراجعة الجلسات والألعاب المكتملة.",
       href: "/admin/games",
       tone: "slate",
       icon: "🏁",
     },
     {
       title: "الرجوع للموقع",
-      description: "افتح الواجهة الرئيسية للموقع.",
+      description: "فتح الواجهة الرئيسية للموقع.",
       href: "/",
       tone: "slate",
       icon: "↩️",
@@ -352,121 +347,49 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
-        <div className="mb-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-7">
-          <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
-            لوحة التحكم الرئيسية
+        <div className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8">
+          <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.20)_1px,transparent_1px)] [background-size:26px_26px]" />
+
+          <div className="relative">
+            <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+              لوحة التحكم الرئيسية
+            </div>
+
+            <h1 className="text-3xl font-black text-white md:text-5xl">
+              Admin Dashboard
+            </h1>
+
+            <p className="mt-4 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
+              صفحة موحدة لإدارة لمتكم، برا السالفة، وCodenames، مع وصول سريع
+              وواضح لأهم الصفحات والإحصائيات بدون تشتيت أو تكرار مزعج.
+            </p>
           </div>
-
-          <h1 className="text-3xl font-black text-white md:text-4xl">
-            Admin Dashboard
-          </h1>
-
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
-            صفحة موحدة لإدارة ألعاب المنصة: لمتكم، برا السالفة، وCodenames،
-            مع وصول سريع لأهم الصفحات والإحصائيات بدون تكرار أو ازدحام غير ضروري.
-          </p>
         </div>
 
         <SectionHeader
           badge="إحصائيات سريعة"
           title="نظرة عامة على النظام"
-          description="كل الأرقام المهمة في مكان واحد، مع الحفاظ على البيانات الأساسية بدون تكرار مربك."
+          description="كل الأرقام المهمة في مكان واحد، بعرض أنظف وأوضح وأسهل للمتابعة اليومية."
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="أقسام لمتكم"
-            value={stats.sections}
-            tone="orange"
-            icon="🧱"
-          />
-          <StatCard
-            label="فئات لمتكم"
-            value={stats.categories}
-            tone="cyan"
-            icon="🗂️"
-          />
-          <StatCard
-            label="الفئات المفعلة"
-            value={stats.activeCategories}
-            tone="emerald"
-            icon="✅"
-          />
-          <StatCard
-            label="أسئلة لمتكم"
-            value={stats.questions}
-            tone="emerald"
-            icon="❓"
-          />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <StatCard label="أقسام لمتكم" value={stats.sections} tone="orange" icon="🧱" />
+          <StatCard label="فئات لمتكم" value={stats.categories} tone="cyan" icon="🗂️" />
+          <StatCard label="الفئات المفعلة" value={stats.activeCategories} tone="emerald" icon="✅" />
+          <StatCard label="أسئلة لمتكم" value={stats.questions} tone="emerald" icon="❓" />
+          <StatCard label="الأعضاء" value={stats.users} tone="slate" icon="👥" />
 
-          <StatCard
-            label="أقسام برا السالفة"
-            value={stats.baraSections}
-            tone="cyan"
-            icon="🎭"
-          />
-          <StatCard
-            label="فئات برا السالفة"
-            value={stats.baraCategories}
-            tone="orange"
-            icon="🗂️"
-          />
-          <StatCard
-            label="عناصر برا السالفة"
-            value={stats.baraItems}
-            tone="emerald"
-            icon="✨"
-          />
-          <StatCard
-            label="الأعضاء"
-            value={stats.users}
-            tone="slate"
-            icon="👥"
-          />
+          <StatCard label="أقسام برا السالفة" value={stats.baraSections} tone="cyan" icon="🎭" />
+          <StatCard label="فئات برا السالفة" value={stats.baraCategories} tone="orange" icon="🗂️" />
+          <StatCard label="عناصر برا السالفة" value={stats.baraItems} tone="emerald" icon="✨" />
+          <StatCard label="ألعاب مكتملة" value={stats.completedGames} tone="slate" icon="🏁" />
+          <StatCard label="كلمات Codenames" value={stats.codenamesWords} tone="orange" icon="🔤" />
 
-          <StatCard
-            label="ألعاب مكتملة"
-            value={stats.completedGames}
-            tone="slate"
-            icon="🏁"
-          />
-          <StatCard
-            label="كلمات Codenames"
-            value={stats.codenamesWords}
-            tone="orange"
-            icon="🔤"
-          />
-          <StatCard
-            label="كلمات مفعلة"
-            value={stats.codenamesActiveWords}
-            tone="emerald"
-            icon="✅"
-          />
-          <StatCard
-            label="غرف Codenames"
-            value={stats.codenamesRooms}
-            tone="violet"
-            icon="🚪"
-          />
-
-          <StatCard
-            label="غرف انتظار"
-            value={stats.codenamesWaitingRooms}
-            tone="slate"
-            icon="⏳"
-          />
-          <StatCard
-            label="غرف نشطة"
-            value={stats.codenamesActiveRooms}
-            tone="cyan"
-            icon="⚡"
-          />
-          <StatCard
-            label="غرف منتهية"
-            value={stats.codenamesFinishedRooms}
-            tone="orange"
-            icon="🎯"
-          />
+          <StatCard label="كلمات مفعلة" value={stats.codenamesActiveWords} tone="emerald" icon="✅" />
+          <StatCard label="غرف Codenames" value={stats.codenamesRooms} tone="violet" icon="🚪" />
+          <StatCard label="غرف انتظار" value={stats.codenamesWaitingRooms} tone="slate" icon="⏳" />
+          <StatCard label="غرف نشطة" value={stats.codenamesActiveRooms} tone="cyan" icon="⚡" />
+          <StatCard label="غرف منتهية" value={stats.codenamesFinishedRooms} tone="orange" icon="🎯" />
         </div>
 
         <div className="mt-10">
@@ -486,7 +409,7 @@ export default async function AdminPage() {
           <SectionHeader
             badge="برا السالفة"
             title="إدارة لعبة برا السالفة"
-            description="الدخول السريع إلى الأقسام والفئات والعناصر الخاصة باللعبة."
+            description="الدخول السريع إلى أقسام اللعبة وفئاتها وعناصرها."
           />
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {baraActions.map((item) => (
@@ -512,7 +435,7 @@ export default async function AdminPage() {
           <SectionHeader
             badge="عام"
             title="أدوات النظام"
-            description="الوصول إلى الصفحات العامة والمهمة بدون عناصر متكررة."
+            description="الصفحات العامة المهمة بدون تكرار أو عناصر غير ضرورية."
           />
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {systemActions.map((item) => (
