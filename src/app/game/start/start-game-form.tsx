@@ -456,8 +456,7 @@ export default function StartGameForm({
             </h1>
 
             <p className="mt-4 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
-              اختر اسم اللعبة وأسماء الفرق ثم حدّد 6 فئات مناسبة للجلسة. الواجهة
-              هنا أصبحت أخف بصريًا وأوضح، مع إبقاء كل شروط اللعبة والمنطق كما هي.
+              اختر اسم اللعبة وأسماء الفرق ثم حدّد 6 فئات مناسبة للجلسة. 
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -504,7 +503,7 @@ export default function StartGameForm({
             <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
               بيانات الجولة
             </div>
-            <h2 className="text-2xl font-black text-white">الإعداد الأساسي</h2>
+            <h2 className="text-2xl font-black text-white">إعدادات اللعبة الأساسية :</h2>
           </div>
 
           <div className="hidden rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/70 md:block">
