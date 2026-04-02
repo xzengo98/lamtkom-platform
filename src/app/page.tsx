@@ -446,7 +446,7 @@ export default function HomePage() {
               <img
                 src={heroLogo}
                 alt="شعار لمتكم"
-                className="h-[82px] w-auto object-contain md:h-[95px]"
+                className="h-[125px] w-auto object-contain md:h-[150px]"
               />
             </div>
 
@@ -510,7 +510,7 @@ export default function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[1.5rem] border border-cyan-300/20 bg-cyan-400/10 p-4 text-center shadow-[0_12px_28px_rgba(0,0,0,0.18)]">
               <div className="text-2xl font-black text-white">{activeGamesCount}</div>
-              <div className="mt-1 text-xs font-black text-cyan-100">الألعاب المتاحة الآن</div>
+              <div className="mt-1 text-xs font-black text-cyan-100">الألعاب المتاحة الآن في المنصة</div>
             </div>
 
             <div className="rounded-[1.5rem] border border-orange-300/20 bg-orange-400/10 p-4 text-center shadow-[0_12px_28px_rgba(0,0,0,0.18)]">
