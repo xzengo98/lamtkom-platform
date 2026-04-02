@@ -137,6 +137,12 @@ export default function LoginPage() {
               >
                 إنشاء حساب جديد
               </Link>
+              <Link
+  href="/forgot-password"
+  className="text-cyan-300 transition hover:text-cyan-200"
+>
+  نسيت كلمة المرور؟
+</Link>
             </div>
           </div>
         </div>
