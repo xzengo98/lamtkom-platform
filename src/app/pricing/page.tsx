@@ -63,7 +63,7 @@ const plans: Plan[] = [
     ],
   },
   {
-    name: "Premium",
+    name: "Premium خطة",
     badge: "احترافي",
     price: "20 JD",
     description:
@@ -312,7 +312,7 @@ export default function PricingPage() {
               </h1>
 
               <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
-                صفحة الباقات الآن أوضح وأكثر احترافية، وتعرض جميع الخيارات
+                صفحة الباقات توضح وتعرض لك جميع الخيارات
                 المتاحة سواء أردت تجربة مجانية، خطة مدفوعة، Premium، أو شراء
                 ألعاب منفردة للعبة لمتكم.
               </p>
