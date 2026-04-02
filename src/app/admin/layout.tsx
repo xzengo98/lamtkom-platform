@@ -330,8 +330,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                   أهلاً بك في لوحة التحكم
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
-                  من هنا يمكنك إدارة الموقع بالكامل بطريقة مرتبة وواضحة، مع وصول
-                  سريع للأقسام والفئات والأسئلة وأقسام الألعاب المختلفة.
+                  من هنا يمكنك إدارة الموقع بالكامل :
                 </p>
               </div>
 

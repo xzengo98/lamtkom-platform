@@ -361,7 +361,7 @@ export default async function AdminPage() {
 
             <p className="mt-4 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
               صفحة موحدة لإدارة لمتكم، برا السالفة، وCodenames، مع وصول سريع
-              وواضح لأهم الصفحات والإحصائيات بدون تشتيت أو تكرار مزعج.
+              وواضح لأهم الصفحات والإحصائيات .
             </p>
           </div>
         </div>
