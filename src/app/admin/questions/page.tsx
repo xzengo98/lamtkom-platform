@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import AdminEmptyState from "@/components/admin/admin-empty-state";
-import AdminPageHeader from "@/components/admin/admin-page-header";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +9,7 @@ type SearchParams = Promise<{
   q?: string;
   section?: string;
   category?: string;
+  page?: string;
 }>;
 
 type SectionRow = {
@@ -56,6 +55,12 @@ type QuestionRow = {
   category_id: string | null;
   categories: CategoryRelation;
 };
+
+type ProfileRow = {
+  role: string | null;
+};
+
+const QUESTIONS_PER_PAGE = 20;
 
 function getCategoryObject(categories: CategoryRelation) {
   if (!categories) return null;
@@ -109,23 +114,31 @@ function buildReturnTo(params: {
   q: string;
   sectionId: string;
   categoryId: string;
+  page: number;
 }) {
   const query = new URLSearchParams();
-
   if (params.q) query.set("q", params.q);
   if (params.sectionId) query.set("section", params.sectionId);
   if (params.categoryId) query.set("category", params.categoryId);
-
+  if (params.page > 1) query.set("page", String(params.page));
   const queryString = query.toString();
   return queryString ? `/admin/questions?${queryString}` : "/admin/questions";
+}
+
+function buildPageHref(params: {
+  q: string;
+  sectionId: string;
+  categoryId: string;
+  page: number;
+}) {
+  return buildReturnTo(params);
 }
 
 async function deleteQuestion(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id") ?? "").trim();
-  const returnTo =
-    String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
+  const returnTo = String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
 
   if (!id) {
     redirect(returnTo);
@@ -142,6 +155,32 @@ async function deleteQuestion(formData: FormData) {
   redirect(returnTo);
 }
 
+async function deleteSelectedQuestions(formData: FormData) {
+  "use server";
+
+  const returnTo =
+    String(formData.get("returnTo") ?? "").trim() || "/admin/questions";
+
+  const selectedIds = formData
+    .getAll("selectedIds")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  if (selectedIds.length === 0) {
+    redirect(returnTo);
+  }
+
+  const supabase = await getSupabaseServerClient();
+  await supabase.from("questions").delete().in("id", selectedIds);
+
+  revalidatePath("/admin/questions");
+  revalidatePath("/admin");
+  revalidatePath("/game/start");
+  revalidatePath("/game/board");
+
+  redirect(returnTo);
+}
+
 export default async function AdminQuestionsPage({
   searchParams,
 }: {
@@ -149,22 +188,33 @@ export default async function AdminQuestionsPage({
 }) {
   try {
     const params = await searchParams;
+
     const searchQuery = String(params.q ?? "").trim();
     const selectedSection = String(params.section ?? "").trim();
     const selectedCategory = String(params.category ?? "").trim();
-
-    const hasFilters =
-      searchQuery.length > 0 ||
-      selectedSection.length > 0 ||
-      selectedCategory.length > 0;
-
-    const returnTo = buildReturnTo({
-      q: searchQuery,
-      sectionId: selectedSection,
-      categoryId: selectedCategory,
-    });
+    const currentPage = Math.max(1, Number(params.page ?? "1") || 1);
 
     const supabase = await getSupabaseServerClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      redirect("/login");
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const typedProfile = profile as ProfileRow | null;
+
+    if (!typedProfile || typedProfile.role !== "admin") {
+      redirect("/");
+    }
 
     const [
       { data: sectionsData, error: sectionsError },
@@ -183,7 +233,7 @@ export default async function AdminQuestionsPage({
 
     if (sectionsError) {
       return (
-        <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
+        <div className="mx-auto max-w-5xl p-6 text-red-400">
           فشل تحميل الأقسام: {sectionsError.message}
         </div>
       );
@@ -191,7 +241,7 @@ export default async function AdminQuestionsPage({
 
     if (categoriesError) {
       return (
-        <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
+        <div className="mx-auto max-w-5xl p-6 text-red-400">
           فشل تحميل الفئات: {categoriesError.message}
         </div>
       );
@@ -204,362 +254,570 @@ export default async function AdminQuestionsPage({
       ? categories.filter((category) => category.section_id === selectedSection)
       : categories;
 
+    const effectiveSelectedCategory =
+      selectedCategory &&
+      filteredCategoriesForDropdown.some((category) => category.id === selectedCategory)
+        ? selectedCategory
+        : "";
+
+    let allowedCategoryIds: string[] | null = null;
+
+    if (selectedSection) {
+      allowedCategoryIds = categories
+        .filter((category) => category.section_id === selectedSection)
+        .map((category) => category.id);
+    }
+
+    if (effectiveSelectedCategory) {
+      allowedCategoryIds = [effectiveSelectedCategory];
+    }
+
+    let countQuery = supabase
+      .from("questions")
+      .select("id", { count: "exact", head: true });
+
+    if (searchQuery) {
+      countQuery = countQuery.or(
+        `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
+      );
+    }
+
+    if (allowedCategoryIds && allowedCategoryIds.length > 0) {
+      countQuery = countQuery.in("category_id", allowedCategoryIds);
+    }
+
+    if (allowedCategoryIds && allowedCategoryIds.length === 0) {
+      countQuery = supabase.from("questions").select("id", {
+        count: "exact",
+        head: true,
+      }).eq("id", "__no_results__");
+    }
+
+    const { count, error: countError } = await countQuery;
+
+    if (countError) {
+      return (
+        <div className="mx-auto max-w-5xl p-6 text-red-400">
+          فشل تحميل عدد الأسئلة: {countError.message}
+        </div>
+      );
+    }
+
+    const totalQuestions = count ?? 0;
+    const totalPages = Math.max(1, Math.ceil(totalQuestions / QUESTIONS_PER_PAGE));
+    const safePage = Math.min(currentPage, totalPages);
+    const from = (safePage - 1) * QUESTIONS_PER_PAGE;
+    const to = from + QUESTIONS_PER_PAGE - 1;
+
     let questions: QuestionRow[] = [];
 
-    if (hasFilters) {
-      let allowedCategoryIds: string[] | null = null;
-
-      if (selectedSection) {
-        allowedCategoryIds = categories
-          .filter((category) => category.section_id === selectedSection)
-          .map((category) => category.id);
-      }
-
-      if (selectedCategory) {
-        allowedCategoryIds = [selectedCategory];
-      }
-
-      if (allowedCategoryIds && allowedCategoryIds.length === 0) {
-        questions = [];
-      } else {
-        let query = supabase
-          .from("questions")
-          .select(`
+    if (!(allowedCategoryIds && allowedCategoryIds.length === 0)) {
+      let query = supabase
+        .from("questions")
+        .select(`
+          id,
+          question_text,
+          answer_text,
+          points,
+          is_active,
+          is_used,
+          category_id,
+          categories (
             id,
-            question_text,
-            answer_text,
-            points,
-            is_active,
-            is_used,
-            category_id,
-            categories (
+            name,
+            slug,
+            category_sections (
               id,
               name,
-              slug,
-              category_sections (
-                id,
-                name,
-                slug
-              )
+              slug
             )
-          `)
-          .order("created_at", { ascending: false })
-          .limit(150);
+          )
+        `)
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
-        if (searchQuery) {
-          query = query.or(
-            `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
-          );
-        }
-
-        if (allowedCategoryIds && allowedCategoryIds.length > 0) {
-          query = query.in("category_id", allowedCategoryIds);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          return (
-            <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
-              فشل تحميل الأسئلة: {error.message}
-            </div>
-          );
-        }
-
-        questions = (data ?? []) as unknown as QuestionRow[];
+      if (searchQuery) {
+        query = query.or(
+          `question_text.ilike.%${searchQuery}%,answer_text.ilike.%${searchQuery}%`,
+        );
       }
+
+      if (allowedCategoryIds && allowedCategoryIds.length > 0) {
+        query = query.in("category_id", allowedCategoryIds);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        return (
+          <div className="mx-auto max-w-5xl p-6 text-red-400">
+            فشل تحميل الأسئلة: {error.message}
+          </div>
+        );
+      }
+
+      questions = (data ?? []) as unknown as QuestionRow[];
     }
+
+    const returnTo = buildReturnTo({
+      q: searchQuery,
+      sectionId: selectedSection,
+      categoryId: effectiveSelectedCategory,
+      page: safePage,
+    });
 
     const exportAllHref = "/api/admin/questions/export";
     const exportSectionHref = selectedSection
       ? `/api/admin/questions/export?section=${encodeURIComponent(selectedSection)}`
       : null;
-    const exportCategoryHref = selectedCategory
-      ? `/api/admin/questions/export?category=${encodeURIComponent(selectedCategory)}`
+    const exportCategoryHref = effectiveSelectedCategory
+      ? `/api/admin/questions/export?category=${encodeURIComponent(
+          effectiveSelectedCategory,
+        )}`
       : null;
 
+    const hasAnyFilter =
+      searchQuery.length > 0 ||
+      selectedSection.length > 0 ||
+      effectiveSelectedCategory.length > 0;
+
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <AdminPageHeader
-  title="إدارة الأسئلة"
-  description="ابحث داخل الأسئلة، عدّلها، واحذفها، وصدّرها كملف JSON جاهز للمراجعة أو إعادة الرفع."
-  action={
-    <div className="flex flex-wrap gap-3">
-      <Link
-        href="/admin/questions/new"
-        className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
-      >
-        إضافة سؤال جديد
-      </Link>
+      <main className="min-h-screen bg-slate-950 text-white">
+        <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+          <div className="mb-6 flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+                  إدارة الأسئلة
+                </div>
+                <h1 className="text-3xl font-black text-white md:text-4xl">
+                  /admin/questions
+                </h1>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
+                  فلترة مرنة، تعديل مع حفظ الحالة داخل الرابط، حذف جماعي، وتقسيم
+                  النتائج إلى صفحات منظمة.
+                </p>
+              </div>
 
-      <Link
-        href="/admin/questions/import"
-        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-      >
-        رفع أسئلة بالجملة
-      </Link>
-    </div>
-  }
-/>
-
-        <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur">
-          <form className="grid gap-4 lg:grid-cols-4">
-            <div className="lg:col-span-2">
-              <label className="mb-2 block text-sm font-bold text-slate-200">
-                البحث بنص السؤال
-              </label>
-              <input
-                name="q"
-                defaultValue={searchQuery}
-                placeholder="ابحث داخل السؤال أو الإجابة"
-                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none placeholder:text-slate-400"
-              />
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/admin/questions/new"
+                  className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                >
+                  إضافة سؤال جديد
+                </Link>
+                <Link
+                  href="/admin/upload"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  رفع أسئلة بالجملة
+                </Link>
+              </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-200">
-                القسم
-              </label>
-              <select
-                name="section"
-                defaultValue={selectedSection}
-                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none"
-              >
-                <option value="">كل الأقسام</option>
-                {sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <form
+              id="filters-form"
+              method="GET"
+              className="grid gap-4 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 md:grid-cols-2 xl:grid-cols-5"
+            >
+              <div className="xl:col-span-2">
+                <label
+                  htmlFor="q"
+                  className="mb-2 block text-sm font-bold text-white/80"
+                >
+                  البحث بنص السؤال
+                </label>
+                <input
+                  id="q"
+                  name="q"
+                  defaultValue={searchQuery}
+                  placeholder="اكتب جزءًا من السؤال أو الإجابة"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                />
+              </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-bold text-slate-200">
-                الفئة
-              </label>
-              <select
-                name="category"
-                defaultValue={selectedCategory}
-                className="min-h-12 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 text-sm text-white outline-none"
-              >
-                <option value="">كل الفئات</option>
-                {filteredCategoriesForDropdown.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label
+                  htmlFor="section"
+                  className="mb-2 block text-sm font-bold text-white/80"
+                >
+                  القسم
+                </label>
+                <select
+                  id="section"
+                  name="section"
+                  defaultValue={selectedSection}
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                >
+                  <option value="">كل الأقسام</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex flex-wrap items-end gap-3 lg:col-span-4">
+              <div>
+                <label
+                  htmlFor="category"
+                  className="mb-2 block text-sm font-bold text-white/80"
+                >
+                  الفئة
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  defaultValue={effectiveSelectedCategory}
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                >
+                  <option value="">كل الفئات</option>
+                  {filteredCategoriesForDropdown.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col justify-end gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                >
+                  بحث / فلترة
+                </button>
+
+                <Link
+                  href="/admin/questions"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  تصفير
+                </Link>
+              </div>
+            </form>
+
+            <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="text-sm text-white/70">
+                  الفلاتر الحالية محفوظة داخل الرابط
+                  {hasAnyFilter ? (
+                    <span className="mr-2 font-black text-cyan-300">
+                      • عدد النتائج: {totalQuestions}
+                    </span>
+                  ) : (
+                    <span className="mr-2 font-black text-white/50">
+                      • يتم عرض جميع الأسئلة مع تقسيم الصفحات
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={exportAllHref}
+                    className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                  >
+                    تصدير جميع الأسئلة
+                  </a>
+
+                  {exportSectionHref ? (
+                    <a
+                      href={exportSectionHref}
+                      className="inline-flex items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
+                    >
+                      تصدير هذا القسم
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/40">
+                      اختر قسمًا لتفعيل تصدير القسم
+                    </span>
+                  )}
+
+                  {exportCategoryHref ? (
+                    <a
+                      href={exportCategoryHref}
+                      className="inline-flex items-center justify-center rounded-xl border border-violet-300/20 bg-violet-400/10 px-4 py-3 text-sm font-black text-violet-100 transition hover:bg-violet-400/15"
+                    >
+                      تصدير هذه الفئة
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/40">
+                      اختر فئة لتفعيل تصدير الفئة
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form action={deleteSelectedQuestions}>
+            <input type="hidden" name="returnTo" value={returnTo} />
+
+            <div className="mb-4 flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white">
+                  <input id="select-all-questions" type="checkbox" className="h-4 w-4" />
+                  تحديد الكل في هذه الصفحة
+                </label>
+                <div className="text-sm text-white/60">
+                  الصفحة {safePage} من {totalPages}
+                </div>
+              </div>
+
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
+                className="inline-flex items-center justify-center rounded-xl bg-red-500 px-5 py-3 text-sm font-black text-white transition hover:bg-red-400"
               >
-                بحث / فلترة
+                حذف المحدد
               </button>
-
-              <Link
-                href="/admin/questions"
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-              >
-                تصفير
-              </Link>
-
-              <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-                الفلترة الحالية محفوظة داخل الرابط{" "}
-                {hasFilters ? (
-                  <span className="font-bold">• عدد النتائج: {questions.length}</span>
-                ) : (
-                  <span className="font-bold">
-                    • ابدأ بالبحث أو اختيار قسم/فئة لإظهار النتائج
-                  </span>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold text-slate-200">
-                تصدير JSON
-              </div>
-              <h2 className="mt-3 text-xl font-black text-white">
-                تصدير الأسئلة للمراجعة الخارجية
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
-                يمكنك تحميل جميع الأسئلة أو تصدير قسم أو فئة محددة بنفس التنسيق
-                المقبول داخل نظام الرفع لديك.
-              </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href={exportAllHref}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-2.5 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-400/15"
-              >
-                تصدير جميع الأسئلة
-              </Link>
+            {questions.length > 0 ? (
+              <div className="grid gap-5">
+                {questions.map((question) => {
+                  const questionPreview = truncateText(
+                    stripHtml(question.question_text),
+                  );
+                  const answerPreview = truncateText(stripHtml(question.answer_text));
+                  const questionImage = extractFirstImageSrc(question.question_text);
+                  const answerImage = extractFirstImageSrc(question.answer_text);
 
-              {exportSectionHref ? (
-                <Link
-                  href={exportSectionHref}
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-                >
-                  تصدير هذا القسم
-                </Link>
-              ) : (
-                <span className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-2.5 text-sm font-bold text-slate-400">
-                  اختر قسمًا لتفعيل تصدير القسم
-                </span>
-              )}
-
-              {exportCategoryHref ? (
-                <Link
-                  href={exportCategoryHref}
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
-                >
-                  تصدير هذه الفئة
-                </Link>
-              ) : (
-                <span className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-2.5 text-sm font-bold text-slate-400">
-                  اختر فئة لتفعيل تصدير الفئة
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {!hasFilters ? (
-          <div className="mt-6">
-            <AdminEmptyState
-              title="ابدأ بالبحث أو الفلترة"
-              description="اختر قسمًا أو فئة أو ابحث بالنص لعرض الأسئلة هنا، ويمكنك في أي وقت استخدام أزرار التصدير أعلاه."
-            />
-          </div>
-        ) : questions.length > 0 ? (
-          <div className="mt-6 grid gap-4">
-            {questions.map((question) => {
-              const questionPreview = truncateText(stripHtml(question.question_text));
-              const answerPreview = truncateText(stripHtml(question.answer_text));
-              const questionImage = extractFirstImageSrc(question.question_text);
-              const answerImage = extractFirstImageSrc(question.answer_text);
-
-              return (
-                <div
-                  key={question.id}
-                  className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur"
-                >
-                  <div className="mb-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-slate-300">
-                    سؤال
-                  </div>
-
-                  <h3 className="text-lg font-black text-white">
-                    {questionPreview || "بدون نص"}
-                  </h3>
-
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
-                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
-                      {getSectionName(question.categories)}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
-                      {getCategoryName(question.categories)}
-                    </span>
-                    <span className="rounded-full border border-amber-400/15 bg-amber-400/10 px-3 py-2 text-amber-100">
-                      {question.points} نقطة
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
-                      {question.is_active ? "مفعّل" : "غير مفعّل"}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-slate-200">
-                      {question.is_used ? "مستخدم" : "غير مستخدم"}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                      <div className="mb-2 text-sm font-bold text-slate-200">
-                        صورة السؤال
-                      </div>
-                      {questionImage ? (
-                        <img
-                          src={questionImage}
-                          alt="صورة السؤال"
-                          className="max-h-52 w-full rounded-2xl object-cover"
-                        />
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/40 p-4 text-sm text-slate-400">
-                          لا توجد صورة داخل السؤال
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                      <div className="mb-2 text-sm font-bold text-slate-200">
-                        صورة الإجابة
-                      </div>
-                      {answerImage ? (
-                        <img
-                          src={answerImage}
-                          alt="صورة الإجابة"
-                          className="max-h-52 w-full rounded-2xl object-cover"
-                        />
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/40 p-4 text-sm text-slate-400">
-                          لا توجد صورة داخل الإجابة
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                    <div className="mb-2 text-sm font-bold text-slate-200">
-                      الإجابة
-                    </div>
-                    <p className="text-sm leading-7 text-slate-300">
-                      {answerPreview || "غير مضافة"}
-                    </p>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                      href={`/admin/questions/${question.id}/edit?returnTo=${encodeURIComponent(returnTo)}`}
-                      className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-cyan-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-cyan-300"
+                  return (
+                    <div
+                      key={question.id}
+                      className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
                     >
-                      تعديل
-                    </Link>
+                      <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            name="selectedIds"
+                            value={question.id}
+                            className="question-checkbox mt-1 h-5 w-5 rounded border-white/20 bg-slate-950/70"
+                          />
+                          <div>
+                            <div className="mb-2 inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-100">
+                              سؤال
+                            </div>
+                            <h3 className="text-xl font-black text-white">
+                              {questionPreview || "بدون نص"}
+                            </h3>
 
-                    <form action={deleteQuestion}>
-                      <input type="hidden" name="id" value={question.id} />
-                      <input type="hidden" name="returnTo" value={returnTo} />
-                      <button
-                        type="submit"
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm font-bold text-red-300 transition hover:bg-red-500/15"
-                      >
-                        حذف
-                      </button>
-                    </form>
-                  </div>
+                            <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
+                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                                {getSectionName(question.categories)}
+                              </span>
+                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                                {getCategoryName(question.categories)}
+                              </span>
+                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                                {question.points} نقطة
+                              </span>
+                              <span
+                                className={`rounded-full px-3 py-1.5 ${
+                                  question.is_active
+                                    ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                                    : "border border-red-300/20 bg-red-400/10 text-red-100"
+                                }`}
+                              >
+                                {question.is_active ? "مفعّل" : "غير مفعّل"}
+                              </span>
+                              <span
+                                className={`rounded-full px-3 py-1.5 ${
+                                  question.is_used
+                                    ? "border border-orange-300/20 bg-orange-400/10 text-orange-100"
+                                    : "border border-white/10 bg-white/5 text-white/75"
+                                }`}
+                              >
+                                {question.is_used ? "مستخدم" : "غير مستخدم"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
+                              returnTo,
+                            )}`}
+                            className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                          >
+                            تعديل
+                          </Link>
+
+                          <form action={deleteQuestion}>
+                            <input type="hidden" name="id" value={question.id} />
+                            <input type="hidden" name="returnTo" value={returnTo} />
+                            <button
+                              type="submit"
+                              className="inline-flex items-center justify-center rounded-xl bg-red-500 px-4 py-3 text-sm font-black text-white transition hover:bg-red-400"
+                            >
+                              حذف
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 xl:grid-cols-2">
+                        <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                          <div className="mb-3 text-sm font-black text-white">
+                            صورة السؤال
+                          </div>
+                          {questionImage ? (
+                            <img
+                              src={questionImage}
+                              alt="صورة السؤال"
+                              className="h-52 w-full rounded-2xl border border-white/10 object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
+                              لا توجد صورة داخل السؤال
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                          <div className="mb-3 text-sm font-black text-white">
+                            صورة الإجابة
+                          </div>
+                          {answerImage ? (
+                            <img
+                              src={answerImage}
+                              alt="صورة الإجابة"
+                              className="h-52 w-full rounded-2xl border border-white/10 object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
+                              لا توجد صورة داخل الإجابة
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                        <div className="mb-2 text-sm font-black text-white">
+                          الإجابة
+                        </div>
+                        <p className="text-sm leading-7 text-white/70">
+                          {answerPreview || "غير مضافة"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-[1.8rem] border border-dashed border-white/10 bg-white/5 px-6 py-14 text-center">
+                <div className="mb-3 text-2xl font-black text-white">
+                  لا توجد نتائج مطابقة
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-6">
-            <AdminEmptyState
-              title="لا توجد نتائج"
-              description="لم يتم العثور على أسئلة مطابقة للفلاتر الحالية. يمكنك تعديل الفلاتر أو استخدام التصدير العام."
-            />
-          </div>
-        )}
-      </div>
+                <p className="mx-auto max-w-2xl text-sm leading-7 text-white/65">
+                  جرّب تغيير البحث أو القسم أو الفئة، أو ارجع لعرض جميع الأسئلة.
+                </p>
+              </div>
+            )}
+          </form>
+
+          {totalPages > 1 ? (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Link
+                href={buildPageHref({
+                  q: searchQuery,
+                  sectionId: selectedSection,
+                  categoryId: effectiveSelectedCategory,
+                  page: Math.max(1, safePage - 1),
+                })}
+                className={`rounded-xl px-4 py-3 text-sm font-black transition ${
+                  safePage === 1
+                    ? "pointer-events-none border border-white/10 bg-white/5 text-white/30"
+                    : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                }`}
+              >
+                السابق
+              </Link>
+
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (pageNumber) => (
+                  <Link
+                    key={pageNumber}
+                    href={buildPageHref({
+                      q: searchQuery,
+                      sectionId: selectedSection,
+                      categoryId: effectiveSelectedCategory,
+                      page: pageNumber,
+                    })}
+                    className={`rounded-xl px-4 py-3 text-sm font-black transition ${
+                      pageNumber === safePage
+                        ? "bg-cyan-500 text-slate-950"
+                        : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {pageNumber}
+                  </Link>
+                ),
+              )}
+
+              <Link
+                href={buildPageHref({
+                  q: searchQuery,
+                  sectionId: selectedSection,
+                  categoryId: effectiveSelectedCategory,
+                  page: Math.min(totalPages, safePage + 1),
+                })}
+                className={`rounded-xl px-4 py-3 text-sm font-black transition ${
+                  safePage === totalPages
+                    ? "pointer-events-none border border-white/10 bg-white/5 text-white/30"
+                    : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                }`}
+              >
+                التالي
+              </Link>
+            </div>
+          ) : null}
+
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                document.addEventListener("DOMContentLoaded", function () {
+                  const form = document.getElementById("filters-form");
+                  const section = document.getElementById("section");
+                  const category = document.getElementById("category");
+                  const selectAll = document.getElementById("select-all-questions");
+                  const questionCheckboxes = Array.from(document.querySelectorAll(".question-checkbox"));
+
+                  if (section && form) {
+                    section.addEventListener("change", function () {
+                      if (category) {
+                        category.value = "";
+                      }
+                      form.submit();
+                    });
+                  }
+
+                  if (category && form) {
+                    category.addEventListener("change", function () {
+                      form.submit();
+                    });
+                  }
+
+                  if (selectAll) {
+                    selectAll.addEventListener("change", function (event) {
+                      const checked = event.target.checked;
+                      questionCheckboxes.forEach(function (checkbox) {
+                        checkbox.checked = checked;
+                      });
+                    });
+                  }
+                });
+              `,
+            }}
+          />
+        </div>
+      </main>
     );
   } catch (error) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-10 text-red-300">
+      <div className="mx-auto max-w-5xl p-6 text-red-400">
         فشل تحميل الأسئلة:{" "}
         {error instanceof Error ? error.message : "Unknown error"}
       </div>
