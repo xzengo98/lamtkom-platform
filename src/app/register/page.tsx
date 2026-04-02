@@ -5,34 +5,21 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+
 function ArrowLeftIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-5 w-5"
       fill="none"
+      className="h-4 w-4"
       stroke="currentColor"
       strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      <path
-        d="M19 12H5M12 19l-7-7 7-7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-    >
-      <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 12H5" />
+      <path d="m12 19-7-7 7-7" />
     </svg>
   );
 }
@@ -45,11 +32,10 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setErrorMessage("");
 
@@ -84,7 +70,7 @@ export default function RegisterPage() {
     if (error) {
       setLoading(false);
       setErrorMessage(
-        "تعذر إنشاء الحساب. تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا."
+        "تعذر إنشاء الحساب. تأكد أن البريد الإلكتروني واسم المستخدم ورقم الهاتف غير مستخدمة مسبقًا.",
       );
       return;
     }
@@ -113,92 +99,60 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-10">
-        <section className="order-2 rounded-[2.25rem] border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.10),transparent_22%),linear-gradient(135deg,#020617_0%,#09122b_46%,#020617_100%)] p-6 sm:p-8 lg:order-1">
-          <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-bold text-cyan-200 sm:text-sm">
-            إنشاء حساب جديد
-          </span>
-
-          <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">
-            ابدأ استخدام منصة لمتكم
-            <span className="block text-cyan-300">بخطوات بسيطة وواضحة</span>
-          </h1>
-
-          <p className="mt-5 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-            أنشئ حسابك وابدأ مباشرة بتنظيم الألعاب الخاصة بك ، مع تجربة اكثر من رائعة وبسيطة
-          </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {[
-              "تسجيل سريع وبسيط",
-              "لا خوف على بياناتك الخاصة المسجلة",
-              "لا نشارك اي معلومات مع طرف اخر",
-              "بدء اللعبة خلال لحظات",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-4"
-              >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/15 text-cyan-300">
-                  <CheckIcon />
-                </span>
-                <span className="text-sm font-bold text-white">{item}</span>
+      <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 py-8 md:px-6">
+        <div className="w-full max-w-[540px]">
+          <div className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
+            <div className="mb-6 flex justify-center">
+              <div className="relative flex h-[150px] w-[150px] items-center justify-center overflow-hidden rounded-[2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.30)]">
+                <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
+                <img
+                  src={heroLogo}
+                  alt="شعار لمتكم"
+                  className="h-[100px] w-[100px] object-contain"
+                />
               </div>
-            ))}
-          </div>
+            </div>
 
-          <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-            <p className="text-sm font-bold text-cyan-300">معلومة سريعة</p>
-            <p className="mt-2 text-sm leading-7 text-slate-300">
-              بعد التسجيل يمكنك الدخول مباشرة والبدء بانشاء العابك الخاصة.
-            </p>
-          </div>
-        </section>
-
-        <section className="order-1 flex items-center lg:order-2">
-          <div className="w-full rounded-[2.25rem] border border-white/10 bg-white/5 p-5 sm:p-7">
-            <div className="mb-6">
-              <h2 className="text-2xl font-black text-white sm:text-3xl">
-                إنشاء الحساب
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-slate-300">
-                أدخل بياناتك الأساسية للبدء.
-              </p>
+            <div className="mb-6 text-center">
+              <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+                إنشاء حساب جديد
+              </div>
+              <h1 className="text-3xl font-black text-white">إنشاء الحساب</h1>
             </div>
 
             {errorMessage ? (
-              <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              <div className="mb-4 rounded-[1.2rem] border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-bold text-red-100">
                 {errorMessage}
               </div>
             ) : null}
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+                <label className="mb-2 block text-sm font-black text-white/80">
                   اسم المستخدم
                 </label>
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:px-5 md:py-4 md:text-base"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+                <label className="mb-2 block text-sm font-black text-white/80">
                   رقم الهاتف
                 </label>
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="05xxxxxxxx أو +971..."
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:px-5 md:py-4 md:text-base"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+                <label className="mb-2 block text-sm font-black text-white/80">
                   البريد الإلكتروني
                 </label>
                 <input
@@ -206,12 +160,12 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="name@email.com"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:px-5 md:py-4 md:text-base"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-bold text-white">
+                <label className="mb-2 block text-sm font-black text-white/80">
                   كلمة المرور
                 </label>
                 <input
@@ -219,28 +173,31 @@ export default function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   placeholder="******"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 md:px-5 md:py-4 md:text-base"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
                 {!loading ? <ArrowLeftIcon /> : null}
               </button>
             </form>
 
-            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-4 text-sm text-slate-300">
+            <div className="mt-5 text-center text-sm font-bold text-white/65">
               لديك حساب بالفعل؟{" "}
-              <Link href="/login" className="font-black text-cyan-300 hover:text-cyan-200">
+              <Link
+                href="/login"
+                className="text-cyan-300 transition hover:text-cyan-200"
+              >
                 تسجيل الدخول
               </Link>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   );
