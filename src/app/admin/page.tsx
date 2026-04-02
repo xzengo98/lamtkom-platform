@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-type Tone = "cyan" | "orange" | "emerald" | "slate";
+type Tone = "cyan" | "orange" | "emerald" | "slate" | "violet";
 
 type StatCardProps = {
   label: string;
@@ -41,6 +41,12 @@ function toneClasses(tone: Tone) {
         soft: "text-emerald-100",
         button: "border-emerald-300/20 bg-emerald-400/10 hover:bg-emerald-400/15",
       };
+    case "violet":
+      return {
+        card: "border-violet-400/20 bg-violet-400/10",
+        soft: "text-violet-100",
+        button: "border-violet-300/20 bg-violet-400/10 hover:bg-violet-400/15",
+      };
     default:
       return {
         card: "border-white/10 bg-white/5",
@@ -50,16 +56,24 @@ function toneClasses(tone: Tone) {
   }
 }
 
-function StatCard({ label, value, tone = "slate", icon }: StatCardProps) {
+function StatCard({
+  label,
+  value,
+  tone = "slate",
+  icon,
+}: StatCardProps) {
   const classes = toneClasses(tone);
 
   return (
-    <div className={`rounded-[24px] border p-5 shadow-xl ${classes.card}`}>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <span className="text-2xl">{icon}</span>
-        <span className="text-sm font-semibold text-white/60">{label}</span>
+    <div
+      className={`rounded-[1.6rem] border p-4 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ${classes.card}`}
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className={`text-sm font-black ${classes.soft}`}>{label}</div>
+        <div className="text-2xl">{icon}</div>
       </div>
-      <div className={`text-4xl font-black ${classes.soft}`}>{value}</div>
+
+      <div className="text-3xl font-black text-white">{value}</div>
     </div>
   );
 }
@@ -75,28 +89,33 @@ function ActionCard({
   const classes = toneClasses(tone);
 
   return (
-    <Link
-      href={href}
-      className={`group rounded-[24px] border p-5 transition shadow-xl ${classes.button}`}
-    >
+    <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)]">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-2xl">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-2xl">
           {icon}
         </div>
+
         {badge ? (
-          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-white/75">
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-black ${classes.card} ${classes.soft}`}
+          >
             {badge}
           </span>
         ) : null}
       </div>
 
-      <div className="text-xl font-black text-white">{title}</div>
-      <p className="mt-2 text-sm leading-6 text-white/65">{description}</p>
+      <h3 className="text-xl font-black text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-7 text-white/65">{description}</p>
 
-      <div className="mt-5 inline-flex rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-sm font-bold text-white/85 transition group-hover:bg-black/30">
-        فتح
+      <div className="mt-5">
+        <Link
+          href={href}
+          className={`inline-flex items-center justify-center rounded-xl border px-4 py-3 text-sm font-black text-white transition ${classes.button}`}
+        >
+          فتح
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -110,12 +129,14 @@ function SectionHeader({
   description: string;
 }) {
   return (
-    <div className="mb-6">
-      <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/70">
+    <div className="mb-5">
+      <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
         {badge}
       </div>
-      <h2 className="mt-4 text-3xl font-black text-white">{title}</h2>
-      <p className="mt-2 max-w-3xl text-white/65">{description}</p>
+      <h2 className="text-2xl font-black text-white md:text-3xl">{title}</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
+        {description}
+      </p>
     </div>
   );
 }
@@ -133,8 +154,6 @@ export default async function AdminPage() {
     baraItemsResult,
     usersResult,
     completedGamesResult,
-    activeGamesResult,
-
     codenamesWordsResult,
     codenamesActiveWordsResult,
     codenamesRoomsResult,
@@ -144,23 +163,40 @@ export default async function AdminPage() {
   ] = await Promise.all([
     supabase.from("category_sections").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
-    supabase.from("categories").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase
+      .from("categories")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
     supabase.from("questions").select("*", { count: "exact", head: true }),
-
     supabase.from("bara_sections").select("*", { count: "exact", head: true }),
     supabase.from("bara_categories").select("*", { count: "exact", head: true }),
-    supabase.from("bara_items").select("*", { count: "exact", head: true }).eq("is_active", true),
-
+    supabase
+      .from("bara_items")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("game_sessions").select("*", { count: "exact", head: true }).eq("status", "completed"),
-    supabase.from("game_sessions").select("*", { count: "exact", head: true }).eq("status", "active"),
-
+    supabase
+      .from("game_sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "completed"),
     supabase.from("codenames_word_bank").select("*", { count: "exact", head: true }),
-    supabase.from("codenames_word_bank").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase
+      .from("codenames_word_bank")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
     supabase.from("codenames_rooms").select("*", { count: "exact", head: true }),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "waiting"),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "finished"),
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "waiting"),
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active"),
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "finished"),
   ]);
 
   const stats = {
@@ -168,15 +204,11 @@ export default async function AdminPage() {
     categories: categoriesResult.count ?? 0,
     activeCategories: activeCategoriesResult.count ?? 0,
     questions: questionsResult.count ?? 0,
-
     baraSections: baraSectionsResult.count ?? 0,
     baraCategories: baraCategoriesResult.count ?? 0,
     baraItems: baraItemsResult.count ?? 0,
-
     users: usersResult.count ?? 0,
     completedGames: completedGamesResult.count ?? 0,
-    activeGames: activeGamesResult.count ?? 0,
-
     codenamesWords: codenamesWordsResult.count ?? 0,
     codenamesActiveWords: codenamesActiveWordsResult.count ?? 0,
     codenamesRooms: codenamesRoomsResult.count ?? 0,
@@ -191,7 +223,7 @@ export default async function AdminPage() {
       description: "استعرض الأقسام الرئيسية وعدّلها أو ادخل عليها مباشرة.",
       href: "/admin/sections",
       tone: "orange",
-      icon: "🧩",
+      icon: "🧱",
     },
     {
       title: "إضافة قسم جديد",
@@ -205,7 +237,7 @@ export default async function AdminPage() {
       description: "تحكم في الفئات الحالية واعرض تفاصيلها بسرعة.",
       href: "/admin/categories",
       tone: "cyan",
-      icon: "📚",
+      icon: "🗂️",
     },
     {
       title: "إضافة فئة جديدة",
@@ -267,7 +299,7 @@ export default async function AdminPage() {
       description: "لوحة إدارة الكلمات والغرف الخاصة بلعبة Codenames.",
       href: "/admin/codenames",
       tone: "cyan",
-      icon: "🕵️",
+      icon: "🧩",
       badge: "جديد",
     },
     {
@@ -275,7 +307,7 @@ export default async function AdminPage() {
       description: "إضافة، تعديل، حذف، وتفعيل كلمات اللعبة.",
       href: "/admin/codenames/words",
       tone: "orange",
-      icon: "📝",
+      icon: "🔤",
     },
     {
       title: "رفع جماعي",
@@ -288,7 +320,7 @@ export default async function AdminPage() {
       title: "إدارة الغرف",
       description: "متابعة الغرف والجلسات الحالية والمنتهية الخاصة باللعبة.",
       href: "/admin/codenames/rooms",
-      tone: "slate",
+      tone: "violet",
       icon: "🚪",
     },
   ];
@@ -299,22 +331,14 @@ export default async function AdminPage() {
       description: "استعرض المستخدمين وحالاتهم داخل النظام.",
       href: "/admin/users",
       tone: "slate",
-      icon: "👤",
+      icon: "👥",
     },
     {
-      title: "ألعاب لمتكم المنتهية",
-      description: "راجع الجلسات والألعاب السابقة الخاصة باللعبة الرئيسية.",
+      title: "الألعاب المكتملة",
+      description: "راجع الجلسات والألعاب المكتملة الخاصة بلعبة لمتكم.",
       href: "/admin/games",
       tone: "slate",
       icon: "🏁",
-    },
-    {
-      title: "الألعاب غير المكتملة",
-      description: "ادخل لإدارة الألعاب النشطة أو غير المكتملة وحذفها عند الحاجة.",
-      href: "/admin/games",
-      tone: "slate",
-      icon: "🧹",
-      badge: "تنظيف",
     },
     {
       title: "الرجوع للموقع",
@@ -326,107 +350,177 @@ export default async function AdminPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl p-4 md:p-6">
-      <div className="space-y-10">
-        <div className="overflow-hidden rounded-[36px] border border-white/10 bg-[#0a1020] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-8">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/70">
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+        <div className="mb-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-7">
+          <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
             لوحة التحكم الرئيسية
           </div>
-          <h1 className="mt-4 text-4xl font-black text-white md:text-5xl">Admin Dashboard</h1>
-          <p className="mt-3 max-w-3xl text-white/65">
-            صفحة موحدة لإدارة ألعاب المنصة: لمتكم، برا السالفة، و Codenames، مع
-            وصول سريع لأهم الصفحات والإحصائيات.
+
+          <h1 className="text-3xl font-black text-white md:text-4xl">
+            Admin Dashboard
+          </h1>
+
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
+            صفحة موحدة لإدارة ألعاب المنصة: لمتكم، برا السالفة، وCodenames،
+            مع وصول سريع لأهم الصفحات والإحصائيات بدون تكرار أو ازدحام غير ضروري.
           </p>
         </div>
 
-        <section>
-          <SectionHeader
-            badge="إحصائيات لمتكم"
-            title="إدارة لمتكم"
-            description="إدارة لعبة الأسئلة والأجوبة الرئيسية مع كل الأدوات اليومية الخاصة بالأقسام والفئات والأسئلة."
+        <SectionHeader
+          badge="إحصائيات سريعة"
+          title="نظرة عامة على النظام"
+          description="كل الأرقام المهمة في مكان واحد، مع الحفاظ على البيانات الأساسية بدون تكرار مربك."
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="أقسام لمتكم"
+            value={stats.sections}
+            tone="orange"
+            icon="🧱"
+          />
+          <StatCard
+            label="فئات لمتكم"
+            value={stats.categories}
+            tone="cyan"
+            icon="🗂️"
+          />
+          <StatCard
+            label="الفئات المفعلة"
+            value={stats.activeCategories}
+            tone="emerald"
+            icon="✅"
+          />
+          <StatCard
+            label="أسئلة لمتكم"
+            value={stats.questions}
+            tone="emerald"
+            icon="❓"
           />
 
-          <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="الأقسام الرئيسية" value={stats.sections} tone="orange" icon="🧩" />
-            <StatCard label="الفئات" value={stats.categories} tone="cyan" icon="📚" />
-            <StatCard label="الفئات المفعّلة" value={stats.activeCategories} tone="emerald" icon="✅" />
-            <StatCard label="الأسئلة" value={stats.questions} tone="slate" icon="❓" />
-          </div>
+          <StatCard
+            label="أقسام برا السالفة"
+            value={stats.baraSections}
+            tone="cyan"
+            icon="🎭"
+          />
+          <StatCard
+            label="فئات برا السالفة"
+            value={stats.baraCategories}
+            tone="orange"
+            icon="🗂️"
+          />
+          <StatCard
+            label="عناصر برا السالفة"
+            value={stats.baraItems}
+            tone="emerald"
+            icon="✨"
+          />
+          <StatCard
+            label="الأعضاء"
+            value={stats.users}
+            tone="slate"
+            icon="👥"
+          />
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard
+            label="ألعاب مكتملة"
+            value={stats.completedGames}
+            tone="slate"
+            icon="🏁"
+          />
+          <StatCard
+            label="كلمات Codenames"
+            value={stats.codenamesWords}
+            tone="orange"
+            icon="🔤"
+          />
+          <StatCard
+            label="كلمات مفعلة"
+            value={stats.codenamesActiveWords}
+            tone="emerald"
+            icon="✅"
+          />
+          <StatCard
+            label="غرف Codenames"
+            value={stats.codenamesRooms}
+            tone="violet"
+            icon="🚪"
+          />
+
+          <StatCard
+            label="غرف انتظار"
+            value={stats.codenamesWaitingRooms}
+            tone="slate"
+            icon="⏳"
+          />
+          <StatCard
+            label="غرف نشطة"
+            value={stats.codenamesActiveRooms}
+            tone="cyan"
+            icon="⚡"
+          />
+          <StatCard
+            label="غرف منتهية"
+            value={stats.codenamesFinishedRooms}
+            tone="orange"
+            icon="🎯"
+          />
+        </div>
+
+        <div className="mt-10">
+          <SectionHeader
+            badge="لمتكم"
+            title="إدارة اللعبة الرئيسية"
+            description="كل ما يخص الأقسام والفئات والأسئلة الخاصة بلعبة لمتكم."
+          />
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {lammatnaActions.map((item) => (
               <ActionCard key={item.href} {...item} />
             ))}
           </div>
-        </section>
+        </div>
 
-        <section>
+        <div className="mt-10">
           <SectionHeader
-            badge="إحصائيات برا السالفة"
-            title="إدارة برا السالفة"
-            description="إدارة الأقسام والفئات والعناصر الخاصة بلعبة برا السالفة. ملاحظة: إحصائيات الجلسات نفسها غير متاحة حاليًا لأنها لا تُحفظ في جدول sessions بعد."
+            badge="برا السالفة"
+            title="إدارة لعبة برا السالفة"
+            description="الدخول السريع إلى الأقسام والفئات والعناصر الخاصة باللعبة."
           />
-
-          <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <StatCard label="أقسام برا السالفة" value={stats.baraSections} tone="orange" icon="🗂️" />
-            <StatCard label="فئات برا السالفة" value={stats.baraCategories} tone="cyan" icon="📂" />
-            <StatCard label="العناصر المفعّلة" value={stats.baraItems} tone="emerald" icon="🎭" />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {baraActions.map((item) => (
               <ActionCard key={item.href} {...item} />
             ))}
           </div>
-        </section>
+        </div>
 
-        <section>
+        <div className="mt-10">
           <SectionHeader
-            badge="إحصائيات Codenames"
-            title="إدارة Codenames"
-            description="تم دمج خيارات Codenames الرئيسية داخل لوحة التحكم نفسها لتسهيل الوصول للكلمات والغرف والرفع الجماعي."
+            badge="Codenames"
+            title="إدارة لعبة Codenames"
+            description="الوصول إلى الكلمات، الرفع الجماعي، والغرف الحالية والمنتهية."
           />
-
-          <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="كل الكلمات" value={stats.codenamesWords} tone="orange" icon="📝" />
-            <StatCard label="الكلمات المفعّلة" value={stats.codenamesActiveWords} tone="cyan" icon="✅" />
-            <StatCard label="كل الغرف" value={stats.codenamesRooms} tone="slate" icon="🚪" />
-            <StatCard label="الغرف النشطة" value={stats.codenamesActiveRooms} tone="emerald" icon="🟢" />
-          </div>
-
-          <div className="mb-6 grid gap-4 md:grid-cols-3">
-            <StatCard label="غرف الانتظار" value={stats.codenamesWaitingRooms} tone="slate" icon="⏳" />
-            <StatCard label="الغرف المنتهية" value={stats.codenamesFinishedRooms} tone="slate" icon="🏁" />
-            <StatCard label="الغرف الجارية" value={stats.codenamesActiveRooms} tone="emerald" icon="🎯" />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {codenamesActions.map((item) => (
               <ActionCard key={item.href} {...item} />
             ))}
           </div>
-        </section>
+        </div>
 
-        <section>
+        <div className="mt-10">
           <SectionHeader
-            badge="إحصائيات النظام"
-            title="إدارة النظام"
-            description="صفحات عامة لإدارة المستخدمين والجلسات العامة والحركة داخل المنصة."
+            badge="عام"
+            title="أدوات النظام"
+            description="الوصول إلى الصفحات العامة والمهمة بدون عناصر متكررة."
           />
-
-          <div className="mb-6 grid gap-4 md:grid-cols-3">
-            <StatCard label="الأعضاء" value={stats.users} tone="slate" icon="👤" />
-            <StatCard label="ألعاب منتهية" value={stats.completedGames} tone="orange" icon="🏁" />
-            <StatCard label="ألعاب نشطة" value={stats.activeGames} tone="cyan" icon="🟢" />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {systemActions.map((item) => (
               <ActionCard key={item.href} {...item} />
             ))}
           </div>
-        </section>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
