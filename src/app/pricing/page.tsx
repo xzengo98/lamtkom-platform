@@ -27,20 +27,22 @@ type FaqItem = {
   answer: string;
 };
 
+const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+
 const plans: Plan[] = [
   {
     name: "الخطة المجانية",
     badge: "للتجربة",
     price: "0 JD",
     description:
-      "مناسبة لتجربة المنصة والتعرّف على طريقة اللعب والتنقل بين الصفحات قبل التوسع.",
+      "مناسبة لتجربة المنصة والتعرّف على طريقة اللعب قبل الانتقال إلى خطة أعلى.",
     cta: "ابدأ مجانًا",
     href: "/signup",
     features: [
       { text: "إنشاء حساب والبدء مباشرة" },
-      { text: "الوصول لتجربة المنصة الأساسية" },
-      { text: "مناسبة للتجربة الفردية أو الأولى" },
-      { text: "إمكانية متابعة الألعاب غير المكتملة من الحساب" },
+      { text: "الوصول للتجربة الأساسية" },
+      { text: "مناسبة للتجربة الأولى" },
+      { text: "متابعة الألعاب غير المكتملة من الحساب" },
     ],
   },
   {
@@ -48,31 +50,46 @@ const plans: Plan[] = [
     badge: "الأكثر طلبًا",
     price: "10 JD",
     description:
-      "أفضل خيار للمستخدم الذي يريد لعبًا أكثر، تجربة أكثر استمرارية، واستخدامًا فعليًا للمنصة بشكل متكرر.",
-    highlight: "مناسبة للأفراد والمجموعات الصغيرة والمهتمين بالاستخدام المستمر",
-    cta: "استعرض خيارات التفعيل",
-    href: "/signup",
+      "أفضل خيار للمستخدم الذي يريد لعبًا أكثر وتجربة أكثر استمرارية.",
+    highlight: "مناسبة للأفراد والمجموعات الصغيرة والاستخدام المستمر",
+    cta: "اشترِ الآن",
+    href: "/payment?plan=featured",
     featured: true,
     features: [
       { text: "عدد ألعاب أكبر بحسب التفعيل" },
-      { text: "أنسب للتجربة المستمرة وليس التجريب فقط" },
+      { text: "أنسب للتجربة المستمرة" },
       { text: "متابعة الجولات غير المكتملة بسهولة" },
-      { text: "استفادة أفضل من كامل تجربة الموقع والألعاب" },
+      { text: "استفادة أفضل من كامل تجربة المنصة" },
     ],
   },
   {
     name: "Premium",
-    badge: "للاستخدام الاحترافي",
-    price: "سيتم تحديده لاحقًا",
+    badge: "احترافي",
+    price: "20 JD",
     description:
-      "خيار احترافي مرن للجهات أو الاستخدام المتقدم، ويمكنك تعديل ميزاته وتسعيره لاحقًا حسب ما يناسبك.",
-    cta: "تواصل معنا",
-    href: "/signup",
+      "خطة أعلى للمستخدم الذي يريد تجربة أقوى وأكثر مرونة واستخدامًا متقدمًا.",
+    cta: "اشترِ الآن",
+    href: "/payment?plan=premium",
     features: [
-      { text: "مناسب للجهات أو الاستخدام المتقدم" },
-      { text: "مرونة أكبر في طريقة التفعيل" },
-      { text: "جاهز للتخصيص لاحقًا حسب احتياجك" },
-      { text: "أنسب للتوسع أو التشغيل المنظم" },
+      { text: "مرونة أعلى في الاستخدام" },
+      { text: "أنسب للتوسع أو الاستخدام الاحترافي" },
+      { text: "حل مناسب للمهتمين بالتفعيل الكامل" },
+      { text: "مستوى أعلى من الاستفادة من المنصة" },
+    ],
+  },
+  {
+    name: "شراء ألعاب منفردة",
+    badge: "مرن",
+    price: "1 JD / لعبة",
+    description:
+      "إذا كنت لا تريد شراء باقة كاملة، يمكنك شراء عدد ألعاب معين خاص بلعبة لمتكم فقط.",
+    cta: "اشترِ الآن",
+    href: "/payment?plan=games",
+    features: [
+      { text: "مرونة في شراء عدد الألعاب فقط" },
+      { text: "مخصص للعبة لمتكم" },
+      { text: "مناسب للمستخدم الذي يحتاج تفعيلًا محدودًا" },
+      { text: "1 JD لكل لعبة واحدة" },
     ],
   },
 ];
@@ -91,10 +108,10 @@ const games: GameCard[] = [
     points: ["تجربة جماعية", "تفاعل مباشر", "مناسبة للجلسات", "تنوع داخل المنصة"],
   },
   {
-    title: "تجربة حساب متكاملة",
+    title: "Codenames",
     description:
-      "صفحة الحساب تساعد المستخدم على الرجوع إلى الألعاب غير المكتملة ومتابعة اللعب بدون فقدان التقدم.",
-    points: ["متابعة الألعاب", "تنظيم أوضح", "سهولة الرجوع", "استخدام يومي أفضل"],
+      "تجربة كلمات وتلميحات تضيف بعدًا مختلفًا داخل المنصة، وتناسب من يريد أسلوب لعب جماعي يعتمد على التفكير والتعاون.",
+    points: ["كلمات", "تلميحات", "فرق", "تعاون"],
   },
 ];
 
@@ -102,22 +119,22 @@ const faqs: FaqItem[] = [
   {
     question: "هل أحتاج الدفع قبل تجربة الموقع؟",
     answer:
-      "لا، يمكن بدء التجربة أولًا، وبعدها اختيار ما يناسبك إذا أردت استخدامًا أكبر أو أكثر استمرارية.",
+      "لا، يمكن بدء التجربة أولًا من خلال الخطة المجانية، وبعدها اختيار الخطة المناسبة حسب استخدامك.",
+  },
+  {
+    question: "هل أستطيع شراء عدد ألعاب فقط؟",
+    answer:
+      "نعم، تم إضافة خيار شراء ألعاب منفردة للعبة لمتكم بسعر 1 JD لكل لعبة واحدة.",
   },
   {
     question: "هل الباقات مخصصة للعبة واحدة فقط؟",
     answer:
-      "لا، الصفحة مبنية لتخدم المنصة ككل، بما يشمل الألعاب الحالية داخل الموقع وتجربة الحساب المرتبطة بها.",
+      "لا، الباقات مخصصة للاستفادة من المنصة بشكل عام، بينما خيار شراء الألعاب المنفردة مخصص للعبة لمتكم فقط.",
   },
   {
-    question: "هل المنصة مناسبة للمدارس أو المناسبات؟",
+    question: "هل المنصة مناسبة للفعاليات أو الجهات؟",
     answer:
-      "نعم، تصميم المنصة مناسب للعروض والمسابقات والأنشطة الجماعية، خصوصًا عند تشغيلها أمام جمهور أو داخل فعالية.",
-  },
-  {
-    question: "هل أستطيع الرجوع إلى لعبة لم تنتهِ؟",
-    answer:
-      "نعم، الألعاب غير المكتملة يمكن متابعتها لاحقًا من صفحة الحساب طالما كانت محفوظة ضمن حسابك.",
+      "نعم، تصميم المنصة مناسب للجلسات، الفعاليات، والعروض الجماعية بشكل واضح ومرتب.",
   },
 ];
 
@@ -193,7 +210,9 @@ function PlanCard({ plan }: { plan: Plan }) {
 
       <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
         <div className="text-sm font-bold text-white/55">السعر</div>
-        <div className="mt-1 text-3xl font-black text-cyan-300">{plan.price}</div>
+        <div className="mt-1 text-3xl font-black text-cyan-300">
+          {plan.price}
+        </div>
       </div>
 
       <p className="mt-4 text-sm leading-7 text-white/70">{plan.description}</p>
@@ -275,73 +294,48 @@ export default function PricingPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
-        <section className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8">
-          <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
-            الباقات والخطط
-          </div>
+        <section className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8 xl:p-10">
+          <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.20)_1px,transparent_1px)] [background-size:26px_26px]" />
 
-          <h1 className="text-3xl font-black text-white md:text-5xl">
-            اختر الخطة المناسبة لتجربة لمتكم
-          </h1>
-
-          <p className="mt-4 max-w-3xl text-sm leading-8 text-white/70 md:text-base">
-            هذه الصفحة مصممة لتشرح الباقات بشكل منطقي ومهني، وتعرض قيمة المنصة
-            الحقيقية للمستخدم سواء كان يريد تجربة سريعة، استخدامًا مستمرًا، أو
-            تشغيل الألعاب بطريقة منظمة.
-          </p>
-
-          <div className="mt-6">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-            >
-              العودة للرئيسية
-            </Link>
-          </div>
-        </section>
-
-        <section className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 md:p-8">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-2 inline-flex text-cyan-300">
+          <div className="relative grid gap-8 xl:grid-cols-[1.1fr_0.9fr] xl:items-center">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
                 <SparkIcon />
+                <span>الباقات والخطط</span>
               </div>
-              <div className="text-sm font-black text-cyan-300">يشمل</div>
-              <div className="mt-2 text-xl font-black text-white">
-                أكثر من تجربة لعب داخل نفس المنصة
-              </div>
-              <p className="mt-3 text-sm leading-7 text-white/70">
-                صفحة الباقات لا تتكلم عن لعبة واحدة فقط، بل عن قيمة الموقع كمنصة
-                ألعاب عربية تفاعلية.
+
+              <h1 className="text-3xl font-black text-white md:text-5xl">
+                اختر الخطة المناسبة
+                <span className="mt-2 block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
+                  لتجربة لمتكم
+                </span>
+              </h1>
+
+              <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
+                صفحة الباقات الآن أوضح وأكثر احترافية، وتعرض جميع الخيارات
+                المتاحة سواء أردت تجربة مجانية، خطة مدفوعة، Premium، أو شراء
+                ألعاب منفردة للعبة لمتكم.
               </p>
+
+              <div className="mt-6">
+                <Link
+                  href="/"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  العودة للرئيسية
+                </Link>
+              </div>
             </div>
 
-            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-2 inline-flex text-cyan-300">
-                <SparkIcon />
+            <div className="flex justify-center xl:justify-end">
+              <div className="relative flex h-[260px] w-[260px] items-center justify-center overflow-hidden rounded-[2.2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:h-[320px] md:w-[320px]">
+                <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
+                <img
+                  src={heroLogo}
+                  alt="شعار لمتكم"
+                  className="h-[170px] w-[170px] object-contain md:h-[230px] md:w-[230px]"
+                />
               </div>
-              <div className="text-sm font-black text-cyan-300">مناسبة لـ</div>
-              <div className="mt-2 text-xl font-black text-white">
-                الأفراد والمجموعات والفعاليات
-              </div>
-              <p className="mt-3 text-sm leading-7 text-white/70">
-                سواء كنت تريد اللعب بشكل شخصي أو تقديم تجربة أمام جمهور، الصفحة
-                تشرح ذلك بوضوح وبدون مبالغة.
-              </p>
-            </div>
-
-            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-2 inline-flex text-cyan-300">
-                <SparkIcon />
-              </div>
-              <div className="text-sm font-black text-cyan-300">تنظيم أوضح</div>
-              <div className="mt-2 text-xl font-black text-white">
-                خطط مرتبة وسهلة المقارنة
-              </div>
-              <p className="mt-3 text-sm leading-7 text-white/70">
-                تم ترتيب الباقات بشكل يساعد الزائر على فهم الفرق بينها بسرعة ومن
-                دون تشتيت.
-              </p>
             </div>
           </div>
         </section>
@@ -355,12 +349,12 @@ export default function PricingPage() {
               خطط واضحة تناسب طريقة استخدامك
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
-              يمكنك تعديل الميزات لاحقًا بسهولة، لكن الهيكل الآن صار أوضح: خطة
-              مجانية، خطة مميزة، وخطة Premium.
+              تم تنظيم الخطط لتغطي الاحتياجات الأساسية، الاستخدام المستمر،
+              الاستخدام الاحترافي، أو شراء عدد ألعاب منفردة للعبة لمتكم.
             </p>
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {plans.map((plan) => (
               <PlanCard key={plan.name} plan={plan} />
             ))}
@@ -373,11 +367,11 @@ export default function PricingPage() {
               ماذا تشمل المنصة؟
             </div>
             <h2 className="text-2xl font-black text-white md:text-3xl">
-              صفحة باقات تخدم كل أجزاء الموقع
+              المنصة تضم أكثر من تجربة لعب
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
-              تم بناء المحتوى ليعكس طبيعة موقعك الفعلية: ألعاب، حساب مستخدم،
-              متابعة الجولات، واستخدام مناسب للأفراد والفعاليات.
+              الباقات تخدم استخدام المنصة ككل، مع وجود خيار مستقل أيضًا لشراء
+              ألعاب منفردة للعبة لمتكم.
             </p>
           </div>
 
