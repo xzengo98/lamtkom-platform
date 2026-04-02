@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Script from "next/script";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -132,6 +133,41 @@ function buildPageHref(params: {
   page: number;
 }) {
   return buildReturnTo(params);
+}
+
+function getVisiblePages(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages: (number | "dots")[] = [1];
+
+  if (currentPage <= 3) {
+    pages.push(2, 3, 4, "dots", totalPages);
+    return pages;
+  }
+
+  if (currentPage >= totalPages - 2) {
+    pages.push(
+      "dots",
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    );
+    return pages;
+  }
+
+  pages.push(
+    "dots",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "dots",
+    totalPages,
+  );
+
+  return pages;
 }
 
 async function deleteQuestion(formData: FormData) {
@@ -287,10 +323,10 @@ export default async function AdminQuestionsPage({
     }
 
     if (allowedCategoryIds && allowedCategoryIds.length === 0) {
-      countQuery = supabase.from("questions").select("id", {
-        count: "exact",
-        head: true,
-      }).eq("id", "__no_results__");
+      countQuery = supabase
+        .from("questions")
+        .select("id", { count: "exact", head: true })
+        .eq("id", "__no_results__");
     }
 
     const { count, error: countError } = await countQuery;
@@ -380,6 +416,8 @@ export default async function AdminQuestionsPage({
       searchQuery.length > 0 ||
       selectedSection.length > 0 ||
       effectiveSelectedCategory.length > 0;
+
+    const visiblePages = getVisiblePages(safePage, totalPages);
 
     return (
       <main className="min-h-screen bg-slate-950 text-white">
@@ -550,173 +588,169 @@ export default async function AdminQuestionsPage({
             </div>
           </div>
 
-          <form action={deleteSelectedQuestions}>
+          <form id="bulk-delete-form" action={deleteSelectedQuestions}>
             <input type="hidden" name="returnTo" value={returnTo} />
+          </form>
 
-            <div className="mb-4 flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white">
-                  <input id="select-all-questions" type="checkbox" className="h-4 w-4" />
-                  تحديد الكل في هذه الصفحة
-                </label>
-                <div className="text-sm text-white/60">
-                  الصفحة {safePage} من {totalPages}
-                </div>
+          <div className="mb-4 flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white">
+                <input id="select-all-questions" type="checkbox" className="h-4 w-4" />
+                تحديد الكل في هذه الصفحة
+              </label>
+              <div className="text-sm text-white/60">
+                الصفحة {safePage} من {totalPages}
               </div>
-
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-xl bg-red-500 px-5 py-3 text-sm font-black text-white transition hover:bg-red-400"
-              >
-                حذف المحدد
-              </button>
             </div>
 
-            {questions.length > 0 ? (
-              <div className="grid gap-5">
-                {questions.map((question) => {
-                  const questionPreview = truncateText(
-                    stripHtml(question.question_text),
-                  );
-                  const answerPreview = truncateText(stripHtml(question.answer_text));
-                  const questionImage = extractFirstImageSrc(question.question_text);
-                  const answerImage = extractFirstImageSrc(question.answer_text);
+            <button
+              type="submit"
+              form="bulk-delete-form"
+              className="inline-flex items-center justify-center rounded-xl bg-red-500 px-5 py-3 text-sm font-black text-white transition hover:bg-red-400"
+            >
+              حذف المحدد
+            </button>
+          </div>
 
-                  return (
-                    <div
-                      key={question.id}
-                      className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
-                    >
-                      <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            name="selectedIds"
-                            value={question.id}
-                            className="question-checkbox mt-1 h-5 w-5 rounded border-white/20 bg-slate-950/70"
-                          />
-                          <div>
-                            <div className="mb-2 inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-100">
-                              سؤال
-                            </div>
-                            <h3 className="text-xl font-black text-white">
-                              {questionPreview || "بدون نص"}
-                            </h3>
+          {questions.length > 0 ? (
+            <div className="grid gap-5">
+              {questions.map((question) => {
+                const questionPreview = truncateText(stripHtml(question.question_text));
+                const answerPreview = truncateText(stripHtml(question.answer_text));
+                const questionImage = extractFirstImageSrc(question.question_text);
+                const answerImage = extractFirstImageSrc(question.answer_text);
 
-                            <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
-                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
-                                {getSectionName(question.categories)}
-                              </span>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
-                                {getCategoryName(question.categories)}
-                              </span>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
-                                {question.points} نقطة
-                              </span>
-                              <span
-                                className={`rounded-full px-3 py-1.5 ${
-                                  question.is_active
-                                    ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
-                                    : "border border-red-300/20 bg-red-400/10 text-red-100"
-                                }`}
-                              >
-                                {question.is_active ? "مفعّل" : "غير مفعّل"}
-                              </span>
-                              <span
-                                className={`rounded-full px-3 py-1.5 ${
-                                  question.is_used
-                                    ? "border border-orange-300/20 bg-orange-400/10 text-orange-100"
-                                    : "border border-white/10 bg-white/5 text-white/75"
-                                }`}
-                              >
-                                {question.is_used ? "مستخدم" : "غير مستخدم"}
-                              </span>
-                            </div>
+                return (
+                  <div
+                    key={question.id}
+                    className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
+                  >
+                    <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          form="bulk-delete-form"
+                          name="selectedIds"
+                          value={question.id}
+                          className="question-checkbox mt-1 h-5 w-5 rounded border-white/20 bg-slate-950/70"
+                        />
+                        <div>
+                          <div className="mb-2 inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-100">
+                            سؤال
                           </div>
-                        </div>
+                          <h3 className="text-xl font-black text-white">
+                            {questionPreview || "بدون نص"}
+                          </h3>
 
-                        <div className="flex flex-wrap gap-2">
-                          <Link
-                            href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
-                              returnTo,
-                            )}`}
-                            className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-                          >
-                            تعديل
-                          </Link>
-
-                          <form action={deleteQuestion}>
-                            <input type="hidden" name="id" value={question.id} />
-                            <input type="hidden" name="returnTo" value={returnTo} />
-                            <button
-                              type="submit"
-                              className="inline-flex items-center justify-center rounded-xl bg-red-500 px-4 py-3 text-sm font-black text-white transition hover:bg-red-400"
+                          <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                              {getSectionName(question.categories)}
+                            </span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                              {getCategoryName(question.categories)}
+                            </span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/75">
+                              {question.points} نقطة
+                            </span>
+                            <span
+                              className={`rounded-full px-3 py-1.5 ${
+                                question.is_active
+                                  ? "border border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                                  : "border border-red-300/20 bg-red-400/10 text-red-100"
+                              }`}
                             >
-                              حذف
-                            </button>
-                          </form>
+                              {question.is_active ? "مفعّل" : "غير مفعّل"}
+                            </span>
+                            {question.is_used ? (
+                              <span className="rounded-full border border-orange-300/20 bg-orange-400/10 px-3 py-1.5 text-orange-100">
+                                مستخدم
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="grid gap-4 xl:grid-cols-2">
-                        <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-                          <div className="mb-3 text-sm font-black text-white">
-                            صورة السؤال
-                          </div>
-                          {questionImage ? (
-                            <img
-                              src={questionImage}
-                              alt="صورة السؤال"
-                              className="h-52 w-full rounded-2xl border border-white/10 object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
-                              لا توجد صورة داخل السؤال
-                            </div>
-                          )}
-                        </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`/admin/questions/edit/${question.id}?returnTo=${encodeURIComponent(
+                            returnTo,
+                          )}`}
+                          className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                        >
+                          تعديل
+                        </Link>
 
-                        <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-                          <div className="mb-3 text-sm font-black text-white">
-                            صورة الإجابة
-                          </div>
-                          {answerImage ? (
-                            <img
-                              src={answerImage}
-                              alt="صورة الإجابة"
-                              className="h-52 w-full rounded-2xl border border-white/10 object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
-                              لا توجد صورة داخل الإجابة
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-                        <div className="mb-2 text-sm font-black text-white">
-                          الإجابة
-                        </div>
-                        <p className="text-sm leading-7 text-white/70">
-                          {answerPreview || "غير مضافة"}
-                        </p>
+                        <form action={deleteQuestion}>
+                          <input type="hidden" name="id" value={question.id} />
+                          <input type="hidden" name="returnTo" value={returnTo} />
+                          <button
+                            type="submit"
+                            className="inline-flex items-center justify-center rounded-xl bg-red-500 px-4 py-3 text-sm font-black text-white transition hover:bg-red-400"
+                          >
+                            حذف
+                          </button>
+                        </form>
                       </div>
                     </div>
-                  );
-                })}
+
+                    <div className="grid gap-4 xl:grid-cols-2">
+                      <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                        <div className="mb-3 text-sm font-black text-white">
+                          صورة السؤال
+                        </div>
+                        {questionImage ? (
+                          <img
+                            src={questionImage}
+                            alt="صورة السؤال"
+                            className="h-52 w-full rounded-2xl border border-white/10 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
+                            لا توجد صورة داخل السؤال
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                        <div className="mb-3 text-sm font-black text-white">
+                          صورة الإجابة
+                        </div>
+                        {answerImage ? (
+                          <img
+                            src={answerImage}
+                            alt="صورة الإجابة"
+                            className="h-52 w-full rounded-2xl border border-white/10 object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-52 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-slate-950/40 text-sm font-bold text-white/45">
+                            لا توجد صورة داخل الإجابة
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+                      <div className="mb-2 text-sm font-black text-white">
+                        الإجابة
+                      </div>
+                      <p className="text-sm leading-7 text-white/70">
+                        {answerPreview || "غير مضافة"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-[1.8rem] border border-dashed border-white/10 bg-white/5 px-6 py-14 text-center">
+              <div className="mb-3 text-2xl font-black text-white">
+                لا توجد نتائج مطابقة
               </div>
-            ) : (
-              <div className="rounded-[1.8rem] border border-dashed border-white/10 bg-white/5 px-6 py-14 text-center">
-                <div className="mb-3 text-2xl font-black text-white">
-                  لا توجد نتائج مطابقة
-                </div>
-                <p className="mx-auto max-w-2xl text-sm leading-7 text-white/65">
-                  جرّب تغيير البحث أو القسم أو الفئة، أو ارجع لعرض جميع الأسئلة.
-                </p>
-              </div>
-            )}
-          </form>
+              <p className="mx-auto max-w-2xl text-sm leading-7 text-white/65">
+                جرّب تغيير البحث أو القسم أو الفئة، أو ارجع لعرض جميع الأسئلة.
+              </p>
+            </div>
+          )}
 
           {totalPages > 1 ? (
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
@@ -736,23 +770,30 @@ export default async function AdminQuestionsPage({
                 السابق
               </Link>
 
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-                (pageNumber) => (
+              {visiblePages.map((item, index) =>
+                item === "dots" ? (
+                  <span
+                    key={`dots-${index}`}
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/50"
+                  >
+                    ...
+                  </span>
+                ) : (
                   <Link
-                    key={pageNumber}
+                    key={item}
                     href={buildPageHref({
                       q: searchQuery,
                       sectionId: selectedSection,
                       categoryId: effectiveSelectedCategory,
-                      page: pageNumber,
+                      page: item,
                     })}
                     className={`rounded-xl px-4 py-3 text-sm font-black transition ${
-                      pageNumber === safePage
+                      item === safePage
                         ? "bg-cyan-500 text-slate-950"
                         : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
                     }`}
                   >
-                    {pageNumber}
+                    {item}
                   </Link>
                 ),
               )}
@@ -774,45 +815,58 @@ export default async function AdminQuestionsPage({
               </Link>
             </div>
           ) : null}
-
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                document.addEventListener("DOMContentLoaded", function () {
-                  const form = document.getElementById("filters-form");
-                  const section = document.getElementById("section");
-                  const category = document.getElementById("category");
-                  const selectAll = document.getElementById("select-all-questions");
-                  const questionCheckboxes = Array.from(document.querySelectorAll(".question-checkbox"));
-
-                  if (section && form) {
-                    section.addEventListener("change", function () {
-                      if (category) {
-                        category.value = "";
-                      }
-                      form.submit();
-                    });
-                  }
-
-                  if (category && form) {
-                    category.addEventListener("change", function () {
-                      form.submit();
-                    });
-                  }
-
-                  if (selectAll) {
-                    selectAll.addEventListener("change", function (event) {
-                      const checked = event.target.checked;
-                      questionCheckboxes.forEach(function (checkbox) {
-                        checkbox.checked = checked;
-                      });
-                    });
-                  }
-                });
-              `,
-            }}
-          />
         </div>
+
+        <Script id="admin-questions-enhancements" strategy="afterInteractive">
+          {`
+            (function () {
+              function bindAdminQuestionPage() {
+                const form = document.getElementById("filters-form");
+                const section = document.getElementById("section");
+                const category = document.getElementById("category");
+                const selectAll = document.getElementById("select-all-questions");
+                const questionCheckboxes = Array.from(document.querySelectorAll(".question-checkbox"));
+
+                if (section && form && !section.dataset.bound) {
+                  section.dataset.bound = "true";
+                  section.addEventListener("change", function () {
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set("section", section.value);
+                    currentUrl.searchParams.delete("category");
+                    const qInput = document.getElementById("q");
+                    if (qInput && qInput.value) {
+                      currentUrl.searchParams.set("q", qInput.value);
+                    } else {
+                      currentUrl.searchParams.delete("q");
+                    }
+                    currentUrl.searchParams.delete("page");
+                    window.location.href = currentUrl.toString();
+                  });
+                }
+
+                if (category && form && !category.dataset.bound) {
+                  category.dataset.bound = "true";
+                  category.addEventListener("change", function () {
+                    form.requestSubmit();
+                  });
+                }
+
+                if (selectAll && !selectAll.dataset.bound) {
+                  selectAll.dataset.bound = "true";
+                  selectAll.addEventListener("change", function (event) {
+                    const checked = event.target.checked;
+                    document.querySelectorAll(".question-checkbox").forEach(function (checkbox) {
+                      checkbox.checked = checked;
+                    });
+                  });
+                }
+              }
+
+              bindAdminQuestionPage();
+              document.addEventListener("DOMContentLoaded", bindAdminQuestionPage);
+            })();
+          `}
+        </Script>
       </main>
     );
   } catch (error) {
