@@ -99,7 +99,9 @@ export default function HtmlSnippetEditor({
 
   return (
     <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
-      <label className="mb-3 block text-lg font-black text-white">{label}</label>
+      <label className="mb-3 block text-lg font-black text-white">
+        {label}
+      </label>
 
       <div className="mb-4 flex flex-wrap gap-2">
         <button
@@ -113,7 +115,7 @@ export default function HtmlSnippetEditor({
         <button
           type="button"
           onClick={askImage}
-          className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
         >
           إدراج صورة
         </button>
@@ -121,7 +123,7 @@ export default function HtmlSnippetEditor({
         <button
           type="button"
           onClick={askVideo}
-          className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
         >
           إدراج فيديو
         </button>
@@ -129,7 +131,7 @@ export default function HtmlSnippetEditor({
         <button
           type="button"
           onClick={askAudio}
-          className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
         >
           إدراج صوتي
         </button>
@@ -137,7 +139,7 @@ export default function HtmlSnippetEditor({
         <button
           type="button"
           onClick={askLink}
-          className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
         >
           إدراج رابط
         </button>
