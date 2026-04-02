@@ -640,7 +640,7 @@ export default function GameBoardClient({
                 <ScoreControl
                   teamName={teamOne}
                   score={boardState.teamOneScore}
-                  accent="orange"
+                  accent="blue"
                   onIncrease={() =>
                     updateState((prev) => ({
                       ...prev,
@@ -660,7 +660,7 @@ export default function GameBoardClient({
                 <ScoreControl
                   teamName={teamTwo}
                   score={boardState.teamTwoScore}
-                  accent="blue"
+                  accent="orange"
                   onIncrease={() =>
                     updateState((prev) => ({
                       ...prev,
