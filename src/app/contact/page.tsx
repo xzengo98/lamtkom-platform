@@ -1,8 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
+export const metadata = {
+  title: "اتصل بنا | لمتكم",
+  description:
+    "تواصل مع منصة لمتكم بسهولة عبر نموذج التواصل أو البريد أو الهاتف أو واتساب.",
+};
 
 const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
 const contactEmail = "adsshweter@gmail.com";
@@ -119,36 +121,9 @@ function ContactCard({
 }
 
 export default function ContactPage() {
-  const searchParams = useSearchParams();
-
-  const [name, setName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [nextUrl, setNextUrl] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setNextUrl(`${window.location.origin}/contact?success=1`);
-    }
-  }, []);
-
-  const whatsappHref = useMemo(() => {
-    const composedMessage = [
-      name ? `الاسم: ${name}` : "",
-      subject ? `العنوان: ${subject}` : "",
-      email ? `الإيميل: ${email}` : "",
-      message ? `الرسالة: ${message}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-      composedMessage || "مرحبًا، أريد التواصل معكم.",
-    )}`;
-  }, [name, subject, email, message]);
-
-  const isSuccess = searchParams.get("success") === "1";
+  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+    "مرحبًا، أريد التواصل معكم.",
+  )}`;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -204,13 +179,6 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
-
-        {isSuccess ? (
-          <div className="mb-6 rounded-[1.4rem] border border-emerald-300/20 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-100">
-            تم إرسال رسالتك بنجاح. إذا كانت هذه أول مرة تستخدم النموذج، تأكد من
-            تفعيل البريد من رسالة التأكيد أولًا.
-          </div>
-        ) : null}
 
         <section className="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           <ContactCard
@@ -283,7 +251,7 @@ export default function ContactPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-white/70">
-              عبّئ البيانات التالية، وسيتم إرسال الرسالة إلى البريد المحدد.
+              عبّئ البيانات التالية وسيتم إرسالها إلى البريد المحدد.
             </p>
 
             <form
@@ -293,8 +261,11 @@ export default function ContactPage() {
             >
               <input type="hidden" name="_captcha" value="false" />
               <input type="hidden" name="_template" value="table" />
-              <input type="hidden" name="_subject" value="رسالة جديدة من صفحة اتصل بنا - لمتكم" />
-              {nextUrl ? <input type="hidden" name="_next" value={nextUrl} /> : null}
+              <input
+                type="hidden"
+                name="_subject"
+                value="رسالة جديدة من صفحة اتصل بنا - لمتكم"
+              />
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
@@ -305,8 +276,6 @@ export default function ContactPage() {
                     type="text"
                     name="name"
                     required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     placeholder="اكتب اسمك"
                     className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
                   />
@@ -320,8 +289,6 @@ export default function ContactPage() {
                     type="email"
                     name="email"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
                     className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
                   />
@@ -336,8 +303,6 @@ export default function ContactPage() {
                   type="text"
                   name="subject"
                   required
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
                   placeholder="عنوان الرسالة"
                   className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
                 />
@@ -351,8 +316,6 @@ export default function ContactPage() {
                   name="message"
                   required
                   rows={6}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
                   placeholder="اكتب رسالتك هنا..."
                   className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
                 />

@@ -723,6 +723,12 @@ export default function HomePage() {
             >
               من نحن
             </Link>
+            <Link
+              href="/contact"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-white/80 transition hover:bg-white/10"
+            >
+             اتصل بنا
+            </Link>
           </div>
 
           <div className="text-sm font-bold text-white/50">
