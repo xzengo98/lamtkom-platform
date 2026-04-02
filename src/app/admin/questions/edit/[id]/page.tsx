@@ -16,12 +16,23 @@ type SearchParams = Promise<{
   returnTo?: string;
 }>;
 
-type CategoryRelation = { name: string } | { name: string }[] | null;
+type CategorySectionRelation =
+  | {
+      id?: string;
+      name?: string;
+      sort_order?: number | null;
+    }
+  | {
+      id?: string;
+      name?: string;
+      sort_order?: number | null;
+    }[]
+  | null;
 
 type CategoryRow = {
   id: string;
   name: string;
-  category_sections: CategoryRelation;
+  category_sections: CategorySectionRelation;
 };
 
 type QuestionRow = {
@@ -36,10 +47,31 @@ type QuestionRow = {
   year_tolerance_after: number | null;
 };
 
-function getSectionName(section: CategoryRelation) {
-  if (!section) return "";
-  if (Array.isArray(section)) return section[0]?.name ?? "";
-  return section.name;
+type GroupedCategorySection = {
+  id: string;
+  name: string;
+  sortOrder: number;
+  categories: { id: string; name: string }[];
+};
+
+function getSectionObject(section: CategorySectionRelation) {
+  if (!section) return null;
+  return Array.isArray(section) ? (section[0] ?? null) : section;
+}
+
+function getSectionName(section: CategorySectionRelation) {
+  const sectionObj = getSectionObject(section);
+  return sectionObj?.name ?? "";
+}
+
+function getSectionSort(section: CategorySectionRelation) {
+  const sectionObj = getSectionObject(section);
+  return typeof sectionObj?.sort_order === "number" ? sectionObj.sort_order : 999999;
+}
+
+function getSectionId(section: CategorySectionRelation) {
+  const sectionObj = getSectionObject(section);
+  return sectionObj?.id ?? "__uncategorized__";
 }
 
 function escapeAttribute(value: string) {
@@ -79,7 +111,7 @@ function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
     parts.push(
       `<img src="${escapeAttribute(
         imageUrl.trim(),
-      )}" alt="" class="w-full rounded-2xl object-contain" />`,
+      )}" alt="" class="mx-auto my-4 rounded-2xl max-w-full" />`,
     );
   }
 
@@ -90,13 +122,13 @@ function appendMediaHtml(baseHtml: string, imageUrl: string, videoUrl: string) {
       parts.push(
         `<iframe src="${escapeAttribute(
           embed,
-        )}" class="aspect-video w-full rounded-2xl" allowfullscreen></iframe>`,
+        )}" class="w-full max-w-3xl aspect-video rounded-2xl mx-auto my-4" allowfullscreen></iframe>`,
       );
     } else {
       parts.push(
-        `<video src="${escapeAttribute(
-          embed,
-        )}" controls class="w-full rounded-2xl"></video>`,
+        `<video controls preload="metadata" src="${escapeAttribute(
+          videoUrl.trim(),
+        )}" class="w-full max-w-3xl rounded-2xl mx-auto my-4"></video>`,
       );
     }
   }
@@ -131,8 +163,12 @@ function stripMediaHtml(html: string | null | undefined) {
 
   return html
     .replace(/<img[^>]*>/gi, "")
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
-    .replace(/<video[\s\S]*?<\/video>/gi, "")
+    .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
+    .replace(/<video[^>]*>.*?<\/video>/gi, "")
+    .replace(/<video[^>]*\/?>/gi, "")
+    .replace(/<audio[^>]*>.*?<\/audio>/gi, "")
+    .replace(/<audio[^>]*\/?>/gi, "")
+    .replace(/<source[^>]*\/?>/gi, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
@@ -154,6 +190,7 @@ export default async function EditQuestionPage({
 }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
+
   const questionId = resolvedParams.id;
   const returnTo = sanitizeReturnTo(resolvedSearchParams.returnTo);
 
@@ -177,25 +214,27 @@ export default async function EditQuestionPage({
     redirect("/");
   }
 
-  const [{ data: categoriesData, error: categoriesError }, { data: questionData, error: questionError }] =
-    await Promise.all([
-      supabase
-        .from("categories")
-        .select("id, name, category_sections ( name )")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("questions")
-        .select(
-          "id, question_text, answer_text, category_id, points, is_active, is_used, year_tolerance_before, year_tolerance_after",
-        )
-        .eq("id", questionId)
-        .single(),
-    ]);
+  const [
+    { data: categoriesData, error: categoriesError },
+    { data: questionData, error: questionError },
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, name, category_sections ( id, name, sort_order )")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("questions")
+      .select(
+        "id, question_text, answer_text, category_id, points, is_active, is_used, year_tolerance_before, year_tolerance_after",
+      )
+      .eq("id", questionId)
+      .single(),
+  ]);
 
   if (categoriesError) {
     return (
-      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+      <div className="p-6 text-red-400">
         فشل تحميل الفئات: {categoriesError.message}
       </div>
     );
@@ -203,26 +242,63 @@ export default async function EditQuestionPage({
 
   if (questionError) {
     return (
-      <div className="space-y-4">
-        <AdminEmptyState
-          title="السؤال غير موجود"
-          description="ربما تم حذف السؤال أو أن الرابط غير صحيح."
-          buttonText="الرجوع للأسئلة"
-        />
-        <div className="flex justify-center">
-          <Link
-            href={returnTo}
-            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
-          >
-            الرجوع للأسئلة
-          </Link>
-        </div>
+  <div className="mx-auto max-w-3xl p-4 md:p-6">
+    <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
+      <h1 className="text-2xl font-black text-white">تعذر تحميل السؤال</h1>
+      <p className="mt-3 text-sm leading-7 text-white/70">
+        لم يتم العثور على السؤال المطلوب أو حدث خطأ أثناء التحميل.
+      </p>
+
+      <div className="mt-5">
+        <Link
+          href="/admin/questions"
+          className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+        >
+          الرجوع للأسئلة
+        </Link>
       </div>
-    );
+    </div>
+  </div>
+);
   }
+  
 
   const categories = (categoriesData ?? []) as CategoryRow[];
   const question = questionData as QuestionRow;
+
+  const groupedSectionsMap = new Map<string, GroupedCategorySection>();
+
+  for (const category of categories) {
+    const sectionId = getSectionId(category.category_sections);
+    const sectionName = getSectionName(category.category_sections) || "بدون قسم";
+    const sortOrder = getSectionSort(category.category_sections);
+
+    if (!groupedSectionsMap.has(sectionId)) {
+      groupedSectionsMap.set(sectionId, {
+        id: sectionId,
+        name: sectionName,
+        sortOrder,
+        categories: [],
+      });
+    }
+
+    groupedSectionsMap.get(sectionId)!.categories.push({
+      id: category.id,
+      name: category.name,
+    });
+  }
+
+  const groupedSections = Array.from(groupedSectionsMap.values())
+    .sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+      return a.name.localeCompare(b.name, "ar");
+    })
+    .map((section) => ({
+      ...section,
+      categories: section.categories.sort((a, b) =>
+        a.name.localeCompare(b.name, "ar"),
+      ),
+    }));
 
   const initialQuestionBase = stripMediaHtml(question.question_text);
   const initialAnswerBase = stripMediaHtml(question.answer_text);
@@ -264,6 +340,7 @@ export default async function EditQuestionPage({
       question_image_url,
       question_video_url,
     );
+
     const finalAnswerText = appendMediaHtml(
       answerBase,
       answer_image_url,
@@ -296,11 +373,13 @@ export default async function EditQuestionPage({
       );
     }
 
-    const isDuplicate = (existingQuestions ?? []).some((item) => {
-      const currentText =
-        typeof item.question_text === "string" ? item.question_text : "";
-      return normalizeHtmlText(currentText) === normalizedQuestion;
-    });
+    const isDuplicate = (existingQuestions ?? []).some(
+      (item: { id?: string; question_text?: string | null }) => {
+        const currentText =
+          typeof item.question_text === "string" ? item.question_text : "";
+        return normalizeHtmlText(currentText) === normalizedQuestion;
+      },
+    );
 
     if (isDuplicate) {
       redirect(
@@ -342,150 +421,149 @@ export default async function EditQuestionPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="text-cyan-300">إدارة المحتوى</div>
-            <h1 className="mt-2 text-4xl font-black text-white">
-              تعديل السؤال
-            </h1>
-            <p className="mt-3 max-w-3xl text-lg leading-8 text-white/75">
-              عدّل السؤال مع النص أو الصور أو الفيديو، وحدد الفئة والنقاط والتفعيل
-              وسماحية السنوات من صفحة واحدة.
-            </p>
-          </div>
+    <main className="mx-auto max-w-5xl p-4 md:p-6">
+      <div className="mb-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
+        <h1 className="text-3xl font-black text-white">تعديل السؤال</h1>
+        <p className="mt-3 text-sm leading-7 text-white/70">
+          عدّل السؤال مع النص أو الصور أو الفيديو أو الصوت، وحدد الفئة والنقاط
+          والتفعيل وسماحية السنوات من صفحة واحدة.
+        </p>
 
+        <div className="mt-5">
           <Link
             href={returnTo}
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+            className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
           >
             الرجوع للأسئلة
           </Link>
         </div>
-
-        {resolvedSearchParams.error ? (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {resolvedSearchParams.error}
-          </div>
-        ) : null}
       </div>
 
-      <form action={updateQuestion} className="space-y-6">
+      {resolvedSearchParams.error ? (
+        <div className="mb-5 rounded-2xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-bold text-red-100">
+          {resolvedSearchParams.error}
+        </div>
+      ) : null}
+
+      <form
+        action={updateQuestion}
+        className="space-y-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]"
+      >
         <input type="hidden" name="returnTo" value={returnTo} />
 
-        <section className="grid gap-6 xl:grid-cols-2">
-          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <HtmlSnippetEditor
-              name="question_text"
-              label="نص السؤال"
-              defaultValue={initialQuestionBase}
-              placeholder="اكتب نص السؤال هنا..."
-              rows={10}
+        <HtmlSnippetEditor
+          name="question_text"
+          label="نص السؤال"
+          defaultValue={initialQuestionBase}
+          placeholder="اكتب السؤال هنا..."
+          rows={8}
+        />
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-black text-white/80">
+              رابط صورة السؤال
+            </label>
+            <input
+              name="question_image_url"
+              type="url"
+              defaultValue={initialQuestionImageUrl}
+              placeholder="https://..."
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
             />
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  رابط صورة السؤال
-                </label>
-                <input
-                  name="question_image_url"
-                  defaultValue={initialQuestionImageUrl}
-                  placeholder="https://example.com/question-image.jpg"
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  رابط فيديو السؤال
-                </label>
-                <input
-                  name="question_video_url"
-                  defaultValue={initialQuestionVideoUrl}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
-                />
-              </div>
-            </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <HtmlSnippetEditor
-              name="answer_text"
-              label="نص الإجابة"
-              defaultValue={initialAnswerBase}
-              placeholder="اكتب نص الإجابة هنا..."
-              rows={10}
+          <div>
+            <label className="mb-2 block text-sm font-black text-white/80">
+              رابط فيديو السؤال
+            </label>
+            <input
+              name="question_video_url"
+              type="url"
+              defaultValue={initialQuestionVideoUrl}
+              placeholder="https://..."
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
             />
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  رابط صورة الإجابة
-                </label>
-                <input
-                  name="answer_image_url"
-                  defaultValue={initialAnswerImageUrl}
-                  placeholder="https://example.com/answer-image.jpg"
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-bold text-white">
-                  رابط فيديو الإجابة
-                </label>
-                <input
-                  name="answer_video_url"
-                  defaultValue={initialAnswerVideoUrl}
-                  placeholder="https://youtube.com/watch?v=..."
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
-                />
-              </div>
-            </div>
           </div>
-        </section>
+        </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          <h2 className="text-2xl font-black text-white">إعدادات السؤال</h2>
-          <p className="mt-2 text-white/70">
+        <HtmlSnippetEditor
+          name="answer_text"
+          label="نص الإجابة"
+          defaultValue={initialAnswerBase}
+          placeholder="اكتب الإجابة هنا..."
+          rows={8}
+        />
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-black text-white/80">
+              رابط صورة الإجابة
+            </label>
+            <input
+              name="answer_image_url"
+              type="url"
+              defaultValue={initialAnswerImageUrl}
+              placeholder="https://..."
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-black text-white/80">
+              رابط فيديو الإجابة
+            </label>
+            <input
+              name="answer_video_url"
+              type="url"
+              defaultValue={initialAnswerVideoUrl}
+              placeholder="https://..."
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
+          <h2 className="mb-4 text-xl font-black text-white">إعدادات السؤال</h2>
+          <p className="mb-5 text-sm leading-7 text-white/65">
             اختر الفئة الصحيحة وحدد النقاط وحالة التفعيل وسماحية السنوات.
           </p>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-black text-white/80">
                 الفئة
               </label>
               <select
                 name="category_id"
                 defaultValue={question.category_id ?? ""}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
               >
                 <option value="">اختر الفئة</option>
-                {categories.map((category) => {
-                  const sectionName = getSectionName(category.category_sections);
-                  return (
-                    <option key={category.id} value={category.id}>
-                      {sectionName
-                        ? `${sectionName} / ${category.name}`
-                        : category.name}
-                    </option>
-                  );
-                })}
+                {groupedSections.map((section) => (
+                  <optgroup
+                    key={section.id}
+                    label={section.name}
+                    className="text-white"
+                  >
+                    {section.categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-black text-white/80">
                 النقاط
               </label>
               <select
                 name="points"
-                defaultValue={String(question.points ?? 200)}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                defaultValue={String(question.points)}
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
               >
                 <option value="200">200</option>
                 <option value="400">400</option>
@@ -494,13 +572,13 @@ export default async function EditQuestionPage({
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-black text-white/80">
                 سماحية سنة قبل
               </label>
               <select
                 name="year_tolerance_before"
                 defaultValue={String(question.year_tolerance_before ?? 0)}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
               >
                 <option value="0">بدون سماحية</option>
                 <option value="1">سنة واحدة قبل</option>
@@ -511,13 +589,13 @@ export default async function EditQuestionPage({
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-bold text-white">
+              <label className="mb-2 block text-sm font-black text-white/80">
                 سماحية سنة بعد
               </label>
               <select
                 name="year_tolerance_after"
                 defaultValue={String(question.year_tolerance_after ?? 0)}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
               >
                 <option value="0">بدون سماحية</option>
                 <option value="1">سنة واحدة بعد</option>
@@ -528,44 +606,45 @@ export default async function EditQuestionPage({
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-4">
-            <label className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-              <input
-                type="checkbox"
-                name="is_active"
-                defaultChecked={question.is_active}
-                className="h-4 w-4 rounded border-white/20 bg-slate-900"
-              />
-              السؤال مفعّل
-            </label>
+          <label className="mt-5 inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white">
+            <input
+              name="is_active"
+              type="checkbox"
+              defaultChecked={question.is_active}
+              className="h-4 w-4 accent-cyan-400"
+            />
+            السؤال مفعّل
+          </label>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
-              حالة الاستخدام الحالية: {question.is_used ? "مستخدم" : "غير مستخدم"}
-            </div>
+          <div className="mt-4 text-sm font-bold text-white/65">
+            حالة الاستخدام الحالية:{" "}
+            <span className="text-white">
+              {question.is_used ? "مستخدم" : "غير مستخدم"}
+            </span>
           </div>
+        </div>
 
-          <p className="mt-4 text-sm leading-7 text-white/60">
-            يمكنك تعديل السؤال كنص فقط، أو نص مع صورة، أو نص مع فيديو. وينطبق ذلك
-            أيضًا على الإجابة.
-          </p>
-        </section>
+        <p className="text-sm leading-7 text-white/65">
+          يمكنك تعديل السؤال كنص فقط، أو نص مع صورة، أو نص مع فيديو، أو مقطع
+          صوتي من داخل المحرر. وينطبق ذلك أيضًا على الإجابة.
+        </p>
 
         <div className="flex flex-wrap gap-3">
           <Link
             href={returnTo}
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+            className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
           >
             إلغاء
           </Link>
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
+            className="inline-flex items-center rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
           >
             حفظ التعديلات
           </button>
         </div>
       </form>
-    </div>
+    </main>
   );
 }
