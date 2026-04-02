@@ -140,14 +140,13 @@ export default function ContactPage() {
               <h1 className="text-3xl font-black text-white md:text-5xl">
                 تواصل مع لمتكم
                 <span className="mt-2 block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
-                  بسهولة وبشكل احترافي
+                  بسهولة وبشكل مباشر
                 </span>
               </h1>
 
               <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
                 إذا كان لديك استفسار، اقتراح، أو رغبة في استخدام المنصة بطريقة
-                أوسع، يمكنك التواصل معنا مباشرة عبر النموذج أو عبر واتساب. تم
-                تصميم الصفحة لتكون واضحة، خفيفة، وعملية.
+                أوسع، يمكنك التواصل معنا مباشرة عبر النموذج أو عبر واتساب. 
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -251,7 +250,7 @@ export default function ContactPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-white/70">
-              عبّئ البيانات التالية وسيتم إرسالها إلى البريد المحدد.
+              عبّئ البيانات التالية وسيتم إرسالها مباشره:
             </p>
 
             <form
