@@ -364,13 +364,11 @@ export default async function AdminCategoriesPage({
               >
                 <div className="mb-4 overflow-hidden rounded-[1.4rem] border border-white/10 bg-white/5">
                   {category.image_url ? (
-                    <Image
-                      src={category.image_url}
-                      alt={category.name}
-                      width={800}
-                      height={500}
-                      className="h-52 w-full object-cover"
-                    />
+                    <img
+  src={category.image_url}
+  alt={category.name}
+  className="h-52 w-full object-cover"
+/>
                   ) : (
                     <div className="flex h-52 items-center justify-center bg-[linear-gradient(180deg,rgba(34,211,238,0.10)_0%,rgba(14,165,233,0.06)_100%)] text-4xl">
                       ✨
