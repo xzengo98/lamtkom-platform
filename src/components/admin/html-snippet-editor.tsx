@@ -27,20 +27,24 @@ export default function HtmlSnippetEditor({
     const end = textarea.selectionEnd ?? 0;
     const current = textarea.value;
 
-    const nextValue = current.slice(0, start) + snippet + current.slice(end);
+    const nextValue =
+      current.slice(0, start) + snippet + current.slice(end);
+
     textarea.value = nextValue;
 
     const nextCursor = start + snippet.length;
     textarea.focus();
     textarea.setSelectionRange(nextCursor, nextCursor);
-
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   function askImage() {
     const url = window.prompt("ضع رابط الصورة المباشر");
     if (!url) return;
-    insertSnippet(`\n<img src="${url}" alt="image" />\n`);
+
+    insertSnippet(
+      `\n\n<img src="${url}" alt="" class="mx-auto my-4 rounded-2xl max-w-full" />\n\n`,
+    );
   }
 
   function askVideo() {
@@ -48,8 +52,10 @@ export default function HtmlSnippetEditor({
     if (!url) return;
 
     let embed = url;
+
     try {
       const parsed = new URL(url);
+
       if (parsed.hostname.includes("youtube.com")) {
         const v = parsed.searchParams.get("v");
         if (v) embed = `https://www.youtube.com/embed/${v}`;
@@ -61,107 +67,105 @@ export default function HtmlSnippetEditor({
 
     if (embed.includes("youtube.com/embed/")) {
       insertSnippet(
-        `\n<div class="video-wrap"><iframe src="${embed}" allowfullscreen></iframe></div>\n`
+        `\n\n<iframe src="${embed}" class="w-full max-w-3xl aspect-video rounded-2xl mx-auto my-4" allowfullscreen></iframe>\n\n`,
       );
       return;
     }
 
     insertSnippet(
-      `\n<video controls><source src="${url}" /></video>\n`
+      `\n\n<video controls preload="metadata" src="${url}" class="w-full max-w-3xl rounded-2xl mx-auto my-4"></video>\n\n`,
+    );
+  }
+
+  function askAudio() {
+    const url = window.prompt("ضع رابط المقطع الصوتي المباشر");
+    if (!url) return;
+
+    insertSnippet(
+      `\n\n<audio controls preload="metadata" src="${url}" class="w-full max-w-3xl mx-auto my-4"></audio>\n\n`,
     );
   }
 
   function askLink() {
     const url = window.prompt("ضع الرابط");
     if (!url) return;
+
     const text = window.prompt("النص الظاهر للرابط", url) || url;
-    insertSnippet(`\n<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>\n`);
+
+    insertSnippet(
+      `\n<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>\n`,
+    );
   }
 
   return (
-    <div>
-      <label className="mb-2 block text-sm font-bold text-white">{label}</label>
+    <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
+      <label className="mb-3 block text-lg font-black text-white">
+        {label}
+      </label>
 
-      <div className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-3">
-        <div className="mb-3 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => insertSnippet("<strong>نص عريض</strong>")}
-            className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white"
-          >
-            عريض
-          </button>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => insertSnippet("<strong>نص عريض</strong>")}
+          className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+        >
+          عريض
+        </button>
 
-          <button
-            type="button"
-            onClick={() => insertSnippet("<em>نص مائل</em>")}
-            className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white"
-          >
-            مائل
-          </button>
+        <button
+          type="button"
+          onClick={askImage}
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
+        >
+          إدراج صورة
+        </button>
 
-          <button
-            type="button"
-            onClick={() => insertSnippet("<h2>عنوان</h2>")}
-            className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white"
-          >
-            عنوان
-          </button>
+        <button
+          type="button"
+          onClick={askVideo}
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
+        >
+          إدراج فيديو
+        </button>
 
-          <button
-            type="button"
-            onClick={() => insertSnippet("<ul><li>عنصر 1</li><li>عنصر 2</li></ul>")}
-            className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white"
-          >
-            نقاط
-          </button>
+        <button
+          type="button"
+          onClick={askAudio}
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
+        >
+          إدراج صوتي
+        </button>
 
-          <button
-            type="button"
-            onClick={askImage}
-            className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-300"
-          >
-            إدراج صورة
-          </button>
+        <button
+          type="button"
+          onClick={askLink}
+          className="rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/15"
+        >
+          إدراج رابط
+        </button>
 
-          <button
-            type="button"
-            onClick={askVideo}
-            className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-300"
-          >
-            إدراج فيديو
-          </button>
-
-          <button
-            type="button"
-            onClick={askLink}
-            className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-300"
-          >
-            إدراج رابط
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertSnippet("")}
-            className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300"
-          >
-            إزالة التنسيق
-          </button>
-        </div>
-
-        <textarea
-          ref={textareaRef}
-          name={name}
-          defaultValue={defaultValue}
-          rows={rows}
-          placeholder={placeholder}
-          className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-4 text-white outline-none"
-        />
-
-        <p className="mt-3 text-xs text-slate-400">
-          اكتب النص بشكل عادي، ويمكنك إدراج HTML بسيط مثل صورة أو فيديو أو رابط داخل المحتوى.
-        </p>
+        <button
+          type="button"
+          onClick={() => insertSnippet("")}
+          className="rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20"
+        >
+          إزالة التنسيق
+        </button>
       </div>
+
+      <textarea
+        ref={textareaRef}
+        name={name}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        rows={rows}
+        className="min-h-[220px] w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-4 text-sm leading-8 text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400"
+      />
+
+      <p className="mt-3 text-xs text-slate-400">
+        اكتب النص بشكل عادي، ويمكنك إدراج HTML بسيط مثل صورة أو فيديو أو رابط
+        أو ملف صوتي داخل المحتوى.
+      </p>
     </div>
   );
 }
