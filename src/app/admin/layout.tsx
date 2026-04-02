@@ -320,33 +320,52 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         </aside>
 
         <section className="min-w-0 flex-1">
-          <div className="mb-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.28)] md:p-7">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
-                  لوحة الإدارة
-                </div>
-                <h1 className="text-3xl font-black text-white md:text-4xl">
-                  أهلاً بك في لوحة التحكم
-                </h1>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
-                  من هنا يمكنك إدارة الموقع بالكامل :
-                </p>
-              </div>
+          <div className="relative mb-6 overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.98)_0%,rgba(6,12,28,0.99)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-7">
+  <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.22)_1px,transparent_1px)] [background-size:26px_26px]" />
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/80">
-                  {profile?.username || "admin"}
-                </div>
-                <Link
-                  href="/"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-                >
-                  الرجوع للموقع
-                </Link>
-              </div>
-            </div>
-          </div>
+  <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+    <div className="min-w-0">
+      <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+        لوحة الإدارة
+      </div>
+
+      <h1 className="text-3xl font-black text-white md:text-5xl">
+        تحكم كامل
+        <span className="mt-2 block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
+          بكل تفاصيل المنصة
+        </span>
+      </h1>
+
+      <p className="mt-4 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
+        من هنا يمكنك إدارة لمتكم، برا السالفة، وCodenames بواجهة أوضح،
+        أسرع، وأكثر احترافية، مع وصول مباشر إلى الأقسام والفئات والأسئلة
+        والمستخدمين والجلسات.
+      </p>
+
+      <div className="mt-5 flex flex-wrap gap-3">
+        <div className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-100">
+          مركز تحكم موحد
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/75">
+          إدارة سريعة وواضحة
+        </div>
+      </div>
+    </div>
+
+    <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+      <div className="rounded-[1.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-5 py-4 text-sm font-black text-white/85 shadow-[0_12px_28px_rgba(0,0,0,0.16)]">
+        {profile?.username || "admin"}
+      </div>
+
+      <Link
+        href="/"
+        className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+      >
+        الرجوع للموقع
+      </Link>
+    </div>
+  </div>
+</div>
 
           <div>{children}</div>
         </section>
