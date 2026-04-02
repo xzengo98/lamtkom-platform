@@ -256,11 +256,13 @@ export default async function NewQuestionPage({
       );
     }
 
-    const isDuplicate = (existingQuestions ?? []).some((item) => {
-      const currentText =
-        typeof item.question_text === "string" ? item.question_text : "";
-      return normalizeHtmlText(currentText) === normalizedQuestion;
-    });
+    const isDuplicate = (existingQuestions ?? []).some(
+  (item: { id?: string; question_text?: string | null }) => {
+    const currentText =
+      typeof item.question_text === "string" ? item.question_text : "";
+    return normalizeHtmlText(currentText) === normalizedQuestion;
+  },
+);
 
     if (isDuplicate) {
       redirect(
