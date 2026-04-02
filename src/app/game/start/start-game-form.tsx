@@ -50,8 +50,6 @@ const sectionThemes: Record<
     info: string;
     iconTint: string;
     iconBg: string;
-    availableBadge: string;
-    unavailableBadge: string;
   }
 > = {
   general: {
@@ -62,8 +60,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-orange-100",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
   islamic: {
     sectionGlow: "from-emerald-400/10 via-emerald-300/5 to-transparent",
@@ -73,8 +69,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-emerald-100",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
   sports: {
     sectionGlow: "from-cyan-400/10 via-cyan-300/5 to-transparent",
@@ -84,8 +78,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-cyan-100",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
   entertainment: {
     sectionGlow: "from-violet-400/10 via-fuchsia-300/5 to-transparent",
@@ -95,8 +87,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-violet-100",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
   technology: {
     sectionGlow: "from-sky-400/10 via-cyan-300/5 to-transparent",
@@ -106,8 +96,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-cyan-100",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
   default: {
     sectionGlow: "from-slate-300/10 via-slate-200/5 to-transparent",
@@ -117,8 +105,6 @@ const sectionThemes: Record<
     info: "bg-[#ca4327] text-white",
     iconTint: "text-white",
     iconBg: "bg-[#112945]",
-    availableBadge: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200",
-    unavailableBadge: "border-red-500/30 bg-[#34161b] text-red-200",
   },
 };
 
@@ -440,7 +426,11 @@ export default function StartGameForm({
   const visibleError = localError || errorMessage;
 
   return (
-    <form action={action} onSubmit={validateBeforeSubmit} className="space-y-8">
+    <form
+      action={action}
+      onSubmit={validateBeforeSubmit}
+      className="mx-auto max-w-[1360px] space-y-8"
+    >
       <input
         type="hidden"
         name="selectedCategories"
@@ -619,7 +609,7 @@ export default function StartGameForm({
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              <div className="flex flex-wrap justify-center gap-4">
                 {section.categories.map((category) => {
                   const availability = categoryAvailability[category.id] ?? {
                     availableGames: 0,
@@ -639,7 +629,7 @@ export default function StartGameForm({
                       key={category.id}
                       type="button"
                       onClick={() => toggleCategory(category.id)}
-                      className={`group relative overflow-hidden rounded-[1.7rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
+                      className={`group relative w-[calc(50%-0.5rem)] min-w-[150px] max-w-[180px] shrink-0 overflow-hidden rounded-[1.7rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 sm:w-[172px] ${
                         active ? `${theme.selectedRing} scale-[1.01]` : ""
                       }`}
                     >
@@ -722,7 +712,7 @@ export default function StartGameForm({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="flex flex-wrap justify-center gap-4">
               {uncategorized.map((category) => {
                 const theme = getSectionTheme("default");
                 const availability = categoryAvailability[category.id] ?? {
@@ -743,7 +733,7 @@ export default function StartGameForm({
                     key={category.id}
                     type="button"
                     onClick={() => toggleCategory(category.id)}
-                    className={`group relative overflow-hidden rounded-[1.7rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 ${
+                    className={`group relative w-[calc(50%-0.5rem)] min-w-[150px] max-w-[180px] shrink-0 overflow-hidden rounded-[1.7rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_16px_32px_rgba(0,0,0,0.26)] transition duration-200 hover:-translate-y-1 sm:w-[172px] ${
                       active ? `${theme.selectedRing} scale-[1.01]` : ""
                     }`}
                   >
