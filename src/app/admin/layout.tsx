@@ -160,7 +160,6 @@ const navGroups: NavGroup[] = [
     title: "عام",
     subtitle: "الصفحات الأساسية",
     icon: "home",
-    defaultOpen: true,
     items: [
       { label: "الرئيسية", href: "/admin", icon: "home" },
       { label: "الأعضاء", href: "/admin/users", icon: "users" },
@@ -171,7 +170,6 @@ const navGroups: NavGroup[] = [
     title: "لمتكم",
     subtitle: "الأقسام والفئات والأسئلة",
     icon: "questions",
-    defaultOpen: true,
     items: [
       { label: "الأقسام الرئيسية", href: "/admin/sections", icon: "sections" },
       { label: "الفئات", href: "/admin/categories", icon: "categories" },

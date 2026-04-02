@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+
 type GameCardItem = {
   title: string;
   subtitle: string;
@@ -9,8 +11,8 @@ type GameCardItem = {
   image: string;
   active: boolean;
   badge: string;
-  accent: "cyan" | "orange" | "violet";
-  icon: "quiz" | "social" | "spark";
+  accent: "cyan" | "orange" | "violet" | "slate";
+  icon: "quiz" | "social" | "spark" | "soon";
 };
 
 const gameCards: GameCardItem[] = [
@@ -49,6 +51,18 @@ const gameCards: GameCardItem[] = [
     badge: "متاحة الآن",
     accent: "violet",
     icon: "spark",
+  },
+  {
+    title: "لعبة جديدة قريبًا",
+    subtitle: "تحت الإنشاء",
+    description:
+      "نعمل حاليًا على إضافة تجربة جديدة داخل لمتكم لتمنحكم تنوعًا أكبر وأسلوب لعب مختلفًا قريبًا.",
+    href: "#",
+    image: "https://i.top4top.io/p_3738ncix61.png",
+    active: false,
+    badge: "قريبًا",
+    accent: "slate",
+    icon: "soon",
   },
 ];
 
@@ -101,6 +115,23 @@ function SparkIcon({ className = "h-5 w-5" }: { className?: string }) {
       strokeLinejoin="round"
     >
       <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
+    </svg>
+  );
+}
+
+function SoonIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 8v4l2.5 2.5" />
     </svg>
   );
 }
@@ -161,7 +192,8 @@ function LightningIcon({ className = "h-5 w-5" }: { className?: string }) {
 function getGameIcon(icon: GameCardItem["icon"]) {
   if (icon === "quiz") return <QuizIcon className="h-5 w-5" />;
   if (icon === "social") return <SocialIcon className="h-5 w-5" />;
-  return <SparkIcon className="h-5 w-5" />;
+  if (icon === "spark") return <SparkIcon className="h-5 w-5" />;
+  return <SoonIcon className="h-5 w-5" />;
 }
 
 function getAccentClasses(accent: GameCardItem["accent"]) {
@@ -173,8 +205,7 @@ function getAccentClasses(accent: GameCardItem["accent"]) {
       icon: "border-orange-300/20 bg-orange-400/10 text-orange-100",
       button:
         "bg-[linear-gradient(180deg,rgba(251,146,60,0.20)_0%,rgba(249,115,22,0.14)_100%)] text-orange-100 hover:bg-[linear-gradient(180deg,rgba(251,146,60,0.28)_0%,rgba(249,115,22,0.20)_100%)]",
-      panel:
-        "from-orange-400/16 via-orange-300/8 to-transparent",
+      panel: "from-orange-400/16 via-orange-300/8 to-transparent",
       ring: "shadow-[0_0_0_1px_rgba(251,146,60,0.14)]",
     };
   }
@@ -187,9 +218,21 @@ function getAccentClasses(accent: GameCardItem["accent"]) {
       icon: "border-violet-300/20 bg-violet-400/10 text-violet-100",
       button:
         "bg-[linear-gradient(180deg,rgba(167,139,250,0.20)_0%,rgba(139,92,246,0.14)_100%)] text-violet-100 hover:bg-[linear-gradient(180deg,rgba(167,139,250,0.28)_0%,rgba(139,92,246,0.20)_100%)]",
-      panel:
-        "from-violet-400/16 via-violet-300/8 to-transparent",
+      panel: "from-violet-400/16 via-violet-300/8 to-transparent",
       ring: "shadow-[0_0_0_1px_rgba(167,139,250,0.14)]",
+    };
+  }
+
+  if (accent === "slate") {
+    return {
+      badge: "border-white/10 bg-white/5 text-white/70",
+      cardGlow:
+        "group-hover:shadow-[0_28px_70px_rgba(255,255,255,0.08)] group-hover:border-white/15",
+      icon: "border-white/10 bg-white/5 text-white/75",
+      button:
+        "border border-white/10 bg-white/5 text-white/70 hover:bg-white/10",
+      panel: "from-white/10 via-white/5 to-transparent",
+      ring: "shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
     };
   }
 
@@ -200,8 +243,7 @@ function getAccentClasses(accent: GameCardItem["accent"]) {
     icon: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
     button:
       "bg-[linear-gradient(180deg,rgba(34,211,238,0.18)_0%,rgba(14,165,233,0.14)_100%)] text-cyan-100 hover:bg-[linear-gradient(180deg,rgba(34,211,238,0.26)_0%,rgba(14,165,233,0.18)_100%)]",
-    panel:
-      "from-cyan-400/16 via-cyan-300/8 to-transparent",
+    panel: "from-cyan-400/16 via-cyan-300/8 to-transparent",
     ring: "shadow-[0_0_0_1px_rgba(34,211,238,0.14)]",
   };
 }
@@ -227,7 +269,7 @@ function FeatureMiniCard({
           : "border-cyan-300/20 bg-cyan-400/10 text-cyan-100";
 
   return (
-    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
+    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
       <div className={`mx-auto mb-3 inline-flex rounded-2xl border p-2.5 ${palette}`}>
         {icon}
       </div>
@@ -243,12 +285,15 @@ function GameCard({ card }: { card: GameCardItem }) {
   return (
     <div
       className={[
-        "group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.30)] transition duration-300 hover:-translate-y-1",
+        "group relative overflow-hidden rounded-[2rem] border p-4 shadow-[0_16px_40px_rgba(0,0,0,0.30)] transition duration-300 hover:-translate-y-1",
+        "bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] border-white/10",
         styles.cardGlow,
         styles.ring,
       ].join(" ")}
     >
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${styles.panel}`} />
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${styles.panel}`}
+      />
 
       <div className="relative">
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -276,9 +321,7 @@ function GameCard({ card }: { card: GameCardItem }) {
           <div className="text-xs font-black tracking-[0.12em] text-white/45">
             {card.subtitle}
           </div>
-
           <h2 className="mt-2 text-2xl font-black text-white">{card.title}</h2>
-
           <p className="mt-3 text-sm leading-7 text-white/72">
             {card.description}
           </p>
@@ -295,7 +338,7 @@ function GameCard({ card }: { card: GameCardItem }) {
             </Link>
           ) : (
             <div className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-white/10 bg-white/5 px-5 py-3.5 text-sm font-black text-white/50">
-              قريبًا
+              تحت الإنشاء
             </div>
           )}
         </div>
@@ -308,183 +351,99 @@ export default function GamesPage() {
   const activeGamesCount = gameCards.filter((card) => card.active).length;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_20%),linear-gradient(180deg,#020617_0%,#020b1d_35%,#010617_100%)] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-8">
-        <section className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.97)_0%,rgba(6,12,28,0.99)_100%)] p-5 shadow-[0_30px_90px_rgba(0,0,0,0.36)] md:p-8">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="hero-glow absolute -right-12 top-0 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
-            <div className="hero-glow absolute left-0 bottom-0 h-56 w-56 rounded-full bg-violet-400/10 blur-3xl" />
-            <div className="hero-glow absolute right-1/3 bottom-6 h-40 w-40 rounded-full bg-orange-400/10 blur-3xl" />
-          </div>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+        {/* Hero */}
+        <section className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8 xl:p-10">
+          <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.20)_1px,transparent_1px)] [background-size:26px_26px]" />
 
-          <div className="relative">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
+          <div className="relative grid gap-8 xl:grid-cols-[1.1fr_0.9fr] xl:items-center">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
                 <GamesIcon className="h-4 w-4" />
                 <span>مكتبة الألعاب</span>
               </div>
 
-              <h1 className="mt-5 text-4xl font-black text-white md:text-6xl">
+              <h1 className="text-3xl font-black text-white md:text-5xl">
                 كل ألعاب لمتكم
-                <span className="block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
+                <span className="mt-2 block bg-[linear-gradient(90deg,#67e8f9_0%,#c084fc_50%,#fb923c_100%)] bg-clip-text text-transparent">
                   في صفحة واحدة
                 </span>
               </h1>
 
-              <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-white/72">
-                تصفّح الألعاب الحالية داخل المنصة، واختر التجربة التي تناسب جلستك:
-                أسئلة وتحديات، ألعاب اجتماعية، أو ألعاب كلمات وتلميحات بتصميم واضح
-                وسريع ومتوافق مع كل الشاشات.
+              <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
+                تصفّح الألعاب الحالية داخل المنصة، واختر التجربة التي تناسب
+                جلستك: أسئلة وتحديات، ألعاب اجتماعية، أو ألعاب كلمات وتلميحات،
+                مع مساحة مفتوحة دائمًا لإضافة ألعاب جديدة قريبًا.
               </p>
             </div>
 
-            <div className="mt-7 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <FeatureMiniCard
-                title="الألعاب المتاحة الآن"
-                value={String(activeGamesCount)}
-                icon={<GamesIcon className="h-4 w-4" />}
-                accent="cyan"
-              />
-              <FeatureMiniCard
-                title="أسلوب اللعب"
-                value="جماعي"
-                icon={<SocialIcon className="h-4 w-4" />}
-                accent="orange"
-              />
-              <FeatureMiniCard
-                title="إيقاع التجربة"
-                value="سريع"
-                icon={<LightningIcon className="h-4 w-4" />}
-                accent="violet"
-              />
-              <FeatureMiniCard
-                title="الهدف"
-                value="متعة"
-                icon={<QuizIcon className="h-4 w-4" />}
-                accent="emerald"
-              />
-            </div>
-
-            <div className="mt-8 grid gap-4 lg:grid-cols-3">
-              {gameCards.map((card) => (
-                <div
-                  key={`hero-${card.title}`}
-                  className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={[
-                        "inline-flex rounded-2xl border p-2.5",
-                        getAccentClasses(card.accent).icon,
-                      ].join(" ")}
-                    >
-                      {getGameIcon(card.icon)}
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="truncate text-base font-black text-white">
-                        {card.title}
-                      </div>
-                      <div className="truncate text-sm text-white/60">
-                        {card.subtitle}
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="mt-3 line-clamp-2 text-sm leading-7 text-white/65">
-                    {card.description}
-                  </p>
-                </div>
-              ))}
+            <div className="flex justify-center xl:justify-end">
+              <div className="relative flex h-[260px] w-[260px] items-center justify-center overflow-hidden rounded-[2.2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:h-[320px] md:w-[320px]">
+                <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
+                <img
+                  src={heroLogo}
+                  alt="شعار لمتكم"
+                  className="h-[170px] w-[170px] object-contain md:h-[230px] md:w-[230px]"
+                />
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mt-8">
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="text-xs font-black tracking-[0.14em] text-cyan-200/70">
-                الألعاب الحالية
-              </div>
-              <h2 className="mt-2 text-3xl font-black text-white md:text-4xl">
-                اختر طابع الجلسة الذي يناسبكم
-              </h2>
-            </div>
+        {/* Quick stats */}
+        <section className="mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <FeatureMiniCard
+              title="الألعاب المتاحة الآن"
+              value={String(activeGamesCount)}
+              icon={<GamesIcon className="h-4 w-4" />}
+              accent="cyan"
+            />
+            <FeatureMiniCard
+              title="أسلوب اللعب"
+              value="جماعي"
+              icon={<SparkIcon className="h-4 w-4" />}
+              accent="orange"
+            />
+            <FeatureMiniCard
+              title="إيقاع التجربة"
+              value="سريع"
+              icon={<LightningIcon className="h-4 w-4" />}
+              accent="violet"
+            />
+            <FeatureMiniCard
+              title="لعبة جديدة"
+              value="قريبًا"
+              icon={<SoonIcon className="h-4 w-4" />}
+              accent="emerald"
+            />
+          </div>
+        </section>
 
-            <p className="max-w-xl text-sm leading-7 text-white/65 md:text-left">
+        {/* Preview strip */}
+        <section className="mb-10">
+          <div className="mb-5">
+            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+              الألعاب الحالية
+            </div>
+            <h2 className="text-2xl font-black text-white md:text-3xl">
+              اختر طابع الجلسة الذي يناسبكم
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
               كل لعبة هنا لها أسلوب مختلف، لكن كلها مبنية لتكون خفيفة، جماعية،
-              وسهلة البدء بدون تعقيد.
+              وسهلة البدء بدون تعقيد. ومع الوقت ستنضاف لعبة جديدة هنا بنفس روح
+              لمتكم وبنفس الجودة.
             </p>
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {gameCards.map((card) => (
               <GameCard key={card.title} card={card} />
             ))}
           </div>
         </section>
-
-        <section className="mt-9 rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.95)_100%)] p-5 text-center shadow-[0_14px_30px_rgba(0,0,0,0.22)] md:p-7">
-          <div className="mx-auto max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-[11px] font-black text-cyan-100">
-              <SparkIcon className="h-4 w-4" />
-              <span>جاهز للبدء؟</span>
-            </div>
-
-            <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-              ابدأ جلستك التالية من هنا
-            </h2>
-
-            <p className="mt-4 text-sm leading-7 text-white/70 md:text-base">
-              سواء كنتم تريدون تحدي أسئلة، لعبة اجتماعية تكشف الشخص المختلف، أو
-              جولة كلمات وتلميحات، ستجدون كل ذلك هنا في مكان واحد.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/game/start"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-cyan-500 px-6 py-4 text-base font-black text-slate-950 transition hover:bg-cyan-400"
-              >
-                ابدأ لعبة لمتكم
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Link>
-
-              <Link
-                href="/game/bara-alsalfah"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] border border-white/10 bg-white/5 px-6 py-4 text-base font-black text-white transition hover:bg-white/10"
-              >
-                ابدأ برا السالفة
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Link>
-
-              <Link
-                href="/games/codenames/"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/20 bg-violet-400/10 px-6 py-4 text-base font-black text-violet-100 transition hover:bg-violet-400/15"
-              >
-                افتح Codenames
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
       </div>
-
-      <style>{`
-        @keyframes glowPulse {
-          0%, 100% {
-            opacity: 0.55;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.06);
-          }
-        }
-
-        .hero-glow {
-          animation: glowPulse 5s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }
