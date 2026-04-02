@@ -429,11 +429,11 @@ export default async function AdminQuestionsPage({
                   إدارة الأسئلة
                 </div>
                 <h1 className="text-3xl font-black text-white md:text-4xl">
-                  /admin/questions
+                 صفحة إدارة الأسئلة 
+
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
-                  فلترة مرنة، تعديل مع حفظ الحالة داخل الرابط، حذف جماعي، وتقسيم
-                  النتائج إلى صفحات منظمة.
+                 قم باستخدام الفلتر لتسهيل عملية الوصول الى النتائج
                 </p>
               </div>
 
@@ -538,7 +538,7 @@ export default async function AdminQuestionsPage({
             <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="text-sm text-white/70">
-                  الفلاتر الحالية محفوظة داخل الرابط
+                  الفلتره الحالية
                   {hasAnyFilter ? (
                     <span className="mr-2 font-black text-cyan-300">
                       • عدد النتائج: {totalQuestions}
