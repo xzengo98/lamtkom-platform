@@ -7,6 +7,7 @@ type PlanFeature = {
 type Plan = {
   name: string;
   badge: string;
+  price: string;
   description: string;
   highlight?: string;
   cta: string;
@@ -30,6 +31,7 @@ const plans: Plan[] = [
   {
     name: "الخطة المجانية",
     badge: "للتجربة",
+    price: "0 JD",
     description:
       "مناسبة لتجربة المنصة والتعرّف على طريقة اللعب والتنقل بين الصفحات قبل التوسع.",
     cta: "ابدأ مجانًا",
@@ -44,6 +46,7 @@ const plans: Plan[] = [
   {
     name: "الخطة المميزة",
     badge: "الأكثر طلبًا",
+    price: "10 JD",
     description:
       "أفضل خيار للمستخدم الذي يريد لعبًا أكثر، تجربة أكثر استمرارية، واستخدامًا فعليًا للمنصة بشكل متكرر.",
     highlight: "مناسبة للأفراد والمجموعات الصغيرة والمهتمين بالاستخدام المستمر",
@@ -58,17 +61,18 @@ const plans: Plan[] = [
     ],
   },
   {
-    name: "الفعاليات والجهات",
-    badge: "للمدارس والشركات",
+    name: "Premium",
+    badge: "للاستخدام الاحترافي",
+    price: "سيتم تحديده لاحقًا",
     description:
-      "حل مخصص للمدارس والفعاليات والمناسبات والجهات التي تريد استخدام المنصة ضمن تجربة جماعية أو عرض مباشر.",
+      "خيار احترافي مرن للجهات أو الاستخدام المتقدم، ويمكنك تعديل ميزاته وتسعيره لاحقًا حسب ما يناسبك.",
     cta: "تواصل معنا",
     href: "/signup",
     features: [
-      { text: "مناسبة للعروض الجماعية والمسابقات" },
-      { text: "أنسب للمدارس والأنشطة والفعاليات" },
-      { text: "إمكانية الاستخدام بطريقة منظمة أمام الحضور" },
-      { text: "حل مرن بحسب طبيعة المناسبة أو الجهة" },
+      { text: "مناسب للجهات أو الاستخدام المتقدم" },
+      { text: "مرونة أكبر في طريقة التفعيل" },
+      { text: "جاهز للتخصيص لاحقًا حسب احتياجك" },
+      { text: "أنسب للتوسع أو التشغيل المنظم" },
     ],
   },
 ];
@@ -127,9 +131,8 @@ function CheckIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden="true"
     >
-      <path d="M20 6L9 17l-5-5" />
+      <path d="m5 12 5 5L20 7" />
     </svg>
   );
 }
@@ -141,12 +144,11 @@ function SparkIcon() {
       fill="none"
       className="h-5 w-5"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden="true"
     >
-      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
+      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
     </svg>
   );
 }
@@ -156,15 +158,14 @@ function ArrowLeftIcon() {
     <svg
       viewBox="0 0 24 24"
       fill="none"
-      className="h-5 w-5"
+      className="h-4 w-4"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden="true"
     >
-      <path d="M5 12h14" />
-      <path d="m13 5 7 7-7 7" />
+      <path d="M19 12H5" />
+      <path d="m12 19-7-7 7-7" />
     </svg>
   );
 }
@@ -172,75 +173,61 @@ function ArrowLeftIcon() {
 function PlanCard({ plan }: { plan: Plan }) {
   return (
     <div
-      className={[
-        "relative flex h-full flex-col rounded-[28px] border p-6 shadow-[0_18px_60px_rgba(15,23,42,0.28)] backdrop-blur",
+      className={`relative overflow-hidden rounded-[2rem] border p-5 shadow-[0_18px_50px_rgba(0,0,0,0.25)] ${
         plan.featured
-          ? "border-cyan-400/30 bg-gradient-to-b from-cyan-500/10 via-slate-900/95 to-slate-950/95"
-          : "border-white/10 bg-white/5",
-      ].join(" ")}
+          ? "border-cyan-300/20 bg-[linear-gradient(180deg,rgba(14,165,233,0.12)_0%,rgba(6,12,28,0.98)_32%,rgba(6,12,28,0.98)_100%)]"
+          : "border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)]"
+      }`}
     >
       {plan.featured ? (
-        <div className="absolute inset-x-6 -top-3">
-          <div className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-400/15 px-4 py-1 text-xs font-extrabold text-cyan-200">
-            الأكثر توازنًا
-          </div>
+        <div className="mb-4 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-100">
+          الأكثر توازنًا
         </div>
       ) : null}
 
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <div className="mb-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-slate-200">
-            {plan.badge}
-          </div>
-          <h3 className="text-2xl font-black tracking-tight text-white">
-            {plan.name}
-          </h3>
-          <p className="mt-3 text-sm leading-7 text-slate-300">
-            {plan.description}
-          </p>
-        </div>
-
-        <div
-          className={[
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
-            plan.featured
-              ? "border-cyan-300/20 bg-cyan-400/10 text-cyan-200"
-              : "border-white/10 bg-white/5 text-slate-200",
-          ].join(" ")}
-        >
-          <SparkIcon />
-        </div>
+      <div className="mb-3 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-black text-white/75">
+        {plan.badge}
       </div>
 
+      <h3 className="text-2xl font-black text-white">{plan.name}</h3>
+
+      <div className="mt-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
+        <div className="text-sm font-bold text-white/55">السعر</div>
+        <div className="mt-1 text-3xl font-black text-cyan-300">{plan.price}</div>
+      </div>
+
+      <p className="mt-4 text-sm leading-7 text-white/70">{plan.description}</p>
+
       {plan.highlight ? (
-        <div className="mb-6 rounded-2xl border border-cyan-300/15 bg-cyan-400/10 px-4 py-3 text-sm leading-7 text-cyan-100">
+        <div className="mt-4 rounded-[1.2rem] border border-cyan-300/15 bg-cyan-400/10 p-3 text-sm font-bold text-cyan-100">
           {plan.highlight}
         </div>
       ) : null}
 
-      <div className="mb-6 space-y-3">
+      <div className="mt-5 space-y-3">
         {plan.features.map((feature) => (
           <div
             key={feature.text}
-            className="flex items-start gap-3 rounded-2xl border border-white/8 bg-black/15 px-4 py-3"
+            className="flex items-start gap-3 rounded-[1rem] border border-white/8 bg-white/5 px-3 py-3"
           >
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
+            <div className="mt-0.5 text-cyan-300">
               <CheckIcon />
             </div>
-            <p className="text-sm leading-7 text-slate-200">{feature.text}</p>
+            <div className="text-sm font-bold leading-7 text-white/75">
+              {feature.text}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-auto">
+      <div className="mt-6">
         <Link
           href={plan.href}
-          className={[
-            "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-base font-extrabold transition",
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-black transition ${
             plan.featured
-              ? "bg-cyan-400 text-slate-950 hover:bg-cyan-300"
-              : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
-          ].join(" ")}
+              ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+              : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+          }`}
         >
           {plan.cta}
           <ArrowLeftIcon />
@@ -252,19 +239,20 @@ function PlanCard({ plan }: { plan: Plan }) {
 
 function GameCard({ item }: { item: GameCard }) {
   return (
-    <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.22)] backdrop-blur">
-      <div className="mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-slate-300">
+    <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.20)]">
+      <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-100">
         داخل المنصة
       </div>
 
       <h3 className="text-xl font-black text-white">{item.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{item.description}</p>
+
+      <p className="mt-3 text-sm leading-7 text-white/70">{item.description}</p>
 
       <div className="mt-5 flex flex-wrap gap-2">
         {item.points.map((point) => (
           <span
             key={point}
-            className="rounded-full border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-bold text-slate-200"
+            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-black text-white/75"
           >
             {point}
           </span>
@@ -276,223 +264,147 @@ function GameCard({ item }: { item: GameCard }) {
 
 function FaqCard({ item }: { item: FaqItem }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <h3 className="text-base font-extrabold text-white">{item.question}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{item.answer}</p>
+    <div className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+      <h3 className="text-lg font-black text-white">{item.question}</h3>
+      <p className="mt-3 text-sm leading-7 text-white/70">{item.answer}</p>
     </div>
   );
 }
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_25%),linear-gradient(180deg,#020617_0%,#0f172a_45%,#020617_100%)] text-white">
-      <section className="mx-auto max-w-7xl px-4 pb-20 pt-12 sm:px-6 lg:px-8 lg:pt-16">
-        <div className="overflow-hidden rounded-[36px] border border-white/10 bg-white/5 shadow-[0_20px_80px_rgba(2,6,23,0.55)] backdrop-blur">
-          <div className="grid gap-10 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-10 lg:py-10">
-            <div>
-              <div className="mb-4 inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-extrabold text-cyan-100">
-                الباقات والخطط
-              </div>
-
-              <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                اختر الخطة المناسبة لتجربة <span className="text-cyan-300">لمتكم</span>
-                <br />
-                واستفد من جميع ألعاب المنصة بشكل أوضح وأفضل
-              </h1>
-
-              <p className="mt-5 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                هذه الصفحة مصممة لتشرح الباقات بشكل منطقي ومهني، وتعرض قيمة المنصة
-                الحقيقية للمستخدم سواء كان يريد تجربة سريعة، استخدامًا مستمرًا،
-                أو تشغيل الألعاب داخل مدرسة أو فعالية أو مناسبة خاصة.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/signup"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-5 py-3 text-base font-extrabold text-slate-950 transition hover:bg-cyan-300"
-                >
-                  ابدأ الآن
-                  <ArrowLeftIcon />
-                </Link>
-
-                <Link
-                  href="/"
-                  className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-base font-bold text-white transition hover:bg-white/10"
-                >
-                  العودة للرئيسية
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-5">
-                <div className="text-sm font-bold text-slate-400">يشمل</div>
-                <div className="mt-2 text-xl font-black text-white">
-                  أكثر من تجربة لعب داخل نفس المنصة
-                </div>
-                <p className="mt-3 text-sm leading-7 text-slate-300">
-                  صفحة الباقات لا تتكلم عن لعبة واحدة فقط، بل عن قيمة الموقع كمنصة
-                  ألعاب عربية تفاعلية.
-                </p>
-              </div>
-
-              <div className="rounded-[28px] border border-cyan-300/15 bg-cyan-400/10 p-5">
-                <div className="text-sm font-bold text-cyan-100">مناسبة لـ</div>
-                <div className="mt-2 text-xl font-black text-white">
-                  الأفراد والمجموعات والفعاليات
-                </div>
-                <p className="mt-3 text-sm leading-7 text-cyan-50/90">
-                  سواء كنت تريد اللعب بشكل شخصي أو تقديم تجربة أمام جمهور، الصفحة
-                  تشرح ذلك بوضوح وبدون مبالغة.
-                </p>
-              </div>
-            </div>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+        <section className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8">
+          <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+            الباقات والخطط
           </div>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200">
-            الباقات المتاحة
-          </div>
-          <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-            خطط واضحة تناسب طريقة استخدامك
-          </h2>
-          <p className="mx-auto mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-            بدلاً من عرض كلام عام، تم تنظيم الباقات هنا لتخدم المستخدم الحقيقي:
-            تجربة أولى، استخدام أكبر، أو تشغيل احترافي للمنصة في الجهات والأنشطة.
+          <h1 className="text-3xl font-black text-white md:text-5xl">
+            اختر الخطة المناسبة لتجربة لمتكم
+          </h1>
+
+          <p className="mt-4 max-w-3xl text-sm leading-8 text-white/70 md:text-base">
+            هذه الصفحة مصممة لتشرح الباقات بشكل منطقي ومهني، وتعرض قيمة المنصة
+            الحقيقية للمستخدم سواء كان يريد تجربة سريعة، استخدامًا مستمرًا، أو
+            تشغيل الألعاب بطريقة منظمة.
           </p>
-        </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <PlanCard key={plan.name} plan={plan} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200">
-            ماذا تشمل المنصة؟
+          <div className="mt-6">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+            >
+              العودة للرئيسية
+            </Link>
           </div>
-          <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-            صفحة باقات تخدم كل أجزاء الموقع
-          </h2>
-          <p className="mx-auto mt-3 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-            تم بناء المحتوى ليعكس طبيعة موقعك الفعلية: ألعاب، حساب مستخدم، متابعة
-            الجولات، واستخدام مناسب للأفراد والفعاليات.
-          </p>
-        </div>
+        </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {games.map((item) => (
-            <GameCard key={item.title} item={item} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="rounded-[32px] border border-white/10 bg-gradient-to-r from-white/5 to-cyan-400/10 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.24)] lg:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
-              <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200">
-                لماذا هذه الصفحة أفضل؟
+        <section className="mb-8 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 md:p-8">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
+              <div className="mb-2 inline-flex text-cyan-300">
+                <SparkIcon />
               </div>
-              <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-                لأنها تشرح الفائدة الفعلية للمستخدم بدل النصوص العامة
-              </h2>
-              <p className="mt-4 text-sm leading-8 text-slate-300 sm:text-base">
-                الصفحة الجديدة تبيع الفكرة بشكل محترف: ما الذي سيأخذه المستخدم،
-                لمن تناسب كل خطة، وما قيمة المنصة له سواء كان زائرًا جديدًا أو
-                مستخدمًا مستمرًا أو جهة تريد تجربة جماعية.
+              <div className="text-sm font-black text-cyan-300">يشمل</div>
+              <div className="mt-2 text-xl font-black text-white">
+                أكثر من تجربة لعب داخل نفس المنصة
+              </div>
+              <p className="mt-3 text-sm leading-7 text-white/70">
+                صفحة الباقات لا تتكلم عن لعبة واحدة فقط، بل عن قيمة الموقع كمنصة
+                ألعاب عربية تفاعلية.
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5">
-                <div className="text-3xl font-black text-white">واجهة أوضح</div>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
-                  تسلسل منطقي من التعريف إلى الباقات ثم قيمة المنصة.
-                </p>
+            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
+              <div className="mb-2 inline-flex text-cyan-300">
+                <SparkIcon />
               </div>
+              <div className="text-sm font-black text-cyan-300">مناسبة لـ</div>
+              <div className="mt-2 text-xl font-black text-white">
+                الأفراد والمجموعات والفعاليات
+              </div>
+              <p className="mt-3 text-sm leading-7 text-white/70">
+                سواء كنت تريد اللعب بشكل شخصي أو تقديم تجربة أمام جمهور، الصفحة
+                تشرح ذلك بوضوح وبدون مبالغة.
+              </p>
+            </div>
 
-              <div className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5">
-                <div className="text-3xl font-black text-white">كلام واقعي</div>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
-                  بدون حشو أو وعود مبالغ فيها أو كلام لا يخص موقعك.
-                </p>
+            <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-4">
+              <div className="mb-2 inline-flex text-cyan-300">
+                <SparkIcon />
               </div>
-
-              <div className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5">
-                <div className="text-3xl font-black text-white">ستايل موحد</div>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
-                  نفس الهوية البصرية الداكنة والبطاقات الحديثة الموجودة في الموقع.
-                </p>
+              <div className="text-sm font-black text-cyan-300">تنظيم أوضح</div>
+              <div className="mt-2 text-xl font-black text-white">
+                خطط مرتبة وسهلة المقارنة
               </div>
-
-              <div className="rounded-[24px] border border-white/10 bg-slate-950/70 p-5">
-                <div className="text-3xl font-black text-white">جاهزة للتطوير</div>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
-                  ويمكن لاحقًا ربطها بأسعار فعلية أو الدفع عند تجهيز النظام.
-                </p>
-              </div>
+              <p className="mt-3 text-sm leading-7 text-white/70">
+                تم ترتيب الباقات بشكل يساعد الزائر على فهم الفرق بينها بسرعة ومن
+                دون تشتيت.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200">
-            أسئلة شائعة
-          </div>
-          <h2 className="mt-4 text-2xl font-black text-white sm:text-3xl">
-            كل ما يحتاجه الزائر قبل اختيار الخطة
-          </h2>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {faqs.map((item) => (
-            <FaqCard key={item.question} item={item} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="rounded-[36px] border border-cyan-300/15 bg-gradient-to-br from-cyan-400/10 via-slate-900/95 to-slate-950/95 p-8 text-center shadow-[0_20px_80px_rgba(8,47,73,0.35)]">
-          <div className="inline-flex rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-extrabold text-cyan-100">
-            ابدأ الآن
+        <section className="mb-10">
+          <div className="mb-5">
+            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+              الباقات المتاحة
+            </div>
+            <h2 className="text-2xl font-black text-white md:text-3xl">
+              خطط واضحة تناسب طريقة استخدامك
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
+              يمكنك تعديل الميزات لاحقًا بسهولة، لكن الهيكل الآن صار أوضح: خطة
+              مجانية، خطة مميزة، وخطة Premium.
+            </p>
           </div>
 
-          <h2 className="mt-4 text-2xl font-black text-white sm:text-4xl">
-            جاهز تبدأ تجربتك داخل المنصة؟
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base">
-            اختر الخطة المناسبة وابدأ اللعب، أو أنشئ حسابك أولًا وجرّب المنصة بنفسك
-            ثم انتقل للخيار الأنسب لك لاحقًا.
-          </p>
-
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/signup"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3 text-base font-extrabold text-slate-950 transition hover:bg-cyan-300"
-            >
-              إنشاء حساب
-              <ArrowLeftIcon />
-            </Link>
-
-            <Link
-              href="/game/start"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-base font-bold text-white transition hover:bg-white/10"
-            >
-              الذهاب إلى اللعب
-            </Link>
+          <div className="grid gap-5 xl:grid-cols-3">
+            {plans.map((plan) => (
+              <PlanCard key={plan.name} plan={plan} />
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section className="mb-10">
+          <div className="mb-5">
+            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+              ماذا تشمل المنصة؟
+            </div>
+            <h2 className="text-2xl font-black text-white md:text-3xl">
+              صفحة باقات تخدم كل أجزاء الموقع
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
+              تم بناء المحتوى ليعكس طبيعة موقعك الفعلية: ألعاب، حساب مستخدم،
+              متابعة الجولات، واستخدام مناسب للأفراد والفعاليات.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {games.map((item) => (
+              <GameCard key={item.title} item={item} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-5">
+            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
+              أسئلة شائعة
+            </div>
+            <h2 className="text-2xl font-black text-white md:text-3xl">
+              كل ما يحتاجه الزائر قبل اختيار الخطة
+            </h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {faqs.map((item) => (
+              <FaqCard key={item.question} item={item} />
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
