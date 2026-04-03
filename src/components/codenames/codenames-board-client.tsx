@@ -693,7 +693,7 @@ export default function CodenamesBoardClient({
 
     cluePopupTimeoutRef.current = window.setTimeout(() => {
       setCluePopup(null);
-    }, 5000);
+    }, 7000);
 
     return () => {
       if (cluePopupTimeoutRef.current) {
@@ -1218,45 +1218,49 @@ export default function CodenamesBoardClient({
     return renderNeutralUnrevealedCard(card, mobile);
   }
 
+  function renderCluePopupOverlay() {
+    if (!cluePopup) return null;
+
+    return (
+      <div className="pointer-events-none absolute inset-0 z-[95] flex items-center justify-center p-4">
+        <div
+          className={`clue-popup rounded-[30px] border px-10 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl ${
+            cluePopup.team === "blue"
+              ? "border-cyan-300/25 bg-cyan-950/60"
+              : cluePopup.team === "red"
+              ? "border-orange-300/25 bg-orange-950/60"
+              : "border-white/20 bg-black/70"
+          }`}
+        >
+          <div className="text-sm font-black uppercase tracking-[0.2em] text-white/60">
+            CLUE
+          </div>
+
+          <div className="mt-2 text-5xl font-black text-white md:text-6xl">
+            {cluePopup.word}
+          </div>
+
+          <div
+            className={`mt-2 text-xl font-black ${
+              cluePopup.team === "blue"
+                ? "text-cyan-100"
+                : cluePopup.team === "red"
+                ? "text-orange-100"
+                : "text-white/80"
+            }`}
+          >
+            {cluePopup.number}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
       <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
 
       {renderSettingsModal()}
-
-      {cluePopup && (
-        <div className="pointer-events-none fixed inset-0 z-[95] flex items-center justify-center p-4">
-          <div
-            className={`clue-popup rounded-[30px] border px-10 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl ${
-              cluePopup.team === "blue"
-                ? "border-cyan-300/25 bg-cyan-950/60"
-                : cluePopup.team === "red"
-                ? "border-orange-300/25 bg-orange-950/60"
-                : "border-white/20 bg-black/70"
-            }`}
-          >
-            <div className="text-sm font-black uppercase tracking-[0.2em] text-white/60">
-              CLUE
-            </div>
-
-            <div className="mt-2 text-5xl font-black text-white md:text-6xl">
-              {cluePopup.word}
-            </div>
-
-            <div
-              className={`mt-2 text-xl font-black ${
-                cluePopup.team === "blue"
-                  ? "text-cyan-100"
-                  : cluePopup.team === "red"
-                  ? "text-orange-100"
-                  : "text-white/80"
-              }`}
-            >
-              {cluePopup.number}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="mb-3 flex items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-black/20 px-3 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-4">
         <div className="flex items-center gap-2">
@@ -1375,7 +1379,8 @@ export default function CodenamesBoardClient({
 
           {renderSpectatorJoinBox()}
 
-          <div className="mobile-board-wrap rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2.5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+          <div className="mobile-board-wrap relative rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2.5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+            {renderCluePopupOverlay()}
             <div className="grid grid-cols-5 gap-2">
               {cards.map((card) => renderBoardCard(card, true))}
             </div>
@@ -1509,8 +1514,11 @@ export default function CodenamesBoardClient({
           {renderTurnIndicator()}
           {renderSpectatorJoinBox()}
 
-          <div className="grid grid-cols-5 gap-4">
-            {cards.map((card) => renderBoardCard(card, false))}
+          <div className="relative">
+            {renderCluePopupOverlay()}
+            <div className="grid grid-cols-5 gap-4">
+              {cards.map((card) => renderBoardCard(card, false))}
+            </div>
           </div>
 
           <div className="rounded-[26px] border border-white/10 bg-[#101522]/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm">

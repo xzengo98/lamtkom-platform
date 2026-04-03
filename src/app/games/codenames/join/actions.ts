@@ -3,9 +3,18 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
+type ExistingPlayerRow = {
+  id: string;
+  guest_name: string | null;
+};
+
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeGuestName(value: string) {
+  return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 export async function joinCodenamesRoom(formData: FormData) {
@@ -30,6 +39,31 @@ export async function joinCodenamesRoom(formData: FormData) {
 
   if (roomError || !roomData) {
     throw new Error(roomError?.message || "الغرفة غير موجودة");
+  }
+
+  const normalizedGuestName = normalizeGuestName(guestName);
+
+  const { data: existingPlayersData, error: existingPlayersError } = await supabase
+    .from("codenames_players")
+    .select("id, guest_name")
+    .eq("room_id", roomData.id);
+
+  if (existingPlayersError) {
+    throw new Error(existingPlayersError.message || "تعذر فحص أسماء اللاعبين");
+  }
+
+  const existingPlayers = (existingPlayersData ?? []) as ExistingPlayerRow[];
+
+  const duplicatePlayer = existingPlayers.find((player: ExistingPlayerRow) => {
+    return normalizeGuestName(player.guest_name ?? "") === normalizedGuestName;
+  });
+
+  if (duplicatePlayer) {
+    redirect(
+      `/games/codenames/join?room_code=${encodeURIComponent(
+        roomData.room_code,
+      )}&error=${encodeURIComponent("هذا الاسم مستخدم بالفعل داخل هذه الغرفة")}`,
+    );
   }
 
   const { data: playerData, error: playerError } = await supabase

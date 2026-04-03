@@ -1,9 +1,9 @@
-import Link from "next/link";
-import { joinCodenamesRoom } from "./actions";
+"use client";
 
-type PageProps = {
-  searchParams?: Promise<{ error?: string; room_code?: string }>;
-};
+import Link from "next/link";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { joinCodenamesRoom } from "./actions";
 
 const BLUE_PANEL_BG =
   "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg";
@@ -15,7 +15,7 @@ function TopPill({
   children,
   active = false,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   active?: boolean;
 }) {
   return (
@@ -31,12 +31,23 @@ function TopPill({
   );
 }
 
-export default async function JoinCodenamesRoomPage({
-  searchParams,
-}: PageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const errorMessage = resolvedSearchParams?.error?.trim() || "";
-  const roomCodeValue = resolvedSearchParams?.room_code?.trim() || "";
+export default function JoinCodenamesRoomPage() {
+  const searchParams = useSearchParams();
+  const errorMessage = searchParams.get("error")?.trim() || "";
+  const roomCodeValue = searchParams.get("room_code")?.trim() || "";
+
+  const submitLockedRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (submitLockedRef.current || isSubmitting) {
+      event.preventDefault();
+      return;
+    }
+
+    submitLockedRef.current = true;
+    setIsSubmitting(true);
+  }
 
   return (
     <div className="mx-auto max-w-[1400px] p-3 md:p-5 xl:p-6">
@@ -86,14 +97,15 @@ export default async function JoinCodenamesRoomPage({
               إذا دخلت عن طريق رابط دعوة مباشر فسيتم تعبئة رمز الغرفة تلقائيًا.
             </p>
 
-            {errorMessage && (
+            {errorMessage ? (
               <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">
                 {decodeURIComponent(errorMessage)}
               </div>
-            )}
+            ) : null}
 
             <form
               action={joinCodenamesRoom}
+              onSubmit={handleSubmit}
               className="mx-auto mt-6 max-w-2xl space-y-4"
             >
               <div className="rounded-[26px] border border-white/10 bg-white/5 p-4 text-right shadow-inner">
@@ -134,9 +146,10 @@ export default async function JoinCodenamesRoomPage({
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="submit"
-                  className="rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:bg-emerald-400"
+                  disabled={isSubmitting}
+                  className="rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  دخول الغرفة
+                  {isSubmitting ? "جارٍ الدخول..." : "دخول الغرفة"}
                 </button>
 
                 <Link
