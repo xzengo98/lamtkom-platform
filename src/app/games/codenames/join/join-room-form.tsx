@@ -1,22 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 type Props = {
   action: (formData: FormData) => void | Promise<void>;
   roomCodeValue: string;
 };
 
-export default function JoinRoomForm({ action, roomCodeValue }: Props) {
+export default function JoinFormClient({ action, roomCodeValue }: Props) {
+  const submitLockedRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (isSubmitting) {
+    if (submitLockedRef.current || isSubmitting) {
       event.preventDefault();
       return;
     }
 
+    submitLockedRef.current = true;
     setIsSubmitting(true);
   }
 

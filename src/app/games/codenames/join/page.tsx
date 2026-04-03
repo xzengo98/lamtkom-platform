@@ -1,9 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
 import { joinCodenamesRoom } from "./actions";
+import JoinFormClient from "./join-form-client";
+
+type PageProps = {
+  searchParams?: Promise<{ error?: string; room_code?: string }>;
+};
 
 const BLUE_PANEL_BG =
   "https://t3.ftcdn.net/jpg/00/86/56/12/360_F_86561234_8HJdzg2iBlPap18K38mbyetKfdw1oNrm.jpg";
@@ -15,7 +16,7 @@ function TopPill({
   children,
   active = false,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
   active?: boolean;
 }) {
   return (
@@ -31,23 +32,12 @@ function TopPill({
   );
 }
 
-export default function JoinCodenamesRoomPage() {
-  const searchParams = useSearchParams();
-  const errorMessage = searchParams.get("error")?.trim() || "";
-  const roomCodeValue = searchParams.get("room_code")?.trim() || "";
-
-  const submitLockedRef = useRef(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (submitLockedRef.current || isSubmitting) {
-      event.preventDefault();
-      return;
-    }
-
-    submitLockedRef.current = true;
-    setIsSubmitting(true);
-  }
+export default async function JoinCodenamesRoomPage({
+  searchParams,
+}: PageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const errorMessage = resolvedSearchParams?.error?.trim() || "";
+  const roomCodeValue = resolvedSearchParams?.room_code?.trim() || "";
 
   return (
     <div className="mx-auto max-w-[1400px] p-3 md:p-5 xl:p-6">
@@ -103,63 +93,10 @@ export default function JoinCodenamesRoomPage() {
               </div>
             ) : null}
 
-            <form
+            <JoinFormClient
               action={joinCodenamesRoom}
-              onSubmit={handleSubmit}
-              className="mx-auto mt-6 max-w-2xl space-y-4"
-            >
-              <div className="rounded-[26px] border border-white/10 bg-white/5 p-4 text-right shadow-inner">
-                <label
-                  htmlFor="guest_name"
-                  className="mb-2 block text-sm font-black text-white/80"
-                >
-                  اسمك
-                </label>
-                <input
-                  id="guest_name"
-                  name="guest_name"
-                  type="text"
-                  required
-                  placeholder="اكتب اسمك"
-                  className="w-full rounded-2xl border border-white/10 bg-white px-4 py-4 text-right text-lg font-black text-black outline-none placeholder:text-black/35"
-                />
-              </div>
-
-              <div className="rounded-[26px] border border-white/10 bg-white/5 p-4 text-right shadow-inner">
-                <label
-                  htmlFor="room_code"
-                  className="mb-2 block text-sm font-black text-white/80"
-                >
-                  رمز الغرفة
-                </label>
-                <input
-                  id="room_code"
-                  name="room_code"
-                  type="text"
-                  required
-                  defaultValue={roomCodeValue}
-                  placeholder="مثال: ABC123"
-                  className="w-full rounded-2xl border border-white/10 bg-white px-4 py-4 text-right text-lg font-black uppercase text-black outline-none placeholder:normal-case placeholder:text-black/35"
-                />
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {isSubmitting ? "جارٍ الدخول..." : "دخول الغرفة"}
-                </button>
-
-                <Link
-                  href="/games/codenames"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center text-lg font-black text-white hover:bg-white/10"
-                >
-                  رجوع
-                </Link>
-              </div>
-            </form>
+              roomCodeValue={roomCodeValue}
+            />
           </div>
 
           <div
