@@ -263,7 +263,7 @@ export default function QuestionPageClient({
   );
 
   const [boardState, setBoardState] = useState(initialState);
-  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [modalBusy, setModalBusy] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [showWinnerPicker, setShowWinnerPicker] = useState(false);
@@ -354,7 +354,7 @@ export default function QuestionPageClient({
     if (modalBusy) return;
 
     setModalBusy(true);
-    setTimerRunning(false);
+    setTimerRunning(true);
 
     updateState((prev) => {
       const nextUsed = prev.usedQuestionIds.includes(question.id)
