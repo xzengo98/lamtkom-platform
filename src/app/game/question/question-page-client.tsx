@@ -269,6 +269,7 @@ export default function QuestionPageClient({
   const [showWinnerPicker, setShowWinnerPicker] = useState(false);
 
   const saveTimeoutRef = useRef<number | null>(null);
+  const awardLockedRef = useRef(false);
 
   useEffect(() => {
     const localState = readLocalBoardState(storageKey);
@@ -351,15 +352,16 @@ export default function QuestionPageClient({
   }
 
   async function handleAwardPoints(winner: "teamOne" | "teamTwo" | "none") {
-    if (modalBusy) return;
+    if (modalBusy || awardLockedRef.current) return;
 
+    awardLockedRef.current = true;
     setModalBusy(true);
-    setTimerRunning(true);
+    setTimerRunning(false);
 
     updateState((prev) => {
-      const nextUsed = prev.usedQuestionIds.includes(question.id)
-        ? prev.usedQuestionIds
-        : [...prev.usedQuestionIds, question.id];
+      if (prev.usedQuestionIds.includes(question.id)) {
+        return prev;
+      }
 
       return {
         ...prev,
@@ -371,7 +373,7 @@ export default function QuestionPageClient({
           winner === "teamTwo"
             ? prev.teamTwoScore + question.points
             : prev.teamTwoScore,
-        usedQuestionIds: nextUsed,
+        usedQuestionIds: [...prev.usedQuestionIds, question.id],
         questionResults: {
           ...prev.questionResults,
           [question.id]: winner,
@@ -383,7 +385,6 @@ export default function QuestionPageClient({
       };
     });
 
-    setModalBusy(false);
     router.push(`/game/board?sessionId=${sessionId}`);
   }
 
