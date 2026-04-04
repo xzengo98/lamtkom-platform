@@ -163,14 +163,84 @@ const sectionThemes: Record<
     iconTint: "text-lime-100",
     iconBg: "bg-[#112945]",
   },
-  arts: {
-    sectionGlow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
-    titleBar: "bg-[linear-gradient(180deg,#d164f7_0%,#b032df_100%)] text-white",
-    nameBar: "bg-[linear-gradient(180deg,#da74fb_0%,#a822d6_100%)] text-white",
+  games: {
+    sectionGlow: "from-rose-400/10 via-red-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#ef5a6f_0%,#cf304b_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f56b7d_0%,#c52842_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-rose-300/80 shadow-[0_0_0_3px_rgba(253,164,175,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-rose-100",
+    iconBg: "bg-[#112945]",
+  },
+  girls: {
+    sectionGlow: "from-pink-400/10 via-rose-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#ec6b9b_0%,#cf4378_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f27da9_0%,#cf3f71_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-pink-300/80 shadow-[0_0_0_3px_rgba(249,168,212,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-pink-100",
+    iconBg: "bg-[#112945]",
+  },
+  jordan: {
+    sectionGlow: "from-red-400/10 via-amber-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#e05353_0%,#b92f2f_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#e76363_0%,#b52a2a_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-red-300/80 shadow-[0_0_0_3px_rgba(252,165,165,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-red-100",
+    iconBg: "bg-[#112945]",
+  },
+  songs: {
+    sectionGlow: "from-yellow-400/10 via-orange-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#f0b24d_0%,#db7a20_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f6bf5f_0%,#d86e19_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-yellow-300/80 shadow-[0_0_0_3px_rgba(253,224,71,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-yellow-100",
+    iconBg: "bg-[#112945]",
+  },
+  focus: {
+    sectionGlow: "from-yellow-400/10 via-lime-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#d7c63f_0%,#9e8f16_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#e1cf4c_0%,#9a8b14_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-yellow-200/80 shadow-[0_0_0_3px_rgba(254,240,138,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-yellow-100",
+    iconBg: "bg-[#112945]",
+  },
+  arabic_art: {
+    sectionGlow: "from-fuchsia-400/10 via-purple-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#8c58d9_0%,#6430b8_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#9967e4_0%,#5d24b4_100%)] text-white",
     selectedRing:
       "ring-4 ring-fuchsia-300/80 shadow-[0_0_0_3px_rgba(240,171,252,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
     iconTint: "text-fuchsia-100",
+    iconBg: "bg-[#112945]",
+  },
+  foreign_art: {
+    sectionGlow: "from-indigo-400/10 via-violet-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#5f7cff_0%,#5b46d8_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#6f88ff_0%,#513dc8_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-indigo-300/80 shadow-[0_0_0_3px_rgba(165,180,252,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-indigo-100",
+    iconBg: "bg-[#112945]",
+  },
+  arts: {
+    sectionGlow: "from-violet-400/10 via-blue-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#6f7cf2_0%,#3e52c7_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#7f8cff_0%,#374bbf_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-violet-300/80 shadow-[0_0_0_3px_rgba(196,181,253,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-violet-100",
     iconBg: "bg-[#112945]",
   },
   default: {
@@ -215,14 +285,44 @@ function resolveSectionThemeKey(slug: string | null | undefined, name?: string |
     return "sports";
   }
 
+  if (combined.includes("games") || combined.includes("العاب")) {
+    return "games";
+  }
+
+  if (combined.includes("بنات") || combined.includes("girls")) {
+    return "girls";
+  }
+
+  if (combined.includes("الاردن") || combined.includes("jordan")) {
+    return "jordan";
+  }
+
+  if (combined.includes("اغاني") || combined.includes("songs") || combined.includes("music")) {
+    return "songs";
+  }
+
+  if (combined.includes("ركز") || combined.includes("focus")) {
+    return "focus";
+  }
+
+  if (
+    (combined.includes("فنانجنبي") || combined.includes("فنأجنبي") || combined.includes("foreignart") || combined.includes("foreignartist"))
+  ) {
+    return "foreign_art";
+  }
+
+  if (
+    (combined.includes("فنعربي") || combined.includes("arabart") || combined.includes("arabicart"))
+  ) {
+    return "arabic_art";
+  }
+
   if (
     combined.includes("entertain") ||
     combined.includes("movie") ||
-    combined.includes("music") ||
     combined.includes("film") ||
     combined.includes("ترفيه") ||
-    combined.includes("افلام") ||
-    combined.includes("اغاني")
+    combined.includes("افلام")
   ) {
     return "entertainment";
   }
@@ -479,6 +579,13 @@ function getSectionIcon(slug: string | null | undefined, name?: string | null) {
   if (key === "geography") return <GlobeIcon className="h-5 w-5" />;
   if (key === "logos") return <GridIcon className="h-5 w-5" />;
   if (key === "currencies") return <TicketIcon className="h-5 w-5" />;
+  if (key === "games") return <GamepadIcon className="h-5 w-5" />;
+  if (key === "girls") return <SparklesIcon className="h-5 w-5" />;
+  if (key === "jordan") return <GlobeIcon className="h-5 w-5" />;
+  if (key === "songs") return <FilmIcon className="h-5 w-5" />;
+  if (key === "focus") return <SparklesIcon className="h-5 w-5" />;
+  if (key === "arabic_art") return <BookOpenIcon className="h-5 w-5" />;
+  if (key === "foreign_art") return <FilmIcon className="h-5 w-5" />;
   if (key === "arts") return <SparklesIcon className="h-5 w-5" />;
   return <BookOpenIcon className="h-5 w-5" />;
 }
