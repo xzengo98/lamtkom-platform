@@ -185,8 +185,92 @@ const sectionThemes: Record<
   },
 };
 
-function getSectionTheme(slug: string) {
-  return sectionThemes[slug] ?? sectionThemes.default;
+function normalizeSectionKey(value: string | null | undefined) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "")
+    .trim();
+}
+
+function resolveSectionThemeKey(slug: string | null | undefined, name?: string | null) {
+  const slugKey = normalizeSectionKey(slug);
+  const nameKey = normalizeSectionKey(name);
+  const combined = `${slugKey} ${nameKey}`;
+
+  if (slugKey in sectionThemes) return slugKey as keyof typeof sectionThemes;
+
+  if (
+    combined.includes("general") ||
+    combined.includes("معلوماتعامة") ||
+    combined.includes("عام")
+  ) {
+    return "general";
+  }
+
+  if (combined.includes("islamic") || combined.includes("اسلام")) {
+    return "islamic";
+  }
+
+  if (combined.includes("sport") || combined.includes("رياض")) {
+    return "sports";
+  }
+
+  if (
+    combined.includes("entertain") ||
+    combined.includes("movie") ||
+    combined.includes("music") ||
+    combined.includes("film") ||
+    combined.includes("ترفيه") ||
+    combined.includes("افلام") ||
+    combined.includes("اغاني")
+  ) {
+    return "entertainment";
+  }
+
+  if (combined.includes("technology") || combined.includes("تقن") || combined.includes("tech")) {
+    return "technology";
+  }
+
+  if (combined.includes("science") || combined.includes("علوم") || combined.includes("علم")) {
+    return "science";
+  }
+
+  if (combined.includes("history") || combined.includes("تاريخ")) {
+    return "history";
+  }
+
+  if (
+    combined.includes("geography") ||
+    combined.includes("جغراف") ||
+    combined.includes("مكان") ||
+    combined.includes("دول")
+  ) {
+    return "geography";
+  }
+
+  if (
+    combined.includes("logo") ||
+    combined.includes("brand") ||
+    combined.includes("شعار") ||
+    combined.includes("شعارات") ||
+    combined.includes("ماركات")
+  ) {
+    return "logos";
+  }
+
+  if (combined.includes("currency") || combined.includes("عملات")) {
+    return "currencies";
+  }
+
+  if (combined.includes("art") || combined.includes("فن") || combined.includes("رسم")) {
+    return "arts";
+  }
+
+  return "default";
+}
+
+function getSectionTheme(slug: string | null | undefined, name?: string | null) {
+  return sectionThemes[resolveSectionThemeKey(slug, name)] ?? sectionThemes.default;
 }
 
 function getAvailabilityBadge(availability: CategoryAvailability) {
@@ -382,12 +466,20 @@ function BookOpenIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-function getSectionIcon(slug: string) {
-  if (slug === "islamic") return <MosqueIcon className="h-5 w-5" />;
-  if (slug === "sports") return <TrophyIcon className="h-5 w-5" />;
-  if (slug === "entertainment") return <FilmIcon className="h-5 w-5" />;
-  if (slug === "general") return <GlobeIcon className="h-5 w-5" />;
-  if (slug === "technology") return <CpuIcon className="h-5 w-5" />;
+function getSectionIcon(slug: string | null | undefined, name?: string | null) {
+  const key = resolveSectionThemeKey(slug, name);
+
+  if (key === "islamic") return <MosqueIcon className="h-5 w-5" />;
+  if (key === "sports") return <TrophyIcon className="h-5 w-5" />;
+  if (key === "entertainment") return <FilmIcon className="h-5 w-5" />;
+  if (key === "general") return <GlobeIcon className="h-5 w-5" />;
+  if (key === "technology") return <CpuIcon className="h-5 w-5" />;
+  if (key === "science") return <SparklesIcon className="h-5 w-5" />;
+  if (key === "history") return <BookOpenIcon className="h-5 w-5" />;
+  if (key === "geography") return <GlobeIcon className="h-5 w-5" />;
+  if (key === "logos") return <GridIcon className="h-5 w-5" />;
+  if (key === "currencies") return <TicketIcon className="h-5 w-5" />;
+  if (key === "arts") return <SparklesIcon className="h-5 w-5" />;
   return <BookOpenIcon className="h-5 w-5" />;
 }
 
@@ -649,7 +741,7 @@ export default function StartGameForm({
       {/* Categories */}
       <section className="space-y-6">
         {groupedSections.map((section) => {
-          const theme = getSectionTheme(section.slug);
+          const theme = getSectionTheme(section.slug, section.name);
 
           return (
             <div
@@ -665,7 +757,7 @@ export default function StartGameForm({
                   <div
                     className={`flex h-12 w-12 items-center justify-center rounded-2xl ${theme.iconBg} ${theme.iconTint}`}
                   >
-                    {getSectionIcon(section.slug)}
+                    {getSectionIcon(section.slug, section.name)}
                   </div>
 
                   <div>
