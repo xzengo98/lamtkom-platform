@@ -8,6 +8,18 @@ export const dynamic = "force-dynamic";
 type SectionRow = {
   id: string;
   name: string;
+  sort_order: number | null;
+  is_active: boolean;
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  section_id: string | null;
+  sort_order: number | null;
+  is_active: boolean;
 };
 
 export default async function EditBaraCategoryPage({
@@ -38,12 +50,11 @@ export default async function EditBaraCategoryPage({
     redirect("/");
   }
 
-  const [{ data: sectionsData }, { data: category, error }] =
+  const [{ data: sectionsData, error: sectionsError }, { data: category, error }] =
     await Promise.all([
       supabase
         .from("bara_sections")
-        .select("id, name")
-        .eq("is_active", true)
+        .select("id, name, sort_order, is_active")
         .order("sort_order", { ascending: true }),
       supabase
         .from("bara_categories")
@@ -51,6 +62,14 @@ export default async function EditBaraCategoryPage({
         .eq("id", resolvedParams.id)
         .single(),
     ]);
+
+  if (sectionsError) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-100">
+        فشل تحميل الأقسام: {sectionsError.message}
+      </div>
+    );
+  }
 
   if (error || !category) {
     return (
@@ -61,6 +80,7 @@ export default async function EditBaraCategoryPage({
   }
 
   const sections = (sectionsData ?? []) as SectionRow[];
+  const currentCategory = category as CategoryRow;
 
   async function updateCategory(formData: FormData) {
     "use server";
@@ -107,122 +127,123 @@ export default async function EditBaraCategoryPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-white">تعديل الفئة</h1>
-            <p className="mt-3 text-white/70">
-              عدل اسم الفئة وربطها بالقسم المناسب.
-            </p>
-          </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]">
+        <h1 className="text-3xl font-black text-white">تعديل الفئة</h1>
+        <p className="mt-3 text-white/70">
+          عدل اسم الفئة ووصفها وترتيبها، ويمكنك أيضًا نقلها من قسم إلى قسم آخر.
+        </p>
 
+        <div className="mt-5">
           <Link
             href="/admin/bara-alsalfah/categories"
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white"
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
           >
             الرجوع
           </Link>
         </div>
-
-        {resolvedSearchParams.error ? (
-          <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {resolvedSearchParams.error}
-          </div>
-        ) : null}
       </div>
 
-      <form action={updateCategory} className="space-y-6">
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-bold text-white">
-                اسم الفئة
-              </label>
-              <input
-                name="name"
-                defaultValue={category.name}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none"
-              />
-            </div>
+      {resolvedSearchParams.error ? (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100">
+          {resolvedSearchParams.error}
+        </div>
+      ) : null}
 
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                القسم
-              </label>
-              <select
-                name="section_id"
-                defaultValue={category.section_id ?? ""}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none"
-              >
-                <option value="">اختر القسم</option>
-                {sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                slug
-              </label>
-              <input
-                name="slug"
-                defaultValue={category.slug ?? ""}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-bold text-white">
-                الترتيب
-              </label>
-              <input
-                type="number"
-                name="sort_order"
-                defaultValue={category.sort_order ?? 0}
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-bold text-white">
-                الوصف
-              </label>
-              <textarea
-                name="description"
-                defaultValue={category.description ?? ""}
-                className="min-h-[120px] w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <label className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-              <input
-                type="checkbox"
-                name="is_active"
-                defaultChecked={category.is_active}
-                className="h-4 w-4"
-              />
-              مفعّلة
+      <form
+        action={updateCategory}
+        className="space-y-6 rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-bold text-white">
+              اسم الفئة
             </label>
+            <input
+              name="name"
+              defaultValue={currentCategory.name}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+            />
           </div>
-        </section>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-white">
+              القسم المرتبط
+            </label>
+            <select
+              name="section_id"
+              defaultValue={currentCategory.section_id ?? ""}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+            >
+              <option value="">اختر القسم</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.name}
+                  {section.is_active ? "" : " (غير مفعّل)"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-white">
+              slug
+            </label>
+            <input
+              name="slug"
+              defaultValue={currentCategory.slug ?? ""}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-white">
+              الترتيب
+            </label>
+            <input
+              name="sort_order"
+              type="number"
+              defaultValue={currentCategory.sort_order ?? 0}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-bold text-white">
+              الوصف
+            </label>
+            <textarea
+              name="description"
+              rows={5}
+              defaultValue={currentCategory.description ?? ""}
+              className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
+            <input
+              type="checkbox"
+              name="is_active"
+              defaultChecked={currentCategory.is_active}
+              className="h-4 w-4"
+            />
+            مفعّلة
+          </label>
+        </div>
 
         <div className="flex flex-wrap gap-3">
           <Link
             href="/admin/bara-alsalfah/categories"
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white"
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
           >
             إلغاء
           </Link>
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-bold text-slate-950"
+            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-400"
           >
             حفظ التعديلات
           </button>
