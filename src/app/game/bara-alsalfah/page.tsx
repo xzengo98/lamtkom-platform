@@ -671,13 +671,13 @@ export default function BaraAlsalfahPage() {
                           </div>
 
                           {category.image_url ? (
-                            <div className="mt-3 flex justify-center">
-                              <img
-                                src={category.image_url}
-                                alt={category.name}
-                                className="h-16 w-16 rounded-2xl object-cover"
-                              />
-                            </div>
+                            <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+  <img
+    src={category.image_url}
+    alt={category.name}
+    className="h-full w-full object-cover"
+  />
+</div>
                           ) : null}
 
                           <div className={`text-center text-lg font-black ${category.image_url ? "mt-3" : "mt-8"}`}>
