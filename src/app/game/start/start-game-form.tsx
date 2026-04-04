@@ -5,6 +5,7 @@ import {
   useState,
   type FormEvent,
   type MouseEvent as ReactMouseEvent,
+  type ReactNode,
 } from "react";
 import type { CategoryAvailability } from "./page";
 
@@ -493,26 +494,26 @@ function SparklesIcon({ className = "h-5 w-5" }: { className?: string }) {
 function getSectionIcon(slug: string | null | undefined, name?: string | null) {
   const key = resolveSectionThemeKey(slug, name);
 
-  const iconMap: Record<string, JSX.Element> = {
-    islamic:      <MosqueIcon className="h-5 w-5" />,
-    sports:       <TrophyIcon className="h-5 w-5" />,
-    entertainment:<FilmIcon className="h-5 w-5" />,
-    general:      <StarGlobeIcon className="h-5 w-5" />,
-    technology:   <CpuIcon className="h-5 w-5" />,
-    science:      <FlaskIcon className="h-5 w-5" />,
-    history:      <BookOpenIcon className="h-5 w-5" />,
-    geography:    <GlobeIcon className="h-5 w-5" />,
-    logos:        <TagIcon className="h-5 w-5" />,
-    brands:       <TagIcon className="h-5 w-5" />,
-    currencies:   <CoinIcon className="h-5 w-5" />,
-    games:        <GameIcon className="h-5 w-5" />,
-    girls:        <HeartIcon className="h-5 w-5" />,
-    jordan:       <FlagIcon className="h-5 w-5" />,
-    songs:        <MusicIcon className="h-5 w-5" />,
-    focus:        <TargetIcon className="h-5 w-5" />,
-    arabic_art:   <PaintbrushIcon className="h-5 w-5" />,
-    foreign_art:  <PaintbrushIcon className="h-5 w-5" />,
-    arts:         <PaintbrushIcon className="h-5 w-5" />,
+  const iconMap: Record<string, ReactNode> = {
+    islamic: <MosqueIcon className="h-5 w-5" />,
+    sports: <TrophyIcon className="h-5 w-5" />,
+    entertainment: <FilmIcon className="h-5 w-5" />,
+    general: <StarGlobeIcon className="h-5 w-5" />,
+    technology: <CpuIcon className="h-5 w-5" />,
+    science: <FlaskIcon className="h-5 w-5" />,
+    history: <BookOpenIcon className="h-5 w-5" />,
+    geography: <GlobeIcon className="h-5 w-5" />,
+    logos: <TagIcon className="h-5 w-5" />,
+    brands: <TagIcon className="h-5 w-5" />,
+    currencies: <CoinIcon className="h-5 w-5" />,
+    games: <GameIcon className="h-5 w-5" />,
+    girls: <HeartIcon className="h-5 w-5" />,
+    jordan: <FlagIcon className="h-5 w-5" />,
+    songs: <MusicIcon className="h-5 w-5" />,
+    focus: <TargetIcon className="h-5 w-5" />,
+    arabic_art: <PaintbrushIcon className="h-5 w-5" />,
+    foreign_art: <PaintbrushIcon className="h-5 w-5" />,
+    arts: <PaintbrushIcon className="h-5 w-5" />,
   };
 
   return iconMap[key] ?? <BookOpenIcon className="h-5 w-5" />;
