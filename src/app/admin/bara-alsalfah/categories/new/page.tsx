@@ -59,6 +59,7 @@ export default async function NewBaraCategoryPage({
     const name = formData.get("name")?.toString().trim() || "";
     const slug = formData.get("slug")?.toString().trim() || "";
     const description = formData.get("description")?.toString().trim() || "";
+    const image_url = formData.get("image_url")?.toString().trim() || "";
     const sortOrder = Number(formData.get("sort_order") || 0);
     const isActive = formData.get("is_active") === "on";
     const sectionId = formData.get("section_id")?.toString().trim() || "";
@@ -102,6 +103,7 @@ export default async function NewBaraCategoryPage({
         name,
         slug: slug || null,
         description: description || null,
+        image_url: image_url || null,
         sort_order: sortOrder,
         is_active: isActive,
         section_id: sectionId,
@@ -121,19 +123,17 @@ export default async function NewBaraCategoryPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="text-cyan-300">إدارة الفئات</div>
-            <h1 className="mt-2 text-4xl font-black text-white">
-              إضافة قسم أو فئة جديدة
-            </h1>
-            <p className="mt-3 max-w-3xl text-lg leading-8 text-white/75">
-              من هنا يمكنك إضافة قسم رئيسي جديد أو فئة جديدة داخل قسم موجود.
-            </p>
-          </div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]">
+        <h1 className="text-3xl font-black text-white">
+          إضافة قسم أو فئة جديدة
+        </h1>
+        <p className="mt-3 text-white/70">
+          من هنا يمكنك إضافة قسم رئيسي جديد أو فئة جديدة داخل قسم موجود، مع
+          إمكانية إضافة صورة للفئة.
+        </p>
 
+        <div className="mt-5">
           <Link
             href="/admin/bara-alsalfah/categories"
             className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
@@ -141,22 +141,30 @@ export default async function NewBaraCategoryPage({
             الرجوع
           </Link>
         </div>
-
-        {params.error ? (
-          <div className="mt-5 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100">
-            {params.error}
-          </div>
-        ) : null}
       </div>
 
-      <form action={createSectionOrCategory} className="space-y-6">
-        <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+      {params.error ? (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-100">
+          {params.error}
+        </div>
+      ) : null}
+
+      <form
+        action={createSectionOrCategory}
+        className="space-y-6 rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
+      >
+        <section className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
+          <h2 className="mb-4 text-xl font-black text-white">
+            بيانات القسم أو الفئة
+          </h2>
+
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
+            <div>
               <label className="mb-2 block text-sm font-bold text-white">
                 نوع الإدخال
               </label>
               <select
+                id="bara-entry-type"
                 name="type"
                 defaultValue="section"
                 className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
@@ -166,14 +174,13 @@ export default async function NewBaraCategoryPage({
               </select>
             </div>
 
-            <div className="md:col-span-2">
+            <div>
               <label className="mb-2 block text-sm font-bold text-white">
                 الاسم
               </label>
               <input
                 name="name"
-                placeholder="مثال: مشاهير أو لاعبين"
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
               />
             </div>
 
@@ -183,8 +190,7 @@ export default async function NewBaraCategoryPage({
               </label>
               <input
                 name="slug"
-                placeholder="مثال: celebrities"
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
               />
             </div>
 
@@ -193,9 +199,39 @@ export default async function NewBaraCategoryPage({
                 الترتيب
               </label>
               <input
-                type="number"
                 name="sort_order"
+                type="number"
                 defaultValue={0}
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+              />
+            </div>
+
+            <div id="bara-section-select-wrap" className="hidden md:col-span-2">
+              <label className="mb-2 block text-sm font-bold text-white">
+                القسم المرتبط
+              </label>
+              <select
+                name="section_id"
+                defaultValue=""
+                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+              >
+                <option value="">اختر القسم</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div id="bara-category-image-wrap" className="hidden md:col-span-2">
+              <label className="mb-2 block text-sm font-bold text-white">
+                رابط صورة الفئة
+              </label>
+              <input
+                name="image_url"
+                type="url"
+                placeholder="https://..."
                 className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
               />
             </div>
@@ -206,27 +242,9 @@ export default async function NewBaraCategoryPage({
               </label>
               <textarea
                 name="description"
-                placeholder="وصف مختصر للقسم أو الفئة"
-                className="min-h-[120px] w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/50"
+                rows={5}
+                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none transition focus:border-cyan-400/50"
               />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-bold text-white">
-                القسم المرتبط (عند إضافة فئة فقط)
-              </label>
-              <select
-                name="section_id"
-                defaultValue=""
-                className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
-              >
-                <option value="">بدون قسم / غير مستخدم عند إضافة قسم</option>
-                {sections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -259,6 +277,29 @@ export default async function NewBaraCategoryPage({
           </button>
         </div>
       </form>
+
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (() => {
+              const typeSelect = document.getElementById("bara-entry-type");
+              const sectionWrap = document.getElementById("bara-section-select-wrap");
+              const imageWrap = document.getElementById("bara-category-image-wrap");
+
+              if (!typeSelect || !sectionWrap || !imageWrap) return;
+
+              const syncVisibility = () => {
+                const isCategory = typeSelect.value === "category";
+                sectionWrap.classList.toggle("hidden", !isCategory);
+                imageWrap.classList.toggle("hidden", !isCategory);
+              };
+
+              syncVisibility();
+              typeSelect.addEventListener("change", syncVisibility);
+            })();
+          `,
+        }}
+      />
     </div>
   );
 }

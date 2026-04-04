@@ -20,6 +20,7 @@ type CategoryRow = {
   section_id: string | null;
   sort_order: number | null;
   is_active: boolean;
+  image_url: string | null;
 };
 
 export default async function EditBaraCategoryPage({
@@ -58,7 +59,9 @@ export default async function EditBaraCategoryPage({
         .order("sort_order", { ascending: true }),
       supabase
         .from("bara_categories")
-        .select("id, name, slug, description, section_id, sort_order, is_active")
+        .select(
+          "id, name, slug, description, section_id, sort_order, is_active, image_url",
+        )
         .eq("id", resolvedParams.id)
         .single(),
     ]);
@@ -91,6 +94,7 @@ export default async function EditBaraCategoryPage({
     const slug = formData.get("slug")?.toString().trim() || "";
     const description = formData.get("description")?.toString().trim() || "";
     const section_id = formData.get("section_id")?.toString().trim() || "";
+    const image_url = formData.get("image_url")?.toString().trim() || "";
     const sort_order = Number(formData.get("sort_order") || 0);
     const is_active = formData.get("is_active") === "on";
 
@@ -109,6 +113,7 @@ export default async function EditBaraCategoryPage({
         slug: slug || null,
         description: description || null,
         section_id,
+        image_url: image_url || null,
         sort_order,
         is_active,
       })
@@ -131,7 +136,7 @@ export default async function EditBaraCategoryPage({
       <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]">
         <h1 className="text-3xl font-black text-white">تعديل الفئة</h1>
         <p className="mt-3 text-white/70">
-          عدل اسم الفئة ووصفها وترتيبها، ويمكنك أيضًا نقلها من قسم إلى قسم آخر.
+          عدل اسم الفئة ووصفها وقسمها وصورتها وترتيبها من مكان واحد.
         </p>
 
         <div className="mt-5">
@@ -207,6 +212,31 @@ export default async function EditBaraCategoryPage({
               className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
             />
           </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-bold text-white">
+              رابط صورة الفئة
+            </label>
+            <input
+              name="image_url"
+              type="url"
+              defaultValue={currentCategory.image_url ?? ""}
+              placeholder="https://..."
+              className="h-14 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 text-white outline-none transition focus:border-cyan-400/50"
+            />
+          </div>
+
+          {currentCategory.image_url ? (
+            <div className="md:col-span-2">
+              <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-3">
+                <img
+                  src={currentCategory.image_url}
+                  alt={currentCategory.name}
+                  className="h-56 w-full rounded-2xl object-cover"
+                />
+              </div>
+            </div>
+          ) : null}
 
           <div className="md:col-span-2">
             <label className="mb-2 block text-sm font-bold text-white">
