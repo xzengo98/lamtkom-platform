@@ -18,6 +18,7 @@ type BaraCategory = {
   name: string;
   slug: string | null;
   description: string | null;
+  image_url: string | null;
   section_id: string | null;
   sort_order: number | null;
   is_active: boolean;
@@ -215,7 +216,7 @@ export default function BaraAlsalfahPage() {
         supabase
           .from("bara_categories")
           .select(
-            "id, name, slug, description, section_id, sort_order, is_active",
+            "id, name, slug, description, image_url, section_id, sort_order, is_active",
           )
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
@@ -658,7 +659,7 @@ export default function BaraAlsalfahPage() {
                             : "border-white/10 hover:border-white/20",
                         ].join(" ")}
                       >
-                        <div className="h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-4">
+                        <div className="h-32 overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-4">
                           <div className="flex items-start justify-between">
                             <div className="rounded-full border border-emerald-500/40 bg-[#0f2e2a] px-2 py-1 text-[11px] font-bold text-emerald-200">
                               {count} عنصر
@@ -669,7 +670,17 @@ export default function BaraAlsalfahPage() {
                             </div>
                           </div>
 
-                          <div className="mt-8 text-center text-lg font-black">
+                          {category.image_url ? (
+                            <div className="mt-3 flex justify-center">
+                              <img
+                                src={category.image_url}
+                                alt={category.name}
+                                className="h-16 w-16 rounded-2xl object-cover"
+                              />
+                            </div>
+                          ) : null}
+
+                          <div className={`text-center text-lg font-black ${category.image_url ? "mt-3" : "mt-8"}`}>
                             {category.name}
                           </div>
                         </div>
