@@ -671,13 +671,13 @@ export default function BaraAlsalfahPage() {
                           </div>
 
                           {category.image_url ? (
-                            <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
-  <img
-    src={category.image_url}
-    alt={category.name}
-    className="h-full w-full object-cover"
-  />
-</div>
+                            <div className="mt-3 h-16 w-full overflow-hidden rounded-2xl">
+                              <img
+                                src={category.image_url}
+                                alt={category.name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
                           ) : null}
 
                           <div className={`text-center text-lg font-black ${category.image_url ? "mt-3" : "mt-8"}`}>
@@ -1060,7 +1060,7 @@ export default function BaraAlsalfahPage() {
                 let classes =
                   "rounded-[1.2rem] border px-5 py-4 text-lg font-black transition";
 
-                if (guessSubmitted && isSelected && isCorrect) {
+                if (guessSubmitted && isCorrect) {
                   classes +=
                     " border-emerald-400/40 bg-emerald-500/20 text-emerald-100";
                 } else if (guessSubmitted && isSelected && !isCorrect) {
