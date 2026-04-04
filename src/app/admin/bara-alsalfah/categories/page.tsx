@@ -15,6 +15,7 @@ type BaraCategoryRow = {
   description: string | null;
   sort_order: number | null;
   is_active: boolean;
+  image_url: string | null;
 };
 
 type BaraSectionRow = {
@@ -66,7 +67,8 @@ export default async function CategoriesPage({
         slug,
         description,
         sort_order,
-        is_active
+        is_active,
+        image_url
       )
     `)
     .order("sort_order", { ascending: true });
@@ -180,7 +182,7 @@ export default async function CategoriesPage({
             <h1 className="text-3xl font-black text-white">إدارة الفئات</h1>
             <p className="mt-3 text-white/70">
               من هنا تعدل الأقسام والفئات الخاصة بلعبة برا السالفة، وتحذفها أو
-              تنقل الفئات لاحقًا بين الأقسام.
+              تنقل الفئات بين الأقسام مع عرض صورة كل فئة.
             </p>
           </div>
 
@@ -261,53 +263,69 @@ export default async function CategoriesPage({
             {(section.bara_categories ?? []).map((cat) => (
               <div
                 key={cat.id}
-                className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-lg font-black text-white">
-                      {cat.name}
+                <div className="aspect-[16/9] w-full bg-slate-900">
+                  {cat.image_url ? (
+                    <img
+                      src={cat.image_url}
+                      alt={cat.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-white/35">
+                      لا توجد صورة
                     </div>
-
-                    <p className="mt-2 text-sm text-white/65">
-                      {cat.description || "بدون وصف"}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href={`/admin/bara-alsalfah/categories/edit-category/${cat.id}`}
-                      className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/10"
-                    >
-                      تعديل
-                    </Link>
-
-                    <form action={deleteCategory}>
-                      <input type="hidden" name="category_id" value={cat.id} />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center justify-center rounded-xl bg-red-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-400"
-                      >
-                        حذف
-                      </button>
-                    </form>
-                  </div>
+                  )}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white">
-                    الترتيب: {cat.sort_order ?? 0}
-                  </span>
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-lg font-black text-white">
+                        {cat.name}
+                      </div>
 
-                  <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white">
-                    {cat.is_active ? "مفعّلة" : "غير مفعّلة"}
-                  </span>
+                      <p className="mt-2 text-sm text-white/65">
+                        {cat.description || "بدون وصف"}
+                      </p>
+                    </div>
 
-                  {cat.slug ? (
-                    <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white/80">
-                      {cat.slug}
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/admin/bara-alsalfah/categories/edit-category/${cat.id}`}
+                        className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/10"
+                      >
+                        تعديل
+                      </Link>
+
+                      <form action={deleteCategory}>
+                        <input type="hidden" name="category_id" value={cat.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center rounded-xl bg-red-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-400"
+                        >
+                          حذف
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white">
+                      الترتيب: {cat.sort_order ?? 0}
                     </span>
-                  ) : null}
+
+                    <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white">
+                      {cat.is_active ? "مفعّلة" : "غير مفعّلة"}
+                    </span>
+
+                    {cat.slug ? (
+                      <span className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-xs text-white/80">
+                        {cat.slug}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             ))}
