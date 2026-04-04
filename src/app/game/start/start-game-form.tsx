@@ -46,6 +46,7 @@ const sectionThemes: Record<
   {
     sectionGlow: string;
     titleBar: string;
+    nameBar: string;
     selectedRing: string;
     info: string;
     iconTint: string;
@@ -55,6 +56,7 @@ const sectionThemes: Record<
   general: {
     sectionGlow: "from-orange-400/10 via-orange-300/5 to-transparent",
     titleBar: "bg-[linear-gradient(180deg,#e18942_0%,#c36023_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f39a4e_0%,#df6c1d_100%)] text-white",
     selectedRing:
       "ring-4 ring-orange-300/80 shadow-[0_0_0_3px_rgba(253,186,116,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
@@ -64,6 +66,7 @@ const sectionThemes: Record<
   islamic: {
     sectionGlow: "from-emerald-400/10 via-emerald-300/5 to-transparent",
     titleBar: "bg-[linear-gradient(180deg,#2dbd8c_0%,#1c9b74_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#38c997_0%,#168765_100%)] text-white",
     selectedRing:
       "ring-4 ring-emerald-300/80 shadow-[0_0_0_3px_rgba(110,231,183,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
@@ -73,6 +76,7 @@ const sectionThemes: Record<
   sports: {
     sectionGlow: "from-cyan-400/10 via-cyan-300/5 to-transparent",
     titleBar: "bg-[linear-gradient(180deg,#1798df_0%,#0b7fca_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#2baae8_0%,#0a79c4_100%)] text-white",
     selectedRing:
       "ring-4 ring-cyan-300/80 shadow-[0_0_0_3px_rgba(103,232,249,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
@@ -82,6 +86,7 @@ const sectionThemes: Record<
   entertainment: {
     sectionGlow: "from-violet-400/10 via-fuchsia-300/5 to-transparent",
     titleBar: "bg-[linear-gradient(180deg,#8f67ff_0%,#6f47ec_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#9b6dff_0%,#6e3cff_100%)] text-white",
     selectedRing:
       "ring-4 ring-violet-300/80 shadow-[0_0_0_3px_rgba(196,181,253,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
@@ -91,15 +96,87 @@ const sectionThemes: Record<
   technology: {
     sectionGlow: "from-sky-400/10 via-cyan-300/5 to-transparent",
     titleBar: "bg-[linear-gradient(180deg,#2497dd_0%,#1280c9_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#32a4ea_0%,#1179bf_100%)] text-white",
     selectedRing:
       "ring-4 ring-cyan-300/80 shadow-[0_0_0_3px_rgba(103,232,249,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
     iconTint: "text-cyan-100",
     iconBg: "bg-[#112945]",
   },
+  science: {
+    sectionGlow: "from-indigo-400/10 via-blue-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#5f7cff_0%,#3d5ce6_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#6f88ff_0%,#3c53cf_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-indigo-300/80 shadow-[0_0_0_3px_rgba(165,180,252,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-indigo-100",
+    iconBg: "bg-[#112945]",
+  },
+  history: {
+    sectionGlow: "from-amber-400/10 via-yellow-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#d59a3c_0%,#a76b19_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#e2a84b_0%,#b8771f_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-amber-300/80 shadow-[0_0_0_3px_rgba(252,211,77,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-amber-100",
+    iconBg: "bg-[#112945]",
+  },
+  geography: {
+    sectionGlow: "from-teal-400/10 via-emerald-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#1fad96_0%,#167f74_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#29baa3_0%,#166e65_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-teal-300/80 shadow-[0_0_0_3px_rgba(94,234,212,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-teal-100",
+    iconBg: "bg-[#112945]",
+  },
+  logos: {
+    sectionGlow: "from-pink-400/10 via-rose-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#ec6b9b_0%,#cf4378_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f27da9_0%,#cf3f71_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-pink-300/80 shadow-[0_0_0_3px_rgba(249,168,212,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-pink-100",
+    iconBg: "bg-[#112945]",
+  },
+  brands: {
+    sectionGlow: "from-pink-400/10 via-rose-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#ec6b9b_0%,#cf4378_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#f27da9_0%,#cf3f71_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-pink-300/80 shadow-[0_0_0_3px_rgba(249,168,212,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-pink-100",
+    iconBg: "bg-[#112945]",
+  },
+  currencies: {
+    sectionGlow: "from-lime-400/10 via-green-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#7fcb4c_0%,#499a2a_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#8ad953_0%,#428d23_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-lime-300/80 shadow-[0_0_0_3px_rgba(190,242,100,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-lime-100",
+    iconBg: "bg-[#112945]",
+  },
+  arts: {
+    sectionGlow: "from-fuchsia-400/10 via-pink-300/5 to-transparent",
+    titleBar: "bg-[linear-gradient(180deg,#d164f7_0%,#b032df_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#da74fb_0%,#a822d6_100%)] text-white",
+    selectedRing:
+      "ring-4 ring-fuchsia-300/80 shadow-[0_0_0_3px_rgba(240,171,252,0.28),0_18px_36px_rgba(0,0,0,0.28)]",
+    info: "bg-[#ca4327] text-white",
+    iconTint: "text-fuchsia-100",
+    iconBg: "bg-[#112945]",
+  },
   default: {
     sectionGlow: "from-slate-300/10 via-slate-200/5 to-transparent",
-    titleBar: "bg-[linear-gradient(180deg,#2497dd_0%,#1280c9_100%)] text-white",
+    titleBar: "bg-[linear-gradient(180deg,#475e86_0%,#314968_100%)] text-white",
+    nameBar: "bg-[linear-gradient(180deg,#546c95_0%,#304764_100%)] text-white",
     selectedRing:
       "ring-4 ring-white/70 shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_18px_36px_rgba(0,0,0,0.28)]",
     info: "bg-[#ca4327] text-white",
@@ -667,10 +744,8 @@ export default function StartGameForm({
                         )}
                       </div>
 
-                      <div className="p-4">
-                        <div className="text-lg font-black text-white">
-                          {category.name}
-                        </div>
+                      <div className={`px-4 py-3 text-center text-lg font-black ${theme.nameBar}`}>
+                        {category.name}
                       </div>
 
                       {infoOpen ? (
