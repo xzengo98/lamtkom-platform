@@ -281,7 +281,7 @@ function resolveSectionThemeKey(slug: string | null | undefined, name?: string |
     return "islamic";
   }
 
-  if (combined.includes("sport") || combined.includes("رياض")) {
+  if (combined.includes("كرة قدم") || combined.includes("رياض")) {
     return "sports";
   }
 
