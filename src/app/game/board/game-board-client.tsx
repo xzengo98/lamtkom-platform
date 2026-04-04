@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type Category = {
   id: string;
   name: string;
@@ -53,6 +55,8 @@ type CategoryColumn = {
   }[];
 };
 
+// ─── State helpers (logic unchanged) ─────────────────────────────────────────
+
 function normalizeBoardState(
   raw: Record<string, unknown> | null | undefined,
 ): BoardState {
@@ -84,7 +88,6 @@ function normalizeBoardState(
 
 function readLocalBoardState(storageKey: string): BoardState | null {
   if (typeof window === "undefined") return null;
-
   try {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return null;
@@ -97,13 +100,14 @@ function readLocalBoardState(storageKey: string): BoardState | null {
 
 function writeLocalBoardState(storageKey: string, state: BoardState) {
   if (typeof window === "undefined") return;
-
   try {
     window.localStorage.setItem(storageKey, JSON.stringify(state));
   } catch {
     //
   }
 }
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -113,12 +117,7 @@ function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
         className="fill-current"
         opacity="0.9"
       />
-      <path
-        d="M5 20h14"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+      <path d="M5 20h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -126,15 +125,7 @@ function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
 function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <rect
-        x="3.5"
-        y="8"
-        width="17"
-        height="8.5"
-        rx="4.25"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+      <rect x="3.5" y="8" width="17" height="8.5" rx="4.25" stroke="currentColor" strokeWidth="1.8" />
       <path
         d="M8 10.5v4M6 12.5h4M15.5 11.25h.01M17.5 13.25h.01"
         stroke="currentColor"
@@ -159,20 +150,32 @@ function FlagIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function StatusPill({
-  label,
-  icon,
-}: {
-  label: string;
-  icon?: ReactNode;
-}) {
+function HomeIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/28 bg-[linear-gradient(180deg,#58c6f2_0%,#3caee1_100%)] px-4 py-2 text-sm font-black text-white shadow-[0_4px_0_rgba(10,77,111,0.45)]">
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M3 12L12 3l9 9M5 10v11h5v-6h4v6h5V10"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ─── StatusPill ───────────────────────────────────────────────────────────────
+
+function StatusPill({ label, icon }: { label: string; icon?: ReactNode }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/25 bg-[linear-gradient(180deg,#58c6f2_0%,#3caee1_100%)] px-3 py-1.5 text-xs font-black text-white shadow-[0_3px_0_rgba(10,77,111,0.40)] sm:px-4 sm:py-2 sm:text-sm">
       {icon}
       <span>{label}</span>
     </div>
   );
 }
+
+// ─── ScoreControl ─────────────────────────────────────────────────────────────
 
 function ScoreControl({
   teamName,
@@ -192,50 +195,57 @@ function ScoreControl({
       ? {
           top: "bg-[linear-gradient(180deg,#ff9c52_0%,#f57c1f_100%)]",
           topShadow: "shadow-[0_4px_0_rgba(150,76,16,0.52)]",
-          circle:
-            "bg-[linear-gradient(180deg,#ffab4f_0%,#f18412_100%)] shadow-[0_4px_0_rgba(148,77,15,0.58)]",
+          circle: "bg-[linear-gradient(180deg,#ffab4f_0%,#f18412_100%)] shadow-[0_4px_0_rgba(148,77,15,0.58)]",
           ring: "ring-orange-100/70",
         }
       : {
           top: "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)]",
           topShadow: "shadow-[0_4px_0_rgba(18,82,113,0.45)]",
-          circle:
-            "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)] shadow-[0_4px_0_rgba(19,83,113,0.55)]",
+          circle: "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)] shadow-[0_4px_0_rgba(19,83,113,0.55)]",
           ring: "ring-cyan-200/60",
         };
 
   return (
-    <div className="w-full max-w-[320px]">
+    <div className="w-full max-w-[260px] sm:max-w-[300px]">
+      {/* Team name header */}
       <div
-        className={`rounded-t-[28px] px-6 pb-5 pt-4 text-center text-[18px] font-black text-white ${palette.top} ${palette.topShadow}`}
+        className={`rounded-t-[24px] px-5 pb-4 pt-3.5 text-center text-base font-black text-white sm:rounded-t-[28px] sm:px-6 sm:pb-5 sm:pt-4 sm:text-lg ${palette.top} ${palette.topShadow}`}
       >
         <span className="block truncate">{teamName}</span>
       </div>
 
-      <div className="relative -mt-1 rounded-b-[28px] border-t-4 border-slate-500/30 bg-[linear-gradient(180deg,#ece8e2_0%,#d9d4cc_100%)] px-5 py-4 shadow-[0_10px_25px_rgba(0,0,0,0.18)]">
+      {/* Score row */}
+      <div className="relative -mt-1 rounded-b-[24px] border-t-4 border-slate-500/30 bg-[linear-gradient(180deg,#ece8e2_0%,#d9d4cc_100%)] px-5 py-3.5 shadow-[0_10px_25px_rgba(0,0,0,0.18)] sm:rounded-b-[28px] sm:px-6 sm:py-4">
+        {/* Increase (+) */}
         <button
           type="button"
           onClick={onIncrease}
-          className={`absolute left-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 ${palette.ring} ${palette.circle}`}
+          className={`absolute left-[-1px] top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-3xl font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 sm:h-[58px] sm:w-[58px] sm:text-[36px] ${palette.ring} ${palette.circle}`}
+          aria-label="زيادة النقاط"
         >
           +
         </button>
 
+        {/* Score display */}
+        <div className="text-center text-[26px] font-black leading-none text-slate-800 sm:text-[28px]">
+          {score}
+        </div>
+
+        {/* Decrease (−) */}
         <button
           type="button"
           onClick={onDecrease}
-          className={`absolute right-[-1px] top-1/2 flex h-[58px] w-[58px] -translate-y-1/2 items-center justify-center rounded-full text-[36px] font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 ${palette.ring} ${palette.circle}`}
+          className={`absolute right-[-1px] top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-3xl font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 sm:h-[58px] sm:w-[58px] sm:text-[36px] ${palette.ring} ${palette.circle}`}
+          aria-label="تقليل النقاط"
         >
           −
         </button>
-
-        <div className="text-center text-[28px] font-black leading-none text-slate-800">
-          {score}
-        </div>
       </div>
     </div>
   );
 }
+
+// ─── CategoryIllustration ─────────────────────────────────────────────────────
 
 function CategoryIllustration({ category }: { category: Category }) {
   if (category.image_url) {
@@ -257,6 +267,8 @@ function CategoryIllustration({ category }: { category: Category }) {
     </div>
   );
 }
+
+// ─── QuestionPill ─────────────────────────────────────────────────────────────
 
 function QuestionPill({
   question,
@@ -300,6 +312,8 @@ function QuestionPill({
   );
 }
 
+// ─── CategoryBoardColumn ──────────────────────────────────────────────────────
+
 function CategoryBoardColumn({
   column,
   boardState,
@@ -313,13 +327,11 @@ function CategoryBoardColumn({
   const row400 = column.rows[1];
   const row600 = column.rows[2];
 
-  const left200 = row200?.questions[0] ?? null;
+  const left200  = row200?.questions[0] ?? null;
   const right200 = row200?.questions[1] ?? null;
-
-  const left400 = row400?.questions[0] ?? null;
+  const left400  = row400?.questions[0] ?? null;
   const right400 = row400?.questions[1] ?? null;
-
-  const left600 = row600?.questions[0] ?? null;
+  const left600  = row600?.questions[0] ?? null;
   const right600 = row600?.questions[1] ?? null;
 
   function getUsed(question: QuestionRow | null) {
@@ -332,85 +344,48 @@ function CategoryBoardColumn({
 
   return (
     <div className="flex w-full max-w-[320px] flex-col items-center md:max-w-[520px]">
-      {/* العنوان العلوي */}
+
+      {/* Top label */}
       <div className="mb-0 w-[170px] rounded-t-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-t-[16px] md:px-4 md:py-3">
         <div className="truncate text-[15px] font-black text-white md:text-[18px]">
           {column.category.name}
         </div>
       </div>
 
-      {/* الجسم */}
+      {/* Board body — fixed-size layout (absolute positioned pills around center image) */}
       <div className="relative h-[240px] w-[320px] md:h-[286px] md:w-[500px]">
-        {/* العمود الأوسط */}
+
+        {/* Center image column */}
         <div className="absolute left-1/2 top-0 z-20 h-[240px] w-[140px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)] md:h-[286px] md:w-[210px]">
           <CategoryIllustration category={column.category} />
         </div>
 
-        {/* الصف الأول */}
-        <div className="absolute left-[0px] top-[5px] z-0 md:left-[0px] md:top-[6px]">
-          <QuestionPill
-            question={left200}
-            points={200}
-            used={getUsed(left200)}
-            result={getResult(left200)}
-            onOpen={() => onOpenQuestion(left200)}
-          />
+        {/* Row 200 */}
+        <div className="absolute left-[0px] top-[5px] z-0 md:top-[6px]">
+          <QuestionPill question={left200}  points={200} used={getUsed(left200)}  result={getResult(left200)}  onOpen={() => onOpenQuestion(left200)} />
+        </div>
+        <div className="absolute right-[0px] top-[5px] z-0 md:top-[6px]">
+          <QuestionPill question={right200} points={200} used={getUsed(right200)} result={getResult(right200)} onOpen={() => onOpenQuestion(right200)} />
         </div>
 
-        <div className="absolute right-[0px] top-[5px] z-0 md:right-[0px] md:top-[6px]">
-          <QuestionPill
-            question={right200}
-            points={200}
-            used={getUsed(right200)}
-            result={getResult(right200)}
-            onOpen={() => onOpenQuestion(right200)}
-          />
+        {/* Row 400 */}
+        <div className="absolute left-[0px] top-[86px] z-0 md:top-[102px]">
+          <QuestionPill question={left400}  points={400} used={getUsed(left400)}  result={getResult(left400)}  onOpen={() => onOpenQuestion(left400)} />
+        </div>
+        <div className="absolute right-[0px] top-[86px] z-0 md:top-[102px]">
+          <QuestionPill question={right400} points={400} used={getUsed(right400)} result={getResult(right400)} onOpen={() => onOpenQuestion(right400)} />
         </div>
 
-        {/* الصف الثاني */}
-        <div className="absolute left-[0px] top-[86px] z-0 md:left-[0px] md:top-[102px]">
-          <QuestionPill
-            question={left400}
-            points={400}
-            used={getUsed(left400)}
-            result={getResult(left400)}
-            onOpen={() => onOpenQuestion(left400)}
-          />
+        {/* Row 600 */}
+        <div className="absolute left-[0px] top-[167px] z-0 md:top-[198px]">
+          <QuestionPill question={left600}  points={600} used={getUsed(left600)}  result={getResult(left600)}  onOpen={() => onOpenQuestion(left600)} />
         </div>
-
-        <div className="absolute right-[0px] top-[86px] z-0 md:right-[0px] md:top-[102px]">
-          <QuestionPill
-            question={right400}
-            points={400}
-            used={getUsed(right400)}
-            result={getResult(right400)}
-            onOpen={() => onOpenQuestion(right400)}
-          />
-        </div>
-
-        {/* الصف الثالث */}
-        <div className="absolute left-[0px] top-[167px] z-0 md:left-[0px] md:top-[198px]">
-          <QuestionPill
-            question={left600}
-            points={600}
-            used={getUsed(left600)}
-            result={getResult(left600)}
-            onOpen={() => onOpenQuestion(left600)}
-          />
-        </div>
-
-        <div className="absolute right-[0px] top-[167px] z-0 md:right-[0px] md:top-[198px]">
-          <QuestionPill
-            question={right600}
-            points={600}
-            used={getUsed(right600)}
-            result={getResult(right600)}
-            onOpen={() => onOpenQuestion(right600)}
-          />
+        <div className="absolute right-[0px] top-[167px] z-0 md:top-[198px]">
+          <QuestionPill question={right600} points={600} used={getUsed(right600)} result={getResult(right600)} onOpen={() => onOpenQuestion(right600)} />
         </div>
       </div>
 
-      {/* العنوان السفلي */}
+      {/* Bottom label */}
       <div className="mt-0 w-[170px] rounded-b-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-b-[16px] md:px-4 md:py-3">
         <div className="truncate text-[14px] font-black text-white md:text-[16px]">
           {column.category.name}
@@ -419,6 +394,8 @@ function CategoryBoardColumn({
     </div>
   );
 }
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function GameBoardClient({
   sessionId,
@@ -435,17 +412,13 @@ export default function GameBoardClient({
 
   const [hasRedirectedToResult, setHasRedirectedToResult] = useState(false);
 
-  const initialState = useMemo(() => {
-    return normalizeBoardState(initialBoardState);
-  }, [initialBoardState]);
-
+  const initialState = useMemo(() => normalizeBoardState(initialBoardState), [initialBoardState]);
   const [boardState, setBoardState] = useState<BoardState>(initialState);
-
   const saveTimeoutRef = useRef<number | null>(null);
 
+  // ── Load local state on mount ──
   useEffect(() => {
     const localState = readLocalBoardState(storageKey);
-
     if (localState && localState.savedAt >= initialState.savedAt) {
       setBoardState(localState);
     } else {
@@ -453,6 +426,7 @@ export default function GameBoardClient({
     }
   }, [initialState, storageKey]);
 
+  // ── Persist state (local + Supabase debounced) ──
   useEffect(() => {
     writeLocalBoardState(storageKey, boardState);
 
@@ -479,6 +453,7 @@ export default function GameBoardClient({
     };
   }, [boardState, sessionId, storageKey, supabase]);
 
+  // ── Build board columns ──
   const boardColumns = useMemo<CategoryColumn[]>(() => {
     const pointsList: (200 | 400 | 600)[] = [200, 400, 600];
 
@@ -489,28 +464,24 @@ export default function GameBoardClient({
 
       return {
         category,
-        rows: pointsList.map((points) => {
-          const matching = categoryQuestions
+        rows: pointsList.map((points) => ({
+          points,
+          questions: categoryQuestions
             .filter((question) => question.points === points)
             .sort((a, b) => a.id.localeCompare(b.id))
-            .slice(0, 2);
-
-          return {
-            points,
-            questions: matching,
-          };
-        }),
+            .slice(0, 2),
+        })),
       };
     });
   }, [categories, questions]);
 
+  // ── Derived state ──
   const usedCount = boardState.usedQuestionIds.length;
 
   const remainingCount = Math.max(
     boardColumns.reduce(
       (sum, column) =>
-        sum +
-        column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
+        sum + column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
       0,
     ) - usedCount,
     0,
@@ -518,11 +489,12 @@ export default function GameBoardClient({
 
   const teamOneLeading = boardState.teamOneScore > boardState.teamTwoScore;
   const teamTwoLeading = boardState.teamTwoScore > boardState.teamOneScore;
-  const leaderLabel = teamOneLeading ? teamOne : teamTwoLeading ? teamTwo : "تعادل";
+  const leaderLabel    = teamOneLeading ? teamOne : teamTwoLeading ? teamTwo : "تعادل";
 
-  const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurn     = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
   const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
 
+  // ── Auto-redirect when all questions are used ──
   useEffect(() => {
     if (remainingCount !== 0) return;
     if (hasRedirectedToResult) return;
@@ -553,26 +525,23 @@ export default function GameBoardClient({
     router,
   ]);
 
+  // ── State updater ──
   function updateState(updater: (prev: BoardState) => BoardState) {
-    setBoardState((prev) => {
-      const next = updater(prev);
-      return {
-        ...next,
-        savedAt: Date.now(),
-      };
-    });
+    setBoardState((prev) => ({
+      ...updater(prev),
+      savedAt: Date.now(),
+    }));
   }
 
+  // ── Handlers ──
   function handleOpenQuestion(question: QuestionRow | null) {
     if (!question) return;
     if (boardState.usedQuestionIds.includes(question.id)) return;
-
     router.push(`/game/question?sessionId=${sessionId}&questionId=${question.id}`);
   }
 
   function handleFinishGame() {
     if (hasRedirectedToResult) return;
-
     setHasRedirectedToResult(true);
 
     const params = new URLSearchParams({
@@ -587,110 +556,123 @@ export default function GameBoardClient({
     router.push(`/game/result?${params.toString()}`);
   }
 
+  // ─────────────────────────────────────────────────────────────────────────────
+
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(23,85,199,0.16),transparent_26%),linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
-        <div className="mb-5 rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_18px_80px_rgba(2,6,23,0.50)] backdrop-blur">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <div className="text-xs font-bold tracking-[0.24em] text-cyan-200/75">
-                  لوحة اللعبة
-                </div>
-                <h1 className="mt-1 text-2xl font-black text-white sm:text-3xl">
-                  {gameName}
-                </h1>
 
-                <p className="mt-2 text-sm font-medium text-slate-200/80">
-                  اختر الأسئلة من لوحة اللعب في الأسفل وابدأ باللعب.
-                </p>
-              </div>
+        {/* ── Top control panel ──────────────────────────────────────────── */}
+        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:p-5">
 
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusPill
-                  label={`الدور ${activeTurnName}`}
-                  icon={<GamepadIcon className="h-4 w-4" />}
-                />
-                <StatusPill
-                  label={`المتصدر ${leaderLabel}`}
-                  icon={<CrownIcon className="h-4 w-4" />}
-                />
-                <StatusPill label={`المتبقي ${remainingCount}`} />
+          {/* Title row */}
+          <div className="mb-4 flex flex-col gap-1 sm:mb-5">
+            <div className="text-xs font-bold tracking-[0.22em] text-cyan-300/60">
+              لوحة اللعبة
+            </div>
+            <h1 className="text-xl font-black text-white sm:text-2xl md:text-3xl">
+              {gameName}
+            </h1>
+            <p className="text-xs font-medium text-slate-300/70 sm:text-sm">
+              اختر الأسئلة من لوحة اللعب في الأسفل وابدأ باللعب.
+            </p>
+          </div>
 
-                <button
-                  type="button"
-                  onClick={handleFinishGame}
-                  className="inline-flex items-center gap-2 rounded-[18px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-6 py-3 text-sm font-black text-white shadow-[0_5px_0_rgba(109,12,55,0.45)] transition duration-150 hover:scale-[1.02] hover:brightness-105 active:scale-95"
-                >
-                  <FlagIcon className="h-4 w-4" />
-                  إنهاء اللعب
-                </button>
+          {/* Status pills + action buttons */}
+          <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
+            <StatusPill
+              label={`الدور: ${activeTurnName}`}
+              icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+            />
+            <StatusPill
+              label={`المتصدر: ${leaderLabel}`}
+              icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+            />
+            <StatusPill label={`المتبقي: ${remainingCount}`} />
 
-                <Link
-                  href="/account"
-                  className="inline-flex items-center rounded-[18px] border border-white/10 bg-white/6 px-4 py-3 text-sm font-black text-white transition duration-150 hover:bg-white/10 hover:scale-[1.02] active:scale-95"
-                >
-                  الرجوع للحساب
-                </Link>
-              </div>
+            {/* Separator — grows to push action buttons right on large screens */}
+            <div className="hidden flex-1 xl:block" />
+
+            <button
+              type="button"
+              onClick={handleFinishGame}
+              className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
+            >
+              <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              إنهاء اللعب
+            </button>
+
+            <Link
+              href="/account"
+              className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
+            >
+              <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">الرجوع للحساب</span>
+              <span className="sm:hidden">الحساب</span>
+            </Link>
+          </div>
+
+          {/* Score controls — side-by-side from sm breakpoint */}
+          <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
+            <div className="flex justify-center sm:justify-start">
+              <ScoreControl
+                teamName={teamOne}
+                score={boardState.teamOneScore}
+                accent="blue"
+                onIncrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamOneScore: Math.max(0, prev.teamOneScore + 100),
+                  }))
+                }
+                onDecrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamOneScore: Math.max(0, prev.teamOneScore - 100),
+                  }))
+                }
+              />
             </div>
 
-            <div className="grid items-start gap-4 xl:grid-cols-2">
-              <div className="flex justify-center xl:justify-start">
-                <ScoreControl
-                  teamName={teamOne}
-                  score={boardState.teamOneScore}
-                  accent="blue"
-                  onIncrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamOneScore: Math.max(0, prev.teamOneScore + 100),
-                    }))
-                  }
-                  onDecrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamOneScore: Math.max(0, prev.teamOneScore - 100),
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex justify-center xl:justify-end">
-                <ScoreControl
-                  teamName={teamTwo}
-                  score={boardState.teamTwoScore}
-                  accent="orange"
-                  onIncrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-                    }))
-                  }
-                  onDecrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-                    }))
-                  }
-                />
-              </div>
+            <div className="flex justify-center sm:justify-end">
+              <ScoreControl
+                teamName={teamTwo}
+                score={boardState.teamTwoScore}
+                accent="orange"
+                onIncrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+                  }))
+                }
+                onDecrease={() =>
+                  updateState((prev) => ({
+                    ...prev,
+                    teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+                  }))
+                }
+              />
             </div>
           </div>
         </div>
 
-        <div className="rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.55)] sm:p-4 md:p-5">
-  <div className="grid grid-cols-1 justify-items-center gap-6 md:grid-cols-2 2xl:grid-cols-3">
-    {boardColumns.map((column) => (
-      <CategoryBoardColumn
-        key={column.category.id}
-        column={column}
-        boardState={boardState}
-        onOpenQuestion={handleOpenQuestion}
-      />
-    ))}
-  </div>
-</div>
+        {/* ── Game board ─────────────────────────────────────────────────── */}
+        <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.55)] sm:rounded-[34px] sm:p-4 md:p-5">
+          {/* Horizontal scroll wrapper — protects layout on very small screens */}
+          <div className="overflow-x-auto pb-1">
+            <div className="grid min-w-[320px] grid-cols-1 justify-items-center gap-6 md:grid-cols-2 2xl:grid-cols-3">
+              {boardColumns.map((column) => (
+                <CategoryBoardColumn
+                  key={column.category.id}
+                  column={column}
+                  boardState={boardState}
+                  onOpenQuestion={handleOpenQuestion}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
       </div>
     </main>
   );
