@@ -480,7 +480,7 @@ function CategoryCard({
       {/* ── Points legend footer ── */}
       <div className="flex items-center justify-between border-t border-white/6 px-2.5 py-1.5 sm:px-3">
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#1565c0]" />
+          <span className="h-2 w-2 rounded-full bg-[#1b7001]" />
           <span className="text-[10px] font-bold text-white/35 sm:text-xs">٢٠٠</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -488,7 +488,7 @@ function CategoryCard({
           <span className="text-[10px] font-bold text-white/35 sm:text-xs">٤٠٠</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#e65100]" />
+          <span className="h-2 w-2 rounded-full bg-[#e6c400]" />
           <span className="text-[10px] font-bold text-white/35 sm:text-xs">٦٠٠</span>
         </div>
         <div className="text-[10px] font-bold text-white/25 sm:text-xs">
