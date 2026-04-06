@@ -207,16 +207,13 @@ function ScoreControl({
 
   return (
     <div className="w-full max-w-[260px] sm:max-w-[300px]">
-      {/* Team name header */}
       <div
         className={`rounded-t-[24px] px-5 pb-4 pt-3.5 text-center text-base font-black text-white sm:rounded-t-[28px] sm:px-6 sm:pb-5 sm:pt-4 sm:text-lg ${palette.top} ${palette.topShadow}`}
       >
         <span className="block truncate">{teamName}</span>
       </div>
 
-      {/* Score row */}
       <div className="relative -mt-1 rounded-b-[24px] border-t-4 border-slate-500/30 bg-[linear-gradient(180deg,#ece8e2_0%,#d9d4cc_100%)] px-5 py-3.5 shadow-[0_10px_25px_rgba(0,0,0,0.18)] sm:rounded-b-[28px] sm:px-6 sm:py-4">
-        {/* Increase (+) */}
         <button
           type="button"
           onClick={onIncrease}
@@ -226,12 +223,10 @@ function ScoreControl({
           +
         </button>
 
-        {/* Score display */}
         <div className="text-center text-[26px] font-black leading-none text-slate-800 sm:text-[28px]">
           {score}
         </div>
 
-        {/* Decrease (−) */}
         <button
           type="button"
           onClick={onDecrease}
@@ -245,32 +240,11 @@ function ScoreControl({
   );
 }
 
-// ─── CategoryIllustration ─────────────────────────────────────────────────────
+// ─── Board: QuestionTile ──────────────────────────────────────────────────────
+// Replaces old QuestionPill — ALL game logic (used / result / onOpen) unchanged.
+// Only the visual representation is redesigned.
 
-function CategoryIllustration({ category }: { category: Category }) {
-  if (category.image_url) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-[#cbcccf] px-3 py-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={category.image_url}
-          alt={category.name}
-          className="h-full w-full object-contain"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex h-full w-full items-center justify-center bg-[#cbcccf] px-4 py-4 text-center text-slate-900">
-      <div className="text-base font-black">{category.name}</div>
-    </div>
-  );
-}
-
-// ─── QuestionPill ─────────────────────────────────────────────────────────────
-
-function QuestionPill({
+function QuestionTile({
   question,
   points,
   used,
@@ -283,38 +257,100 @@ function QuestionPill({
   result?: QuestionResult;
   onOpen?: () => void;
 }) {
-  const baseClass =
-    "flex h-[68px] w-[118px] items-center justify-center rounded-full border border-slate-400/30 bg-[#cbcccf] text-[16px] font-black text-red-700 transition md:h-[82px] md:w-[190px] md:text-[18px]";
+  // Points-level base style (available state)
+  const pointsColors =
+    points === 200
+      ? {
+          bg: "bg-[linear-gradient(160deg,#1565c0_0%,#0d47a1_100%)]",
+          text: "text-[#90caf9]",
+          glow: "shadow-[inset_0_1px_0_rgba(100,181,246,0.25),0_4px_16px_rgba(13,71,161,0.45)]",
+          hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(21,101,192,0.55)]",
+          border: "border-[#1976d2]/40",
+        }
+      : points === 400
+        ? {
+            bg: "bg-[linear-gradient(160deg,#6a1b9a_0%,#4a148c_100%)]",
+            text: "text-[#ce93d8]",
+            glow: "shadow-[inset_0_1px_0_rgba(206,147,216,0.20),0_4px_16px_rgba(74,20,140,0.50)]",
+            hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(106,27,154,0.55)]",
+            border: "border-[#7b1fa2]/40",
+          }
+        : {
+            bg: "bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)]",
+            text: "text-[#ffcc80]",
+            glow: "shadow-[inset_0_1px_0_rgba(255,204,128,0.20),0_4px_16px_rgba(191,54,12,0.50)]",
+            hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(230,81,0,0.55)]",
+            border: "border-[#f4511e]/40",
+          };
 
+  const base =
+    "relative flex w-full items-center justify-center rounded-xl border font-black transition-all duration-200 select-none" +
+    " h-12 text-lg sm:h-14 sm:text-xl md:h-16 md:text-2xl";
+
+  // ── No question exists for this slot ──
   if (!question) {
-    return <div className={baseClass}>{points}</div>;
+    return (
+      <div
+        className={`${base} border-white/5 bg-white/[0.03] text-white/15`}
+      >
+        {points}
+      </div>
+    );
   }
 
+  // ── Question already used ──
   if (used) {
-    const usedClass =
-      result === "teamOne"
-        ? "border-cyan-200/30 bg-[linear-gradient(180deg,#45b9ea_0%,#2f9fd8_100%)] text-white"
-        : result === "teamTwo"
-          ? "border-orange-200/30 bg-[linear-gradient(180deg,#ffa85f_0%,#f28a34_100%)] text-white"
-          : "border-slate-700/50 bg-[linear-gradient(180deg,#1a2746_0%,#101a34_100%)] text-white line-through decoration-2";
+    if (result === "teamOne") {
+      return (
+        <div
+          className={`${base} border-cyan-400/30 bg-[linear-gradient(160deg,#0277bd_0%,#01579b_100%)] text-white shadow-[inset_0_0_20px_rgba(79,195,247,0.12),0_4px_16px_rgba(2,119,189,0.40)]`}
+        >
+          {/* Checkmark overlay */}
+          <span className="absolute right-1.5 top-1 text-[10px] text-cyan-300/70 sm:text-xs">✓</span>
+          {points}
+        </div>
+      );
+    }
 
-    return <div className={`${baseClass} ${usedClass}`}>{points}</div>;
+    if (result === "teamTwo") {
+      return (
+        <div
+          className={`${base} border-orange-400/30 bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)] text-white shadow-[inset_0_0_20px_rgba(255,183,77,0.12),0_4px_16px_rgba(230,81,0,0.40)]`}
+        >
+          <span className="absolute right-1.5 top-1 text-[10px] text-orange-300/70 sm:text-xs">✓</span>
+          {points}
+        </div>
+      );
+    }
+
+    // result === "none" → no winner, question passed
+    return (
+      <div
+        className={`${base} border-white/5 bg-[linear-gradient(160deg,#0f1c3a_0%,#090f22_100%)] text-white/25 line-through decoration-2`}
+      >
+        {points}
+      </div>
+    );
   }
 
+  // ── Question available — clickable ──
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={`${baseClass} hover:bg-[#d5d6d8] active:scale-[0.98]`}
+      className={`${base} ${pointsColors.bg} ${pointsColors.text} ${pointsColors.glow} ${pointsColors.border} ${pointsColors.hover} cursor-pointer active:scale-95`}
     >
       {points}
     </button>
   );
 }
 
-// ─── CategoryBoardColumn ──────────────────────────────────────────────────────
+// ─── Board: CategoryCard ──────────────────────────────────────────────────────
+// Replaces old CategoryBoardColumn.
+// Logic (getUsed / getResult / row extraction) is 100% unchanged.
+// Only the visual structure is redesigned.
 
-function CategoryBoardColumn({
+function CategoryCard({
   column,
   boardState,
   onOpenQuestion,
@@ -323,6 +359,7 @@ function CategoryBoardColumn({
   boardState: BoardState;
   onOpenQuestion: (question: QuestionRow | null) => void;
 }) {
+  // ── Logic — completely unchanged ──
   const row200 = column.rows[0];
   const row400 = column.rows[1];
   const row600 = column.rows[2];
@@ -342,53 +379,120 @@ function CategoryBoardColumn({
     return question ? boardState.questionResults[question.id] ?? "none" : "none";
   }
 
-  return (
-    <div className="flex w-full max-w-[320px] flex-col items-center md:max-w-[520px]">
+  // ── Count used tiles in this category (for progress indicator) ──
+  const allTiles = [left200, right200, left400, right400, left600, right600];
+  const usedInCategory = allTiles.filter(
+    (q) => q && boardState.usedQuestionIds.includes(q.id),
+  ).length;
+  const totalInCategory = allTiles.filter(Boolean).length;
 
-      {/* Top label */}
-      <div className="mb-0 w-[170px] rounded-t-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-t-[16px] md:px-4 md:py-3">
-        <div className="truncate text-[15px] font-black text-white md:text-[18px]">
-          {column.category.name}
+  return (
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(10,25,60,0.95)_0%,rgba(5,14,38,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.50)] transition-transform duration-300 hover:-translate-y-0.5">
+
+      {/* ── Category header ── */}
+      <div className="relative overflow-hidden">
+        {/* Image */}
+        {column.category.image_url ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={column.category.image_url}
+              alt={column.category.name}
+              className="h-20 w-full object-cover sm:h-24 md:h-28"
+            />
+            {/* Gradient overlay on image */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.90)] via-[rgba(5,14,38,0.30)] to-transparent" />
+          </>
+        ) : (
+          <div className="h-20 w-full bg-[linear-gradient(135deg,#0d2060,#05143a)] sm:h-24 md:h-28" />
+        )}
+
+        {/* Category name — overlaid on image bottom */}
+        <div className="absolute bottom-0 inset-x-0 px-3 pb-2.5 pt-6">
+          <div className="truncate text-center text-sm font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-base md:text-lg">
+            {column.category.name}
+          </div>
         </div>
+
+        {/* Progress bar */}
+        {totalInCategory > 0 && (
+          <div className="absolute top-0 inset-x-0 h-[3px] bg-white/10">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-500"
+              style={{ width: `${(usedInCategory / totalInCategory) * 100}%` }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Board body — fixed-size layout (absolute positioned pills around center image) */}
-      <div className="relative h-[240px] w-[320px] md:h-[286px] md:w-[500px]">
+      {/* ── Tile grid: 3 rows × 2 cols ── */}
+      <div className="grid grid-cols-2 gap-1.5 p-2 sm:gap-2 sm:p-2.5">
 
-        {/* Center image column */}
-        <div className="absolute left-1/2 top-0 z-20 h-[240px] w-[140px] -translate-x-1/2 overflow-hidden bg-[#cbcccf] shadow-[0_8px_18px_rgba(0,0,0,0.10)] md:h-[286px] md:w-[210px]">
-          <CategoryIllustration category={column.category} />
-        </div>
-
-        {/* Row 200 */}
-        <div className="absolute left-[0px] top-[5px] z-0 md:top-[6px]">
-          <QuestionPill question={left200}  points={200} used={getUsed(left200)}  result={getResult(left200)}  onOpen={() => onOpenQuestion(left200)} />
-        </div>
-        <div className="absolute right-[0px] top-[5px] z-0 md:top-[6px]">
-          <QuestionPill question={right200} points={200} used={getUsed(right200)} result={getResult(right200)} onOpen={() => onOpenQuestion(right200)} />
-        </div>
+        {/* Row label + tiles — 200 pts */}
+        <QuestionTile
+          question={left200}
+          points={200}
+          used={getUsed(left200)}
+          result={getResult(left200)}
+          onOpen={() => onOpenQuestion(left200)}
+        />
+        <QuestionTile
+          question={right200}
+          points={200}
+          used={getUsed(right200)}
+          result={getResult(right200)}
+          onOpen={() => onOpenQuestion(right200)}
+        />
 
         {/* Row 400 */}
-        <div className="absolute left-[0px] top-[86px] z-0 md:top-[102px]">
-          <QuestionPill question={left400}  points={400} used={getUsed(left400)}  result={getResult(left400)}  onOpen={() => onOpenQuestion(left400)} />
-        </div>
-        <div className="absolute right-[0px] top-[86px] z-0 md:top-[102px]">
-          <QuestionPill question={right400} points={400} used={getUsed(right400)} result={getResult(right400)} onOpen={() => onOpenQuestion(right400)} />
-        </div>
+        <QuestionTile
+          question={left400}
+          points={400}
+          used={getUsed(left400)}
+          result={getResult(left400)}
+          onOpen={() => onOpenQuestion(left400)}
+        />
+        <QuestionTile
+          question={right400}
+          points={400}
+          used={getUsed(right400)}
+          result={getResult(right400)}
+          onOpen={() => onOpenQuestion(right400)}
+        />
 
         {/* Row 600 */}
-        <div className="absolute left-[0px] top-[167px] z-0 md:top-[198px]">
-          <QuestionPill question={left600}  points={600} used={getUsed(left600)}  result={getResult(left600)}  onOpen={() => onOpenQuestion(left600)} />
-        </div>
-        <div className="absolute right-[0px] top-[167px] z-0 md:top-[198px]">
-          <QuestionPill question={right600} points={600} used={getUsed(right600)} result={getResult(right600)} onOpen={() => onOpenQuestion(right600)} />
-        </div>
+        <QuestionTile
+          question={left600}
+          points={600}
+          used={getUsed(left600)}
+          result={getResult(left600)}
+          onOpen={() => onOpenQuestion(left600)}
+        />
+        <QuestionTile
+          question={right600}
+          points={600}
+          used={getUsed(right600)}
+          result={getResult(right600)}
+          onOpen={() => onOpenQuestion(right600)}
+        />
       </div>
 
-      {/* Bottom label */}
-      <div className="mt-0 w-[170px] rounded-b-[14px] bg-[#262626] px-3 py-2.5 text-center shadow-[0_4px_0_rgba(0,0,0,0.18)] md:w-[210px] md:rounded-b-[16px] md:px-4 md:py-3">
-        <div className="truncate text-[14px] font-black text-white md:text-[16px]">
-          {column.category.name}
+      {/* ── Points legend footer ── */}
+      <div className="flex items-center justify-between border-t border-white/6 px-2.5 py-1.5 sm:px-3">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#1565c0]" />
+          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٢٠٠</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#6a1b9a]" />
+          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٤٠٠</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#e65100]" />
+          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٦٠٠</span>
+        </div>
+        <div className="text-[10px] font-bold text-white/25 sm:text-xs">
+          {usedInCategory}/{totalInCategory}
         </div>
       </div>
     </div>
@@ -590,7 +694,6 @@ export default function GameBoardClient({
             />
             <StatusPill label={`المتبقي: ${remainingCount}`} />
 
-            {/* Separator — grows to push action buttons right on large screens */}
             <div className="hidden flex-1 xl:block" />
 
             <button
@@ -612,7 +715,7 @@ export default function GameBoardClient({
             </Link>
           </div>
 
-          {/* Score controls — side-by-side from sm breakpoint */}
+          {/* Score controls */}
           <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
             <div className="flex justify-center sm:justify-start">
               <ScoreControl
@@ -657,19 +760,38 @@ export default function GameBoardClient({
         </div>
 
         {/* ── Game board ─────────────────────────────────────────────────── */}
-        <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.86)_0%,rgba(4,17,44,0.98)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.55)] sm:rounded-[34px] sm:p-4 md:p-5">
-          {/* Horizontal scroll wrapper — protects layout on very small screens */}
-          <div className="overflow-x-auto pb-1">
-            <div className="grid min-w-[320px] grid-cols-1 justify-items-center gap-6 md:grid-cols-2 2xl:grid-cols-3">
-              {boardColumns.map((column) => (
-                <CategoryBoardColumn
-                  key={column.category.id}
-                  column={column}
-                  boardState={boardState}
-                  onOpenQuestion={handleOpenQuestion}
-                />
-              ))}
+        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(5,20,57,0.90)_0%,rgba(4,17,44,0.99)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.60)] sm:rounded-[28px] sm:p-4">
+
+          {/* Legend row */}
+          <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
+            <span className="text-xs font-bold text-white/30 sm:text-sm">الفئات</span>
+            <div className="flex-1 h-px bg-white/6" />
+            <div className="flex items-center gap-3 text-[10px] font-bold text-white/30 sm:text-xs">
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2.5 w-2.5 rounded bg-[#1565c0]" />
+                فريق ١
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2.5 w-2.5 rounded bg-[#e65100]" />
+                فريق ٢
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block h-2.5 w-2.5 rounded bg-[#0f1c3a]" />
+                انتهى
+              </span>
             </div>
+          </div>
+
+          {/* Responsive category grid — 2 cols mobile, 3 cols lg */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+            {boardColumns.map((column) => (
+              <CategoryCard
+                key={column.category.id}
+                column={column}
+                boardState={boardState}
+                onOpenQuestion={handleOpenQuestion}
+              />
+            ))}
           </div>
         </div>
 
