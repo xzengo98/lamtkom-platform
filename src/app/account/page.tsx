@@ -29,8 +29,33 @@ type ActiveSession = {
   status: string;
 };
 
+type IconName =
+  | "user"
+  | "email"
+  | "phone"
+  | "calendar"
+  | "games"
+  | "play"
+  | "logout"
+  | "stats"
+  | "shield"
+  | "continue"
+  | "home"
+  | "pricing"
+  | "trash"
+  | "sparkles"
+  | "arrow"
+  | "clock";
+
+type Tone = "slate" | "cyan" | "orange" | "emerald" | "violet";
+
+function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
+
   return new Date(value).toLocaleDateString("ar-EG", {
     year: "numeric",
     month: "2-digit",
@@ -40,32 +65,72 @@ function formatDate(value: string | null | undefined) {
 
 function getRoleLabel(role: string | null | undefined) {
   const normalized = String(role ?? "user").toLowerCase();
+
   if (normalized === "admin") return "ADMIN";
   if (normalized === "vip") return "VIP";
   if (normalized === "premium") return "Premium";
+
   return "FREE";
+}
+
+function getRoleTone(role: string | null | undefined) {
+  const normalized = String(role ?? "user").toLowerCase();
+
+  if (normalized === "admin") {
+    return "border-violet-400/20 bg-violet-500/15 text-violet-100";
+  }
+
+  if (normalized === "vip") {
+    return "border-orange-400/20 bg-orange-500/15 text-orange-100";
+  }
+
+  if (normalized === "premium") {
+    return "border-emerald-400/20 bg-emerald-500/15 text-emerald-100";
+  }
+
+  return "border-cyan-400/20 bg-cyan-500/15 text-cyan-100";
+}
+
+function toneClasses(tone: Tone) {
+  switch (tone) {
+    case "cyan":
+      return {
+        card: "border-cyan-400/20 bg-cyan-400/10 text-cyan-100",
+        iconWrap: "border-cyan-300/20 bg-cyan-400/10 text-cyan-100",
+        softText: "text-cyan-100/80",
+      };
+    case "orange":
+      return {
+        card: "border-orange-400/20 bg-orange-400/10 text-orange-100",
+        iconWrap: "border-orange-300/20 bg-orange-400/10 text-orange-100",
+        softText: "text-orange-100/80",
+      };
+    case "emerald":
+      return {
+        card: "border-emerald-400/20 bg-emerald-400/10 text-emerald-100",
+        iconWrap: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
+        softText: "text-emerald-100/80",
+      };
+    case "violet":
+      return {
+        card: "border-violet-400/20 bg-violet-400/10 text-violet-100",
+        iconWrap: "border-violet-300/20 bg-violet-400/10 text-violet-100",
+        softText: "text-violet-100/80",
+      };
+    default:
+      return {
+        card: "border-white/10 bg-white/5 text-white",
+        iconWrap: "border-white/10 bg-white/5 text-white",
+        softText: "text-white/70",
+      };
+  }
 }
 
 function Icon({
   name,
   className = "h-5 w-5",
 }: {
-  name:
-    | "user"
-    | "email"
-    | "phone"
-    | "calendar"
-    | "games"
-    | "play"
-    | "logout"
-    | "quiz"
-    | "bara"
-    | "stats"
-    | "shield"
-    | "continue"
-    | "home"
-    | "pricing"
-    | "trash";
+  name: IconName;
   className?: string;
 }) {
   const common = {
@@ -86,64 +151,59 @@ function Icon({
           <path d="M5 19a7 7 0 0 1 14 0" />
         </svg>
       );
+
     case "email":
       return (
         <svg {...common}>
           <rect x="3" y="5" width="18" height="14" rx="2.5" />
-          <path d="m4 7 8 6 8-6" />
+          <path d="m4.5 7 7.5 6 7.5-6" />
         </svg>
       );
+
     case "phone":
       return (
         <svg {...common}>
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.45 19.45 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.63 2.62a2 2 0 0 1-.45 2.11L8 9.91a16 16 0 0 0 6.09 6.09l1.46-1.29a2 2 0 0 1 2.11-.45c.84.3 1.72.51 2.62.63A2 2 0 0 1 22 16.92Z" />
+          <path d="M6.9 4.5h2.2l1.2 3.2-1.6 1.4a14.8 14.8 0 0 0 6.2 6.2l1.4-1.6 3.2 1.2v2.2a1.7 1.7 0 0 1-1.9 1.7C10.4 18.4 5.6 13.6 5.2 6.4A1.7 1.7 0 0 1 6.9 4.5Z" />
         </svg>
       );
+
     case "calendar":
       return (
         <svg {...common}>
           <rect x="3" y="5" width="18" height="16" rx="2.5" />
-          <path d="M16 3v4M8 3v4M3 10h18" />
+          <path d="M16 3v4" />
+          <path d="M8 3v4" />
+          <path d="M3 10h18" />
         </svg>
       );
+
     case "games":
       return (
         <svg {...common}>
-          <rect x="3.5" y="8" width="17" height="8.5" rx="4.25" />
-          <path d="M8 10.5v4M6 12.5h4M15.5 11.25h.01M17.5 13.25h.01" />
+          <rect x="3" y="7" width="18" height="10" rx="5" />
+          <path d="M8 12h4" />
+          <path d="M10 10v4" />
+          <circle cx="16.5" cy="10.5" r=".7" />
+          <circle cx="18.5" cy="13.5" r=".7" />
         </svg>
       );
+
     case "play":
       return (
         <svg {...common}>
-          <path d="m8 6 10 6-10 6V6Z" />
+          <path d="M8 6.5v11l8.5-5.5L8 6.5Z" />
         </svg>
       );
+
     case "logout":
       return (
         <svg {...common}>
-          <path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3" />
-          <path d="M10 17 15 12 10 7" />
-          <path d="M15 12H4" />
+          <path d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10" />
+          <path d="M14 8l5 4-5 4" />
+          <path d="M9 12h10" />
         </svg>
       );
-    case "quiz":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M9.75 9.25a2.5 2.5 0 1 1 4.1 2c-.75.6-1.35 1.05-1.35 2" />
-          <path d="M12 16.5h.01" />
-        </svg>
-      );
-    case "bara":
-      return (
-        <svg {...common}>
-          <circle cx="9" cy="8" r="3" />
-          <path d="M4 19a5 5 0 0 1 10 0" />
-          <path d="M18 8h.01" />
-          <path d="M16.5 15.5c1.5-.3 2.8-1.2 3.5-2.5" />
-        </svg>
-      );
+
     case "stats":
       return (
         <svg {...common}>
@@ -152,12 +212,14 @@ function Icon({
           <path d="M19 20v-7" />
         </svg>
       );
+
     case "shield":
       return (
         <svg {...common}>
           <path d="M12 3 5 6v6c0 4.5 2.9 7.7 7 9 4.1-1.3 7-4.5 7-9V6l-7-3Z" />
         </svg>
       );
+
     case "continue":
       return (
         <svg {...common}>
@@ -165,6 +227,7 @@ function Icon({
           <path d="m12 5 7 7-7 7" />
         </svg>
       );
+
     case "home":
       return (
         <svg {...common}>
@@ -172,25 +235,89 @@ function Icon({
           <path d="M5.5 9.5V20h13V9.5" />
         </svg>
       );
+
     case "pricing":
       return (
         <svg {...common}>
-          <path d="M12 1v22" />
-          <path d="M17 5.5c0-1.9-2.2-3.5-5-3.5S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5S14.8 16 12 16s-5 1.6-5 3.5" />
+          <path d="M12 3v18" />
+          <path d="M16.5 7.5c0-1.9-1.8-3-4.5-3s-4.5 1.1-4.5 3 1.5 2.6 4.5 3 4.5 1.1 4.5 3-1.8 3-4.5 3-4.5-1.1-4.5-3" />
         </svg>
       );
+
     case "trash":
       return (
         <svg {...common}>
-          <path d="M3 6h18" />
-          <path d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6" />
-          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
-          <path d="M10 11v6M14 11v6" />
+          <path d="M4 7h16" />
+          <path d="M9 7V4h6v3" />
+          <path d="M7 7l1 12h8l1-12" />
+          <path d="M10 11v5" />
+          <path d="M14 11v5" />
         </svg>
       );
+
+    case "sparkles":
+      return (
+        <svg {...common}>
+          <path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3Z" />
+          <path d="m18.5 14 .7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z" />
+          <path d="m5.5 13 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6Z" />
+        </svg>
+      );
+
+    case "arrow":
+      return (
+        <svg {...common}>
+          <path d="M5 12h14" />
+          <path d="m13 5 7 7-7 7" />
+        </svg>
+      );
+
+    case "clock":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5v5l3.2 1.8" />
+        </svg>
+      );
+
     default:
       return null;
   }
+}
+
+function SectionHeading({
+  badge,
+  title,
+  description,
+  tone = "cyan",
+}: {
+  badge: string;
+  title: string;
+  description?: string;
+  tone?: Tone;
+}) {
+  const toneStyle = toneClasses(tone);
+
+  return (
+    <div className="mb-5">
+      <div
+        className={cn(
+          "mb-3 inline-flex items-center rounded-full border px-4 py-2 text-xs font-black",
+          toneStyle.card,
+        )}
+      >
+        {badge}
+      </div>
+
+      <h2 className="text-2xl font-black text-white sm:text-3xl">{title}</h2>
+
+      {description ? (
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 sm:text-base">
+          {description}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 function StatCard({
@@ -198,31 +325,45 @@ function StatCard({
   value,
   icon,
   tone = "slate",
+  helper,
 }: {
   label: string;
   value: string | number;
-  icon: "games" | "stats" | "shield" | "play" | "quiz";
-  tone?: "slate" | "cyan" | "orange" | "emerald";
+  icon: "games" | "stats" | "shield" | "play";
+  tone?: Tone;
+  helper?: string;
 }) {
-  const tones = {
-    slate: "border-white/10 bg-white/5 text-white",
-    cyan: "border-cyan-400/20 bg-cyan-400/10 text-cyan-100",
-    orange: "border-orange-400/20 bg-orange-400/10 text-orange-100",
-    emerald: "border-emerald-400/20 bg-emerald-400/10 text-emerald-100",
-  };
+  const toneStyle = toneClasses(tone);
 
   return (
     <div
-      className={`rounded-[1.6rem] border p-4 shadow-[0_14px_34px_rgba(0,0,0,0.18)] ${tones[tone]}`}
+      className={cn(
+        "relative overflow-hidden rounded-[1.7rem] border p-5 shadow-[0_18px_40px_rgba(0,0,0,0.18)]",
+        toneStyle.card,
+      )}
     >
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="text-sm font-black">{label}</div>
-        <div className="opacity-90">
+      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-sm font-black">{label}</div>
+          {helper ? (
+            <div className={cn("mt-2 text-xs leading-6", toneStyle.softText)}>
+              {helper}
+            </div>
+          ) : null}
+        </div>
+
+        <div
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
+            toneStyle.iconWrap,
+          )}
+        >
           <Icon name={icon} className="h-5 w-5" />
         </div>
       </div>
 
-      <div className="text-3xl font-black text-white">{value}</div>
+      <div className="mt-5 text-3xl font-black text-white sm:text-4xl">{value}</div>
     </div>
   );
 }
@@ -231,27 +372,108 @@ function InfoCard({
   label,
   value,
   icon,
-  truncate = false,
+  tone = "cyan",
+  valueClassName,
 }: {
   label: string;
   value: string;
-  icon: "user" | "email" | "phone" | "calendar" | "shield";
-  truncate?: boolean;
+  icon: "user" | "email" | "phone" | "calendar";
+  tone?: Tone;
+  valueClassName?: string;
 }) {
+  const toneStyle = toneClasses(tone);
+
   return (
-    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.16)]">
-      <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
+    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4 shadow-[0_12px_26px_rgba(0,0,0,0.16)]">
+      <div className="flex items-start gap-4">
+        <div
+          className={cn(
+            "mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border",
+            toneStyle.iconWrap,
+          )}
+        >
           <Icon name={icon} className="h-5 w-5" />
         </div>
-        <div className="text-sm font-black text-white/75">{label}</div>
+
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
+            {label}
+          </div>
+          <div
+            className={cn(
+              "mt-2 text-sm font-black leading-7 text-white sm:text-base",
+              valueClassName,
+            )}
+          >
+            {value}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickAction({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: "home" | "games" | "pricing";
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-4 rounded-[1.4rem] border border-white/10 bg-white/5 p-4 transition hover:border-cyan-300/20 hover:bg-white/10"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
+          <Icon name={icon} className="h-5 w-5" />
+        </div>
+
+        <div>
+          <div className="text-sm font-black text-white">{title}</div>
+          <div className="mt-1 text-xs leading-6 text-white/60">{description}</div>
+        </div>
       </div>
 
-      {truncate ? (
-        <div className="truncate text-base font-black text-white">{value}</div>
-      ) : (
-        <div className="text-base font-black text-white">{value}</div>
+      <Icon
+        name="arrow"
+        className="h-5 w-5 shrink-0 text-white/45 transition group-hover:translate-x-1 group-hover:text-white"
+      />
+    </Link>
+  );
+}
+
+function SessionScorePanel({
+  name,
+  score,
+  tone,
+  align = "right",
+}: {
+  name: string;
+  score: number;
+  tone: "cyan" | "orange";
+  align?: "right" | "left";
+}) {
+  const toneStyle = toneClasses(tone);
+
+  return (
+    <div
+      className={cn(
+        "rounded-[1.35rem] border p-4 shadow-[0_8px_20px_rgba(0,0,0,0.12)]",
+        toneStyle.card,
+        align === "left" ? "text-left" : "text-right",
       )}
+    >
+      <div className={cn("text-xs font-black uppercase tracking-[0.18em]", toneStyle.softText)}>
+        الفريق
+      </div>
+      <div className="mt-2 text-base font-black text-white sm:text-lg">{name}</div>
+      <div className="mt-3 text-3xl font-black text-white sm:text-4xl">{score}</div>
     </div>
   );
 }
@@ -266,47 +488,106 @@ function SessionCard({
   deleting: boolean;
 }) {
   return (
-    <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
-      <div className="mb-3 inline-flex items-center rounded-full border border-orange-300/20 bg-orange-400/10 px-3 py-1.5 text-xs font-black text-orange-100">
-        لعبة غير مكتملة
-      </div>
+    <div className="relative overflow-hidden rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(14,23,44,0.96)_0%,rgba(6,12,28,0.99)_100%)] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)] sm:p-6">
+      <div className="pointer-events-none absolute -left-10 top-0 h-28 w-28 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-3xl" />
 
-      <h3 className="text-2xl font-black text-white">{session.game_name}</h3>
+      <div className="relative">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center rounded-full border border-orange-300/20 bg-orange-400/10 px-3 py-1.5 text-xs font-black text-orange-100">
+              لعبة غير مكتملة
+            </div>
 
-      <div className="mt-3 text-sm font-bold text-white/55">
-        {formatDate(session.created_at)}
-      </div>
+            <h3 className="text-2xl font-black text-white sm:text-[1.75rem]">
+              {session.game_name}
+            </h3>
 
-      <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-sm font-black text-white/80">
-        {session.team_one_name} ({session.team_one_score ?? 0}) ×{" "}
-        {session.team_two_name} ({session.team_two_score ?? 0})
-      </div>
+            <p className="mt-3 text-sm leading-7 text-white/65">
+              يمكنك متابعة نفس الجلسة من حيث توقفت، أو حذفها نهائيًا إذا لم تعد
+              ترغب بإكمالها.
+            </p>
+          </div>
 
-      <div className="mt-5 flex flex-wrap gap-3">
-        <Link
-          href={`/game/board?sessionId=${session.id}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 font-black text-slate-950 transition hover:bg-cyan-400"
-        >
-          <Icon name="continue" className="h-4 w-4" />
-          متابعة اللعبة
-        </Link>
+          <div className="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/75">
+            <Icon name="clock" className="h-4 w-4" />
+            {formatDate(session.created_at)}
+          </div>
+        </div>
 
-        <button
-          onClick={() => onDelete(session.id)}
-          disabled={deleting}
-          className="inline-flex items-center gap-2 rounded-2xl border border-red-400/20 bg-red-500/10 px-5 py-3 font-black text-red-100 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Icon name="trash" className="h-4 w-4" />
-          {deleting ? "جارٍ الحذف..." : "حذف اللعبة"}
-        </button>
+        <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+          <SessionScorePanel
+            name={session.team_one_name}
+            score={session.team_one_score ?? 0}
+            tone="cyan"
+            align="right"
+          />
+
+          <div className="hidden justify-center sm:flex">
+            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-black text-white/60">
+              VS
+            </div>
+          </div>
+
+          <SessionScorePanel
+            name={session.team_two_name}
+            score={session.team_two_score ?? 0}
+            tone="orange"
+            align="left"
+          />
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={`/game/board?sessionId=${session.id}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-cyan-300 sm:w-auto"
+          >
+            <Icon name="continue" className="h-4 w-4" />
+            متابعة اللعبة
+          </Link>
+
+          <button
+            onClick={() => onDelete(session.id)}
+            disabled={deleting}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-500/10 px-5 py-3.5 text-sm font-black text-red-100 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+          >
+            <Icon name="trash" className="h-4 w-4" />
+            {deleting ? "جارٍ الحذف..." : "حذف اللعبة"}
+          </button>
+        </div>
       </div>
     </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(2,6,23,1)_100%)] p-6 sm:p-8">
+          <div className="h-7 w-36 animate-pulse rounded-full bg-white/10" />
+          <div className="mt-5 h-10 w-56 animate-pulse rounded-2xl bg-white/10 sm:w-72" />
+          <div className="mt-4 h-4 w-full max-w-2xl animate-pulse rounded-full bg-white/10" />
+          <div className="mt-2 h-4 w-full max-w-xl animate-pulse rounded-full bg-white/10" />
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-36 animate-pulse rounded-[1.7rem] border border-white/10 bg-white/5"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
 
 export default function AccountPage() {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
@@ -343,7 +624,9 @@ export default function AccountPage() {
     ]);
 
     setProfile((profileData as Profile | null) ?? null);
-    setActiveSessions(Array.isArray(sessionsData) ? (sessionsData as ActiveSession[]) : []);
+    setActiveSessions(
+      Array.isArray(sessionsData) ? (sessionsData as ActiveSession[]) : [],
+    );
     setLoading(false);
   }
 
@@ -395,7 +678,10 @@ export default function AccountPage() {
   async function handleDeleteSession(sessionId: string) {
     if (!userId || !sessionId) return;
 
-    const confirmed = window.confirm("هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟");
+    const confirmed = window.confirm(
+      "هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟",
+    );
+
     if (!confirmed) return;
 
     setDeletingId(sessionId);
@@ -417,36 +703,31 @@ export default function AccountPage() {
   }
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-10 text-center text-lg font-black">
-          جارٍ تحميل بيانات الحساب...
-        </div>
-      </main>
-    );
+    return <LoadingState />;
   }
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
-        {/* Hero */}
-        <section className="relative mb-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.30)] md:p-8 xl:p-10">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_22%),linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)] sm:p-7 xl:p-8">
           <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_center,rgba(255,255,255,0.20)_1px,transparent_1px)] [background-size:26px_26px]" />
+          <div className="pointer-events-none absolute -right-20 top-0 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 bottom-0 h-48 w-48 rounded-full bg-orange-400/10 blur-3xl" />
 
-          <div className="relative grid gap-8 xl:grid-cols-[1.1fr_0.9fr] xl:items-center">
+          <div className="relative grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
             <div>
               <div className="mb-3 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
                 Dashboard الحساب
               </div>
 
-              <h1 className="text-3xl font-black text-white md:text-5xl">
+              <h1 className="text-3xl font-black text-white sm:text-4xl xl:text-5xl">
                 أهلاً {profile?.username || "بك"}
               </h1>
 
-              <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 md:text-base">
+              <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 sm:text-base">
                 هذا مركز التحكم الخاص بك داخل المنصة. راجع بياناتك، تابع ألعابك
-                غير المكتملة، واحذف أي لعبة لا تريد إكمالها — وكل ذلك داخل صفحة
-                منظمة وواضحة.
+                غير المكتملة، واحذف أي لعبة لا تريد إكمالها، وكل ذلك داخل صفحة
+                مرتبة وواضحة وسهلة الاستخدام على الهاتف والكمبيوتر.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -459,8 +740,16 @@ export default function AccountPage() {
                 </Link>
 
                 <Link
+                  href="/games"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  <Icon name="games" className="h-4 w-4" />
+                  الألعاب
+                </Link>
+
+                <Link
                   href="/pricing"
-                  className="inline-flex items-center gap-2 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/15"
+                  className="inline-flex items-center gap-2 rounded-xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-400/20"
                 >
                   <Icon name="pricing" className="h-4 w-4" />
                   الخطط
@@ -468,37 +757,130 @@ export default function AccountPage() {
 
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-2 rounded-xl bg-red-500 px-5 py-3 text-sm font-black text-white transition hover:bg-red-400"
+                  className="inline-flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-5 py-3 text-sm font-black text-red-100 transition hover:bg-red-500/20"
                 >
                   <Icon name="logout" className="h-4 w-4" />
                   تسجيل الخروج
                 </button>
               </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
+                    العضوية
+                  </div>
+                  <div
+                    className={cn(
+                      "mt-2 inline-flex rounded-full border px-3 py-1.5 text-xs font-black",
+                      getRoleTone(profile?.role),
+                    )}
+                  >
+                    {getRoleLabel(profile?.role)}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
+                    الألعاب المتاحة الآن
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-white">
+                    {profile?.games_remaining ?? 0}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/45">
+                    الجلسات النشطة
+                  </div>
+                  <div className="mt-2 text-2xl font-black text-white">
+                    {activeSessions.length}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex justify-center xl:justify-end">
-              <div className="relative flex h-[260px] w-[260px] items-center justify-center overflow-hidden rounded-[2.2rem] border border-cyan-300/15 bg-[linear-gradient(180deg,rgba(15,26,55,0.96)_0%,rgba(8,16,36,0.96)_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35)] md:h-[320px] md:w-[320px]">
-                <div className="absolute inset-0 rounded-[inherit] border border-white/5" />
+            <div className="grid gap-4">
+              <div className="mx-auto flex h-[150px] w-[150px] items-center justify-center rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.20)] sm:h-[180px] sm:w-[180px] xl:h-[210px] xl:w-[210px]">
                 <img
                   src={heroLogo}
                   alt="شعار لمتكم"
-                  className="h-[170px] w-[170px] object-contain md:h-[230px] md:w-[230px]"
+                  className="h-full w-full object-contain"
                 />
+              </div>
+
+              <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.06] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)]">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-white/45">
+                      <Icon name="sparkles" className="h-4 w-4" />
+                      ملخص سريع
+                    </div>
+
+                    <div className="mt-3 text-xl font-black text-white">
+                      حساب جاهز للعب
+                    </div>
+
+                    <p className="mt-2 text-sm leading-7 text-white/65">
+                      راجع بياناتك بسرعة، ادخل لأي جلسة غير مكتملة، وتابع اللعب
+                      من نفس المكان مباشرة.
+                    </p>
+                  </div>
+
+                  <div
+                    className={cn(
+                      "inline-flex shrink-0 rounded-full border px-3 py-1.5 text-xs font-black",
+                      getRoleTone(profile?.role),
+                    )}
+                  >
+                    {getRoleLabel(profile?.role)}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-orange-300/20 bg-orange-400/10 text-orange-100">
+                        <Icon name="stats" className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-white/45">
+                          ألعاب تم لعبها
+                        </div>
+                        <div className="mt-1 text-xl font-black text-white">
+                          {profile?.games_played ?? 0}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
+                        <Icon name="play" className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black text-white/45">
+                          جلسات غير مكتملة
+                        </div>
+                        <div className="mt-1 text-xl font-black text-white">
+                          {activeSessions.length}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="mb-8">
-          <div className="mb-5">
-            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
-              إحصائيات الحساب
-            </div>
-            <h2 className="text-2xl font-black text-white md:text-3xl">
-              نظرة سريعة على حسابك
-            </h2>
-          </div>
+        <section className="mt-8">
+          <SectionHeading
+            badge="إحصائيات الحساب"
+            title="نظرة سريعة على حسابك"
+            description="ملخص واضح لأهم مؤشرات الحساب الحالية بطريقة أسهل للقراءة على مختلف أحجام الشاشات."
+            tone="cyan"
+          />
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
@@ -506,83 +888,119 @@ export default function AccountPage() {
               value={profile?.games_remaining ?? 0}
               icon="games"
               tone="cyan"
+              helper="عدد الجولات المتاحة لك حاليًا."
             />
+
             <StatCard
               label="الألعاب التي تم لعبها"
               value={profile?.games_played ?? 0}
               icon="stats"
               tone="orange"
+              helper="إجمالي ما تم لعبه على الحساب."
             />
+
             <StatCard
               label="العضوية"
               value={getRoleLabel(profile?.role)}
               icon="shield"
               tone="emerald"
+              helper="نوع الخطة الحالية المرتبطة بحسابك."
             />
+
             <StatCard
-              label="الجولات غير المكتملة"
+              label="الجلسات النشطة"
               value={activeSessions.length}
               icon="play"
-              tone="slate"
+              tone="violet"
+              helper="عدد الألعاب غير المكتملة الجاهزة للمتابعة."
             />
           </div>
         </section>
 
-        {/* Info */}
-        <section className="mb-10">
-          <div className="mb-5">
-            <div className="mb-2 inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-400/10 px-4 py-2 text-xs font-black text-cyan-100">
-              معلومات الحساب
+        <section className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-[1.9rem] border border-white/10 bg-white/5 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)] sm:p-6">
+            <SectionHeading
+              badge="معلومات الحساب"
+              title="بياناتك الأساسية"
+              description="تنسيق أوضح للمعلومات المهمة مع تحسين عرض النصوص الطويلة مثل البريد الإلكتروني."
+              tone="cyan"
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <InfoCard
+                label="اسم المستخدم"
+                value={profile?.username || "-"}
+                icon="user"
+                tone="cyan"
+              />
+
+              <InfoCard
+                label="الإيميل"
+                value={profile?.email || "-"}
+                icon="email"
+                tone="cyan"
+                valueClassName="break-all"
+              />
+
+              <InfoCard
+                label="رقم الهاتف"
+                value={profile?.phone || "-"}
+                icon="phone"
+                tone="orange"
+              />
+
+              <InfoCard
+                label="تاريخ إنشاء الحساب"
+                value={formatDate(profile?.created_at)}
+                icon="calendar"
+                tone="emerald"
+              />
             </div>
-            <h2 className="text-2xl font-black text-white md:text-3xl">
-              بياناتك الأساسية
-            </h2>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <InfoCard
-              label="اسم المستخدم"
-              value={profile?.username || "-"}
-              icon="user"
+          <div className="rounded-[1.9rem] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,35,0.96)_0%,rgba(5,10,24,0.98)_100%)] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.22)] sm:p-6">
+            <SectionHeading
+              badge="الوصول السريع"
+              title="روابط مفيدة داخل الحساب"
+              description="اختصارات عملية للوصول للأماكن الأكثر استخدامًا داخل المنصة."
+              tone="orange"
             />
-            <InfoCard
-              label="الإيميل"
-              value={profile?.email || "-"}
-              icon="email"
-              truncate
-            />
-            <InfoCard
-              label="رقم الهاتف"
-              value={profile?.phone || "-"}
-              icon="phone"
-            />
-            <InfoCard
-              label="تاريخ إنشاء الحساب"
-              value={formatDate(profile?.created_at)}
-              icon="calendar"
-            />
+
+            <div className="space-y-3">
+              <QuickAction
+                href="/games"
+                icon="games"
+                title="استعراض الألعاب"
+                description="انتقل مباشرة إلى قائمة الألعاب المتاحة داخل المنصة."
+              />
+
+              <QuickAction
+                href="/pricing"
+                icon="pricing"
+                title="الخطط والاشتراكات"
+                description="راجع خيارات الاشتراك أو قم بالترقية عند الحاجة."
+              />
+
+              <QuickAction
+                href="/"
+                icon="home"
+                title="العودة إلى الرئيسية"
+                description="الرجوع للواجهة الرئيسية بسرعة من داخل لوحة الحساب."
+              />
+            </div>
           </div>
         </section>
 
-        {/* Sessions */}
-        <section>
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="mb-2 inline-flex items-center rounded-full border border-orange-300/20 bg-orange-400/10 px-4 py-2 text-xs font-black text-orange-100">
-                لعبة لمتكم
-              </div>
-              <h2 className="text-2xl font-black text-white md:text-3xl">
-                الجولات غير المكتملة
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base">
-                يمكنك الرجوع لأي لعبة لم تنتهِ بعد، أو حذفها بالكامل إذا لم تعد
-                تريد إكمالها.
-              </p>
-            </div>
-          </div>
+        <section className="mt-8">
+          <SectionHeading
+            badge="لعبة لمتكم"
+            title="الجولات غير المكتملة"
+            description="يمكنك الرجوع لأي لعبة لم تنتهِ بعد، أو حذفها بالكامل إذا لم تعد تريد إكمالها."
+            tone="orange"
+          />
 
           {activeSessions.length > 0 ? (
-            <div className="grid gap-5">
+            <div className="grid gap-5 xl:grid-cols-2">
               {activeSessions.map((session) => (
                 <SessionCard
                   key={session.id}
@@ -593,14 +1011,37 @@ export default function AccountPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-[1.8rem] border border-dashed border-white/10 bg-white/5 px-6 py-14 text-center">
-              <div className="mb-3 text-2xl font-black text-white">
-                لا توجد ألعاب غير مكتملة حاليًا.
+            <div className="rounded-[1.9rem] border border-dashed border-white/10 bg-white/5 px-6 py-14 text-center shadow-[0_16px_36px_rgba(0,0,0,0.14)]">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-100">
+                <Icon name="play" className="h-7 w-7" />
               </div>
-              <p className="mx-auto max-w-2xl text-sm leading-7 text-white/65">
+
+              <div className="mt-5 text-2xl font-black text-white">
+                لا توجد ألعاب غير مكتملة حاليًا
+              </div>
+
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/65 sm:text-base">
                 عندما تبدأ لعبة جديدة ثم تتوقف قبل إنهائها، ستظهر هنا لتتمكن من
-                متابعتها أو حذفها لاحقًا.
+                متابعتها أو حذفها لاحقًا بسهولة.
               </p>
+
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/games"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+                >
+                  <Icon name="games" className="h-4 w-4" />
+                  ابدأ لعبة جديدة
+                </Link>
+
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
+                >
+                  <Icon name="home" className="h-4 w-4" />
+                  العودة للرئيسية
+                </Link>
+              </div>
             </div>
           )}
         </section>
