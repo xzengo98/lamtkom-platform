@@ -726,8 +726,7 @@ export default function AccountPage() {
 
               <p className="mt-5 max-w-3xl text-sm leading-8 text-white/72 sm:text-base">
                 هذا مركز التحكم الخاص بك داخل المنصة. راجع بياناتك، تابع ألعابك
-                غير المكتملة، واحذف أي لعبة لا تريد إكمالها، وكل ذلك داخل صفحة
-                مرتبة وواضحة وسهلة الاستخدام على الهاتف والكمبيوتر.
+                غير المكتملة، واحذف أي لعبة لا تريد إكمالها.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -821,7 +820,7 @@ export default function AccountPage() {
                     </div>
 
                     <p className="mt-2 text-sm leading-7 text-white/65">
-                      راجع بياناتك بسرعة، ادخل لأي جلسة غير مكتملة، وتابع اللعب
+                      راجع بياناتك، ادخل لأي جلسة غير مكتملة، وتابع اللعب
                       من نفس المكان مباشرة.
                     </p>
                   </div>
@@ -878,7 +877,7 @@ export default function AccountPage() {
           <SectionHeading
             badge="إحصائيات الحساب"
             title="نظرة سريعة على حسابك"
-            description="ملخص واضح لأهم مؤشرات الحساب الحالية بطريقة أسهل للقراءة على مختلف أحجام الشاشات."
+            description="ملخص لأهم مؤشرات الحساب الحالية."
             tone="cyan"
           />
 
@@ -922,7 +921,7 @@ export default function AccountPage() {
             <SectionHeading
               badge="معلومات الحساب"
               title="بياناتك الأساسية"
-              description="تنسيق أوضح للمعلومات المهمة مع تحسين عرض النصوص الطويلة مثل البريد الإلكتروني."
+              description="هنا تظهر جميع معلومات حسابك الأساسية"
               tone="cyan"
             />
 
