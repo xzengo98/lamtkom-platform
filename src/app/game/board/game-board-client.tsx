@@ -265,7 +265,7 @@ function QuestionTile({
           text: "text-[#90caf9]",
           glow: "shadow-[inset_0_1px_0_rgba(100,181,246,0.25),0_4px_16px_rgba(13,71,161,0.45)]",
           hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(21,101,192,0.55)]",
-          border: "border-[#1976d2]/40",
+          border: "border-[#1b7001]/40",
         }
       : points === 400
         ? {
@@ -277,10 +277,10 @@ function QuestionTile({
           }
         : {
             bg: "bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)]",
-            text: "text-[#ffcc80]",
+            text: "text-[#ffdca8]",
             glow: "shadow-[inset_0_1px_0_rgba(255,204,128,0.20),0_4px_16px_rgba(191,54,12,0.50)]",
             hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(230,81,0,0.55)]",
-            border: "border-[#f4511e]/40",
+            border: "border-[#e6c400]/40",
           };
 
   const base =
