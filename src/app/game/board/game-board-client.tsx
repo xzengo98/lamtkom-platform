@@ -261,11 +261,11 @@ function QuestionTile({
   const pointsColors =
     points === 200
       ? {
-          bg: "bg-[linear-gradient(160deg,#1565c0_0%,#0d47a1_100%)]",
-          text: "text-[#90caf9]",
-          glow: "shadow-[inset_0_1px_0_rgba(100,181,246,0.25),0_4px_16px_rgba(13,71,161,0.45)]",
-          hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(21,101,192,0.55)]",
-          border: "border-[#1b7001]/40",
+          bg: "bg-[linear-gradient(160deg,#1b7001_0%,#145200_100%)]",
+          text: "text-[#a5d6a7]",
+          glow: "shadow-[inset_0_1px_0_rgba(165,214,167,0.25),0_4px_16px_rgba(27,112,1,0.50)]",
+          hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(27,112,1,0.60)]",
+          border: "border-[#2e7d32]/40",
         }
       : points === 400
         ? {
@@ -276,11 +276,11 @@ function QuestionTile({
             border: "border-[#7b1fa2]/40",
           }
         : {
-            bg: "bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)]",
-            text: "text-[#ffdca8]",
-            glow: "shadow-[inset_0_1px_0_rgba(255,204,128,0.20),0_4px_16px_rgba(191,54,12,0.50)]",
-            hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(230,81,0,0.55)]",
-            border: "border-[#e6c400]/40",
+            bg: "bg-[linear-gradient(160deg,#e6c400_0%,#b89b00_100%)]",
+            text: "text-[#3d2e00]",
+            glow: "shadow-[inset_0_1px_0_rgba(255,236,100,0.35),0_4px_16px_rgba(230,196,0,0.45)]",
+            hover: "hover:brightness-110 hover:shadow-[0_6px_24px_rgba(230,196,0,0.55)]",
+            border: "border-[#e6c400]/50",
           };
 
   const base =
