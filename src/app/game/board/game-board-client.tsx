@@ -261,19 +261,19 @@ function QuestionTile({
   const pointsColors =
     points === 200
       ? {
-          bg: "bg-[linear-gradient(160deg,#e6c400_0%,#145200_100%)]",
+          bg: "bg-[linear-gradient(160deg,#1b7001_0%,#145200_100%)]",
           text: "text-[#a5d6a7]",
           glow: "shadow-[inset_0_1px_0_rgba(165,214,167,0.25),0_4px_16px_rgba(27,112,1,0.50)]",
           hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(27,112,1,0.60)]",
-          border: "border-[#e6c400]/40",
+          border: "border-[#2e7d32]/40",
         }
       : points === 400
         ? {
-            bg: "bg-[linear-gradient(160deg,#e6c400_0%,#4a148c_100%)]",
+            bg: "bg-[linear-gradient(160deg,#6a1b9a_0%,#4a148c_100%)]",
             text: "text-[#ce93d8]",
             glow: "shadow-[inset_0_1px_0_rgba(206,147,216,0.20),0_4px_16px_rgba(74,20,140,0.50)]",
             hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(106,27,154,0.55)]",
-            border: "border-[#e6c400]/40",
+            border: "border-[#7b1fa2]/40",
           }
         : {
             bg: "bg-[linear-gradient(160deg,#e6c400_0%,#b89b00_100%)]",
@@ -480,11 +480,11 @@ function CategoryCard({
       {/* ── Points legend footer ── */}
       <div className="flex items-center justify-between border-t border-white/6 px-2.5 py-1.5 sm:px-3">
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#e6c400]" />
+          <span className="h-2 w-2 rounded-full bg-[#1b7001]" />
           <span className="text-[10px] font-bold text-white/35 sm:text-xs">٢٠٠</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#e6c400]" />
+          <span className="h-2 w-2 rounded-full bg-[#6a1b9a]" />
           <span className="text-[10px] font-bold text-white/35 sm:text-xs">٤٠٠</span>
         </div>
         <div className="flex items-center gap-1.5">
