@@ -309,7 +309,7 @@ function MobileTeamTopCard({
       </div>
 
       <div
-        className={`mt-2 text-center text-3xl font-black ${
+        className={`mt-1.5 text-center text-4xl font-black leading-none ${
           isBlue ? "text-cyan-100" : "text-orange-100"
         }`}
       >
@@ -317,11 +317,11 @@ function MobileTeamTopCard({
       </div>
 
       <div className="mt-2 space-y-1">
-        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white">
-          Operatives {operatives.length}
+        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white/80">
+          Ops: {operatives.length}
         </div>
-        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white">
-          Spymasters {spymasters.length}
+        <div className="rounded-xl bg-black/25 px-2 py-1 text-center text-[10px] font-bold text-white/80">
+          Spy: {spymasters.length}
         </div>
       </div>
     </div>
@@ -1262,22 +1262,24 @@ export default function CodenamesBoardClient({
 
       {renderSettingsModal()}
 
-      <div className="mb-3 flex items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-black/20 px-3 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-4">
-        <div className="flex items-center gap-2">
+      {/* ── Top navbar ── */}
+      <div className="mb-3 flex items-center justify-between gap-2 rounded-[20px] border border-white/10 bg-black/25 px-3 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.20)] backdrop-blur-sm sm:px-4 sm:py-3">
+        {/* Left: back + player name */}
+        <div className="flex min-w-0 items-center gap-2">
           <Link
             href={`/games/codenames/room/${room.room_code}?player_id=${safeCurrentPlayer.id}`}
-            className="rounded-full border border-white/20 bg-white/5 px-3 py-2 text-sm font-black text-white hover:bg-white/10"
+            className="shrink-0 rounded-full border border-white/15 bg-white/6 px-3 py-1.5 text-xs font-black text-white hover:bg-white/12 sm:px-4 sm:py-2 sm:text-sm"
           >
-            العودة للروم
+            ← الروم
           </Link>
-
-          <div className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white">
+          <div className="truncate rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-black text-white sm:text-sm">
             {getPlayerDisplayName(safeCurrentPlayer)}
           </div>
         </div>
 
-        <div className="hidden text-center xl:block">
-          <div className="text-4xl font-black uppercase text-white">
+        {/* Center: status text (desktop only) */}
+        <div className="hidden flex-1 text-center xl:block">
+          <div className="truncate text-2xl font-black uppercase text-white/90">
             {room.status === "finished"
               ? room.assassin_revealed
                 ? "Assassin was revealed"
@@ -1288,14 +1290,18 @@ export default function CodenamesBoardClient({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right: room code + settings */}
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/50 sm:block">
+            #{room.room_code}
+          </div>
           {safeCurrentPlayer.is_host && (
             <button
               type="button"
               onClick={() => setShowSettings(true)}
-              className="rounded-full border border-white/15 bg-white/5 px-3 py-2 text-sm font-black text-white hover:bg-white/10"
+              className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-black text-white hover:bg-white/12 sm:px-4 sm:py-2 sm:text-sm"
             >
-              ⚙️ Settings
+              ⚙️ <span className="hidden sm:inline">Settings</span>
             </button>
           )}
         </div>
@@ -1306,7 +1312,7 @@ export default function CodenamesBoardClient({
         <div className="space-y-3">
           {renderTurnIndicator()}
 
-          <div className="grid grid-cols-[92px_minmax(115px,1fr)_92px] gap-2">
+          <div className="grid grid-cols-[minmax(72px,92px)_1fr_minmax(72px,92px)] gap-2">
             <MobileTeamTopCard
               title="Blue"
               theme="blue"
@@ -1379,14 +1385,14 @@ export default function CodenamesBoardClient({
 
           {renderSpectatorJoinBox()}
 
-          <div className="mobile-board-wrap relative rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2.5 shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+          <div className="mobile-board-wrap relative rounded-[20px] border border-white/10 bg-[#0d1522]/70 p-2 shadow-[0_18px_44px_rgba(0,0,0,0.28)] sm:p-2.5">
             {renderCluePopupOverlay()}
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
               {cards.map((card) => renderBoardCard(card, true))}
             </div>
           </div>
 
-          <div className="rounded-[20px] border border-white/10 bg-[#101522]/90 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+          <div className="rounded-[20px] border border-white/10 bg-[#101522]/90 p-3.5 shadow-[0_18px_44px_rgba(0,0,0,0.3)] backdrop-blur-sm sm:p-4">
             <div className="space-y-3">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
                 <div className="text-xs font-semibold text-white/60">🧠 آخر clue</div>
@@ -1432,13 +1438,13 @@ export default function CodenamesBoardClient({
 
                   <button
                     type="submit"
-                    className="w-full rounded-2xl bg-emerald-500 px-5 py-3 text-base font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:bg-emerald-400"
+                    className="w-full rounded-2xl bg-emerald-500 px-5 py-3.5 text-base font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] active:scale-[0.98] hover:bg-emerald-400"
                   >
                     إرسال الـ clue
                   </button>
                 </form>
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/55">
+                <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3.5 text-sm font-semibold text-white/50">
                   {activeTurn
                     ? "تم إرسال clue بالفعل، الآن دور الـ operatives"
                     : "فقط Spymaster الخاص بالفريق الذي عليه الدور يستطيع إرسال clue"}
@@ -1452,7 +1458,7 @@ export default function CodenamesBoardClient({
                     <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                     <button
                       type="submit"
-                      className="w-full rounded-2xl bg-orange-500 px-5 py-3 text-base font-black text-white shadow-[0_10px_25px_rgba(249,115,22,0.25)] hover:bg-orange-400"
+                      className="w-full rounded-2xl bg-orange-500 px-5 py-3.5 text-base font-black text-white shadow-[0_10px_25px_rgba(249,115,22,0.25)] active:scale-[0.98] hover:bg-orange-400"
                     >
                       إنهاء الدور
                     </button>
@@ -1465,7 +1471,7 @@ export default function CodenamesBoardClient({
                     <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
                     <button
                       type="submit"
-                      className="w-full rounded-2xl border border-red-300/20 bg-red-500/10 px-5 py-3 text-base font-black text-red-100 hover:bg-red-500/20"
+                      className="w-full rounded-2xl border border-red-300/20 bg-red-500/10 px-5 py-3.5 text-base font-black text-red-100 active:scale-[0.98] hover:bg-red-500/20"
                     >
                       🔄 إعادة اللعبة
                     </button>
@@ -2005,16 +2011,21 @@ export default function CodenamesBoardClient({
 
         @media (max-width: 420px) {
           .mobile-card-word {
-            font-size: clamp(0.68rem, 3vw, 0.95rem);
+            font-size: clamp(0.7rem, 3.2vw, 0.95rem);
           }
 
           .card-open-word-text {
-            font-size: clamp(0.82rem, 3.2vw, 1rem);
+            font-size: clamp(0.78rem, 3vw, 0.96rem);
           }
 
           .card-open-word-panel {
-            inset: auto 8px 8px 8px;
-            padding: 8px;
+            inset: auto 6px 6px 6px;
+            padding: 7px;
+            border-radius: 10px;
+          }
+
+          .mobile-board-wrap .grid {
+            gap: 5px;
           }
         }
 
