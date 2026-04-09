@@ -120,7 +120,8 @@ function buildQuestionPairs(players: Player[]): QuestionPair[] {
 
 function SectionBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-100">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-bold tracking-wide text-white/55">
+      <span className="h-1 w-1 rounded-full bg-cyan-400" />
       {children}
     </span>
   );
@@ -134,10 +135,13 @@ function StatCard({
   value: ReactNode;
 }) {
   return (
-    <div className="rounded-[1.2rem] border border-white/10 bg-white/5 p-4 text-center">
-      <div className="text-xs text-white/60 md:text-sm">{label}</div>
-      <div className="mt-2 text-xl font-black text-white md:text-3xl">
-        {value}
+    <div className="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.04]">
+      <div className="h-[2px] w-full bg-cyan-400 opacity-50" />
+      <div className="px-3 py-3 text-center">
+        <div className="text-[11px] font-bold text-white/45 sm:text-xs">{label}</div>
+        <div className="mt-1.5 text-lg font-black text-cyan-300 md:text-2xl">
+          {value}
+        </div>
       </div>
     </div>
   );
@@ -545,8 +549,15 @@ export default function BaraAlsalfahPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#020817] p-4 text-white">
-        <div className="mx-auto max-w-6xl animate-pulse rounded-[2rem] border border-white/10 bg-[#071126] p-8">
-          جاري تحميل اللعبة...
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-center py-32 text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-orange-400/20 bg-orange-400/8">
+            <span className="relative flex h-4 w-4">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60" />
+              <span className="relative inline-flex h-4 w-4 rounded-full bg-orange-400" />
+            </span>
+          </div>
+          <div className="text-lg font-black text-white/70">جاري تحميل اللعبة...</div>
+          <div className="mt-2 text-sm text-white/30">لحظة واحدة</div>
         </div>
       </div>
     );
@@ -555,7 +566,7 @@ export default function BaraAlsalfahPage() {
   if (loadError) {
     return (
       <div className="min-h-screen bg-[#020817] p-4 text-white">
-        <div className="mx-auto max-w-4xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-red-100">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-red-400/25 bg-red-400/8 p-6 text-sm font-bold text-red-300">
           {loadError}
         </div>
       </div>
@@ -563,58 +574,68 @@ export default function BaraAlsalfahPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020817] px-4 py-6 text-white md:px-6">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_35%),linear-gradient(180deg,#071126_0%,#061020_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.35)] md:p-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="text-cyan-300">لعبة جديدة</div>
-              <h1 className="mt-2 text-3xl font-black md:text-5xl">
-                برا السالفة
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70 md:text-base md:leading-8">
-                لعبة جماعية ممتعة داخل نفس الموقع. اختر الفئة، أضف اللاعبين، ودع اللعبة تختار شخصًا واحدًا فقط يكون برا السالفة بشكل عشوائي.
-              </p>
-            </div>
+    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] px-4 py-6 text-white md:px-6">
+      <div className="mx-auto max-w-6xl space-y-5">
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(150deg,rgba(10,20,44,0.98)_0%,rgba(5,10,24,1)_55%,rgba(8,16,38,0.98)_100%)]">
+          <div className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[500px] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-56 rounded-full bg-cyan-500/6 blur-2xl" />
+          <div className="relative p-6 md:p-8">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/20 bg-orange-400/8 px-3.5 py-1.5 text-xs font-bold text-orange-300">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
+                  لعبة جديدة
+                </span>
+                <h1 className="mt-3 text-3xl font-black text-white md:text-5xl">
+                  برا السالفة
+                </h1>
+                <p className="mt-2 max-w-xl text-sm leading-7 text-white/50 md:text-base">
+                  لعبة جماعية ممتعة — اختر الفئة، أضف اللاعبين، ودع اللعبة تختار شخصًا واحدًا يكون برا السالفة.
+                </p>
+              </div>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <StatCard label="عدد اللاعبين" value={players.length} />
-              <StatCard
-                label="الفئة"
-                value={activeCategory?.name ?? "غير محددة"}
-              />
-              <StatCard label="الوضع" value={getModeLabel(selectedMode)} />
-              <StatCard label="المتبقي" value={remainingItemsCount} />
+              <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
+                <StatCard label="عدد اللاعبين" value={players.length} />
+                <StatCard label="الفئة" value={activeCategory?.name ?? "—"} />
+                <StatCard label="الوضع" value={getModeLabel(selectedMode)} />
+                <StatCard label="المتبقي" value={remainingItemsCount} />
+              </div>
             </div>
           </div>
         </section>
 
         {step === "intro" && (
-          <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-              <div className="mx-auto flex h-36 w-36 items-center justify-center rounded-full border-4 border-white/15 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.18),_transparent_60%),#0b1733] text-6xl">
+          <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8 text-center">
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-orange-400 opacity-60" />
+              <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full border-2 border-orange-400/25 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.15),transparent_60%)] text-5xl">
                 ?
               </div>
-
-              <h2 className="mt-6 text-4xl font-black">برا السالفة</h2>
-
+              <h2 className="mt-6 text-4xl font-black text-white">برا السالفة</h2>
+              <p className="mt-3 text-sm text-white/45">العبوها مع أصدقائك واكتشفوا من هو برا السالفة</p>
               <button
                 onClick={() => setStep("category")}
-                className="mt-8 w-full rounded-[1.5rem] bg-green-500 px-6 py-4 text-xl font-black text-white transition hover:bg-green-400"
+                className="mt-8 w-full rounded-2xl bg-orange-500 px-6 py-4 text-xl font-black text-white shadow-[0_6px_24px_rgba(249,115,22,0.25)] transition hover:bg-orange-400 active:scale-[0.98]"
               >
                 ابدأ اللعب
               </button>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-6">
               <SectionBadge>كيف تعمل اللعبة؟</SectionBadge>
-
-              <div className="mt-5 space-y-4 text-white/75">
-                <p>1. تختار الفئة ونوع الجولة.</p>
-                <p>2. تضيف اللاعبين يدويًا.</p>
-                <p>3. نوزع الأدوار عشوائيًا، وشخص واحد فقط يكون برا السالفة.</p>
-                <p>4. كل لاعب يسأل مرة على الأقل ويُسأل مرة على الأقل.</p>
-                <p>5. عند انتهاء عناصر الفئة يجب اختيار فئة جديدة.</p>
+              <div className="mt-5 space-y-3">
+                {[
+                  "تختار الفئة ونوع الجولة.",
+                  "تضيف اللاعبين يدويًا.",
+                  "نوزع الأدوار عشوائيًا، وشخص واحد فقط يكون برا السالفة.",
+                  "كل لاعب يسأل مرة على الأقل ويُسأل مرة على الأقل.",
+                  "عند انتهاء عناصر الفئة يجب اختيار فئة جديدة.",
+                ].map((text, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-orange-400/25 bg-orange-400/10 text-[11px] font-black text-orange-300">{i + 1}</span>
+                    <p className="text-sm leading-7 text-white/60">{text}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -625,7 +646,7 @@ export default function BaraAlsalfahPage() {
             {groupedSections.map((section) => (
               <div
                 key={section.id}
-                className="rounded-[2rem] border border-white/10 bg-[#071126] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)]"
               >
                 <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="flex flex-wrap items-center gap-3">
@@ -685,7 +706,7 @@ export default function BaraAlsalfahPage() {
                           </div>
                         </div>
 
-                        <div className="bg-[#ff6a00] px-4 py-3 text-center text-base font-black text-white">
+                        <div className="bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-2.5 text-center text-sm font-black text-white">
                           {category.name}
                         </div>
                       </button>
@@ -698,7 +719,7 @@ export default function BaraAlsalfahPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setStep("intro")}
-                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-bold text-white transition hover:bg-white/10"
+                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/70 transition hover:bg-white/8 hover:text-white"
               >
                 رجوع
               </button>
@@ -715,7 +736,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "mode" && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-6">
             <SectionBadge>اختر وضع اللعبة</SectionBadge>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -753,7 +774,7 @@ export default function BaraAlsalfahPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={() => setStep("category")}
-                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-bold text-white transition hover:bg-white/10"
+                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/70 transition hover:bg-white/8 hover:text-white"
               >
                 رجوع
               </button>
@@ -771,7 +792,7 @@ export default function BaraAlsalfahPage() {
 
         {step === "players" && (
           <section className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
-            <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-6">
               <SectionBadge>إضافة اللاعبين</SectionBadge>
 
               <div className="mt-5 flex gap-3">
@@ -840,7 +861,7 @@ export default function BaraAlsalfahPage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-[#071126] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-6">
               <SectionBadge>ملخص الجلسة</SectionBadge>
 
               <div className="mt-5 grid gap-4">
@@ -859,7 +880,7 @@ export default function BaraAlsalfahPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   onClick={() => setStep("mode")}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-bold text-white transition hover:bg-white/10"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/70 transition hover:bg-white/8 hover:text-white"
                 >
                   رجوع
                 </button>
@@ -882,8 +903,8 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "reveal-pass" && revealPlayer && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <div className="text-2xl font-black text-green-400 md:text-4xl">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8 text-center">
+            <div className="text-2xl font-black text-orange-300 md:text-4xl">
               {revealPlayer.name}
             </div>
 
@@ -898,7 +919,7 @@ export default function BaraAlsalfahPage() {
                 setRevealShown(false);
                 setStep("reveal-role");
               }}
-              className="mt-10 rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+              className="mt-10 w-full rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
             >
               التالي
             </button>
@@ -907,7 +928,7 @@ export default function BaraAlsalfahPage() {
 
         {step === "reveal-role" && revealPlayer && activeItem && (
           <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <div className="text-2xl font-black text-green-400 md:text-4xl">
+            <div className="text-2xl font-black text-orange-300 md:text-4xl">
               {revealPlayer.name}
             </div>
 
@@ -919,7 +940,7 @@ export default function BaraAlsalfahPage() {
 
                 <button
                   onClick={() => setRevealShown(true)}
-                  className="mt-10 rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                  className="mt-10 w-full rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
                 >
                   إظهار
                 </button>
@@ -927,14 +948,14 @@ export default function BaraAlsalfahPage() {
             ) : revealPlayer.id === outsiderId ? (
               <>
                 <p className="mt-5 text-xl leading-9 text-white">
-                  أنت <span className="font-black text-green-400">برا السالفة</span>
+                  أنت <span className="font-black text-orange-400">برا السالفة</span>
                   <br />
                   حاول تعرف الكلمة من أسئلة اللاعبين وتصويتهم.
                 </p>
 
                 <button
                   onClick={goNextReveal}
-                  className="mt-10 rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                  className="mt-10 w-full rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
                 >
                   التالي
                 </button>
@@ -948,7 +969,7 @@ export default function BaraAlsalfahPage() {
 
                 <button
                   onClick={goNextReveal}
-                  className="mt-10 rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                  className="mt-10 w-full rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
                 >
                   التالي
                 </button>
@@ -958,7 +979,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "questions" && currentQuestionPair && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8 text-center">
             <SectionBadge>وقت الأسئلة</SectionBadge>
 
             <h2 className="mt-5 text-3xl font-black md:text-5xl">
@@ -976,7 +997,7 @@ export default function BaraAlsalfahPage() {
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <button
                 onClick={nextQuestionTurn}
-                className="rounded-[1.4rem] bg-green-500 px-7 py-4 text-xl font-black text-white transition hover:bg-green-400"
+                className="rounded-2xl bg-orange-500 px-7 py-4 text-xl font-black text-white shadow-[0_3px_14px_rgba(249,115,22,0.20)] transition hover:bg-orange-400 active:scale-[0.98]"
               >
                 التالي
               </button>
@@ -992,7 +1013,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "vote" && votingPlayer && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8 text-center">
             <div className="text-center">
               <SectionBadge>التصويت</SectionBadge>
               <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
@@ -1010,7 +1031,7 @@ export default function BaraAlsalfahPage() {
                   <button
                     key={player.id}
                     onClick={() => castVote(player.id)}
-                    className="w-full rounded-[1.2rem] bg-green-500 px-5 py-4 text-lg font-black text-white transition hover:bg-green-400"
+                    className="w-full rounded-2xl border border-orange-400/20 bg-orange-500/10 px-5 py-4 text-lg font-black text-orange-100 transition hover:bg-orange-500/20 active:scale-[0.98]"
                   >
                     {player.name}
                   </button>
@@ -1027,13 +1048,13 @@ export default function BaraAlsalfahPage() {
               الشخص الذي كان برا السالفة هو:
             </p>
 
-            <div className="mt-4 text-4xl font-black text-green-400 md:text-6xl">
+            <div className="mt-4 text-4xl font-black text-orange-400 md:text-6xl">
               {outsiderPlayer.name}
             </div>
 
             <button
               onClick={() => setStep("guess")}
-              className="mt-10 rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+              className="mt-10 w-full rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
             >
               التالي
             </button>
@@ -1041,7 +1062,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "guess" && outsiderPlayer && activeItem && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8">
             <div className="text-center">
               <SectionBadge>تخمين الشخص برا السالفة</SectionBadge>
               <h2 className="mt-4 text-3xl font-black text-white md:text-5xl">
@@ -1093,14 +1114,14 @@ export default function BaraAlsalfahPage() {
                 <button
                   onClick={submitOutsiderGuess}
                   disabled={!selectedGuess}
-                  className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
                 >
                   إجابة
                 </button>
               ) : (
                 <button
                   onClick={goToResultsAfterGuess}
-                  className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                  className="rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
                 >
                   النتائج
                 </button>
@@ -1125,7 +1146,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "results" && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8">
             <div className="text-center">
               <SectionBadge>النتائج</SectionBadge>
               <h2 className="mt-4 text-3xl font-black md:text-5xl">
@@ -1152,7 +1173,7 @@ export default function BaraAlsalfahPage() {
             <div className="mt-8 flex justify-center">
               <button
                 onClick={() => setStep("round-end")}
-                className="rounded-[1.5rem] bg-green-500 px-8 py-4 text-2xl font-black text-white transition hover:bg-green-400"
+                className="rounded-2xl bg-orange-500 px-8 py-4 text-xl font-black text-white shadow-[0_4px_20px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
               >
                 التالي
               </button>
@@ -1161,7 +1182,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "round-end" && (
-          <section className="rounded-[2rem] border border-white/10 bg-[#071126] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)] p-8">
             <div className="text-center">
               <SectionBadge>انتهت هذه الجولة</SectionBadge>
               <h2 className="mt-4 text-3xl font-black md:text-5xl">
@@ -1175,7 +1196,7 @@ export default function BaraAlsalfahPage() {
             <div className="mx-auto mt-10 grid max-w-3xl gap-4 md:grid-cols-2">
               <button
                 onClick={continueWithSamePlayersAndCategory}
-                className="rounded-[1.4rem] bg-green-500 px-6 py-4 text-xl font-black text-white transition hover:bg-green-400"
+                className="rounded-2xl bg-orange-500 px-6 py-4 text-xl font-black text-white shadow-[0_3px_14px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 active:scale-[0.98]"
               >
                 كمل اللعبة
               </button>
@@ -1205,7 +1226,7 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "category-finished" && (
-          <section className="rounded-[2rem] border border-amber-400/20 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <section className="overflow-hidden rounded-[2rem] border border-amber-400/20 bg-[linear-gradient(160deg,rgba(20,14,6,0.98)_0%,rgba(5,10,24,0.98)_100%)] p-8 text-center">
             <SectionBadge>انتهت أسئلة الفئة</SectionBadge>
 
             <h2 className="mt-5 text-3xl font-black text-white md:text-5xl">
@@ -1221,7 +1242,7 @@ export default function BaraAlsalfahPage() {
             <div className="mt-10 flex justify-center">
               <button
                 onClick={changeCategoryKeepScores}
-                className="rounded-[1.5rem] bg-cyan-500 px-8 py-4 text-2xl font-black text-slate-950 transition hover:bg-cyan-400"
+                className="rounded-2xl bg-cyan-500 px-8 py-4 text-xl font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 active:scale-[0.98]"
               >
                 تغيير نوع السالفة
               </button>

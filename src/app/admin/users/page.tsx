@@ -132,27 +132,32 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 
   const users: UserRow[] = Array.isArray(data) ? (data as UserRow[]) : [];
 
+  const selectClass = "w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/60";
+  const labelClass  = "mb-1.5 block text-xs font-bold text-white/45";
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <AdminPageHeader
         title="إدارة الأعضاء"
-        description="من هنا يمكنك تعديل الدور الإداري، نوع الحساب free أو premium، وعدد الألعاب المتبقية لكل مستخدم."
+        description="من هنا يمكنك تعديل الدور الإداري، نوع الحساب، وعدد الألعاب المتبقية لكل مستخدم."
       />
 
-      {params.saved ? (
-        <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 px-5 py-4 text-sm text-emerald-100 sm:text-base">
+      {params.saved && (
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/8 px-4 py-3.5 text-sm font-bold text-emerald-300">
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7"/></svg>
           تم حفظ التعديلات بنجاح.
         </div>
-      ) : null}
+      )}
 
-      {params.error ? (
-        <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
+      {params.error && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-400/8 px-4 py-3.5 text-sm font-bold text-red-300">
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
           حدث خطأ أثناء الحفظ.
         </div>
-      ) : null}
+      )}
 
       {error ? (
-        <div className="rounded-[1.5rem] border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-100 sm:text-base">
+        <div className="flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-400/8 px-4 py-3.5 text-sm font-bold text-red-300">
           فشل تحميل المستخدمين: {error.message}
         </div>
       ) : users.length > 0 ? (
@@ -161,106 +166,86 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             <form
               key={item.id}
               action={updateUserAction}
-              className="rounded-[1.75rem] border border-white/10 bg-slate-900/50 p-4 sm:p-5"
+              className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(160deg,rgba(14,22,48,0.94)_0%,rgba(6,12,28,0.98)_100%)]"
             >
+              {/* Colored top bar by tier */}
+              <div className={`h-[2px] w-full ${item.account_tier === "premium" ? "bg-orange-400" : "bg-cyan-400"} opacity-60`} />
+
               <input type="hidden" name="user_id" value={item.id} />
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 p-5">
+                {/* User header */}
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-xs text-cyan-300 sm:text-sm">المستخدم</p>
-                    <h3 className="mt-1 break-words text-2xl font-black text-white sm:text-3xl">
-                      {item.username || "بدون اسم مستخدم"}
-                    </h3>
-                    <p className="mt-2 break-all text-xs text-slate-500">
-                      {item.id}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/8 text-base font-black text-cyan-300">
+                      {(item.username || item.email || "?").slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-lg font-black text-white sm:text-xl">
+                        {item.username || "بدون اسم مستخدم"}
+                      </h3>
+                      <p className="truncate text-[11px] text-white/30">{item.id.slice(0, 16)}...</p>
+                    </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white">
-                      {item.role === "admin" ? "admin" : "user"}
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${item.role === "admin" ? "border-red-400/25 bg-red-400/10 text-red-300" : "border-white/10 bg-white/5 text-white/50"}`}>
+                      {item.role === "admin" ? "ADMIN" : "USER"}
                     </span>
-                    <span
-                      className={`rounded-full border px-3 py-1.5 text-xs font-bold ${
-                        item.account_tier === "premium"
-                          ? "border-orange-400/20 bg-orange-400/10 text-orange-100"
-                          : "border-cyan-400/20 bg-cyan-400/10 text-cyan-200"
-                      }`}
-                    >
-                      {item.account_tier === "premium" ? "premium" : "free"}
+                    <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${item.account_tier === "premium" ? "border-orange-400/25 bg-orange-400/10 text-orange-300" : "border-cyan-400/20 bg-cyan-400/8 text-cyan-300"}`}>
+                      {item.account_tier === "premium" ? "Premium" : "Free"}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                {/* Info grid */}
+                <div className="grid gap-2.5 sm:grid-cols-2">
                   <MiniInfoCard label="البريد الإلكتروني" value={item.email || "-"} />
                   <MiniInfoCard label="رقم الهاتف" value={item.phone || "-"} />
-                  <MiniInfoCard
-                    label="الألعاب المتبقية"
-                    value={String(item.games_remaining ?? 0)}
-                  />
-                  <MiniInfoCard
-                    label="الألعاب التي لُعبت"
-                    value={String(item.games_played ?? 0)}
-                  />
+                  <MiniInfoCard label="الألعاب المتبقية" value={String(item.games_remaining ?? 0)} accent="cyan" />
+                  <MiniInfoCard label="الألعاب التي لُعبت" value={String(item.games_played ?? 0)} accent="orange" />
                 </div>
 
-                <div className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-xs text-slate-400 sm:text-sm">تاريخ الإنشاء</p>
-                  <p className="mt-2 text-sm font-bold text-white sm:text-base">
-                    {formatDate(item.created_at)}
-                  </p>
+                {/* Date */}
+                <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                  <p className="text-[11px] font-bold text-white/35">تاريخ الإنشاء</p>
+                  <p className="mt-1 text-sm font-bold text-white/70">{formatDate(item.created_at)}</p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                {/* Edit controls */}
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-white">
-                      الدور
-                    </label>
-                    <select
-                      name="role"
-                      defaultValue={item.role ?? "user"}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-cyan-400/50"
-                    >
+                    <label className={labelClass}>الدور</label>
+                    <select name="role" defaultValue={item.role ?? "user"} className={selectClass}>
                       <option value="user">user</option>
                       <option value="admin">admin</option>
                     </select>
                   </div>
-
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-white">
-                      نوع الحساب
-                    </label>
-                    <select
-                      name="account_tier"
-                      defaultValue={item.account_tier ?? "free"}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-cyan-400/50"
-                    >
+                    <label className={labelClass}>نوع الحساب</label>
+                    <select name="account_tier" defaultValue={item.account_tier ?? "free"} className={selectClass}>
                       <option value="free">free</option>
                       <option value="premium">premium</option>
                     </select>
                   </div>
-
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-white">
-                      الألعاب المتبقية
-                    </label>
+                    <label className={labelClass}>الألعاب المتبقية</label>
                     <input
                       type="number"
                       min={0}
                       step={1}
                       name="games_remaining"
                       defaultValue={item.games_remaining ?? 0}
-                      className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-cyan-400/50"
+                      className={selectClass}
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-cyan-400 px-5 py-3 text-base font-black text-slate-950 transition hover:bg-cyan-300"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_3px_14px_rgba(34,211,238,0.20)] transition hover:bg-cyan-400 active:scale-[0.98]"
                 >
+                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7"/></svg>
                   حفظ التعديلات
                 </button>
               </div>
@@ -280,16 +265,17 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 function MiniInfoCard({
   label,
   value,
+  accent,
 }: {
   label: string;
   value: string;
+  accent?: "cyan" | "orange";
 }) {
+  const valColor = accent === "cyan" ? "text-cyan-300" : accent === "orange" ? "text-orange-300" : "text-white/80";
   return (
-    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-3">
-      <p className="text-xs text-slate-400 sm:text-sm">{label}</p>
-      <p className="mt-2 break-words text-sm font-bold text-white sm:text-base">
-        {value}
-      </p>
+    <div className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
+      <p className="text-[11px] font-bold text-white/35">{label}</p>
+      <p className={`mt-1 break-words text-sm font-black ${valColor}`}>{value}</p>
     </div>
   );
 }
