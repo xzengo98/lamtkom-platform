@@ -297,216 +297,231 @@ export default async function NewQuestionPage({
     redirect("/admin/questions");
   }
 
+  const inputClass = "w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-400/60";
+  const labelClass = "mb-1.5 block text-xs font-bold text-white/50";
+
   return (
-    <main className="mx-auto max-w-5xl p-4 md:p-6">
-      <div className="mb-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
-        <h1 className="text-3xl font-black text-white">إضافة سؤال جديد</h1>
-        <p className="mt-3 text-sm leading-7 text-white/70">
-          أضف السؤال مع النص أو الصور أو الفيديو أو الصوت، وحدد الفئة والنقاط
-          والتفعيل وسماحية السنوات من صفحة واحدة.
-        </p>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
 
-        <div className="mt-5">
-          <Link
-            href="/admin/questions"
-            className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10"
-          >
-            الرجوع للأسئلة
-          </Link>
-        </div>
-      </div>
+        {/* ── Page header ── */}
+        <div className="relative mb-6 overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(150deg,rgba(15,25,50,1)_0%,rgba(7,13,30,1)_100%)]">
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
+          <div className="relative px-7 py-9 md:px-10">
+            {/* Breadcrumb */}
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold text-white/30">
+              <Link href="/admin" className="transition hover:text-white/55">Admin</Link>
+              <span>/</span>
+              <Link href="/admin/questions" className="transition hover:text-white/55">الأسئلة</Link>
+              <span>/</span>
+              <span className="text-white/50">إضافة جديد</span>
+            </div>
 
-      {resolvedSearchParams.error ? (
-        <div className="mb-5 rounded-2xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm font-bold text-red-100">
-          {resolvedSearchParams.error}
-        </div>
-      ) : null}
-
-      <form
-        action={createQuestion}
-        className="space-y-6 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)]"
-      >
-        <HtmlSnippetEditor
-          name="question_text"
-          label="نص السؤال"
-          placeholder="اكتب السؤال هنا..."
-          rows={8}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-black text-white/80">
-              رابط صورة السؤال
-            </label>
-            <input
-              name="question_image_url"
-              type="url"
-              placeholder="https://..."
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-black text-white/80">
-              رابط فيديو السؤال
-            </label>
-            <input
-              name="question_video_url"
-              type="url"
-              placeholder="https://..."
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-            />
-          </div>
-        </div>
-
-        <HtmlSnippetEditor
-          name="answer_text"
-          label="نص الإجابة"
-          placeholder="اكتب الإجابة هنا..."
-          rows={8}
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-black text-white/80">
-              رابط صورة الإجابة
-            </label>
-            <input
-              name="answer_image_url"
-              type="url"
-              placeholder="https://..."
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-black text-white/80">
-              رابط فيديو الإجابة
-            </label>
-            <input
-              name="answer_video_url"
-              type="url"
-              placeholder="https://..."
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-            />
-          </div>
-        </div>
-
-        <div className="rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
-          <h2 className="mb-4 text-xl font-black text-white">إعدادات السؤال</h2>
-          <p className="mb-5 text-sm leading-7 text-white/65">
-            اختر الفئة الصحيحة وحدد النقاط وحالة التفعيل وسماحية السنوات.
-          </p>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-black text-white/80">
-                الفئة
-              </label>
-              <select
-                name="category_id"
-                defaultValue=""
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-bold text-white/50">
+                  <span className="h-1 w-1 rounded-full bg-cyan-400" />
+                  لوحة التحكم
+                </span>
+                <h1 className="mt-3 text-2xl font-black text-white md:text-3xl">
+                  إضافة سؤال جديد
+                </h1>
+                <p className="mt-1.5 text-sm text-white/45">
+                  أضف نص السؤال والإجابة مع الوسائط، وحدد الفئة والنقاط والإعدادات.
+                </p>
+              </div>
+              <Link
+                href="/admin/questions"
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98]"
               >
-                <option value="">اختر الفئة</option>
-                {groupedSections.map((section) => (
-                  <optgroup
-                    key={section.id}
-                    label={section.name}
-                    className="text-white"
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                الرجوع للأسئلة
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Error alert ── */}
+        {resolvedSearchParams.error && (
+          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-400/8 px-4 py-3.5 text-sm font-bold text-red-300">
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+            {resolvedSearchParams.error}
+          </div>
+        )}
+
+        {/* ── Main form ── */}
+        <form action={createQuestion} className="space-y-5">
+
+          {/* ─ Question block ─ */}
+          <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.92)_0%,rgba(5,10,24,0.97)_100%)]">
+            <div className="flex items-center gap-3 border-b border-white/6 px-6 py-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/8 text-cyan-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.75 9.25a2.5 2.5 0 1 1 4.1 2c-.75.6-1.35 1.05-1.35 2"/><path d="M12 16.5h.01"/></svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-black text-white">السؤال</h2>
+                <p className="text-[11px] text-white/35">نص السؤال وصورة أو فيديو اختياري</p>
+              </div>
+            </div>
+            <div className="space-y-4 p-6">
+              <HtmlSnippetEditor
+                name="question_text"
+                label="نص السؤال"
+                placeholder="اكتب السؤال هنا..."
+                rows={8}
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>رابط صورة السؤال (اختياري)</label>
+                  <input name="question_image_url" type="url" placeholder="https://..." className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>رابط فيديو السؤال (اختياري)</label>
+                  <input name="question_video_url" type="url" placeholder="https://..." className={inputClass} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─ Answer block ─ */}
+          <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.92)_0%,rgba(5,10,24,0.97)_100%)]">
+            <div className="flex items-center gap-3 border-b border-white/6 px-6 py-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/8 text-emerald-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-black text-white">الإجابة</h2>
+                <p className="text-[11px] text-white/35">نص الإجابة الصحيحة وصورة أو فيديو اختياري</p>
+              </div>
+            </div>
+            <div className="space-y-4 p-6">
+              <HtmlSnippetEditor
+                name="answer_text"
+                label="نص الإجابة"
+                placeholder="اكتب الإجابة هنا..."
+                rows={8}
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>رابط صورة الإجابة (اختياري)</label>
+                  <input name="answer_image_url" type="url" placeholder="https://..." className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>رابط فيديو الإجابة (اختياري)</label>
+                  <input name="answer_video_url" type="url" placeholder="https://..." className={inputClass} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─ Settings block ─ */}
+          <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.92)_0%,rgba(5,10,24,0.97)_100%)]">
+            <div className="flex items-center gap-3 border-b border-white/6 px-6 py-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/8 text-violet-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-black text-white">إعدادات السؤال</h2>
+                <p className="text-[11px] text-white/35">الفئة، النقاط، التفعيل، وسماحية السنوات</p>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Category */}
+                <div className="sm:col-span-2">
+                  <label className={labelClass}>الفئة <span className="text-red-400">*</span></label>
+                  <select
+                    name="category_id"
+                    defaultValue=""
+                    className={inputClass}
                   >
-                    {section.categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
+                    <option value="">اختر الفئة...</option>
+                    {groupedSections.map((section) => (
+                      <optgroup key={section.id} label={section.name} className="text-white">
+                        {section.categories.map((category) => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </optgroup>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+                  </select>
+                </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-black text-white/80">
-                النقاط
-              </label>
-              <select
-                name="points"
-                defaultValue="200"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-              >
-                <option value="200">200</option>
-                <option value="400">400</option>
-                <option value="600">600</option>
-              </select>
-            </div>
+                {/* Points */}
+                <div>
+                  <label className={labelClass}>النقاط <span className="text-red-400">*</span></label>
+                  <select name="points" defaultValue="200" className={inputClass}>
+                    <option value="200">200 نقطة — سهل</option>
+                    <option value="400">400 نقطة — متوسط</option>
+                    <option value="600">600 نقطة — صعب</option>
+                  </select>
+                </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-black text-white/80">
-                سماحية سنة قبل
-              </label>
-              <select
-                name="year_tolerance_before"
-                defaultValue="0"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-              >
-                <option value="0">بدون سماحية</option>
-                <option value="1">سنة واحدة قبل</option>
-                <option value="2">سنتان قبل</option>
-                <option value="5">5 سنوات قبل</option>
-                <option value="10">10 سنوات قبل</option>
-              </select>
-            </div>
+                {/* Is active */}
+                <div className="flex items-end">
+                  <label className="inline-flex w-full cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white transition hover:bg-white/8">
+                    <input name="is_active" type="checkbox" defaultChecked className="h-4 w-4 rounded accent-cyan-400" />
+                    <span>
+                      السؤال مفعّل
+                      <span className="mt-0.5 block text-[11px] font-bold text-white/35">يظهر في اللعبة فور الحفظ</span>
+                    </span>
+                  </label>
+                </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-black text-white/80">
-                سماحية سنة بعد
-              </label>
-              <select
-                name="year_tolerance_after"
-                defaultValue="0"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-cyan-400"
-              >
-                <option value="0">بدون سماحية</option>
-                <option value="1">سنة واحدة بعد</option>
-                <option value="2">سنتان بعد</option>
-                <option value="5">5 سنوات بعد</option>
-                <option value="10">10 سنوات بعد</option>
-              </select>
+                {/* Year tolerance */}
+                <div>
+                  <label className={labelClass}>سماحية سنوات قبل</label>
+                  <select name="year_tolerance_before" defaultValue="0" className={inputClass}>
+                    <option value="0">بدون سماحية</option>
+                    <option value="1">سنة واحدة قبل</option>
+                    <option value="2">سنتان قبل</option>
+                    <option value="5">5 سنوات قبل</option>
+                    <option value="10">10 سنوات قبل</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>سماحية سنوات بعد</label>
+                  <select name="year_tolerance_after" defaultValue="0" className={inputClass}>
+                    <option value="0">بدون سماحية</option>
+                    <option value="1">سنة واحدة بعد</option>
+                    <option value="2">سنتان بعد</option>
+                    <option value="5">5 سنوات بعد</option>
+                    <option value="10">10 سنوات بعد</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Hint */}
+              <p className="mt-4 text-xs leading-6 text-white/35">
+                يمكنك إضافة السؤال كنص فقط، أو نص مع صورة أو فيديو. السماحية تُستخدم للأسئلة التي تعتمد على سنة معينة.
+              </p>
             </div>
           </div>
 
-          <label className="mt-5 inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white">
-            <input
-              name="is_active"
-              type="checkbox"
-              defaultChecked
-              className="h-4 w-4 accent-cyan-400"
-            />
-            السؤال مفعّل
-          </label>
-        </div>
-
-        <p className="text-sm leading-7 text-white/65">
-          يمكنك إضافة السؤال كنص فقط، أو نص مع صورة، أو نص مع فيديو، أو مقطع
-          صوتي من داخل المحرر. وينطبق ذلك أيضًا على الإجابة.
-        </p>
-
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/questions"
-            className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
-          >
-            إلغاء
-          </Link>
-
-          <button
-            type="submit"
-            className="inline-flex items-center rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
-          >
-            حفظ السؤال
-          </button>
-        </div>
-      </form>
+          {/* ─ Submit bar ─ */}
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-5 py-4">
+            <p className="text-xs text-white/30">
+              <span className="text-red-400">*</span> حقول مطلوبة — نص السؤال، نص الإجابة، والفئة
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link
+                href="/admin/questions"
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98]"
+              >
+                إلغاء
+              </Link>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-7 py-3 text-sm font-black text-slate-950 shadow-[0_4px_16px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 active:scale-[0.98]"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                حفظ السؤال
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </main>
   );
 }

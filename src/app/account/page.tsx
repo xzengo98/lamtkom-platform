@@ -172,7 +172,7 @@ function StatCard({
   );
 }
 
-// ─── InfoRow ──────────────────────────────────────────────────────────────────
+// ─── InfoRow (vertical, divider style) ────────────────────────────────────────
 
 function InfoRow({
   label,
@@ -196,6 +196,55 @@ function InfoRow({
           <div className="truncate text-sm font-black text-white">{value}</div>
         ) : (
           <div className="text-sm font-black text-white">{value}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── InfoCard (grid card style) ───────────────────────────────────────────────
+
+const infoIconTones: Record<"user" | "email" | "phone" | "calendar" | "shield", string> = {
+  user:     "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
+  email:    "border-violet-400/20 bg-violet-400/8 text-violet-300",
+  phone:    "border-emerald-400/20 bg-emerald-400/8 text-emerald-300",
+  calendar: "border-orange-400/20 bg-orange-400/8 text-orange-300",
+  shield:   "border-amber-400/20 bg-amber-400/8 text-amber-300",
+};
+
+const infoBarColors: Record<"user" | "email" | "phone" | "calendar" | "shield", string> = {
+  user:     "bg-cyan-400",
+  email:    "bg-violet-400",
+  phone:    "bg-emerald-400",
+  calendar: "bg-orange-400",
+  shield:   "bg-amber-400",
+};
+
+function InfoCard({
+  label,
+  value,
+  icon,
+  truncate = false,
+}: {
+  label: string;
+  value: string;
+  icon: "user" | "email" | "phone" | "calendar" | "shield";
+  truncate?: boolean;
+}) {
+  const iconTone = infoIconTones[icon];
+  const barColor = infoBarColors[icon];
+  return (
+    <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(160deg,rgba(16,26,52,0.85)_0%,rgba(6,12,28,0.95)_100%)]">
+      <div className={`h-[2px] w-full ${barColor} opacity-55`} />
+      <div className="p-4">
+        <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${iconTone}`}>
+          <Icon name={icon} className="h-4 w-4" />
+        </div>
+        <div className="text-xs font-bold text-white/40">{label}</div>
+        {truncate ? (
+          <div className="mt-1 truncate text-sm font-black text-white">{value}</div>
+        ) : (
+          <div className="mt-1 text-sm font-black text-white">{value}</div>
         )}
       </div>
     </div>
@@ -532,19 +581,17 @@ export default function AccountPage() {
           </div>
         </section>
 
-        {/* ── Info card ─────────────────────────────────────────────────────── */}
+        {/* ── Info grid ─────────────────────────────────────────────────────── */}
         <section className="mb-8">
           <SectionBadge>معلومات الحساب</SectionBadge>
           <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">بياناتك الأساسية</h2>
 
-          <div className="mt-5 overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.80)_0%,rgba(6,12,28,0.90)_100%)]">
-            <div className="divide-y divide-white/6 px-5">
-              <InfoRow label="اسم المستخدم"       value={profile?.username || "-"}           icon="user"     />
-              <InfoRow label="البريد الإلكتروني"  value={profile?.email    || "-"}           icon="email"    truncate />
-              <InfoRow label="رقم الهاتف"          value={profile?.phone    || "-"}           icon="phone"    />
-              <InfoRow label="تاريخ إنشاء الحساب" value={formatDate(profile?.created_at)}    icon="calendar" />
-              <InfoRow label="نوع العضوية"         value={roleLabel}                          icon="shield"   />
-            </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            <InfoCard label="اسم المستخدم"       value={profile?.username || "-"}           icon="user"     />
+            <InfoCard label="البريد الإلكتروني"  value={profile?.email    || "-"}           icon="email"    truncate />
+            <InfoCard label="رقم الهاتف"          value={profile?.phone    || "-"}           icon="phone"    />
+            <InfoCard label="تاريخ إنشاء الحساب" value={formatDate(profile?.created_at)}    icon="calendar" />
+            <InfoCard label="نوع العضوية"         value={roleLabel}                          icon="shield"   />
           </div>
         </section>
 
