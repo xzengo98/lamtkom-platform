@@ -38,115 +38,119 @@ export default async function CreateCodenamesRoomPage({
   const errorMessage = resolvedSearchParams?.error?.trim() || "";
 
   return (
-    <div className="mx-auto max-w-[1400px] p-3 md:p-5 xl:p-6">
-      <div className="rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_22%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <TopPill active>Create Room</TopPill>
-            <TopPill>Codenames</TopPill>
-          </div>
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] text-white">
+      <div className="mx-auto max-w-2xl px-4 py-8 md:px-6">
 
-          <Link
-            href="/games/codenames"
-            className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-black text-white hover:bg-white/10"
-          >
-            رجوع
-          </Link>
+        {/* ── Header ── */}
+        <div className="relative mb-6 overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(150deg,rgba(8,18,42,0.98)_0%,rgba(4,10,26,1)_100%)]">
+          <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
+
+          <div className="relative px-7 py-9 md:px-10">
+            {/* Breadcrumb */}
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold text-white/30">
+              <Link href="/" className="transition hover:text-white/55">الرئيسية</Link>
+              <span>/</span>
+              <Link href="/games/codenames" className="transition hover:text-white/55">Codenames</Link>
+              <span>/</span>
+              <span className="text-white/50">إنشاء غرفة</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-3.5 py-1.5 text-xs font-bold text-cyan-300">
+                  <span className="h-1 w-1 rounded-full bg-cyan-400" />
+                  Create Room
+                </span>
+                <h1 className="mt-3 text-2xl font-black text-white md:text-3xl">
+                  ابدأ غرفة جديدة
+                </h1>
+                <p className="mt-1.5 text-sm text-white/45">
+                  أدخل اسمك لإنشاء غرفة وستصبح الـ Host تلقائياً.
+                </p>
+              </div>
+              <Link
+                href="/games/codenames"
+                className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white"
+              >
+                رجوع
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)_300px] xl:items-stretch">
-          <div
-            className="relative overflow-hidden rounded-[28px] border border-cyan-300/20 p-5 shadow-[0_18px_42px_rgba(0,0,0,0.24)]"
-            style={{
-              backgroundImage: `linear-gradient(180deg, rgba(10,18,30,0.78), rgba(10,18,30,0.9)), url(${BLUE_PANEL_BG})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="text-center text-sm font-black uppercase tracking-[0.16em] text-cyan-100">
-              Blue Team
-            </div>
-            <div className="mt-16 text-center text-xl font-black text-white">
-              Create the room
-            </div>
-          </div>
+        {/* ── Form card ── */}
+        <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.94)_0%,rgba(5,10,24,0.98)_100%)]">
+          <div className="h-[2px] w-full bg-cyan-400 opacity-60" />
 
-          <div className="rounded-[30px] border border-white/10 bg-black/20 px-5 py-6 text-center shadow-[0_18px_42px_rgba(0,0,0,0.24)]">
-            <div className="text-sm font-black uppercase tracking-[0.18em] text-white/55">
-              Codenames
+          <div className="p-6 md:p-8">
+            {/* Team side cards */}
+            <div className="mb-6 grid grid-cols-2 gap-3">
+              <div
+                className="relative overflow-hidden rounded-2xl border border-cyan-400/20 p-4"
+                style={{
+                  backgroundImage: `linear-gradient(160deg, rgba(8,16,30,0.92), rgba(4,10,24,0.96)), url(${BLUE_PANEL_BG})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <div className="text-center text-xs font-black uppercase tracking-widest text-cyan-300">Blue Team</div>
+                <div className="mt-3 text-center text-sm font-bold text-white/60">Operatives + Spymaster</div>
+              </div>
+              <div
+                className="relative overflow-hidden rounded-2xl border border-orange-400/20 p-4"
+                style={{
+                  backgroundImage: `linear-gradient(160deg, rgba(20,10,6,0.92), rgba(10,5,3,0.96)), url(${ORANGE_PANEL_BG})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                <div className="text-center text-xs font-black uppercase tracking-widest text-orange-300">Orange Team</div>
+                <div className="mt-3 text-center text-sm font-bold text-white/60">Operatives + Spymaster</div>
+              </div>
             </div>
-
-            <h1 className="mt-4 text-3xl font-black text-white md:text-5xl">
-              ابدأ غرفة جديدة
-            </h1>
-
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
-              أدخل اسمك ليتم إنشاء غرفة جديدة، وستصبح أنت منشئ الغرفة وبإمكانك
-              التحكم باللاعبين والفرق ثم بدء المباراة.
-            </p>
 
             {errorMessage && (
-              <div className="mx-auto mt-5 max-w-2xl rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">
+              <div className="mb-5 flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-400/8 px-4 py-3.5 text-sm font-bold text-red-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
                 {decodeURIComponent(errorMessage)}
               </div>
             )}
 
-            <form
-              action={createCodenamesRoom}
-              className="mx-auto mt-6 max-w-2xl space-y-4"
-            >
-              <div className="rounded-[26px] border border-white/10 bg-white/5 p-4 text-right shadow-inner">
-                <label
-                  htmlFor="guest_name"
-                  className="mb-2 block text-sm font-black text-white/80"
-                >
-                  اسمك
+            <form action={createCodenamesRoom} className="space-y-4">
+              <div>
+                <label htmlFor="guest_name" className="mb-1.5 block text-xs font-bold text-white/45">
+                  اسمك <span className="text-red-400">*</span>
                 </label>
                 <input
                   id="guest_name"
                   name="guest_name"
                   type="text"
                   required
-                  placeholder="اكتب اسمك"
-                  className="w-full rounded-2xl border border-white/10 bg-white px-4 py-4 text-right text-lg font-black text-black outline-none placeholder:text-black/35"
+                  placeholder="اكتب اسمك هنا..."
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3.5 text-sm font-bold text-white outline-none transition placeholder:text-white/25 focus:border-cyan-400/60"
                 />
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-2.5 sm:flex-row">
                 <button
                   type="submit"
-                  className="rounded-2xl bg-emerald-500 px-6 py-4 text-lg font-black text-white shadow-[0_10px_25px_rgba(16,185,129,0.25)] hover:bg-emerald-400"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.25)] transition hover:bg-cyan-400 active:scale-[0.98]"
                 >
+                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                   إنشاء الغرفة
                 </button>
-
                 <Link
                   href="/games/codenames"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center text-lg font-black text-white hover:bg-white/10"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white"
                 >
-                  رجوع
+                  إلغاء
                 </Link>
               </div>
             </form>
           </div>
-
-          <div
-            className="relative overflow-hidden rounded-[28px] border border-orange-300/20 p-5 shadow-[0_18px_42px_rgba(0,0,0,0.24)]"
-            style={{
-              backgroundImage: `linear-gradient(180deg, rgba(20,10,6,0.78), rgba(20,10,6,0.9)), url(${ORANGE_PANEL_BG})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="text-center text-sm font-black uppercase tracking-[0.16em] text-orange-100">
-              Orange Team
-            </div>
-            <div className="mt-16 text-center text-xl font-black text-white">
-              Become the host
-            </div>
-          </div>
         </div>
+
       </div>
-    </div>
+    </main>
   );
 }

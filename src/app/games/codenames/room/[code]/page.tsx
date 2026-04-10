@@ -70,10 +70,10 @@ function TopPill({
 }) {
   return (
     <div
-      className={`rounded-full border px-4 py-2 text-sm font-black text-white shadow-lg ${
+      className={`rounded-full border px-3.5 py-1.5 text-xs font-bold text-white ${
         active
-          ? "border-white/25 bg-white/10"
-          : "border-white/20 bg-black/15"
+          ? "border-cyan-400/25 bg-cyan-400/10 text-cyan-300"
+          : "border-white/10 bg-white/5 text-white/60"
       }`}
     >
       {children}
@@ -131,17 +131,18 @@ function TeamStatMini({
   value: number;
   tone: "blue" | "orange" | "neutral";
 }) {
-  const toneClass =
-    tone === "blue"
-      ? "border-cyan-300/20 bg-cyan-500/10 text-cyan-100"
-      : tone === "orange"
-      ? "border-orange-300/20 bg-orange-500/10 text-orange-100"
-      : "border-white/10 bg-white/5 text-white";
+  const barColor  = tone === "blue" ? "bg-cyan-400" : tone === "orange" ? "bg-orange-400" : "bg-white/30";
+  const numColor  = tone === "blue" ? "text-cyan-300" : tone === "orange" ? "text-orange-300" : "text-white/80";
+  const lblColor  = tone === "blue" ? "text-cyan-400/55" : tone === "orange" ? "text-orange-400/55" : "text-white/35";
+  const bdColor   = tone === "blue" ? "border-cyan-400/15 bg-cyan-400/6" : tone === "orange" ? "border-orange-400/15 bg-orange-400/6" : "border-white/8 bg-white/4";
 
   return (
-    <div className={`rounded-[22px] border p-4 shadow-xl ${toneClass}`}>
-      <div className="text-sm font-semibold opacity-80">{title}</div>
-      <div className="mt-2 text-4xl font-black">{value}</div>
+    <div className={`overflow-hidden rounded-2xl border ${bdColor}`}>
+      <div className={`h-[2px] w-full ${barColor} opacity-55`} />
+      <div className="px-4 py-4 text-center">
+        <div className={`text-xs font-bold ${lblColor}`}>{title}</div>
+        <div className={`mt-1.5 text-3xl font-black ${numColor}`}>{value}</div>
+      </div>
     </div>
   );
 }
@@ -181,7 +182,7 @@ function TeamLobbyColumn({
     tone === "blue" ? "🔵" : tone === "orange" ? "🟠" : "👁️";
 
   return (
-    <div className={`rounded-[30px] border p-4 shadow-[0_18px_42px_rgba(0,0,0,0.24)] ${wrapperTone}`}>
+    <div className={`overflow-hidden rounded-[2rem] border p-4 ${wrapperTone}`}>
       <div className="mb-4 flex items-center justify-between">
         <div className={`text-xl font-black md:text-2xl ${titleTone}`}>{title}</div>
         <div className="text-lg">{badge}</div>
@@ -241,7 +242,7 @@ function TeamLobbyColumn({
                         <input type="hidden" name="team" value="blue" />
                         <button
                           type="submit"
-                          className="rounded-2xl bg-cyan-500 px-3 py-2 text-xs font-black text-white hover:bg-cyan-400"
+                          className="rounded-xl bg-cyan-500 px-3 py-2 text-xs font-black text-white transition hover:bg-cyan-400 active:scale-[0.98]"
                         >
                           Blue
                         </button>
@@ -258,7 +259,7 @@ function TeamLobbyColumn({
                         <input type="hidden" name="team" value="red" />
                         <button
                           type="submit"
-                          className="rounded-2xl bg-orange-500 px-3 py-2 text-xs font-black text-white hover:bg-orange-400"
+                          className="rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white transition hover:bg-orange-400 active:scale-[0.98]"
                         >
                           Orange
                         </button>
@@ -275,7 +276,7 @@ function TeamLobbyColumn({
                         <input type="hidden" name="team" value="spectator" />
                         <button
                           type="submit"
-                          className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black text-white hover:bg-white/10"
+                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black text-white/60 transition hover:bg-white/8 hover:text-white"
                         >
                           Spectator
                         </button>
@@ -338,7 +339,7 @@ function TeamLobbyColumn({
                           />
                           <button
                             type="submit"
-                            className="rounded-2xl border border-red-300/20 bg-red-500/10 px-3 py-2 text-xs font-black text-red-100 hover:bg-red-500/20"
+                            className="rounded-xl border border-red-400/20 bg-red-500/8 px-3 py-2 text-xs font-black text-red-300 transition hover:bg-red-500/15 active:scale-[0.98]"
                           >
                             حذف
                           </button>
@@ -353,7 +354,7 @@ function TeamLobbyColumn({
             );
           })
         ) : (
-          <div className="rounded-[24px] border border-white/10 bg-black/20 p-5 text-sm text-white/45">
+          <div className="rounded-2xl border border-dashed border-white/8 bg-white/[0.02] p-5 text-sm text-white/35 text-center">
             {emptyText}
           </div>
         )}
@@ -435,110 +436,121 @@ export default async function CodenamesRoomPage({
   }
 
   return (
-    <div className="mx-auto max-w-[1840px] p-3 md:p-5 xl:p-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] px-3 py-4 text-white md:px-5 md:py-5 xl:px-6">
+      <div className="mx-auto max-w-[1840px]">
       <RoomStatusWatcher
         roomId={room.id}
         roomCode={room.room_code}
         playerId={safeCurrentPlayer.id}
       />
 
-      <div className="space-y-5">
-        <div className="rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_22%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <TopPill active>Room Lobby</TopPill>
-              <TopPill>{getPlayerDisplayName(safeCurrentPlayer)}</TopPill>
-              <TopPill>Code: {room.room_code}</TopPill>
-            </div>
+      <div className="space-y-4">
+        {/* ── Lobby header ── */}
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-[linear-gradient(150deg,rgba(8,18,42,0.98)_0%,rgba(4,10,26,1)_55%,rgba(6,12,32,0.98)_100%)]">
+          <div className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[500px] -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-56 rounded-full bg-violet-500/6 blur-2xl" />
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href="/games/codenames/create"
-                className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-black text-white hover:bg-white/10"
-              >
-                ➕ New Room
-              </Link>
-
-              <div className="rounded-full border border-white/20 bg-black/20 px-4 py-2 text-sm font-black text-white/80">
-                الحالة: {room.status || "waiting"}
+          <div className="relative px-5 py-5 md:px-7">
+            {/* Top nav bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <TopPill active>Room Lobby</TopPill>
+                <TopPill>{getPlayerDisplayName(safeCurrentPlayer)}</TopPill>
+                <TopPill>#{room.room_code}</TopPill>
+                <span className={`rounded-full border px-3 py-1 text-xs font-bold ${
+                  room.status === "active"
+                    ? "border-emerald-400/25 bg-emerald-400/8 text-emerald-300"
+                    : "border-white/10 bg-white/5 text-white/45"
+                }`}>
+                  {room.status || "waiting"}
+                </span>
               </div>
 
-              {isHost && canStartGame && (
-                <form action={startCodenamesGame}>
-                  <input type="hidden" name="room_code" value={room.room_code} />
-                  <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
-                  <button
-                    type="submit"
-                    className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-black text-white hover:bg-emerald-400"
-                  >
-                    🚀 ابدأ اللعبة
-                  </button>
-                </form>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/games/codenames/create"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black text-white/70 transition hover:bg-white/8 hover:text-white"
+                >
+                  + New Room
+                </Link>
+
+                {isHost && canStartGame && (
+                  <form action={startCodenamesGame}>
+                    <input type="hidden" name="room_code" value={room.room_code} />
+                    <input type="hidden" name="actor_player_id" value={safeCurrentPlayer.id} />
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-black text-white shadow-[0_3px_14px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 active:scale-[0.98]"
+                    >
+                      🚀 ابدأ اللعبة
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
+
+            {/* Invite link */}
+            <div className="mt-4">
+              <CodenamesInviteLink roomCode={room.room_code} />
+            </div>
+
+            {/* Team prep center */}
+            <div className="mt-5 grid gap-3 xl:grid-cols-[220px_minmax(0,1fr)_220px] xl:items-start">
+              <TeamHeaderCard title="Blue Team" theme="blue" subtitle="Operatives + Spymaster" />
+
+              <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(10,18,40,0.90)_0%,rgba(4,10,24,0.95)_100%)] px-5 py-5 text-center">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-bold tracking-widest text-white/40 uppercase">
+                  Codenames · Lobby
+                </span>
+                <div className="mt-3 text-2xl font-black uppercase text-white md:text-3xl">
+                  Prepare the Teams
+                </div>
+                <div className="mt-2 text-sm text-white/45">
+                  اختر الفريق والدور لكل لاعب، ثم ابدأ الجولة
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl border border-cyan-400/15 bg-cyan-400/6 px-3 py-2.5 text-center">
+                    <div className="text-[10px] font-bold text-cyan-400/55">Blue Ops</div>
+                    <div className="text-xl font-black text-cyan-300">{blueOperatives.length}</div>
+                  </div>
+                  <div className="rounded-xl border border-cyan-400/15 bg-cyan-400/6 px-3 py-2.5 text-center">
+                    <div className="text-[10px] font-bold text-cyan-400/55">Blue Spy</div>
+                    <div className="text-xl font-black text-cyan-300">{blueSpymasters.length}</div>
+                  </div>
+                  <div className="rounded-xl border border-orange-400/15 bg-orange-400/6 px-3 py-2.5 text-center">
+                    <div className="text-[10px] font-bold text-orange-400/55">Orange Ops</div>
+                    <div className="text-xl font-black text-orange-300">{orangeOperatives.length}</div>
+                  </div>
+                  <div className="rounded-xl border border-orange-400/15 bg-orange-400/6 px-3 py-2.5 text-center">
+                    <div className="text-[10px] font-bold text-orange-400/55">Orange Spy</div>
+                    <div className="text-xl font-black text-orange-300">{orangeSpymasters.length}</div>
+                  </div>
+                </div>
+              </div>
+
+              <TeamHeaderCard title="Orange Team" theme="orange" subtitle="Operatives + Spymaster" />
+            </div>
+
+            {/* Alerts */}
+            {isHost && !canStartGame && (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3.5 text-sm font-bold text-amber-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                يجب أن يكون لكل فريق operative واحد على الأقل وspymaster واحد فقط.
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="mt-3 flex items-center gap-3 rounded-2xl border border-red-400/25 bg-red-400/8 px-4 py-3.5 text-sm font-bold text-red-300">
+                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+                {decodeURIComponent(errorMessage)}
+              </div>
+            )}
           </div>
-
-          <div className="mt-5">
-            <CodenamesInviteLink roomCode={room.room_code} />
-          </div>
-
-          <div className="mt-6 grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)_250px] xl:items-start">
-            <TeamHeaderCard
-              title="Blue Team"
-              theme="blue"
-              subtitle="Operatives + Spymaster"
-            />
-
-            <div className="rounded-[30px] border border-white/10 bg-black/20 px-5 py-6 text-center shadow-[0_18px_42px_rgba(0,0,0,0.24)]">
-              <div className="text-sm font-black uppercase tracking-[0.18em] text-white/55">
-                Codenames
-              </div>
-
-              <div className="mt-4 text-3xl font-black uppercase text-white md:text-5xl">
-                Prepare the teams
-              </div>
-
-              <div className="mt-4 text-sm text-white/65 md:text-base">
-                اختر اللاعبين لكل فريق وحدد الـ Spymaster ثم ابدأ الجولة
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-100">
-                  Blue Operatives: {blueOperatives.length}
-                </div>
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-100">
-                  Blue Spymasters: {blueSpymasters.length}
-                </div>
-                <div className="rounded-full border border-orange-300/20 bg-orange-500/10 px-4 py-2 text-sm font-black text-orange-100">
-                  Orange Operatives: {orangeOperatives.length}
-                </div>
-                <div className="rounded-full border border-orange-300/20 bg-orange-500/10 px-4 py-2 text-sm font-black text-orange-100">
-                  Orange Spymasters: {orangeSpymasters.length}
-                </div>
-              </div>
-            </div>
-
-            <TeamHeaderCard
-              title="Orange Team"
-              theme="orange"
-              subtitle="Operatives + Spymaster"
-            />
-          </div>
-
-          {isHost && !canStartGame && (
-            <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100">
-              يجب أن يكون لكل فريق لاعب operative واحد على الأقل ولاعب spymaster واحد فقط.
-            </div>
-          )}
-
-          {errorMessage && (
-            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-100">
-              {decodeURIComponent(errorMessage)}
-            </div>
-          )}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        {/* ── Stats strip ── */}
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
           <TeamStatMini title="إجمالي اللاعبين" value={players.length} tone="neutral" />
           <TeamStatMini title="Blue Team" value={bluePlayers.length} tone="blue" />
           <TeamStatMini title="Orange Team" value={orangePlayers.length} tone="orange" />
@@ -576,6 +588,7 @@ export default async function CodenamesRoomPage({
             roomCode={room.room_code}
           />
         </div>
+      </div>
       </div>
 
       <style>{`
