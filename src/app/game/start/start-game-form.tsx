@@ -278,9 +278,22 @@ function getSectionTheme(slug: string | null | undefined, name?: string | null) 
 
 function getAvailabilityBadge(availability: CategoryAvailability) {
   if (!availability?.isSelectable) {
-    return { text: "غير متاحة", className: "border-red-500/30 bg-[#34161b] text-red-200" };
+    return {
+      text: "غير متاح",
+      className: "border-red-500/30 bg-red-500/20 text-red-200",
+      exhausted: true,
+    };
   }
-  return { text: "متاحة", className: "border-emerald-400/30 bg-[#0f2e2a] text-emerald-200" };
+  // Calculate available games: min of easy/medium/hard counts
+  // Each game uses 1 of each. availableGames from server is pre-calculated.
+  const count = availability.availableGames ?? 0;
+  const gameLabel =
+    count === 1 ? "لعبة واحدة" : count > 1 ? `${count} ألعاب` : "متاحة";
+  return {
+    text: gameLabel,
+    className: "border-emerald-400/30 bg-emerald-500/18 text-emerald-200",
+    exhausted: false,
+  };
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -536,6 +549,7 @@ export default function StartGameForm({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [localError, setLocalError]           = useState("");
   const [openInfoId, setOpenInfoId]           = useState<string | null>(null);
+  const [tooltipCategoryId, setTooltipCategoryId] = useState<string | null>(null);
 
   const safeSections   = Array.isArray(sections)   ? sections   : [];
   const safeCategories = Array.isArray(categories) ? categories : [];
@@ -823,73 +837,113 @@ export default function StartGameForm({
 
                   const active   = selectedCategories.includes(category.id);
                   const badge    = getAvailabilityBadge(availability);
-                  const infoOpen = openInfoId === category.id;
-
+                  const isTooltipOpen = tooltipCategoryId === category.id;
                   return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      onClick={() => toggleCategory(category.id)}
-                      className={`group relative w-full overflow-hidden rounded-[1.4rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_12px_28px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 ${
-                        active ? `${theme.selectedRing} scale-[1.01]` : ""
-                      }`}
-                    >
-                      {/* Info button */}
+                    <div key={category.id} className="relative">
+                      {/* Tooltip popup */}
+                      {isTooltipOpen && (
+                        <div className="absolute -top-2 left-1/2 z-50 w-52 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(8,14,32,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
+                          <div className="mb-1 text-xs font-black" style={{ color: "var(--tw-ring-color, #67e8f9)" }}>{category.name}</div>
+                          {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+                          <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(8,14,32,0.97)]" />
+                        </div>
+                      )}
+
                       <button
                         type="button"
-                        onClick={(event) => handleInfoClick(event, category.id)}
-                        className={`absolute left-2 top-2 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-black shadow-md md:h-9 md:w-9 md:text-sm ${theme.info}`}
-                        aria-label={`عرض وصف ${category.name}`}
+                        disabled={!availability.isSelectable}
+                        onClick={() => {
+                          if (availability.isSelectable) {
+                            toggleCategory(category.id);
+                            setTooltipCategoryId(null);
+                          }
+                        }}
+                        className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
+                          !availability.isSelectable
+                            ? "cursor-not-allowed border-white/5 opacity-75"
+                            : active
+                            ? `${theme.selectedRing} scale-[1.01] border-transparent`
+                            : "border-white/10 hover:-translate-y-0.5 hover:border-white/20"
+                        }`}
                       >
-                        i
-                      </button>
+                        {/* Image area — full cover */}
+                        <div className="relative overflow-hidden">
+                          {category.image_url ? (
+                            <img
+                              src={category.image_url}
+                              alt={category.name}
+                              className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-40 items-center justify-center bg-[linear-gradient(160deg,rgba(16,26,52,0.95),rgba(6,12,28,0.98))] text-4xl">
+                              ✨
+                            </div>
+                          )}
 
-                      {/* Availability badge */}
-                      <div className={`absolute right-2 top-2 z-20 inline-flex rounded-full border px-2 py-1 text-[10px] font-black md:px-3 ${badge.className}`}>
-                        {badge.text}
-                      </div>
+                          {/* Dark gradient overlay from bottom */}
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(6,12,28,0.88)] via-transparent to-transparent" />
 
-                      {/* Selected checkmark */}
-                      {active ? (
-                        <div className="absolute bottom-2 left-2 z-20 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
-                          ✓
-                        </div>
-                      ) : null}
+                          {/* "i" info tooltip button — top left */}
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              setTooltipCategoryId(isTooltipOpen ? null : category.id);
+                            }}
+                            className={`absolute left-2 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-[rgba(14,100,180,0.85)] text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-[rgba(14,130,220,0.95)] ${theme.info}`}
+                            aria-label={`عرض وصف ${category.name}`}
+                          >
+                            i
+                          </button>
 
-                      {/* Image */}
-                      <div className="overflow-hidden rounded-t-[1.4rem] border-b border-white/10 bg-[#cfd3d8]">
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt={category.name}
-                            className="h-28 w-full object-cover sm:h-32 md:h-36 lg:h-40"
-                          />
-                        ) : (
-                          <div className="flex h-28 items-center justify-center text-2xl text-slate-500 sm:h-32 md:h-36 lg:h-40">
-                            ✨
+                          {/* Availability / games count badge — top right */}
+                          <div className={`absolute right-2 top-2 z-20 rounded-full border px-2.5 py-1 text-[10px] font-black backdrop-blur-sm ${badge.className}`}>
+                            {badge.text}
                           </div>
-                        )}
-                      </div>
 
-                      {/* Name bar */}
-                      <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 md:text-base ${theme.nameBar}`}>
-                        {category.name}
-                      </div>
+                          {/* Selected checkmark — bottom left */}
+                          {active && (
+                            <div className="absolute bottom-2 left-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
+                              ✓
+                            </div>
+                          )}
 
-                      {/* Info panel */}
-                      {infoOpen ? (
-                        <div className="border-t border-white/10 bg-slate-950/85 px-3 py-3 text-right text-xs leading-6 text-white/80 md:text-sm md:leading-7">
-                          <div className="mb-1.5 text-sm font-black text-white">{category.name}</div>
-                          <div>{category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}</div>
+                          {/* Exhausted overlay */}
+                          {!availability.isSelectable && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
+                              <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
+                                غير متاح
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      ) : null}
-                    </button>
+
+                        {/* Name bar */}
+                        <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 ${
+                          !availability.isSelectable
+                            ? "bg-[linear-gradient(180deg,rgba(50,20,20,0.80),rgba(30,10,10,0.90))] text-white/50"
+                            : theme.nameBar
+                        }`}>
+                          {category.name}
+                        </div>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
             </div>
           );
         })}
+
+        {/* Tooltip dismiss overlay */}
+        {tooltipCategoryId && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setTooltipCategoryId(null)}
+          />
+        )}
 
         {/* Uncategorized */}
         {uncategorized.length > 0 ? (
@@ -918,61 +972,90 @@ export default function StartGameForm({
 
                 const active   = selectedCategories.includes(category.id);
                 const badge    = getAvailabilityBadge(availability);
-                const infoOpen = openInfoId === category.id;
-
+                const isTooltipOpen = tooltipCategoryId === category.id;
                 return (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => toggleCategory(category.id)}
-                    className={`group relative w-full overflow-hidden rounded-[1.4rem] border border-black/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-0 text-right shadow-[0_12px_28px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-0.5 ${
-                      active ? `${theme.selectedRing} scale-[1.01]` : ""
-                    }`}
-                  >
+                  <div key={category.id} className="relative">
+                    {isTooltipOpen && (
+                      <div className="absolute -top-2 left-1/2 z-50 w-52 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(8,14,32,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
+                        <div className="mb-1 text-xs font-black text-cyan-300">{category.name}</div>
+                        {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+                        <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(8,14,32,0.97)]" />
+                      </div>
+                    )}
+
                     <button
                       type="button"
-                      onClick={(event) => handleInfoClick(event, category.id)}
-                      className={`absolute left-2 top-2 z-30 inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-black shadow-md md:h-9 md:w-9 md:text-sm ${theme.info}`}
-                      aria-label={`عرض وصف ${category.name}`}
+                      disabled={!availability.isSelectable}
+                      onClick={() => {
+                        if (availability.isSelectable) {
+                          toggleCategory(category.id);
+                          setTooltipCategoryId(null);
+                        }
+                      }}
+                      className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
+                        !availability.isSelectable
+                          ? "cursor-not-allowed border-white/5 opacity-75"
+                          : active
+                          ? `${theme.selectedRing} scale-[1.01] border-transparent`
+                          : "border-white/10 hover:-translate-y-0.5 hover:border-white/20"
+                      }`}
                     >
-                      i
-                    </button>
+                      <div className="relative overflow-hidden">
+                        {category.image_url ? (
+                          <img
+                            src={category.image_url}
+                            alt={category.name}
+                            className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-40 items-center justify-center bg-[linear-gradient(160deg,rgba(16,26,52,0.95),rgba(6,12,28,0.98))] text-4xl">
+                            ✨
+                          </div>
+                        )}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(6,12,28,0.88)] via-transparent to-transparent" />
 
-                    <div className={`absolute right-2 top-2 z-20 inline-flex rounded-full border px-2 py-1 text-[10px] font-black md:px-3 ${badge.className}`}>
-                      {badge.text}
-                    </div>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setTooltipCategoryId(isTooltipOpen ? null : category.id);
+                          }}
+                          className="absolute left-2 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-[rgba(14,100,180,0.85)] text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-[rgba(14,130,220,0.95)]"
+                          aria-label={`عرض وصف ${category.name}`}
+                        >
+                          i
+                        </button>
 
-                    {active ? (
-                      <div className="absolute bottom-2 left-2 z-20 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
-                        ✓
-                      </div>
-                    ) : null}
-
-                    <div className="overflow-hidden rounded-t-[1.4rem] border-b border-white/10 bg-[#cfd3d8]">
-                      {category.image_url ? (
-                        <img
-                          src={category.image_url}
-                          alt={category.name}
-                          className="h-28 w-full object-cover sm:h-32 md:h-36 lg:h-40"
-                        />
-                      ) : (
-                        <div className="flex h-28 items-center justify-center text-2xl text-slate-500 sm:h-32 md:h-36 lg:h-40">
-                          ✨
+                        <div className={`absolute right-2 top-2 z-20 rounded-full border px-2.5 py-1 text-[10px] font-black backdrop-blur-sm ${badge.className}`}>
+                          {badge.text}
                         </div>
-                      )}
-                    </div>
 
-                    <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 md:text-base ${theme.nameBar}`}>
-                      {category.name}
-                    </div>
+                        {active && (
+                          <div className="absolute bottom-2 left-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
+                            ✓
+                          </div>
+                        )}
 
-                    {infoOpen ? (
-                      <div className="border-t border-white/10 bg-slate-950/85 px-3 py-3 text-right text-xs leading-6 text-white/80 md:text-sm md:leading-7">
-                        <div className="mb-1.5 text-sm font-black text-white">{category.name}</div>
-                        <div>{category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}</div>
+                        {!availability.isSelectable && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
+                            <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
+                              غير متاح
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    ) : null}
-                  </button>
+
+                      <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 ${
+                        !availability.isSelectable
+                          ? "bg-[linear-gradient(180deg,rgba(50,20,20,0.80),rgba(30,10,10,0.90))] text-white/50"
+                          : theme.nameBar
+                      }`}>
+                        {category.name}
+                      </div>
+                    </button>
+                  </div>
                 );
               })}
             </div>
