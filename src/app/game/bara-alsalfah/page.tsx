@@ -192,6 +192,7 @@ export default function BaraAlsalfahPage() {
   const [selectedGuess, setSelectedGuess] = useState("");
   const [guessSubmitted, setGuessSubmitted] = useState(false);
   const [guessWasCorrect, setGuessWasCorrect] = useState<boolean | null>(null);
+  const [tooltipCategoryId, setTooltipCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -642,79 +643,181 @@ export default function BaraAlsalfahPage() {
         )}
 
         {step === "category" && (
-          <section className="space-y-6">
-            {groupedSections.map((section) => (
-              <div
-                key={section.id}
-                className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,20,44,0.95)_0%,rgba(5,10,24,0.98)_100%)]"
-              >
-                <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <SectionBadge>{section.name}</SectionBadge>
-                    <div className="rounded-full border border-white/10 bg-[#0f1b3d] px-3 py-1 text-sm font-bold text-white/85">
-                      {section.categories.length} فئات
+          <section className="space-y-5">
+            {groupedSections.map((section) => {
+              // Count total items per category for this section
+              const sectionCategoryIds = section.categories.map((c) => c.id);
+              const totalSectionItems = items.filter((item) =>
+                sectionCategoryIds.includes(item.category_id)
+              ).length;
+
+              return (
+                <div
+                  key={section.id}
+                  className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(10,18,40,0.96)_0%,rgba(4,10,24,0.99)_100%)]"
+                >
+                  {/* Section header — styled like لمتكم game board */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/6 px-5 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Section name badge */}
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-400/20 bg-orange-400/8 px-3.5 py-1.5 text-xs font-bold text-orange-300">
+                        <span className="h-1 w-1 rounded-full bg-orange-400" />
+                        {section.name}
+                      </span>
+                      {/* Category count */}
+                      <span className="rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs font-bold text-white/50">
+                        {section.categories.length} {section.categories.length === 1 ? "فئة" : "فئات"}
+                      </span>
                     </div>
+
+                    {/* Section description */}
+                    {section.description && (
+                      <p className="text-xs text-white/40 md:max-w-lg">
+                        {section.description}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-[#0f1b3d] px-4 py-2 text-sm text-white/75 md:max-w-xl">
-                    {section.description || "اختر الفئة التي تريد اللعب بها."}
+                  {/* Category cards grid — لمتكم style */}
+                  <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 sm:p-5">
+                    {section.categories.map((category) => {
+                      const isActive = selectedCategoryId === category.id;
+                      const totalCount = items.filter(
+                        (item) => item.category_id === category.id,
+                      ).length;
+                      const usedCount = usedItemIdsByCategory[category.id]?.length ?? 0;
+                      const remainingCount = Math.max(totalCount - usedCount, 0);
+                      const isExhausted = totalCount === 0 || (usedCount >= totalCount && totalCount > 0);
+                      const showTooltip = tooltipCategoryId === category.id;
+
+                      const gameLabel =
+                        remainingCount === 0
+                          ? "غير متاح"
+                          : remainingCount === 1
+                          ? "لعبة واحدة"
+                          : `${remainingCount} ألعاب`;
+
+                      return (
+                        <div key={category.id} className="relative">
+                          {/* Tooltip popup */}
+                          {showTooltip && category.description && (
+                            <div
+                              className="absolute -top-2 left-1/2 z-50 w-56 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(10,18,38,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md"
+                            >
+                              <div className="text-xs font-black text-orange-300 mb-1">{category.name}</div>
+                              {category.description}
+                              {/* Arrow */}
+                              <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(10,18,38,0.97)]" />
+                            </div>
+                          )}
+
+                          <button
+                            key={category.id}
+                            type="button"
+                            disabled={isExhausted}
+                            onClick={() => {
+                              if (!isExhausted) {
+                                setSelectedCategoryId(category.id);
+                                setTooltipCategoryId(null);
+                              }
+                            }}
+                            className={[
+                              "group relative w-full overflow-hidden rounded-[1.4rem] border text-right transition duration-200",
+                              isExhausted
+                                ? "cursor-not-allowed opacity-60 border-white/5"
+                                : isActive
+                                ? "border-orange-400/50 shadow-[0_0_0_2px_rgba(249,115,22,0.25)]"
+                                : "border-white/8 hover:border-white/18 hover:-translate-y-0.5",
+                            ].join(" ")}
+                          >
+                            {/* Image area — full cover like لمتكم */}
+                            <div className="relative overflow-hidden">
+                              {category.image_url ? (
+                                <img
+                                  src={category.image_url}
+                                  alt={category.name}
+                                  className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                                />
+                              ) : (
+                                <div className="flex h-40 w-full items-center justify-center bg-[linear-gradient(160deg,rgba(20,14,6,0.95),rgba(10,7,3,0.98))] text-5xl">
+                                  🎯
+                                </div>
+                              )}
+
+                              {/* Dark gradient overlay from bottom */}
+                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(8,14,30,0.90)] via-transparent to-transparent" />
+
+                              {/* "i" info button — top right */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTooltipCategoryId(
+                                    showTooltip ? null : category.id
+                                  );
+                                }}
+                                className="absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-[rgba(14,100,180,0.85)] text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-[rgba(14,130,220,0.95)]"
+                                title={category.description || category.name}
+                              >
+                                i
+                              </button>
+
+                              {/* Game count badge — top left (right in RTL) */}
+                              <div
+                                className={`absolute right-2 top-2 z-20 rounded-full border px-2.5 py-1 text-[11px] font-black backdrop-blur-sm ${
+                                  isExhausted
+                                    ? "border-red-400/40 bg-red-500/25 text-red-200"
+                                    : isActive
+                                    ? "border-orange-400/50 bg-orange-500/30 text-orange-100"
+                                    : "border-emerald-400/35 bg-emerald-500/20 text-emerald-100"
+                                }`}
+                              >
+                                {gameLabel}
+                              </div>
+
+                              {/* Selected ring */}
+                              {isActive && (
+                                <div className="pointer-events-none absolute inset-0 border-[3px] border-orange-400/60 rounded-t-[1.4rem]" />
+                              )}
+
+                              {/* Exhausted overlay */}
+                              {isExhausted && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
+                                  <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
+                                    غير متاح
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Name bar at bottom — orange gradient like لمتكم */}
+                            <div
+                              className={`px-3 py-2.5 text-center text-sm font-black text-white transition-colors ${
+                                isActive
+                                  ? "bg-gradient-to-r from-orange-600 to-orange-500"
+                                  : isExhausted
+                                  ? "bg-[rgba(60,20,10,0.80)]"
+                                  : "bg-gradient-to-r from-[rgba(180,70,0,0.90)] to-[rgba(200,80,0,0.80)] group-hover:from-orange-600 group-hover:to-orange-500"
+                              }`}
+                            >
+                              {category.name}
+                            </div>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+              );
+            })}
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                  {section.categories.map((category) => {
-                    const isActive = selectedCategoryId === category.id;
-                    const count = items.filter(
-                      (item) => item.category_id === category.id,
-                    ).length;
-
-                    return (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => setSelectedCategoryId(category.id)}
-                        className={[
-                          "overflow-hidden rounded-[1.3rem] border text-right transition",
-                          isActive
-                            ? "border-cyan-300/40 ring-2 ring-cyan-400/30"
-                            : "border-white/10 hover:border-white/20",
-                        ].join(" ")}
-                      >
-                        <div className="h-32 overflow-hidden bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-4">
-                          <div className="flex items-start justify-between">
-                            <div className="rounded-full border border-emerald-500/40 bg-[#0f2e2a] px-2 py-1 text-[11px] font-bold text-emerald-200">
-                              {count} عنصر
-                            </div>
-
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-500 text-lg font-black text-white">
-                              i
-                            </div>
-                          </div>
-
-                          {category.image_url ? (
-                            <div className="mt-3 h-16 w-full overflow-hidden rounded-2xl">
-                              <img
-                                src={category.image_url}
-                                alt={category.name}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          ) : null}
-
-                          <div className={`text-center text-lg font-black ${category.image_url ? "mt-3" : "mt-8"}`}>
-                            {category.name}
-                          </div>
-                        </div>
-
-                        <div className="bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-2.5 text-center text-sm font-black text-white">
-                          {category.name}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+            {/* Close tooltip on outside click */}
+            {tooltipCategoryId && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setTooltipCategoryId(null)}
+              />
+            )}
 
             <div className="flex flex-wrap gap-3">
               <button
@@ -727,7 +830,7 @@ export default function BaraAlsalfahPage() {
               <button
                 onClick={() => setStep("mode")}
                 disabled={!selectedCategoryId}
-                className="rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-2xl bg-orange-500 px-6 py-3 text-sm font-black text-white shadow-[0_4px_16px_rgba(249,115,22,0.22)] transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
               >
                 التالي
               </button>
