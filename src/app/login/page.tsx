@@ -129,7 +129,7 @@ export default async function LoginPage({
               <form action={loginAction} className="space-y-4">
                 <div>
                   <label className="mb-2 block text-sm font-bold text-white/65">
-                    البريد الإلكتروني
+                    البريد الإلكتروني :
                   </label>
                   <input
                     name="email"
