@@ -1,7 +1,6 @@
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "../../../lib/supabase/server";
 import { createGameSession } from "./actions";
 import StartGameForm from "./start-game-form";
 
@@ -36,11 +35,15 @@ type ProfileForSession = {
   role: string | null;
 };
 
-type QuestionCandidate = {
+type QuestionAvailabilityRow = {
   id: string;
   category_id: string;
   points: number;
-  created_at: string | null;
+};
+
+type HistoryRow = {
+  question_id: string;
+  category_id: string;
 };
 
 export type CategoryAvailability = {
@@ -50,11 +53,6 @@ export type CategoryAvailability = {
   easyCount: number;
   mediumCount: number;
   hardCount: number;
-};
-
-type HistoryRow = {
-  question_id: string;
-  category_id: string;
 };
 
 type ServerSupabase = Awaited<ReturnType<typeof getSupabaseServerClient>>;
@@ -76,7 +74,11 @@ function calculateAvailableGames(
 
 function buildCategoryAvailability(params: {
   categories: Category[];
-  questions: QuestionCandidate[];
+  questions: Array<{
+    id: string;
+    category_id: string;
+    points: number;
+  }>;
   usedQuestionIds: Set<string>;
   mode: "fixed" | "dynamic";
 }) {
@@ -117,30 +119,30 @@ function buildCategoryAvailability(params: {
   return availabilityMap;
 }
 
-async function fetchAllQuestionsPaged(
+async function fetchQuestionAvailabilityPaged(
   supabase: ServerSupabase,
   categoryIds: string[],
 ) {
   if (categoryIds.length === 0) {
-    return { data: [] as QuestionCandidate[], error: null };
+    return { data: [] as QuestionAvailabilityRow[], error: null };
   }
 
   let from = 0;
-  const allRows: QuestionCandidate[] = [];
+  const allRows: QuestionAvailabilityRow[] = [];
 
   while (true) {
     const { data, error } = await supabase
       .from("questions")
-      .select("id, category_id, points, created_at")
+      .select("id, category_id, points")
       .in("category_id", categoryIds)
       .eq("is_active", true)
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
-      return { data: null as QuestionCandidate[] | null, error };
+      return { data: null as QuestionAvailabilityRow[] | null, error };
     }
 
-    const rows = (data ?? []) as QuestionCandidate[];
+    const rows = (data ?? []) as QuestionAvailabilityRow[];
     allRows.push(...rows);
 
     if (rows.length < PAGE_SIZE) break;
@@ -202,21 +204,26 @@ export default async function GameStartPage({
 
   if (!profile || (profile.games_remaining ?? 0) <= 0) {
     return (
-      <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-        <h1 className="text-3xl font-black">لا توجد ألعاب متبقية</h1>
-        <p className="mt-4 text-white/75">
-          تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن حسابك
-          للمتابعة.
-        </p>
-        <div className="mt-6">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400"
-          >
-            الرجوع للرئيسية
-          </Link>
+      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
+          <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+            <h1 className="text-3xl font-black">لا توجد ألعاب متبقية</h1>
+            <p className="mt-4 text-white/75">
+              تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن
+              حسابك للمتابعة.
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400"
+              >
+                الرجوع للرئيسية
+              </Link>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -241,10 +248,15 @@ export default async function GameStartPage({
       sectionsError?.message ?? categoriesError?.message ?? "Unknown error";
 
     return (
-      <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-        <h1 className="text-3xl font-black">فشل تحميل بيانات الإعداد</h1>
-        <p className="mt-4">{message}</p>
-      </div>
+      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
+          <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+            <h1 className="text-3xl font-black">فشل تحميل بيانات الإعداد</h1>
+            <p className="mt-4">{message}</p>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -264,23 +276,28 @@ export default async function GameStartPage({
     : "fixed";
 
   const {
-    data: allQuestionsData,
+    data: availabilityRowsData,
     error: allQuestionsError,
-  } = await fetchAllQuestionsPaged(
+  } = await fetchQuestionAvailabilityPaged(
     supabase,
     categories.map((category) => category.id),
   );
 
   if (allQuestionsError) {
     return (
-      <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-        <h1 className="text-3xl font-black">فشل تحميل الأسئلة</h1>
-        <p className="mt-4">{allQuestionsError.message}</p>
-      </div>
+      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
+          <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+            <h1 className="text-3xl font-black">فشل تحميل الأسئلة</h1>
+            <p className="mt-4">{allQuestionsError.message}</p>
+          </div>
+        </div>
+      </main>
     );
   }
 
-  const allQuestions = (allQuestionsData ?? []) as QuestionCandidate[];
+  const allQuestions = (availabilityRowsData ?? []) as QuestionAvailabilityRow[];
 
   let usedQuestionIds = new Set<string>();
 
@@ -290,10 +307,15 @@ export default async function GameStartPage({
 
     if (historyError) {
       return (
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-          <h1 className="text-3xl font-black">فشل تحميل سجل الأسئلة</h1>
-          <p className="mt-4">{historyError.message}</p>
-        </div>
+        <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+          <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+          <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
+            <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
+              <h1 className="text-3xl font-black">فشل تحميل سجل الأسئلة</h1>
+              <p className="mt-4">{historyError.message}</p>
+            </div>
+          </div>
+        </main>
       );
     }
 
@@ -310,14 +332,19 @@ export default async function GameStartPage({
   });
 
   return (
-    <StartGameForm
-      sections={sections}
-      categories={categories}
-      gamesRemaining={profile.games_remaining ?? 0}
-      action={createGameSession}
-      categoryAvailability={categoryAvailability}
-      selectionMode={selectionMode}
-      errorMessage={params.error ?? ""}
-    />
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+      <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+      <div className="relative">
+        <StartGameForm
+          sections={sections}
+          categories={categories}
+          gamesRemaining={profile.games_remaining ?? 0}
+          action={createGameSession}
+          categoryAvailability={categoryAvailability}
+          selectionMode={selectionMode}
+          errorMessage={params.error ?? ""}
+        />
+      </div>
+    </main>
   );
 }
