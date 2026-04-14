@@ -4,6 +4,7 @@ import {
   useMemo,
   useState,
   type FormEvent,
+  type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
@@ -594,7 +595,15 @@ export default function StartGameForm({
     setOpenInfoId((prev) => (prev === categoryId ? null : categoryId));
   }
 
-  function validateBeforeSubmit(event: FormEvent) {
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>, categoryId: string) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleCategory(categoryId);
+      setTooltipCategoryId(null);
+    }
+  }
+
+  function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
     const cleanGameName = gameName.trim();
     const cleanTeamOne  = teamOne.trim();
     const cleanTeamTwo  = teamTwo.trim();
@@ -620,6 +629,8 @@ export default function StartGameForm({
       setLocalError("لا توجد ألعاب متبقية في حسابك.");
       return;
     }
+    
+    // All validation passed - clear error and submit form naturally
     setLocalError("");
   }
 
@@ -849,21 +860,26 @@ export default function StartGameForm({
                         </div>
                       )}
 
-                      <button
-                        type="button"
-                        disabled={!availability.isSelectable}
+                      <div
+                        role="button"
+                        tabIndex={availability.isSelectable ? 0 : -1}
+                        aria-disabled={!availability.isSelectable}
                         onClick={() => {
                           if (availability.isSelectable) {
                             toggleCategory(category.id);
                             setTooltipCategoryId(null);
                           }
                         }}
+                        onKeyDown={(event) => {
+                          if (!availability.isSelectable) return;
+                          handleCardKeyDown(event, category.id);
+                        }}
                         className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
                           !availability.isSelectable
                             ? "cursor-not-allowed border-white/5 opacity-75"
                             : active
                             ? `${theme.selectedRing} scale-[1.01] border-transparent`
-                            : "border-white/10 hover:-translate-y-0.5 hover:border-white/20"
+                            : "cursor-pointer border-white/10 hover:-translate-y-0.5 hover:border-white/20"
                         }`}
                       >
                         {/* Image area — full cover */}
@@ -928,7 +944,7 @@ export default function StartGameForm({
                         }`}>
                           {category.name}
                         </div>
-                      </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -983,21 +999,26 @@ export default function StartGameForm({
                       </div>
                     )}
 
-                    <button
-                      type="button"
-                      disabled={!availability.isSelectable}
+                    <div
+                      role="button"
+                      tabIndex={availability.isSelectable ? 0 : -1}
+                      aria-disabled={!availability.isSelectable}
                       onClick={() => {
                         if (availability.isSelectable) {
                           toggleCategory(category.id);
                           setTooltipCategoryId(null);
                         }
                       }}
+                      onKeyDown={(event) => {
+                        if (!availability.isSelectable) return;
+                        handleCardKeyDown(event, category.id);
+                      }}
                       className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
                         !availability.isSelectable
                           ? "cursor-not-allowed border-white/5 opacity-75"
                           : active
                           ? `${theme.selectedRing} scale-[1.01] border-transparent`
-                          : "border-white/10 hover:-translate-y-0.5 hover:border-white/20"
+                          : "cursor-pointer border-white/10 hover:-translate-y-0.5 hover:border-white/20"
                       }`}
                     >
                       <div className="relative overflow-hidden">
@@ -1054,7 +1075,7 @@ export default function StartGameForm({
                       }`}>
                         {category.name}
                       </div>
-                    </button>
+                    </div>
                   </div>
                 );
               })}
