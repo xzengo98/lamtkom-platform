@@ -1,42 +1,64 @@
-import { getSupabaseServerClient } from "../supabase/server";
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import Navbar from "../components/layout/navbar";
+import AppResumeRefresh from "../components/app/app-resume-refresh";
+import { getViewer } from "../lib/auth/viewer";
 
-export type ViewerData = {
-  isLoggedIn: boolean;
-  isAdmin: boolean;
-  username: string | null;
+export const metadata: Metadata = {
+  title: {
+    default: "منصة لمتكم - منصة ألعاب عربية",
+    template: "%s | لمتكم",
+  },
+  description:
+    "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
+  applicationName: "لمتكم",
+  keywords: [
+    "لمتكم",
+    "ألعاب أسئلة",
+    "مسابقات",
+    "لعبة جماعية",
+    "منصة مسابقات",
+    "أسئلة وأجوبة",
+    "برا السالفة",
+    "codenames",
+  ],
+  openGraph: {
+    title: "لمتكم",
+    description:
+      "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
+    siteName: "لمتكم",
+    locale: "ar_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "لمتكم",
+    description:
+      "منصة تجمع أكثر من لعبة في مكان واحد، بتجربة عربية أنيقة وسهلة الاستخدام.",
+  },
 };
 
-type ProfileRow = {
-  role: string | null;
-  username: string | null;
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
-export async function getViewer(): Promise<ViewerData> {
-  const supabase = await getSupabaseServerClient();
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const viewer = await getViewer();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return {
-      isLoggedIn: false,
-      isAdmin: false,
-      username: null,
-    };
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, username")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const typedProfile = (profile as ProfileRow | null) ?? null;
-
-  return {
-    isLoggedIn: true,
-    isAdmin: typedProfile?.role === "admin",
-    username: typedProfile?.username ?? null,
-  };
+  return (
+    <html lang="ar" dir="rtl">
+      <body>
+        <AppResumeRefresh />
+        <Navbar initialAuth={viewer} />
+        {children}
+      </body>
+    </html>
+  );
 }

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "../../lib/supabase/client";
 import type { ViewerData } from "../../lib/auth/viewer";
@@ -147,38 +146,41 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   }, [initialAuth]);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (_event: string, session: Session | null) => {
-        if (!session?.user) {
-          setAuthState(loggedOutState());
-          router.refresh();
-          return;
-        }
-
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, username")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        const typedProfile = (profile as Profile | null) ?? null;
-
-        setAuthState({
-          isLoggedIn: true,
-          isAdmin: typedProfile?.role === "admin",
-          username: typedProfile?.username ?? null,
-        });
-
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(
+    async (
+      _event: unknown,
+      session: { user?: { id: string } } | null,
+    ) => {
+      if (!session?.user) {
+        setAuthState(loggedOutState());
         router.refresh();
-      },
-    );
+        return;
+      }
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [router, supabase]);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, username")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      const typedProfile = (profile as Profile | null) ?? null;
+
+      setAuthState({
+        isLoggedIn: true,
+        isAdmin: typedProfile?.role === "admin",
+        username: typedProfile?.username ?? null,
+      });
+
+      router.refresh();
+    },
+  );
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}, [router, supabase]);
 
   useEffect(() => {
     setMenuOpen(false);
