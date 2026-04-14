@@ -13,7 +13,6 @@ type Profile = {
 };
 
 type AuthState = {
-  loading: boolean;
   isLoggedIn: boolean;
   isAdmin: boolean;
   username: string | null;
@@ -113,9 +112,18 @@ function PricingIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 1v22M17 5.5c0-1.9-2.2-3.5-5-3.5S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5S14.8 16 12 16s-5 1.6-5 3.5" />
+      <path d="M12 1v22" />
+      <path d="M17 5.5C17 3.6 14.8 2 12 2S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5S14.8 16 12 16s-5 1.6-5 3.5" />
     </svg>
   );
+}
+
+function loggedOutState(): AuthState {
+  return {
+    isLoggedIn: false,
+    isAdmin: false,
+    username: null,
+  };
 }
 
 export default function Navbar({ initialAuth }: NavbarProps) {
@@ -125,7 +133,6 @@ export default function Navbar({ initialAuth }: NavbarProps) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>({
-    loading: false,
     isLoggedIn: initialAuth.isLoggedIn,
     isAdmin: initialAuth.isAdmin,
     username: initialAuth.username,
@@ -133,7 +140,6 @@ export default function Navbar({ initialAuth }: NavbarProps) {
 
   useEffect(() => {
     setAuthState({
-      loading: false,
       isLoggedIn: initialAuth.isLoggedIn,
       isAdmin: initialAuth.isAdmin,
       username: initialAuth.username,
@@ -146,12 +152,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     } = supabase.auth.onAuthStateChange(
       async (_event: string, session: Session | null) => {
         if (!session?.user) {
-          setAuthState({
-            loading: false,
-            isLoggedIn: false,
-            isAdmin: false,
-            username: null,
-          });
+          setAuthState(loggedOutState());
           router.refresh();
           return;
         }
@@ -165,7 +166,6 @@ export default function Navbar({ initialAuth }: NavbarProps) {
         const typedProfile = (profile as Profile | null) ?? null;
 
         setAuthState({
-          loading: false,
           isLoggedIn: true,
           isAdmin: typedProfile?.role === "admin",
           username: typedProfile?.username ?? null,
@@ -184,22 +184,10 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     setMenuOpen(false);
   }, [pathname]);
 
-  async function handleLogout() {
+  function handleLogout() {
     setMenuOpen(false);
-
-    setAuthState({
-      loading: false,
-      isLoggedIn: false,
-      isAdmin: false,
-      username: null,
-    });
-
-    try {
-      sessionStorage.removeItem("lamtkom-navbar-auth-v1");
-    } catch {}
-
-    await supabase.auth.signOut();
-    window.location.href = "/";
+    setAuthState(loggedOutState());
+    window.location.assign("/logout");
   }
 
   const navLinks = [

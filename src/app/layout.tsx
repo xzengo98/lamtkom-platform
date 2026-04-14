@@ -1,28 +1,42 @@
-import AppResumeRefresh from "../components/app/app-resume-refresh";
-import "./globals.css";
-import type { Metadata } from "next";
-import Navbar from "../components/layout/navbar";
-import { getViewer } from "../lib/auth/viewer";
+import { getSupabaseServerClient } from "../supabase/server";
 
-export const metadata: Metadata = {
-  title: "لمتكم",
-  description: "منصة ألعاب جماعية للجلسات والتجمعات",
+export type ViewerData = {
+  isLoggedIn: boolean;
+  isAdmin: boolean;
+  username: string | null;
 };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const viewer = await getViewer();
+type ProfileRow = {
+  role: string | null;
+  username: string | null;
+};
 
-  return (
-    <html lang="ar" dir="rtl">
-      <body>
-  <AppResumeRefresh />
-  <Navbar initialAuth={viewer} />
-  {children}
-</body>
-    </html>
-  );
+export async function getViewer(): Promise<ViewerData> {
+  const supabase = await getSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      isLoggedIn: false,
+      isAdmin: false,
+      username: null,
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, username")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const typedProfile = (profile as ProfileRow | null) ?? null;
+
+  return {
+    isLoggedIn: true,
+    isAdmin: typedProfile?.role === "admin",
+    username: typedProfile?.username ?? null,
+  };
 }

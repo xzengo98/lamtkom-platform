@@ -17,9 +17,7 @@ export default function AppResumeRefresh() {
       pathname.startsWith(prefix),
     );
 
-    if (shouldSkip) {
-      return;
-    }
+    if (shouldSkip) return;
 
     const refreshIfNeeded = (force = false) => {
       const now = Date.now();
