@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "../../lib/supabase/client";
 import { deleteIncompleteGame } from "@/app/account/actions";
 
 const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
@@ -74,7 +73,10 @@ function getRoleBadgeClass(role: string | null | undefined) {
   return "border-white/10 bg-white/5 text-white/45";
 }
 
-function getInitials(username: string | null | undefined, email: string | null | undefined) {
+function getInitials(
+  username: string | null | undefined,
+  email: string | null | undefined
+) {
   const name = username || email || "؟";
   return name.slice(0, 2).toUpperCase();
 }
@@ -303,7 +305,10 @@ function StatCard({
   );
 }
 
-const infoIconTones: Record<"user" | "email" | "phone" | "calendar" | "shield", string> = {
+const infoIconTones: Record<
+  "user" | "email" | "phone" | "calendar" | "shield",
+  string
+> = {
   user: "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
   email: "border-violet-400/20 bg-violet-400/8 text-violet-300",
   phone: "border-emerald-400/20 bg-emerald-400/8 text-emerald-300",
@@ -311,7 +316,10 @@ const infoIconTones: Record<"user" | "email" | "phone" | "calendar" | "shield", 
   shield: "border-amber-400/20 bg-amber-400/8 text-amber-300",
 };
 
-const infoBarColors: Record<"user" | "email" | "phone" | "calendar" | "shield", string> = {
+const infoBarColors: Record<
+  "user" | "email" | "phone" | "calendar" | "shield",
+  string
+> = {
   user: "bg-cyan-400",
   email: "bg-violet-400",
   phone: "bg-emerald-400",
@@ -364,9 +372,11 @@ function SessionCard({
   deleting: boolean;
 }) {
   const total = (session.team_one_score ?? 0) + (session.team_two_score ?? 0);
-  const teamOnePct = total > 0 ? Math.round(((session.team_one_score ?? 0) / total) * 100) : 50;
+  const teamOnePct =
+    total > 0 ? Math.round(((session.team_one_score ?? 0) / total) * 100) : 50;
   const teamTwoPct = total > 0 ? 100 - teamOnePct : 50;
-  const teamOneLeads = (session.team_one_score ?? 0) >= (session.team_two_score ?? 0);
+  const teamOneLeads =
+    (session.team_one_score ?? 0) >= (session.team_two_score ?? 0);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(160deg,rgba(10,18,42,0.96)_0%,rgba(4,8,22,0.99)_100%)]">
@@ -379,7 +389,9 @@ function SessionCard({
               <Icon name="quiz" className="h-3.5 w-3.5" />
               جولة غير مكتملة
             </span>
-            <h3 className="mt-3 text-xl font-black text-white">{session.game_name}</h3>
+            <h3 className="mt-3 text-xl font-black text-white">
+              {session.game_name}
+            </h3>
           </div>
 
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/45">
@@ -388,9 +400,19 @@ function SessionCard({
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
-          <div className={`rounded-2xl border px-4 py-4 ${teamOneLeads ? "border-cyan-400/20 bg-cyan-400/8" : "border-white/8 bg-white/4"}`}>
-            <div className="text-sm font-bold text-white/45">{session.team_one_name}</div>
-            <div className="mt-2 text-3xl font-black text-white">{session.team_one_score ?? 0}</div>
+          <div
+            className={`rounded-2xl border px-4 py-4 ${
+              teamOneLeads
+                ? "border-cyan-400/20 bg-cyan-400/8"
+                : "border-white/8 bg-white/4"
+            }`}
+          >
+            <div className="text-sm font-bold text-white/45">
+              {session.team_one_name}
+            </div>
+            <div className="mt-2 text-3xl font-black text-white">
+              {session.team_one_score ?? 0}
+            </div>
           </div>
 
           <div className="text-center">
@@ -398,9 +420,19 @@ function SessionCard({
             <div className="mt-2 text-sm font-bold text-white/45">جولة نشطة</div>
           </div>
 
-          <div className={`rounded-2xl border px-4 py-4 ${!teamOneLeads ? "border-orange-400/20 bg-orange-400/8" : "border-white/8 bg-white/4"}`}>
-            <div className="text-sm font-bold text-white/45">{session.team_two_name}</div>
-            <div className="mt-2 text-3xl font-black text-white">{session.team_two_score ?? 0}</div>
+          <div
+            className={`rounded-2xl border px-4 py-4 ${
+              !teamOneLeads
+                ? "border-orange-400/20 bg-orange-400/8"
+                : "border-white/8 bg-white/4"
+            }`}
+          >
+            <div className="text-sm font-bold text-white/45">
+              {session.team_two_name}
+            </div>
+            <div className="mt-2 text-3xl font-black text-white">
+              {session.team_two_score ?? 0}
+            </div>
           </div>
         </div>
 
@@ -441,43 +473,43 @@ export default function AccountClientPage({
   initialUserId,
 }: AccountClientPageProps) {
   const router = useRouter();
-  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
-
-  const [profile, setProfile] = useState<Profile | null>(initialProfile);
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(initialActiveSessions);
+  const [profile] = useState<Profile | null>(initialProfile);
+  const [activeSessions, setActiveSessions] =
+    useState<ActiveSession[]>(initialActiveSessions);
   const [userId] = useState(initialUserId);
   const [deletingId, setDeletingId] = useState("");
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    window.location.href = "/";
+  function handleLogout() {
+    window.location.assign("/logout");
   }
 
   async function handleDeleteSession(sessionId: string) {
-  if (!userId || !sessionId) return;
+    if (!userId || !sessionId) return;
 
-  const confirmed = window.confirm("هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟");
-  if (!confirmed) return;
-
-  setDeletingId(sessionId);
-
-  try {
-    const result = await deleteIncompleteGame(sessionId);
-
-    if (!result.ok) {
-      alert(result.error || "تعذر حذف اللعبة غير المكتملة.");
-      return;
-    }
-
-    setActiveSessions((prev) =>
-      prev.filter((session) => session.id !== sessionId)
+    const confirmed = window.confirm(
+      "هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟"
     );
+    if (!confirmed) return;
 
-    router.refresh();
-  } finally {
-    setDeletingId("");
+    setDeletingId(sessionId);
+
+    try {
+      const result = await deleteIncompleteGame(sessionId);
+
+      if (!result.ok) {
+        alert(result.error || "تعذر حذف اللعبة غير المكتملة.");
+        return;
+      }
+
+      setActiveSessions((prev) =>
+        prev.filter((session) => session.id !== sessionId)
+      );
+
+      router.refresh();
+    } finally {
+      setDeletingId("");
+    }
   }
-}
 
   const roleLabel = getRoleLabel(profile?.role);
   const roleBadgeClass = getRoleBadgeClass(profile?.role);
@@ -504,7 +536,9 @@ export default function AccountClientPage({
                   </h1>
 
                   <div className="mt-3">
-                    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${roleBadgeClass}`}>
+                    <span
+                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${roleBadgeClass}`}
+                    >
                       {roleLabel}
                     </span>
                   </div>
@@ -512,7 +546,8 @@ export default function AccountClientPage({
               </div>
 
               <p className="mt-5 max-w-2xl text-sm leading-8 text-white/50">
-                مركز التحكم الخاص بك — راجع بياناتك، تابع ألعابك غير المكتملة، واحذف أي لعبة لا تريد إكمالها.
+                مركز التحكم الخاص بك — راجع بياناتك، تابع ألعابك غير المكتملة،
+                واحذف أي لعبة لا تريد إكمالها.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -556,15 +591,37 @@ export default function AccountClientPage({
         </section>
 
         <section className="mb-8 grid gap-4 md:grid-cols-4">
-          <StatCard label="الألعاب المتبقية" value={profile?.games_remaining ?? 0} icon="games" tone="cyan" />
-          <StatCard label="الألعاب التي لُعبت" value={profile?.games_played ?? 0} icon="play" tone="orange" />
-          <StatCard label="الجولات النشطة" value={activeSessions.length} icon="quiz" tone="emerald" />
-          <StatCard label="نوع الحساب" value={roleLabel} icon="shield" tone="slate" />
+          <StatCard
+            label="الألعاب المتبقية"
+            value={profile?.games_remaining ?? 0}
+            icon="games"
+            tone="cyan"
+          />
+          <StatCard
+            label="الألعاب التي لُعبت"
+            value={profile?.games_played ?? 0}
+            icon="play"
+            tone="orange"
+          />
+          <StatCard
+            label="الجولات النشطة"
+            value={activeSessions.length}
+            icon="quiz"
+            tone="emerald"
+          />
+          <StatCard
+            label="نوع الحساب"
+            value={roleLabel}
+            icon="shield"
+            tone="slate"
+          />
         </section>
 
         <section className="mb-8">
           <SectionBadge>معلومات الحساب</SectionBadge>
-          <h2 className="mt-3 text-2xl font-black text-white">بياناتك الأساسية</h2>
+          <h2 className="mt-3 text-2xl font-black text-white">
+            بياناتك الأساسية
+          </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <InfoCard
@@ -594,7 +651,9 @@ export default function AccountClientPage({
 
         <section className="mb-8">
           <SectionBadge>وصول سريع</SectionBadge>
-          <h2 className="mt-3 text-2xl font-black text-white">ابدأ لعبة جديدة</h2>
+          <h2 className="mt-3 text-2xl font-black text-white">
+            ابدأ لعبة جديدة
+          </h2>
           <p className="mt-2 text-sm leading-7 text-white/45">
             اختر اللعبة التي تريد البدء بها مباشرة.
           </p>
@@ -607,7 +666,8 @@ export default function AccountClientPage({
                 href: "/game/start",
                 icon: "quiz" as const,
                 bar: "bg-cyan-400",
-                badge: "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
+                badge:
+                  "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
                 btn: "border-cyan-400/20 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/18",
               },
               {
@@ -616,7 +676,8 @@ export default function AccountClientPage({
                 href: "/game/bara-alsalfah",
                 icon: "bara" as const,
                 bar: "bg-orange-400",
-                badge: "border-orange-400/20 bg-orange-400/8 text-orange-300",
+                badge:
+                  "border-orange-400/20 bg-orange-400/8 text-orange-300",
                 btn: "border-orange-400/20 bg-orange-400/10 text-orange-200 hover:bg-orange-400/18",
               },
               {
@@ -625,7 +686,8 @@ export default function AccountClientPage({
                 href: "/games/codenames",
                 icon: "spark" as const,
                 bar: "bg-violet-400",
-                badge: "border-violet-400/20 bg-violet-400/8 text-violet-300",
+                badge:
+                  "border-violet-400/20 bg-violet-400/8 text-violet-300",
                 btn: "border-violet-400/20 bg-violet-400/10 text-violet-200 hover:bg-violet-400/18",
               },
             ].map((game) => (
@@ -635,11 +697,15 @@ export default function AccountClientPage({
               >
                 <div className={`h-[2px] w-full ${game.bar} opacity-70`} />
                 <div className="p-5">
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black ${game.badge}`}>
+                  <span
+                    className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black ${game.badge}`}
+                  >
                     {game.label}
                   </span>
 
-                  <p className="mt-4 text-sm leading-7 text-white/45">{game.desc}</p>
+                  <p className="mt-4 text-sm leading-7 text-white/45">
+                    {game.desc}
+                  </p>
 
                   <Link
                     href={game.href}
@@ -656,7 +722,9 @@ export default function AccountClientPage({
 
         <section className="mb-10">
           <SectionBadge>لعبة لمتكم</SectionBadge>
-          <h2 className="mt-3 text-2xl font-black text-white">الجولات غير المكتملة</h2>
+          <h2 className="mt-3 text-2xl font-black text-white">
+            الجولات غير المكتملة
+          </h2>
           <p className="mt-2 text-sm leading-7 text-white/45">
             يمكنك الرجوع لأي لعبة لم تنتهِ بعد، أو حذفها إذا لم تعد تريد إكمالها.
           </p>
@@ -688,7 +756,8 @@ export default function AccountClientPage({
                 لا توجد ألعاب غير مكتملة حاليًا
               </h3>
               <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-white/45">
-                عندما تبدأ لعبة جديدة وتتوقف قبل إنهائها، ستظهر هنا لتتمكن من متابعتها لاحقًا.
+                عندما تبدأ لعبة جديدة وتتوقف قبل إنهائها، ستظهر هنا لتتمكن من
+                متابعتها لاحقًا.
               </p>
               <Link
                 href="/game/start"
