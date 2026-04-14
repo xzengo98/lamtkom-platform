@@ -1,6 +1,36 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-export default function AdminCodenamesPage() {
+export const dynamic = "force-dynamic";
+
+type ProfileRow = {
+  role: string | null;
+};
+
+export default async function AdminCodenamesPage() {
+  const supabase = await getSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const typedProfile = profile as ProfileRow | null;
+
+  if (!typedProfile || typedProfile.role !== "admin") {
+    redirect("/");
+  }
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
