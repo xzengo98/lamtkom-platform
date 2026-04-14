@@ -1,47 +1,49 @@
-# OpenNext Starter
+# Lamtkom Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+منصة ألعاب جماعية مبنية بـ **Next.js + Supabase + Cloudflare**، وتضم عدة ألعاب جماعية موجهة للجلسات والتجمعات، مع لوحة إدارة للمحتوى والألعاب والمستخدمين.
 
-## Getting Started
+---
 
-Read the documentation at https://opennext.js.org/cloudflare.
+## التقنيات المستخدمة
 
-## Develop
+- **Next.js 16**
+- **TypeScript**
+- **Tailwind CSS**
+- **Supabase**
+  - Auth
+  - Database
+  - RLS / Policies
+- **Cloudflare**
+  - OpenNext
+  - Workers / Pages
+- **PostCSS**
 
-Run the Next.js development server:
+---
 
-```bash
-npm run dev
-# or similar package manager command
-```
+## الألعاب الحالية
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1) لمتكم
+لعبة أسئلة وأجوبة بين فريقين تعتمد على الفئات والنقاط.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2) برا السالفة
+لعبة اجتماعية فيها لاعب لا يعرف الكلمة ويحاول اكتشافها من خلال الحوار.
 
-## Preview
+### 3) Codenames
+لعبة كلمات وتلميحات جماعية تعتمد على الفرق والأدوار.
 
-Preview the application locally on the Cloudflare runtime:
+---
 
-```bash
-npm run preview
-# or similar package manager command
-```
+## أهم المسارات داخل المشروع
 
-## Deploy
-
-Deploy the application to Cloudflare:
-
-```bash
-npm run deploy
-# or similar package manager command
-```
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```txt
+src/
+  app/
+    admin/
+    game/
+    games/
+    login/
+    register/
+    payment/
+    pricing/
+  components/
+  lib/

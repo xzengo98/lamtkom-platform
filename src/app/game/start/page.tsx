@@ -26,7 +26,7 @@ type CategorySection = {
 };
 
 type SearchParams = Promise<{
-  error?: string;
+  error?: string | string[];
 }>;
 
 type ProfileForSession = {
@@ -59,6 +59,7 @@ type ServerSupabase = Awaited<ReturnType<typeof getSupabaseServerClient>>;
 
 const QUESTIONS_PER_GAME_PER_LEVEL = 2;
 const PAGE_SIZE = 1000;
+const MAX_ERROR_MESSAGE_LENGTH = 280;
 
 function calculateAvailableGames(
   easyCount: number,
@@ -70,6 +71,18 @@ function calculateAvailableGames(
     Math.floor(mediumCount / QUESTIONS_PER_GAME_PER_LEVEL),
     Math.floor(hardCount / QUESTIONS_PER_GAME_PER_LEVEL),
   );
+}
+
+function sanitizeMessage(
+  value: string | string[] | null | undefined,
+  fallback = "",
+) {
+  const raw = Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  const normalized = raw.trim();
+
+  if (!normalized) return fallback;
+
+  return normalized.slice(0, MAX_ERROR_MESSAGE_LENGTH);
 }
 
 function buildCategoryAvailability(params: {
@@ -180,6 +193,44 @@ async function fetchAllUserHistoryPaged(
   return { data: allRows, error: null };
 }
 
+function renderStatePage(params: {
+  title: string;
+  message: string;
+  variant?: "default" | "error";
+}) {
+  const { title, message, variant = "default" } = params;
+  const isError = variant === "error";
+
+  return (
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+      <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+      <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
+        <div
+          className={`mx-auto max-w-3xl rounded-[2rem] p-8 text-center ${
+            isError
+              ? "border border-red-500/20 bg-red-500/10 text-red-100"
+              : "border border-white/10 bg-[#071126] text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+          }`}
+        >
+          <h1 className="text-3xl font-black">{title}</h1>
+          <p className="mt-4">{message}</p>
+
+          {!isError ? (
+            <div className="mt-6">
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400"
+              >
+                الرجوع للرئيسية
+              </Link>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default async function GameStartPage({
   searchParams,
 }: {
@@ -192,39 +243,40 @@ export default async function GameStartPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/login");
+  }
 
-  const { data: profileData } = await supabase
+  const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("games_remaining, account_tier, role")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  if (profileError) {
+    return renderStatePage({
+      title: "فشل التحقق من الحساب",
+      message: sanitizeMessage(profileError.message, "تعذر التحقق من بيانات الحساب."),
+      variant: "error",
+    });
+  }
 
   const profile = profileData as ProfileForSession | null;
 
-  if (!profile || (profile.games_remaining ?? 0) <= 0) {
-    return (
-      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
-          <div className="mx-auto max-w-3xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-            <h1 className="text-3xl font-black">لا توجد ألعاب متبقية</h1>
-            <p className="mt-4 text-white/75">
-              تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن
-              حسابك للمتابعة.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/"
-                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-cyan-400"
-              >
-                الرجوع للرئيسية
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+  if (!profile) {
+    return renderStatePage({
+      title: "فشل التحقق من الحساب",
+      message: "تعذر العثور على بيانات الحساب المرتبطة بهذا المستخدم.",
+      variant: "error",
+    });
+  }
+
+  if ((profile.games_remaining ?? 0) <= 0) {
+    return renderStatePage({
+      title: "لا توجد ألعاب متبقية",
+      message:
+        "تم استهلاك عدد الألعاب المتاحة لحسابك. يمكنك الرجوع للرئيسية أو شحن حسابك للمتابعة.",
+    });
   }
 
   const [sectionsResult, categoriesResult] = await Promise.all([
@@ -244,29 +296,41 @@ export default async function GameStartPage({
   const { data: categoriesData, error: categoriesError } = categoriesResult;
 
   if (sectionsError || categoriesError) {
-    const message =
-      sectionsError?.message ?? categoriesError?.message ?? "Unknown error";
-
-    return (
-      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
-          <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-            <h1 className="text-3xl font-black">فشل تحميل بيانات الإعداد</h1>
-            <p className="mt-4">{message}</p>
-          </div>
-        </div>
-      </main>
+    const message = sanitizeMessage(
+      sectionsError?.message ?? categoriesError?.message,
+      "تعذر تحميل بيانات الإعداد.",
     );
+
+    return renderStatePage({
+      title: "فشل تحميل بيانات الإعداد",
+      message,
+      variant: "error",
+    });
   }
 
   const sections: CategorySection[] = Array.isArray(sectionsData)
     ? (sectionsData as CategorySection[])
     : [];
 
-  const categories: Category[] = Array.isArray(categoriesData)
+  const rawCategories: Category[] = Array.isArray(categoriesData)
     ? (categoriesData as Category[])
     : [];
+
+  const activeSectionIds = new Set(sections.map((section) => section.id));
+
+  const categories = rawCategories.filter(
+    (category) =>
+      typeof category.section_id === "string" &&
+      activeSectionIds.has(category.section_id),
+  );
+
+  if (sections.length === 0 || categories.length === 0) {
+    return renderStatePage({
+      title: "فشل تحميل بيانات الإعداد",
+      message: "لا توجد أقسام أو فئات مفعلة متاحة حاليًا لبدء اللعبة.",
+      variant: "error",
+    });
+  }
 
   const shouldPreventRepeat =
     profile.role === "admin" || profile.account_tier === "premium";
@@ -284,17 +348,14 @@ export default async function GameStartPage({
   );
 
   if (allQuestionsError) {
-    return (
-      <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-        <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
-          <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-            <h1 className="text-3xl font-black">فشل تحميل الأسئلة</h1>
-            <p className="mt-4">{allQuestionsError.message}</p>
-          </div>
-        </div>
-      </main>
-    );
+    return renderStatePage({
+      title: "فشل تحميل الأسئلة",
+      message: sanitizeMessage(
+        allQuestionsError.message,
+        "تعذر تحميل الأسئلة الخاصة بالفئات.",
+      ),
+      variant: "error",
+    });
   }
 
   const allQuestions = (availabilityRowsData ?? []) as QuestionAvailabilityRow[];
@@ -306,17 +367,14 @@ export default async function GameStartPage({
       await fetchAllUserHistoryPaged(supabase, user.id);
 
     if (historyError) {
-      return (
-        <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-          <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
-          <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
-            <div className="mx-auto max-w-3xl rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center text-red-100">
-              <h1 className="text-3xl font-black">فشل تحميل سجل الأسئلة</h1>
-              <p className="mt-4">{historyError.message}</p>
-            </div>
-          </div>
-        </main>
-      );
+      return renderStatePage({
+        title: "فشل تحميل سجل الأسئلة",
+        message: sanitizeMessage(
+          historyError.message,
+          "تعذر تحميل سجل الأسئلة السابقة.",
+        ),
+        variant: "error",
+      });
     }
 
     usedQuestionIds = new Set(
@@ -331,6 +389,8 @@ export default async function GameStartPage({
     mode: selectionMode,
   });
 
+  const safeErrorMessage = sanitizeMessage(params.error, "");
+
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
       <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
@@ -342,7 +402,7 @@ export default async function GameStartPage({
           action={createGameSession}
           categoryAvailability={categoryAvailability}
           selectionMode={selectionMode}
-          errorMessage={params.error ?? ""}
+          errorMessage={safeErrorMessage}
         />
       </div>
     </main>
