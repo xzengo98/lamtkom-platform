@@ -54,6 +54,7 @@ type PreviewSelection = {
 } | null;
 
 type RealtimePayload<T> = {
+  eventType?: "INSERT" | "UPDATE" | "DELETE";
   new: T | null;
   old: T | null;
 };
@@ -128,6 +129,30 @@ function normalizePlayers(rows: PlayerRow[]) {
       role: normalizedRole,
     };
   });
+}
+
+function sortTurnsNewestFirst(rows: TurnRow[]) {
+  return [...rows].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+function upsertById<T extends { id: string }>(rows: T[], nextRow: T) {
+  const nextIndex = rows.findIndex((row) => row.id === nextRow.id);
+
+  if (nextIndex === -1) {
+    return [...rows, nextRow];
+  }
+
+  const copy = [...rows];
+  copy[nextIndex] = nextRow;
+  return copy;
+}
+
+function removeById<T extends { id: string }>(rows: T[], id: string) {
+  return rows.filter((row) => row.id !== id);
 }
 
 function TeamSidebarCard({
@@ -416,6 +441,11 @@ export default function CodenamesBoardClient({
   const lastShownTurnIdRef = useRef<string | null>(null);
   const cluePopupTimeoutRef = useRef<number | null>(null);
   const previewChannelRef = useRef<any>(null);
+  const mountedRef = useRef(true);
+  const refreshTimerRef = useRef<number | null>(null);
+  const refreshInFlightRef = useRef(false);
+  const refreshQueuedRef = useRef(false);
+  const lastFetchAtRef = useRef(0);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -434,13 +464,7 @@ export default function CodenamesBoardClient({
     [turns]
   );
 
-  const sortedTurns = useMemo(() => {
-    return [...turns].sort((a, b) => {
-      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return bTime - aTime;
-    });
-  }, [turns]);
+  const sortedTurns = useMemo(() => sortTurnsNewestFirst(turns), [turns]);
 
   if (!currentPlayer) return null;
   const safeCurrentPlayer = currentPlayer as PlayerRow;
@@ -478,54 +502,94 @@ export default function CodenamesBoardClient({
     [openedRevealedCardIds]
   );
 
-  async function fetchLatestState() {
-    const supabase = getSupabaseBrowserClient();
+  async function fetchLatestState(force = false) {
+    if (!mountedRef.current) return;
 
-    const [roomRes, cardsRes, playersRes, turnsRes] = await Promise.all([
-      supabase
-        .from("codenames_rooms")
-        .select(
-          "id, room_code, status, current_turn_team, starting_team, red_remaining, blue_remaining, winner_team, assassin_revealed"
-        )
-        .eq("id", room.id)
-        .maybeSingle(),
+    const now = Date.now();
 
-      supabase
-        .from("codenames_cards")
-        .select("id, room_id, position_index, word, card_type, is_revealed")
-        .eq("room_id", room.id)
-        .order("position_index", { ascending: true }),
+    if (!force && now - lastFetchAtRef.current < 250) {
+      return;
+    }
 
-      supabase
-        .from("codenames_players")
-        .select("id, room_id, guest_name, team, role, is_host")
-        .eq("room_id", room.id),
+    if (refreshInFlightRef.current) {
+      refreshQueuedRef.current = true;
+      return;
+    }
 
-      supabase
-        .from("codenames_turns")
-        .select(
-          "id, room_id, team, clue_word, clue_number, turn_status, guesses_made, created_at"
-        )
-        .eq("room_id", room.id)
-        .order("created_at", { ascending: false }),
-    ]);
+    refreshInFlightRef.current = true;
+    lastFetchAtRef.current = now;
 
-    if (roomRes.data) setRoom(roomRes.data as RoomRow);
-    if (cardsRes.data) setCards(cardsRes.data as CardRow[]);
-    if (playersRes.data) setPlayers(normalizePlayers(playersRes.data as PlayerRow[]));
-    if (turnsRes.data) setTurns(turnsRes.data as TurnRow[]);
+    try {
+      const supabase = getSupabaseBrowserClient();
+
+      const [roomRes, cardsRes, playersRes, turnsRes] = await Promise.all([
+        supabase
+          .from("codenames_rooms")
+          .select(
+            "id, room_code, status, current_turn_team, starting_team, red_remaining, blue_remaining, winner_team, assassin_revealed"
+          )
+          .eq("id", room.id)
+          .maybeSingle(),
+
+        supabase
+          .from("codenames_cards")
+          .select("id, room_id, position_index, word, card_type, is_revealed")
+          .eq("room_id", room.id)
+          .order("position_index", { ascending: true }),
+
+        supabase
+          .from("codenames_players")
+          .select("id, room_id, guest_name, team, role, is_host")
+          .eq("room_id", room.id),
+
+        supabase
+          .from("codenames_turns")
+          .select(
+            "id, room_id, team, clue_word, clue_number, turn_status, guesses_made, created_at"
+          )
+          .eq("room_id", room.id)
+          .order("created_at", { ascending: false }),
+      ]);
+
+      if (!mountedRef.current) return;
+
+      if (roomRes.data) setRoom(roomRes.data as RoomRow);
+      if (cardsRes.data) setCards(cardsRes.data as CardRow[]);
+      if (playersRes.data) setPlayers(normalizePlayers(playersRes.data as PlayerRow[]));
+      if (turnsRes.data) setTurns(sortTurnsNewestFirst(turnsRes.data as TurnRow[]));
+    } finally {
+      refreshInFlightRef.current = false;
+
+      if (refreshQueuedRef.current && mountedRef.current) {
+        refreshQueuedRef.current = false;
+        window.setTimeout(() => {
+          void fetchLatestState(true);
+        }, 0);
+      }
+    }
+  }
+
+  function scheduleRefresh(delay = 120) {
+    if (!mountedRef.current) return;
+
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+    }
+
+    refreshTimerRef.current = window.setTimeout(() => {
+      refreshTimerRef.current = null;
+      void fetchLatestState(true);
+    }, delay);
   }
 
   useEffect(() => {
-    let isMounted = true;
-    const supabase = getSupabaseBrowserClient();
-    const previewChannel = supabase.channel(`codenames-preview-${room.room_code}`);
-    previewChannelRef.current = previewChannel;
+    mountedRef.current = true;
 
-    const safeRefresh = async () => {
-      if (!isMounted) return;
-      await fetchLatestState();
-    };
+    const supabase = getSupabaseBrowserClient();
+    const previewChannel = supabase.channel(`codenames-preview-${room.room_code}`, {
+      config: { broadcast: { self: true } },
+    });
+    previewChannelRef.current = previewChannel;
 
     const roomChannel = supabase
       .channel(`board-room-${room.room_code}`)
@@ -537,11 +601,19 @@ export default function CodenamesBoardClient({
           table: "codenames_rooms",
           filter: `room_code=eq.${room.room_code}`,
         },
-        async (_payload: RealtimePayload<RoomRow>) => {
-          await safeRefresh();
+        (payload: RealtimePayload<RoomRow>) => {
+          if (payload.new) {
+            setRoom((prev) => ({ ...prev, ...(payload.new as RoomRow) }));
+          }
+
+          scheduleRefresh(80);
         }
       )
-      .subscribe();
+      .subscribe((status: string) => {
+        if (status === "SUBSCRIBED") {
+          void fetchLatestState(true);
+        }
+      });
 
     const cardsChannel = supabase
       .channel(`board-cards-${room.id}`)
@@ -553,8 +625,18 @@ export default function CodenamesBoardClient({
           table: "codenames_cards",
           filter: `room_id=eq.${room.id}`,
         },
-        async () => {
-          await safeRefresh();
+        (payload: RealtimePayload<CardRow>) => {
+          if (payload.eventType === "DELETE" && payload.old) {
+            setCards((prev) => removeById(prev, payload.old!.id));
+          } else if (payload.new) {
+            setCards((prev) =>
+              [...upsertById(prev, payload.new as CardRow)].sort(
+                (a, b) => a.position_index - b.position_index
+              )
+            );
+          }
+
+          scheduleRefresh(60);
         }
       )
       .subscribe();
@@ -569,8 +651,15 @@ export default function CodenamesBoardClient({
           table: "codenames_players",
           filter: `room_id=eq.${room.id}`,
         },
-        async () => {
-          await safeRefresh();
+        (payload: RealtimePayload<PlayerRow>) => {
+          if (payload.eventType === "DELETE" && payload.old) {
+            setPlayers((prev) => removeById(prev, payload.old!.id));
+          } else if (payload.new) {
+            const normalized = normalizePlayers([payload.new as PlayerRow])[0];
+            setPlayers((prev) => normalizePlayers(upsertById(prev, normalized)));
+          }
+
+          scheduleRefresh(60);
         }
       )
       .subscribe();
@@ -585,8 +674,14 @@ export default function CodenamesBoardClient({
           table: "codenames_turns",
           filter: `room_id=eq.${room.id}`,
         },
-        async () => {
-          await safeRefresh();
+        (payload: RealtimePayload<TurnRow>) => {
+          if (payload.eventType === "DELETE" && payload.old) {
+            setTurns((prev) => sortTurnsNewestFirst(removeById(prev, payload.old!.id)));
+          } else if (payload.new) {
+            setTurns((prev) => sortTurnsNewestFirst(upsertById(prev, payload.new as TurnRow)));
+          }
+
+          scheduleRefresh(60);
         }
       )
       .subscribe();
@@ -604,13 +699,34 @@ export default function CodenamesBoardClient({
       })
       .subscribe();
 
-    const interval = setInterval(() => {
-      safeRefresh();
-    }, 1200);
+    const interval = window.setInterval(() => {
+      void fetchLatestState(false);
+    }, 2500);
+
+    const handleFocus = () => {
+      void fetchLatestState(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void fetchLatestState(true);
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      isMounted = false;
+      mountedRef.current = false;
+
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+
       clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       supabase.removeChannel(roomChannel);
       supabase.removeChannel(cardsChannel);
       supabase.removeChannel(playersChannel);
@@ -1257,8 +1373,9 @@ export default function CodenamesBoardClient({
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
-      <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
+    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+      <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
+        <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
 
       {renderSettingsModal()}
 
@@ -2040,6 +2157,7 @@ export default function CodenamesBoardClient({
           }
         }
       `}</style>
+      </div>
     </div>
   );
 }

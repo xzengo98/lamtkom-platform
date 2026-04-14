@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -22,6 +22,8 @@ export default function RoomStatusWatcher({
   playerId,
 }: Props) {
   const router = useRouter();
+  const refreshTimerRef = useRef<number | null>(null);
+  const lastRefreshAtRef = useRef(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,8 +35,18 @@ export default function RoomStatusWatcher({
       );
     };
 
-    const refreshRoom = () => {
-      router.refresh();
+    const refreshRoom = (delay = 80) => {
+      const now = Date.now();
+      if (now - lastRefreshAtRef.current < 250) return;
+
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+      }
+
+      refreshTimerRef.current = window.setTimeout(() => {
+        lastRefreshAtRef.current = Date.now();
+        router.refresh();
+      }, delay);
     };
 
     const checkRoomStatus = async () => {
@@ -46,9 +58,14 @@ export default function RoomStatusWatcher({
         .eq("room_code", roomCode)
         .maybeSingle();
 
+      if (!isMounted) return;
+
       if (data?.status === "active") {
         goToBoard();
+        return;
       }
+
+      refreshRoom(60);
     };
 
     const roomChannel = supabase
@@ -56,7 +73,7 @@ export default function RoomStatusWatcher({
       .on(
         "postgres_changes" as any,
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "codenames_rooms",
           filter: `room_code=eq.${roomCode}`,
@@ -72,7 +89,11 @@ export default function RoomStatusWatcher({
           refreshRoom();
         }
       )
-      .subscribe();
+      .subscribe((status: string) => {
+        if (status === "SUBSCRIBED") {
+          void checkRoomStatus();
+        }
+      });
 
     const playersChannel = supabase
       .channel(`codenames-room-players-${roomId}`)
@@ -90,15 +111,34 @@ export default function RoomStatusWatcher({
       )
       .subscribe();
 
-    const interval = setInterval(() => {
-      checkRoomStatus();
-    }, 1000);
+    const interval = window.setInterval(() => {
+      void checkRoomStatus();
+    }, 2500);
 
-    checkRoomStatus();
+    const handleFocus = () => {
+      void checkRoomStatus();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void checkRoomStatus();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       isMounted = false;
+
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+
       clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       supabase.removeChannel(roomChannel);
       supabase.removeChannel(playersChannel);
     };
