@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "../../lib/supabase/client";
+import { deleteIncompleteGame } from "@/app/account/actions";
 
 const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
 
@@ -453,27 +454,30 @@ export default function AccountClientPage({
   }
 
   async function handleDeleteSession(sessionId: string) {
-    if (!userId || !sessionId) return;
+  if (!userId || !sessionId) return;
 
-    const confirmed = window.confirm("هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟");
-    if (!confirmed) return;
+  const confirmed = window.confirm("هل أنت متأكد من حذف هذه اللعبة غير المكتملة؟");
+  if (!confirmed) return;
 
-    setDeletingId(sessionId);
+  setDeletingId(sessionId);
 
-    const { error } = await supabase
-      .from("game_sessions")
-      .delete()
-      .eq("id", sessionId)
-      .eq("user_id", userId)
-      .eq("status", "active");
+  try {
+    const result = await deleteIncompleteGame(sessionId);
 
-    if (!error) {
-      setActiveSessions((prev) => prev.filter((session) => session.id !== sessionId));
-      router.refresh();
+    if (!result.ok) {
+      alert(result.error || "تعذر حذف اللعبة غير المكتملة.");
+      return;
     }
 
+    setActiveSessions((prev) =>
+      prev.filter((session) => session.id !== sessionId)
+    );
+
+    router.refresh();
+  } finally {
     setDeletingId("");
   }
+}
 
   const roleLabel = getRoleLabel(profile?.role);
   const roleBadgeClass = getRoleBadgeClass(profile?.role);
