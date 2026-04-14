@@ -307,11 +307,23 @@ export default function Navbar() {
   }, [pathname]);
 
   async function handleLogout() {
-    applyLoggedOut();
-    await supabase.auth.signOut();
-    router.refresh();
-    router.push("/");
-  }
+  setMenuOpen(false);
+
+  setAuthState({
+    loading: false,
+    isLoggedIn: false,
+    isAdmin: false,
+    username: null,
+  });
+
+  try {
+    sessionStorage.removeItem("lamtkom-navbar-auth-v1");
+  } catch {}
+
+  await supabase.auth.signOut();
+
+  window.location.href = "/";
+}
 
   const navLinks = [
     { label: "الرئيسية", href: "/", icon: null },
