@@ -492,7 +492,6 @@ export default function BaraAlsalfahClient({
     setStep("category");
   }
 
-  }
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] px-4 py-6 text-white md:px-6">
