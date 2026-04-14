@@ -1,3 +1,4 @@
+import AppResumeRefresh from "../components/app/app-resume-refresh";
 import "./globals.css";
 import type { Metadata } from "next";
 import Navbar from "../components/layout/navbar";
@@ -18,9 +19,10 @@ export default async function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <Navbar initialAuth={viewer} />
-        {children}
-      </body>
+  <AppResumeRefresh />
+  <Navbar initialAuth={viewer} />
+  {children}
+</body>
     </html>
   );
 }
