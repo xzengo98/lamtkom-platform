@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "../../lib/supabase/client";
+import type { ViewerData } from "../../lib/auth/viewer";
 
-type Profile = { role: string; username: string | null };
+type Profile = {
+  role: string | null;
+  username: string | null;
+};
 
 type AuthState = {
   loading: boolean;
@@ -14,67 +19,19 @@ type AuthState = {
   username: string | null;
 };
 
-const NAVBAR_AUTH_CACHE_KEY = "lamtkom-navbar-auth-v1";
+type NavbarProps = {
+  initialAuth: ViewerData;
+};
 
 function navLinkClass(pathname: string, href: string) {
   const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+
   return [
     "relative rounded-xl px-4 py-2 text-sm font-bold transition duration-200",
     active
       ? "bg-cyan-400/10 text-cyan-300 after:absolute after:bottom-0 after:left-1/2 after:h-px after:w-4 after:-translate-x-1/2 after:rounded-full after:bg-cyan-400"
       : "text-white/60 hover:bg-white/6 hover:text-white",
   ].join(" ");
-}
-
-function readCachedAuthState(): AuthState | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = window.sessionStorage.getItem(NAVBAR_AUTH_CACHE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as Partial<AuthState>;
-    return {
-      loading: false,
-      isLoggedIn: Boolean(parsed.isLoggedIn),
-      isAdmin: Boolean(parsed.isAdmin),
-      username: parsed.username ?? null,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedAuthState(state: AuthState) {
-  if (typeof window === "undefined") return;
-
-  try {
-    window.sessionStorage.setItem(
-      NAVBAR_AUTH_CACHE_KEY,
-      JSON.stringify({
-        isLoggedIn: state.isLoggedIn,
-        isAdmin: state.isAdmin,
-        username: state.username,
-      }),
-    );
-  } catch {}
-}
-
-function clearCachedAuthState() {
-  if (typeof window === "undefined") return;
-
-  try {
-    window.sessionStorage.removeItem(NAVBAR_AUTH_CACHE_KEY);
-  } catch {}
-}
-
-function loggedOutState(): AuthState {
-  return {
-    loading: false,
-    isLoggedIn: false,
-    isAdmin: false,
-    username: null,
-  };
 }
 
 function GamesIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -161,169 +118,89 @@ function PricingIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ initialAuth }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [authState, setAuthState] = useState<AuthState>(() => {
-    const cached = readCachedAuthState();
-    return (
-      cached ?? {
-        loading: true,
-        isLoggedIn: false,
-        isAdmin: false,
-        username: null,
-      }
-    );
+  const [authState, setAuthState] = useState<AuthState>({
+    loading: false,
+    isLoggedIn: initialAuth.isLoggedIn,
+    isAdmin: initialAuth.isAdmin,
+    username: initialAuth.username,
   });
 
-  const applyLoggedOut = useCallback(() => {
-    const state = loggedOutState();
-    setAuthState(state);
-    clearCachedAuthState();
-  }, []);
-
-  const applyProfile = useCallback((profile: Profile | null) => {
-    const nextState: AuthState = {
+  useEffect(() => {
+    setAuthState({
       loading: false,
-      isLoggedIn: true,
-      isAdmin: profile?.role === "admin",
-      username: profile?.username ?? null,
-    };
-
-    setAuthState(nextState);
-    writeCachedAuthState(nextState);
-  }, []);
-
-  const loadUser = useCallback(async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user) {
-        applyLoggedOut();
-        return;
-      }
-
-      setAuthState((prev) => ({
-        ...prev,
-        loading: false,
-        isLoggedIn: true,
-      }));
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("role, username")
-        .eq("id", session.user.id)
-        .maybeSingle();
-
-      if (error) {
-        applyProfile(null);
-        return;
-      }
-
-      applyProfile((profile as Profile | null) ?? null);
-    } catch {
-      applyLoggedOut();
-    }
-  }, [applyLoggedOut, applyProfile, supabase]);
+      isLoggedIn: initialAuth.isLoggedIn,
+      isAdmin: initialAuth.isAdmin,
+      username: initialAuth.username,
+    });
+  }, [initialAuth]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const bootstrap = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!isMounted) return;
-
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      async (_event: string, session: Session | null) => {
         if (!session?.user) {
-          applyLoggedOut();
+          setAuthState({
+            loading: false,
+            isLoggedIn: false,
+            isAdmin: false,
+            username: null,
+          });
+          router.refresh();
           return;
         }
 
-        setAuthState((prev) => ({
-          ...prev,
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role, username")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        const typedProfile = (profile as Profile | null) ?? null;
+
+        setAuthState({
           loading: false,
           isLoggedIn: true,
-        }));
+          isAdmin: typedProfile?.role === "admin",
+          username: typedProfile?.username ?? null,
+        });
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, username")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        if (!isMounted) return;
-        applyProfile((profile as Profile | null) ?? null);
-      } catch {
-        if (!isMounted) return;
-        applyLoggedOut();
-      }
-    };
-
-    bootstrap();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        applyLoggedOut();
         router.refresh();
-        return;
-      }
-
-      setAuthState((prev) => ({
-        ...prev,
-        loading: false,
-        isLoggedIn: true,
-      }));
-
-      void (async () => {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, username")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        applyProfile((profile as Profile | null) ?? null);
-        router.refresh();
-      })();
-    });
+      },
+    );
 
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [applyLoggedOut, applyProfile, router, supabase]);
+  }, [router, supabase]);
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
   async function handleLogout() {
-  setMenuOpen(false);
+    setMenuOpen(false);
 
-  setAuthState({
-    loading: false,
-    isLoggedIn: false,
-    isAdmin: false,
-    username: null,
-  });
+    setAuthState({
+      loading: false,
+      isLoggedIn: false,
+      isAdmin: false,
+      username: null,
+    });
 
-  try {
-    sessionStorage.removeItem("lamtkom-navbar-auth-v1");
-  } catch {}
+    try {
+      sessionStorage.removeItem("lamtkom-navbar-auth-v1");
+    } catch {}
 
-  await supabase.auth.signOut();
-
-  window.location.href = "/";
-}
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
 
   const navLinks = [
     { label: "الرئيسية", href: "/", icon: null },
@@ -390,14 +267,7 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            {authState.loading ? (
-              <div className="rounded-xl border border-white/8 bg-white/4 px-4 py-2 text-sm font-bold text-white/30">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/30" />
-                  جارِ التحميل...
-                </span>
-              </div>
-            ) : authState.isLoggedIn ? (
+            {authState.isLoggedIn ? (
               <>
                 <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-4 py-2 text-sm font-bold text-white/70">
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400/15 text-[11px] font-black text-cyan-300">
@@ -499,14 +369,7 @@ export default function Navbar() {
             </div>
 
             <div className="mt-3 flex flex-col gap-2 border-t border-white/6 pt-3">
-              {authState.loading ? (
-                <div className="rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-sm font-bold text-white/30">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/30" />
-                    جارِ التحميل...
-                  </span>
-                </div>
-              ) : authState.isLoggedIn ? (
+              {authState.isLoggedIn ? (
                 <>
                   <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-sm font-bold text-white/70">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 text-xs font-black text-cyan-300">
