@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "../../lib/supabase/server";
 
-export async function GET(request: Request) {
-  return NextResponse.redirect(new URL("/", request.url));
+export default async function LogoutPage() {
+  const supabase = await getSupabaseServerClient();
+  await supabase.auth.signOut();
+  redirect("/");
 }
