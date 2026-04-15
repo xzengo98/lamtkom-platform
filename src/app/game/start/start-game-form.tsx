@@ -686,10 +686,6 @@ export default function StartGameForm({
     const active = selectedCategorySet.has(category.id);
     const badge = getAvailabilityBadge(availability);
     const isTooltipOpen = tooltipCategoryId === category.id;
-    const totalQuestions =
-      (availability.easyCount ?? 0) +
-      (availability.mediumCount ?? 0) +
-      (availability.hardCount ?? 0);
 
     return (
       <div key={category.id} className="relative mx-auto w-full max-w-[210px]">
@@ -749,7 +745,7 @@ export default function StartGameForm({
             </button>
 
             <div className={`absolute right-3 top-3 z-20 rounded-[1rem] px-4 py-2 text-sm font-black shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${theme.titleBar}`}>
-              {totalQuestions > 0 ? `${totalQuestions} سؤال` : badge.text}
+              {badge.text}
             </div>
 
             {active && (
@@ -799,9 +795,7 @@ export default function StartGameForm({
         </div>
 
         <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
-          {categoriesList.map((category) =>
-            renderCategoryCard(category, getSectionTheme(category.slug, title))
-          )}
+          {categoriesList.map((category) => renderCategoryCard(category, sectionTheme))}
         </div>
       </section>
     );
@@ -999,6 +993,7 @@ export default function StartGameForm({
         <div className="fixed inset-0 z-40" onClick={() => setTooltipCategoryId(null)} />
       )}
 
+      {selectedCount > 0 && (
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4">
         <div className="pointer-events-auto w-full max-w-[760px] rounded-[2rem] border border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,28,54,0.97)_0%,rgba(5,16,34,0.98)_100%)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl md:p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -1017,7 +1012,8 @@ export default function StartGameForm({
 
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
             {selectedCategoryItems.map((category) => {
-              const theme = getSectionTheme(category.slug, category.name);
+              const section = safeSections.find((item) => item.id === category.section_id) ?? null;
+              const theme = getSectionTheme(section?.slug ?? category.slug, section?.name ?? category.name);
               return (
                 <button
                   key={category.id}
@@ -1064,6 +1060,7 @@ export default function StartGameForm({
           </button>
         </div>
       </div>
+      )}
     </form>
   );
 }
