@@ -54,11 +54,13 @@ export default async function RootLayout({
 
   return (
     <html lang="ar" dir="rtl">
-      <body>
-        <AppResumeRefresh />
-        <Navbar initialAuth={viewer} />
-        {children}
-      </body>
-    </html>
+  <body className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+    <div className="min-h-screen bg-transparent text-white">
+      <Navbar initialAuth={viewer} />
+      <AppResumeRefresh />
+      {children}
+    </div>
+  </body>
+</html>
   );
 }

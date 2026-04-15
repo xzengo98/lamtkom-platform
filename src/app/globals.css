@@ -1,27 +1,43 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
 @import "tailwindcss";
+
+:root {
+  --site-bg: #020a1a;
+  --site-bg-2: #030d22;
+  --site-bg-3: #020814;
+  --site-text: #ffffff;
+}
 
 html,
 body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-}
-
-html,
-body {
   font-family: 'Tajawal', system-ui, sans-serif;
+  letter-spacing: 0;
+  word-spacing: 0;
+  background-color: var(--site-bg);
+  color: var(--site-text);
 }
-
 
 html {
   -webkit-text-size-adjust: 100%;
+  background:
+    linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
+  background-color: var(--site-bg);
 }
 
 body {
   min-height: 100vh;
   overflow-x: hidden;
+  background:
+    linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
+  background-color: var(--site-bg);
+}
+
+#__next {
+  min-height: 100vh;
+  background: transparent;
 }
 
 *,
@@ -30,15 +46,6 @@ body {
   box-sizing: border-box;
 }
 
-/* إصلاح مشاكل الخط العربي */
-html,
-body {
-  letter-spacing: 0;
-  word-spacing: 0;
-}
-
-/* منع كسر الحروف العربية بسبب tracking */
 [lang="ar"] * {
   letter-spacing: normal !important;
 }
-
