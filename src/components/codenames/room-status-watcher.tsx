@@ -24,6 +24,7 @@ export default function RoomStatusWatcher({
   const router = useRouter();
   const refreshTimerRef = useRef<number | null>(null);
   const lastRefreshAtRef = useRef(0);
+  const hiddenAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,9 +36,12 @@ export default function RoomStatusWatcher({
       );
     };
 
-    const refreshRoom = (delay = 80) => {
+    const refreshRoom = (delay = 260, force = false) => {
       const now = Date.now();
-      if (now - lastRefreshAtRef.current < 250) return;
+
+      if (!force && now - lastRefreshAtRef.current < 1200) {
+        return;
+      }
 
       if (refreshTimerRef.current) {
         window.clearTimeout(refreshTimerRef.current);
@@ -49,7 +53,7 @@ export default function RoomStatusWatcher({
       }, delay);
     };
 
-    const checkRoomStatus = async () => {
+    const checkRoomStatus = async (forceRefresh = false) => {
       if (!isMounted) return;
 
       const { data } = await supabase
@@ -65,7 +69,9 @@ export default function RoomStatusWatcher({
         return;
       }
 
-      refreshRoom(60);
+      if (forceRefresh) {
+        refreshRoom(120, true);
+      }
     };
 
     const roomChannel = supabase
@@ -91,7 +97,7 @@ export default function RoomStatusWatcher({
       )
       .subscribe((status: string) => {
         if (status === "SUBSCRIBED") {
-          void checkRoomStatus();
+          void checkRoomStatus(true);
         }
       });
 
@@ -112,20 +118,40 @@ export default function RoomStatusWatcher({
       .subscribe();
 
     const interval = window.setInterval(() => {
-      void checkRoomStatus();
-    }, 2500);
+      void checkRoomStatus(false);
+    }, 15000);
 
     const handleFocus = () => {
-      void checkRoomStatus();
+      const now = Date.now();
+      if (now - lastRefreshAtRef.current < 2500) return;
+      void checkRoomStatus(true);
+    };
+
+    const handlePageShow = () => {
+      const now = Date.now();
+      if (now - lastRefreshAtRef.current < 2500) return;
+      void checkRoomStatus(true);
     };
 
     const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+
       if (document.visibilityState === "visible") {
-        void checkRoomStatus();
+        const now = Date.now();
+        const hiddenFor = hiddenAtRef.current ? now - hiddenAtRef.current : 0;
+
+        if (hiddenFor < 5000) return;
+        if (now - lastRefreshAtRef.current < 2500) return;
+
+        void checkRoomStatus(true);
       }
     };
 
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -138,6 +164,7 @@ export default function RoomStatusWatcher({
 
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       supabase.removeChannel(roomChannel);
       supabase.removeChannel(playersChannel);

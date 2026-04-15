@@ -446,6 +446,7 @@ export default function CodenamesBoardClient({
   const refreshInFlightRef = useRef(false);
   const refreshQueuedRef = useRef(false);
   const lastFetchAtRef = useRef(0);
+  const lastFocusSyncAtRef = useRef(0);
 
   const currentPlayer = useMemo(
     () => players.find((player) => player.id === currentPlayerId) || null,
@@ -507,7 +508,7 @@ export default function CodenamesBoardClient({
 
     const now = Date.now();
 
-    if (!force && now - lastFetchAtRef.current < 250) {
+    if (!force && now - lastFetchAtRef.current < 1800) {
       return;
     }
 
@@ -569,7 +570,7 @@ export default function CodenamesBoardClient({
     }
   }
 
-  function scheduleRefresh(delay = 120) {
+  function scheduleRefresh(delay = 220, force = false) {
     if (!mountedRef.current) return;
 
     if (refreshTimerRef.current) {
@@ -578,7 +579,7 @@ export default function CodenamesBoardClient({
 
     refreshTimerRef.current = window.setTimeout(() => {
       refreshTimerRef.current = null;
-      void fetchLatestState(true);
+      void fetchLatestState(force);
     }, delay);
   }
 
@@ -587,7 +588,7 @@ export default function CodenamesBoardClient({
 
     const supabase = getSupabaseBrowserClient();
     const previewChannel = supabase.channel(`codenames-preview-${room.room_code}`, {
-      config: { broadcast: { self: true } },
+      config: { broadcast: { self: true, ack: false } },
     });
     previewChannelRef.current = previewChannel;
 
@@ -606,7 +607,7 @@ export default function CodenamesBoardClient({
             setRoom((prev) => ({ ...prev, ...(payload.new as RoomRow) }));
           }
 
-          scheduleRefresh(80);
+          scheduleRefresh(260, false);
         }
       )
       .subscribe((status: string) => {
@@ -636,7 +637,7 @@ export default function CodenamesBoardClient({
             );
           }
 
-          scheduleRefresh(60);
+          scheduleRefresh(260, false);
         }
       )
       .subscribe();
@@ -659,7 +660,7 @@ export default function CodenamesBoardClient({
             setPlayers((prev) => normalizePlayers(upsertById(prev, normalized)));
           }
 
-          scheduleRefresh(60);
+          scheduleRefresh(260, false);
         }
       )
       .subscribe();
@@ -681,7 +682,7 @@ export default function CodenamesBoardClient({
             setTurns((prev) => sortTurnsNewestFirst(upsertById(prev, payload.new as TurnRow)));
           }
 
-          scheduleRefresh(60);
+          scheduleRefresh(260, false);
         }
       )
       .subscribe();
@@ -701,19 +702,33 @@ export default function CodenamesBoardClient({
 
     const interval = window.setInterval(() => {
       void fetchLatestState(false);
-    }, 2500);
+    }, 15000);
 
     const handleFocus = () => {
+      const now = Date.now();
+      if (now - lastFocusSyncAtRef.current < 2500) return;
+      lastFocusSyncAtRef.current = now;
+      void fetchLatestState(true);
+    };
+
+    const handlePageShow = () => {
+      const now = Date.now();
+      if (now - lastFocusSyncAtRef.current < 2500) return;
+      lastFocusSyncAtRef.current = now;
       void fetchLatestState(true);
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
+        const now = Date.now();
+        if (now - lastFocusSyncAtRef.current < 2500) return;
+        lastFocusSyncAtRef.current = now;
         void fetchLatestState(true);
       }
     };
 
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -726,6 +741,7 @@ export default function CodenamesBoardClient({
 
       clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       supabase.removeChannel(roomChannel);
       supabase.removeChannel(cardsChannel);
@@ -829,9 +845,11 @@ export default function CodenamesBoardClient({
   async function sendPreview(selectedCards: CardRow[]) {
     const channel = previewChannelRef.current;
 
-    if (!channel) return;
-
     if (!selectedCards.length) {
+      setPreviewSelection(null);
+
+      if (!channel) return;
+
       await channel.send({
         type: "broadcast",
         event: "clear-preview",
@@ -840,16 +858,22 @@ export default function CodenamesBoardClient({
       return;
     }
 
+    const payload = {
+      playerId: safeCurrentPlayer.id,
+      playerName: safeCurrentPlayer.guest_name || "لاعب",
+      cardIds: selectedCards.map((card) => card.id),
+      words: selectedCards.map((card) => card.word),
+      team: safeCurrentPlayer.team,
+    } satisfies PreviewSelection;
+
+    setPreviewSelection(payload);
+
+    if (!channel) return;
+
     await channel.send({
       type: "broadcast",
       event: "preview-selection",
-      payload: {
-        playerId: safeCurrentPlayer.id,
-        playerName: safeCurrentPlayer.guest_name || "لاعب",
-        cardIds: selectedCards.map((card) => card.id),
-        words: selectedCards.map((card) => card.word),
-        team: safeCurrentPlayer.team,
-      } satisfies PreviewSelection,
+      payload,
     });
   }
 
@@ -1373,7 +1397,7 @@ export default function CodenamesBoardClient({
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">\n      <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)]" />
       <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
         <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
 
