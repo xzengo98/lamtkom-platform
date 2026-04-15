@@ -725,12 +725,12 @@ export default function StartGameForm({
               <img
                 src={category.image_url}
                 alt={category.name}
-                className="h-44 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                className="h-48 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
                 loading="lazy"
                 decoding="async"
               />
             ) : (
-              <div className="flex h-44 items-center justify-center text-4xl">✨</div>
+              <div className="flex h-48 items-center justify-center text-4xl">✨</div>
             )}
 
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_55%)]" />
@@ -763,9 +763,6 @@ export default function StartGameForm({
 
           <div className={`relative px-3 pb-4 pt-3 text-center ${theme.nameBar}`}>
             <div className="text-[1.05rem] font-black leading-6 text-white">{category.name}</div>
-            <div className="mt-1 text-xs font-bold text-white/85">
-              {badge.text}
-            </div>
           </div>
         </div>
       </div>
@@ -789,9 +786,13 @@ export default function StartGameForm({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-1 text-xs font-bold text-white/40">
-          <span>{countLabel ?? `${categoriesList.length} فئة`}</span>
-          <span>اختر الفئات المناسبة للجولة</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+          <div className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}>
+            {countLabel ?? `${categoriesList.length} فئة`}
+          </div>
+          <div className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}>
+            اختر الفئات المناسبة للجولة
+          </div>
         </div>
 
         <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
