@@ -55,15 +55,23 @@ function getStatusLabel(status: string | null) {
 }
 
 function getStatusTone(status: string | null) {
-  if (status === "active") return "border-emerald-400/20 bg-emerald-400/10 text-emerald-100";
-  if (status === "finished") return "border-orange-400/20 bg-orange-400/10 text-orange-100";
+  if (status === "active") {
+    return "border-emerald-400/20 bg-emerald-400/10 text-emerald-100";
+  }
+
+  if (status === "finished") {
+    return "border-orange-400/20 bg-orange-400/10 text-orange-100";
+  }
+
   return "border-white/10 bg-white/5 text-white";
 }
 
 function formatDate(value: string | null) {
   if (!value) return "غير معروف";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "غير معروف";
+
   return new Intl.DateTimeFormat("ar", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -125,7 +133,8 @@ async function bulkDeleteByStatusAction(formData: FormData) {
     .eq("status", status);
 
   const roomRows = (rooms ?? []) as { id: string }[];
-const roomIds = roomRows.map((room) => room.id);
+  const roomIds = roomRows.map((room) => room.id);
+
   if (roomIds.length === 0) return;
 
   await supabase.from("codenames_cards").delete().in("room_id", roomIds);
@@ -192,19 +201,36 @@ export default async function AdminCodenamesRoomsPage({
         "id, room_code, status, created_at, current_turn_team, starting_team, red_remaining, blue_remaining, winner_team, assassin_revealed"
       )
       .order("created_at", { ascending: false }),
+
     supabase
       .from("codenames_players")
       .select("id, room_id, guest_name, team, role, is_host"),
+
     supabase
       .from("codenames_cards")
       .select("id, room_id, is_revealed"),
+
     supabase
       .from("codenames_turns")
-      .select("id, room_id, team, clue_word, clue_number, turn_status, created_at")
+      .select(
+        "id, room_id, team, clue_word, clue_number, turn_status, created_at"
+      )
       .order("created_at", { ascending: false }),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "waiting"),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("codenames_rooms").select("*", { count: "exact", head: true }).eq("status", "finished"),
+
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "waiting"),
+
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active"),
+
+    supabase
+      .from("codenames_rooms")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "finished"),
   ]);
 
   const rooms = (roomsResult.data ?? []) as RoomRow[];
@@ -225,7 +251,8 @@ export default async function AdminCodenamesRoomsPage({
     const roomPlayers = players.filter((item) => item.room_id === room.id);
     const roomCards = cards.filter((item) => item.room_id === room.id);
     const roomTurns = turns.filter((item) => item.room_id === room.id);
-    const activeTurn = roomTurns.find((item) => item.turn_status === "active") ?? null;
+    const activeTurn =
+      roomTurns.find((item) => item.turn_status === "active") ?? null;
     const revealedCount = roomCards.filter((item) => item.is_revealed).length;
     const host = roomPlayers.find((item) => item.is_host) ?? null;
 
@@ -239,8 +266,10 @@ export default async function AdminCodenamesRoomsPage({
       host,
       bluePlayers: roomPlayers.filter((item) => item.team === "blue").length,
       redPlayers: roomPlayers.filter((item) => item.team === "red").length,
-      spectatorPlayers: roomPlayers.filter((item) => item.team === "spectator").length,
-      spymasters: roomPlayers.filter((item) => item.role === "spymaster").length,
+      spectatorPlayers: roomPlayers.filter((item) => item.team === "spectator")
+        .length,
+      spymasters: roomPlayers.filter((item) => item.role === "spymaster")
+        .length,
     };
   });
 
@@ -257,8 +286,8 @@ export default async function AdminCodenamesRoomsPage({
           </h1>
 
           <p className="mt-3 max-w-3xl text-white/65">
-            راقب الغرف الحالية، راجع حالتها، واحذف الغرف المنتهية أو غير المكتملة بالكامل
-            من لوحة التحكم.
+            راقب الغرف الحالية، راجع حالتها، واحذف الغرف المنتهية أو غير المكتملة
+            بالكامل من لوحة التحكم.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -279,10 +308,30 @@ export default async function AdminCodenamesRoomsPage({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="غرف بانتظار البدء" value={waitingCountResult.count ?? 0} tone="slate" icon="⏳" />
-          <StatCard label="غرف نشطة" value={activeCountResult.count ?? 0} tone="emerald" icon="🟢" />
-          <StatCard label="غرف منتهية" value={finishedCountResult.count ?? 0} tone="orange" icon="🏁" />
-          <StatCard label="الغرف الظاهرة" value={filteredRooms.length} tone="cyan" icon="🚪" />
+          <StatCard
+            label="غرف بانتظار البدء"
+            value={waitingCountResult.count ?? 0}
+            tone="slate"
+            icon="⏳"
+          />
+          <StatCard
+            label="غرف نشطة"
+            value={activeCountResult.count ?? 0}
+            tone="emerald"
+            icon="🟢"
+          />
+          <StatCard
+            label="غرف منتهية"
+            value={finishedCountResult.count ?? 0}
+            tone="orange"
+            icon="🏁"
+          />
+          <StatCard
+            label="الغرف الظاهرة"
+            value={filteredRooms.length}
+            tone="cyan"
+            icon="🚪"
+          />
         </div>
 
         <div className="rounded-[28px] border border-white/10 bg-[#0a1020] p-5 shadow-xl">
@@ -411,7 +460,9 @@ export default async function AdminCodenamesRoomsPage({
                       </div>
 
                       <div className="rounded-2xl border border-orange-300/20 bg-orange-400/10 p-4">
-                        <div className="text-sm text-orange-100/70">Orange Team</div>
+                        <div className="text-sm text-orange-100/70">
+                          Orange Team
+                        </div>
                         <div className="mt-2 text-xl font-black text-orange-100">
                           {entry.redPlayers}
                         </div>
@@ -425,7 +476,9 @@ export default async function AdminCodenamesRoomsPage({
                       </div>
 
                       <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
-                        <div className="text-sm text-emerald-100/70">Spymasters</div>
+                        <div className="text-sm text-emerald-100/70">
+                          Spymasters
+                        </div>
                         <div className="mt-2 text-xl font-black text-emerald-100">
                           {entry.spymasters}
                         </div>
@@ -434,9 +487,12 @@ export default async function AdminCodenamesRoomsPage({
 
                     {entry.activeTurn ? (
                       <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
-                        <div className="text-sm text-emerald-100/70">الدور النشط الحالي</div>
+                        <div className="text-sm text-emerald-100/70">
+                          الدور النشط الحالي
+                        </div>
                         <div className="mt-2 font-bold text-emerald-100">
-                          {entry.activeTurn.team || "غير محدد"} • clue: {entry.activeTurn.clue_word || "-"} •{" "}
+                          {entry.activeTurn.team || "غير محدد"} • clue:{" "}
+                          {entry.activeTurn.clue_word || "-"} •{" "}
                           {entry.activeTurn.clue_number ?? 0}
                         </div>
                       </div>
@@ -445,17 +501,12 @@ export default async function AdminCodenamesRoomsPage({
 
                   <div className="flex flex-col justify-between gap-3 xl:w-[220px]">
                     <Link
-                      href={`/games/codenames/room/${entry.room.room_code}`}
+                      href={`/games/codenames/join?room_code=${encodeURIComponent(
+                        entry.room.room_code
+                      )}`}
                       className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-center font-bold text-white hover:bg-white/10"
                     >
-                      فتح الروم
-                    </Link>
-
-                    <Link
-                      href={`/games/codenames/board/${entry.room.room_code}`}
-                      className="rounded-2xl border border-cyan-300/20 bg-cyan-400/10 px-5 py-3 text-center font-bold text-cyan-100 hover:bg-cyan-400/15"
-                    >
-                      فتح البورد
+                      فتح صفحة الانضمام
                     </Link>
 
                     <form action={deleteRoomAction}>
