@@ -535,6 +535,7 @@ function getSectionIcon(slug: string | null | undefined, name?: string | null) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+
 export default function StartGameForm({
   sections = [],
   categories = [],
@@ -544,15 +545,14 @@ export default function StartGameForm({
   selectionMode,
   errorMessage = "",
 }: Props) {
-  const [gameName, setGameName]               = useState("");
-  const [teamOne, setTeamOne]                 = useState("");
-  const [teamTwo, setTeamTwo]                 = useState("");
+  const [gameName, setGameName] = useState("");
+  const [teamOne, setTeamOne] = useState("");
+  const [teamTwo, setTeamTwo] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [localError, setLocalError]           = useState("");
-  const [openInfoId, setOpenInfoId]           = useState<string | null>(null);
+  const [localError, setLocalError] = useState("");
   const [tooltipCategoryId, setTooltipCategoryId] = useState<string | null>(null);
 
-  const safeSections   = Array.isArray(sections)   ? sections   : [];
+  const safeSections = Array.isArray(sections) ? sections : [];
   const safeCategories = Array.isArray(categories) ? categories : [];
 
   const groupedSections = useMemo(() => {
@@ -568,31 +568,59 @@ export default function StartGameForm({
     return safeCategories.filter((c) => !c.section_id);
   }, [safeCategories]);
 
-  const selectedCount   = selectedCategories.length;
+  const categoryById = useMemo(() => {
+    return new Map(safeCategories.map((category) => [category.id, category]));
+  }, [safeCategories]);
+
+  const selectedCategorySet = useMemo(() => {
+    return new Set(selectedCategories);
+  }, [selectedCategories]);
+
+  const selectedCategoryItems = useMemo(() => {
+    return selectedCategories
+      .map((id) => categoryById.get(id))
+      .filter(Boolean) as Category[];
+  }, [selectedCategories, categoryById]);
+
+  const selectedCount = selectedCategories.length;
+  const remainingSlots = Math.max(REQUIRED_CATEGORY_COUNT - selectedCount, 0);
   const isReadyToSubmit = selectedCount === REQUIRED_CATEGORY_COUNT;
 
   function toggleCategory(id: string) {
     const availability = categoryAvailability[id];
+
     if (!availability?.isSelectable) {
-      setLocalError("هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.");
+      setLocalError(
+        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة."
+      );
       return;
     }
+
     setSelectedCategories((prev) => {
       const isSelected = prev.includes(id);
-      if (isSelected) { setLocalError(""); return prev.filter((item) => item !== id); }
+
+      if (isSelected) {
+        setLocalError("");
+        return prev.filter((item) => item !== id);
+      }
+
       if (prev.length >= REQUIRED_CATEGORY_COUNT) {
         setLocalError(`يمكنك اختيار ${REQUIRED_CATEGORY_COUNT} فئات فقط.`);
         return prev;
       }
+
       setLocalError("");
       return [...prev, id];
     });
   }
 
-  function handleInfoClick(event: ReactMouseEvent, categoryId: string) {
+  function handleInfoToggle(
+    event: ReactMouseEvent<HTMLButtonElement>,
+    categoryId: string
+  ) {
     event.preventDefault();
     event.stopPropagation();
-    setOpenInfoId((prev) => (prev === categoryId ? null : categoryId));
+    setTooltipCategoryId((prev) => (prev === categoryId ? null : categoryId));
   }
 
   function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>, categoryId: string) {
@@ -605,57 +633,198 @@ export default function StartGameForm({
 
   function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
     const cleanGameName = gameName.trim();
-    const cleanTeamOne  = teamOne.trim();
-    const cleanTeamTwo  = teamTwo.trim();
+    const cleanTeamOne = teamOne.trim();
+    const cleanTeamTwo = teamTwo.trim();
 
     if (!cleanGameName || !cleanTeamOne || !cleanTeamTwo) {
       event.preventDefault();
       setLocalError("اسم اللعبة واسم الفريق الأول واسم الفريق الثاني مطلوبة.");
       return;
     }
+
     if (selectedCategories.length !== REQUIRED_CATEGORY_COUNT) {
       event.preventDefault();
       setLocalError(`يجب اختيار ${REQUIRED_CATEGORY_COUNT} فئات بالضبط.`);
       return;
     }
-    const invalidSelection = selectedCategories.find((id) => !categoryAvailability[id]?.isSelectable);
+
+    const invalidSelection = selectedCategories.find(
+      (id) => !categoryAvailability[id]?.isSelectable
+    );
+
     if (invalidSelection) {
       event.preventDefault();
       setLocalError("هناك فئة مختارة لم تعد متاحة، حدّث الاختيار ثم حاول مجددًا.");
       return;
     }
+
     if (gamesRemaining <= 0) {
       event.preventDefault();
       setLocalError("لا توجد ألعاب متبقية في حسابك.");
       return;
     }
-    
-    // All validation passed - clear error and submit form naturally
+
     setLocalError("");
   }
 
   const visibleError = localError || errorMessage;
-
-  // Progress percentage for the selection counter
   const progressPct = Math.round((selectedCount / REQUIRED_CATEGORY_COUNT) * 100);
+
+  const renderCategoryCard = (
+    category: Category,
+    theme: ReturnType<typeof getSectionTheme>
+  ) => {
+    const availability = categoryAvailability[category.id] ?? {
+      availableGames: 0,
+      isSelectable: false,
+      mode: selectionMode,
+      easyCount: 0,
+      mediumCount: 0,
+      hardCount: 0,
+    };
+
+    const active = selectedCategorySet.has(category.id);
+    const badge = getAvailabilityBadge(availability);
+    const isTooltipOpen = tooltipCategoryId === category.id;
+    const totalQuestions =
+      (availability.easyCount ?? 0) +
+      (availability.mediumCount ?? 0) +
+      (availability.hardCount ?? 0);
+
+    return (
+      <div key={category.id} className="relative mx-auto w-full max-w-[210px]">
+        {isTooltipOpen && (
+          <div className="absolute -top-3 left-1/2 z-50 w-56 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(8,14,32,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
+            <div className="mb-1 text-xs font-black text-cyan-300">{category.name}</div>
+            {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
+            <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(8,14,32,0.97)]" />
+          </div>
+        )}
+
+        <div
+          role="button"
+          tabIndex={availability.isSelectable ? 0 : -1}
+          aria-disabled={!availability.isSelectable}
+          onClick={() => {
+            if (availability.isSelectable) {
+              toggleCategory(category.id);
+              setTooltipCategoryId(null);
+            }
+          }}
+          onKeyDown={(event) => {
+            if (!availability.isSelectable) return;
+            handleCardKeyDown(event, category.id);
+          }}
+          className={[
+            "group relative overflow-hidden rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_14px_32px_rgba(0,0,0,0.22)] transition duration-200",
+            !availability.isSelectable
+              ? "cursor-not-allowed border-white/6 opacity-70"
+              : active
+              ? "scale-[1.015] border-yellow-300 shadow-[0_0_0_3px_rgba(253,224,71,0.45),0_18px_34px_rgba(0,0,0,0.30)]"
+              : "cursor-pointer border-white/10 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_18px_36px_rgba(0,0,0,0.26)]",
+          ].join(" ")}
+        >
+          <div className="relative overflow-hidden rounded-t-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(228,236,248,0.96)_100%)]">
+            {category.image_url ? (
+              <img
+                src={category.image_url}
+                alt={category.name}
+                className="h-44 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="flex h-44 items-center justify-center text-4xl">✨</div>
+            )}
+
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_55%)]" />
+
+            <button
+              type="button"
+              onClick={(event) => handleInfoToggle(event, category.id)}
+              className="absolute left-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-[#203352] bg-[#24a7df] text-lg font-black text-white shadow-[0_6px_16px_rgba(0,0,0,0.22)] transition hover:brightness-110"
+              aria-label={`عرض وصف ${category.name}`}
+            >
+              !
+            </button>
+
+            <div className={`absolute right-3 top-3 z-20 rounded-[1rem] px-4 py-2 text-sm font-black shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${theme.titleBar}`}>
+              {totalQuestions > 0 ? `${totalQuestions} سؤال` : badge.text}
+            </div>
+
+            {active && (
+              <div className="absolute inset-0 rounded-t-[2rem] border-[3px] border-yellow-300/90" />
+            )}
+
+            {!availability.isSelectable && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+                <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
+                  غير متاح
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className={`relative px-3 pb-4 pt-3 text-center ${theme.nameBar}`}>
+            <div className="text-[1.05rem] font-black leading-6 text-white">{category.name}</div>
+            <div className="mt-1 text-xs font-bold text-white/85">
+              {badge.text}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSectionBlock = (
+    title: string,
+    categoriesList: Category[],
+    themeKeySlug?: string | null,
+    themeName?: string | null,
+    countLabel?: string
+  ) => {
+    const sectionTheme = getSectionTheme(themeKeySlug, themeName ?? title);
+
+    return (
+      <section className="space-y-5" key={title}>
+        <div className="flex justify-center">
+          <div className={`min-w-[240px] rounded-[1.4rem] px-7 py-3 text-center text-lg font-black shadow-[0_14px_28px_rgba(0,0,0,0.18)] ${sectionTheme.titleBar}`}>
+            {title}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 px-1 text-xs font-bold text-white/40">
+          <span>{countLabel ?? `${categoriesList.length} فئة`}</span>
+          <span>اختر الفئات المناسبة للجولة</span>
+        </div>
+
+        <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
+          {categoriesList.map((category) =>
+            renderCategoryCard(category, getSectionTheme(category.slug, title))
+          )}
+        </div>
+      </section>
+    );
+  };
 
   return (
     <form
       action={action}
       onSubmit={validateBeforeSubmit}
-      className="mx-auto max-w-[1360px] space-y-5"
+      className="mx-auto max-w-[1360px] space-y-6 pb-52 md:pb-56"
     >
-      <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />
+      <input
+        type="hidden"
+        name="selectedCategories"
+        value={selectedCategories.join(",")}
+      />
 
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden rounded-[2.2rem] border border-white/8 bg-[linear-gradient(150deg,rgba(15,25,50,1)_0%,rgba(7,13,30,1)_55%,rgba(10,18,40,1)_100%)]">
-        {/* Glow blobs */}
         <div className="pointer-events-none absolute -top-28 left-1/2 h-56 w-96 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-56 rounded-full bg-violet-500/8 blur-2xl" />
 
         <div className="relative grid gap-6 px-5 py-8 md:px-8 md:py-10 xl:grid-cols-[1.1fr_auto] xl:items-center xl:gap-10">
           <div>
-            {/* Badge */}
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-xs font-bold text-cyan-300">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
@@ -675,19 +844,19 @@ export default function StartGameForm({
               اختر اسم اللعبة وأسماء الفرق، ثم حدّد {REQUIRED_CATEGORY_COUNT} فئات تناسب جلستكم.
             </p>
 
-            {/* Stats pills */}
             <div className="mt-5 flex flex-wrap gap-2">
-              {/* Selection counter with mini progress */}
-              <div className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors duration-300 ${
-                isReadyToSubmit
-                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                  : "border-white/10 bg-white/5 text-white/70"
-              }`}>
+              <div
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors duration-300 ${
+                  isReadyToSubmit
+                    ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                    : "border-white/10 bg-white/5 text-white/70"
+                }`}
+              >
                 <GridIcon className="h-4 w-4 shrink-0" />
-                <span>{selectedCount} / {REQUIRED_CATEGORY_COUNT} فئات</span>
-                {isReadyToSubmit && (
-                  <span className="text-emerald-400">✓</span>
-                )}
+                <span>
+                  {selectedCount} / {REQUIRED_CATEGORY_COUNT} فئات
+                </span>
+                {isReadyToSubmit && <span className="text-emerald-400">✓</span>}
               </div>
 
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70">
@@ -706,7 +875,6 @@ export default function StartGameForm({
             </div>
           </div>
 
-          {/* Logo card – hidden on mobile, shown on xl */}
           <div className="hidden xl:flex xl:justify-end">
             <div className="relative flex h-[220px] w-[220px] items-center justify-center overflow-hidden rounded-[2rem] border border-cyan-400/12 bg-[linear-gradient(160deg,rgba(14,24,50,0.96)_0%,rgba(7,13,30,0.98)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.40)]">
               <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.07),transparent_70%)]" />
@@ -714,42 +882,43 @@ export default function StartGameForm({
                 src={heroLogo}
                 alt="شعار لمتكم"
                 className="h-[155px] w-[155px] object-contain drop-shadow-[0_0_20px_rgba(34,211,238,0.12)]"
+                decoding="async"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Setup Card ────────────────────────────────────────────────────── */}
       <section className="rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.22)] md:p-6">
-
-        {/* Header */}
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-bold text-white/50">
               <span className="h-1 w-1 rounded-full bg-cyan-400" />
               بيانات الجولة
             </span>
-            <h2 className="mt-2 text-xl font-black text-white md:text-2xl">إعدادات اللعبة الأساسية</h2>
+            <h2 className="mt-2 text-xl font-black text-white md:text-2xl">
+              إعدادات اللعبة الأساسية
+            </h2>
           </div>
           <div className="hidden rounded-2xl border border-white/8 bg-white/4 px-4 py-2.5 text-xs font-bold text-white/45 sm:block">
             ابدأ بعد اكتمال {REQUIRED_CATEGORY_COUNT} فئات
           </div>
         </div>
 
-        {/* Progress bar */}
         <div className="mb-5 overflow-hidden rounded-full bg-white/5" style={{ height: 4 }}>
           <div
-            className={`h-full rounded-full transition-all duration-500 ${isReadyToSubmit ? "bg-emerald-400" : "bg-cyan-400"}`}
+            className={`h-full rounded-full transition-all duration-500 ${
+              isReadyToSubmit ? "bg-emerald-400" : "bg-cyan-400"
+            }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
 
-        {/* Form inputs */}
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr_auto]">
-          {/* Game name */}
           <div className="sm:col-span-2 xl:col-span-1">
-            <label className="mb-1.5 block text-xs font-bold text-white/60">اسم اللعبة</label>
+            <label className="mb-1.5 block text-xs font-bold text-white/60">
+              اسم اللعبة
+            </label>
             <input
               name="gameName"
               value={gameName}
@@ -759,9 +928,10 @@ export default function StartGameForm({
             />
           </div>
 
-          {/* Team one */}
           <div>
-            <label className="mb-1.5 block text-xs font-bold text-white/60">الفريق الأول</label>
+            <label className="mb-1.5 block text-xs font-bold text-white/60">
+              الفريق الأول
+            </label>
             <input
               name="teamOne"
               value={teamOne}
@@ -771,9 +941,10 @@ export default function StartGameForm({
             />
           </div>
 
-          {/* Team two */}
           <div>
-            <label className="mb-1.5 block text-xs font-bold text-white/60">الفريق الثاني</label>
+            <label className="mb-1.5 block text-xs font-bold text-white/60">
+              الفريق الثاني
+            </label>
             <input
               name="teamTwo"
               value={teamTwo}
@@ -783,7 +954,6 @@ export default function StartGameForm({
             />
           </div>
 
-          {/* Submit */}
           <div className="flex items-end sm:col-span-2 xl:col-span-1">
             <button
               type="submit"
@@ -796,7 +966,6 @@ export default function StartGameForm({
           </div>
         </div>
 
-        {/* Error */}
         {visibleError ? (
           <div className="mt-4 rounded-[1.2rem] border border-red-400/20 bg-red-400/8 px-4 py-3 text-sm font-bold text-red-300">
             {visibleError}
@@ -804,285 +973,97 @@ export default function StartGameForm({
         ) : null}
       </section>
 
-      {/* ── Categories ────────────────────────────────────────────────────── */}
-      <section className="space-y-5">
-        {groupedSections.map((section) => {
-          const theme = getSectionTheme(section.slug, section.name);
-
-          return (
-            <div
-              key={section.id}
-              className="relative overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.22)] md:p-5"
-            >
-              {/* Section glow */}
-              <div className={`pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b ${theme.sectionGlow}`} />
-
-              {/* Section header */}
-              <div className="relative mb-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${theme.iconBg} ${theme.iconTint}`}>
-                    {getSectionIcon(section.slug, section.name)}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black text-white md:text-xl">{section.name}</h3>
-                    <div className="mt-0.5 text-xs font-bold text-white/45">{section.categories.length} فئة</div>
-                  </div>
-                </div>
-
-                <div className={`hidden rounded-full px-3 py-1.5 text-xs font-bold sm:inline-flex ${theme.titleBar}`}>
-                  قسم جاهز للاختيار
-                </div>
-              </div>
-
-              {/* Category cards grid — responsive 2 cols on mobile, more on larger */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {section.categories.map((category) => {
-                  const availability = categoryAvailability[category.id] ?? {
-                    availableGames: 0,
-                    isSelectable: false,
-                    mode: selectionMode,
-                    easyCount: 0,
-                    mediumCount: 0,
-                    hardCount: 0,
-                  };
-
-                  const active   = selectedCategories.includes(category.id);
-                  const badge    = getAvailabilityBadge(availability);
-                  const isTooltipOpen = tooltipCategoryId === category.id;
-                  return (
-                    <div key={category.id} className="relative">
-                      {/* Tooltip popup */}
-                      {isTooltipOpen && (
-                        <div className="absolute -top-2 left-1/2 z-50 w-52 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(8,14,32,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
-                          <div className="mb-1 text-xs font-black" style={{ color: "var(--tw-ring-color, #67e8f9)" }}>{category.name}</div>
-                          {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
-                          <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(8,14,32,0.97)]" />
-                        </div>
-                      )}
-
-                      <div
-                        role="button"
-                        tabIndex={availability.isSelectable ? 0 : -1}
-                        aria-disabled={!availability.isSelectable}
-                        onClick={() => {
-                          if (availability.isSelectable) {
-                            toggleCategory(category.id);
-                            setTooltipCategoryId(null);
-                          }
-                        }}
-                        onKeyDown={(event) => {
-                          if (!availability.isSelectable) return;
-                          handleCardKeyDown(event, category.id);
-                        }}
-                        className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
-                          !availability.isSelectable
-                            ? "cursor-not-allowed border-white/5 opacity-75"
-                            : active
-                            ? `${theme.selectedRing} scale-[1.01] border-transparent`
-                            : "cursor-pointer border-white/10 hover:-translate-y-0.5 hover:border-white/20"
-                        }`}
-                      >
-                        {/* Image area — full cover */}
-                        <div className="relative overflow-hidden">
-                          {category.image_url ? (
-                            <img
-                              src={category.image_url}
-                              alt={category.name}
-                              className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="flex h-40 items-center justify-center bg-[linear-gradient(160deg,rgba(16,26,52,0.95),rgba(6,12,28,0.98))] text-4xl">
-                              ✨
-                            </div>
-                          )}
-
-                          {/* Dark gradient overlay from bottom */}
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(6,12,28,0.88)] via-transparent to-transparent" />
-
-                          {/* "i" info tooltip button — top left */}
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              setTooltipCategoryId(isTooltipOpen ? null : category.id);
-                            }}
-                            className={`absolute left-2 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-[rgba(14,100,180,0.85)] text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-[rgba(14,130,220,0.95)] ${theme.info}`}
-                            aria-label={`عرض وصف ${category.name}`}
-                          >
-                            i
-                          </button>
-
-                          {/* Availability / games count badge — top right */}
-                          <div className={`absolute right-2 top-2 z-20 rounded-full border px-2.5 py-1 text-[10px] font-black backdrop-blur-sm ${badge.className}`}>
-                            {badge.text}
-                          </div>
-
-                          {/* Selected checkmark — bottom left */}
-                          {active && (
-                            <div className="absolute bottom-2 left-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
-                              ✓
-                            </div>
-                          )}
-
-                          {/* Exhausted overlay */}
-                          {!availability.isSelectable && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
-                              <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
-                                غير متاح
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Name bar */}
-                        <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 ${
-                          !availability.isSelectable
-                            ? "bg-[linear-gradient(180deg,rgba(50,20,20,0.80),rgba(30,10,10,0.90))] text-white/50"
-                            : theme.nameBar
-                        }`}>
-                          {category.name}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Tooltip dismiss overlay */}
-        {tooltipCategoryId && (
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setTooltipCategoryId(null)}
-          />
+      <section className="space-y-10">
+        {groupedSections.map((section) =>
+          renderSectionBlock(
+            section.name,
+            section.categories,
+            section.slug,
+            section.name,
+            `${section.categories.length} فئة`
+          )
         )}
 
-        {/* Uncategorized */}
-        {uncategorized.length > 0 ? (
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.22)] md:p-5">
-            <div className="relative mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#112945] text-white">
-                <BookOpenIcon className="h-5 w-5" />
+        {uncategorized.length > 0
+          ? renderSectionBlock(
+              "فئات بدون قسم",
+              uncategorized,
+              "default",
+              "فئات بدون قسم",
+              `${uncategorized.length} فئة`
+            )
+          : null}
+      </section>
+
+      {tooltipCategoryId && (
+        <div className="fixed inset-0 z-40" onClick={() => setTooltipCategoryId(null)} />
+      )}
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4">
+        <div className="pointer-events-auto w-full max-w-[760px] rounded-[2rem] border border-cyan-400/10 bg-[linear-gradient(180deg,rgba(10,28,54,0.97)_0%,rgba(5,16,34,0.98)_100%)] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl md:p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs font-bold text-cyan-300/80">
+                {selectedCount} / {REQUIRED_CATEGORY_COUNT}
               </div>
-              <div>
-                <h3 className="text-lg font-black text-white md:text-xl">فئات بدون قسم</h3>
-                <div className="mt-0.5 text-xs font-bold text-white/45">{uncategorized.length} فئة</div>
+              <div className="mt-1 text-lg font-black text-white">
+                الفئات المختارة
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {uncategorized.map((category) => {
-                const theme        = getSectionTheme("default");
-                const availability = categoryAvailability[category.id] ?? {
-                  availableGames: 0,
-                  isSelectable: false,
-                  mode: selectionMode,
-                  easyCount: 0,
-                  mediumCount: 0,
-                  hardCount: 0,
-                };
-
-                const active   = selectedCategories.includes(category.id);
-                const badge    = getAvailabilityBadge(availability);
-                const isTooltipOpen = tooltipCategoryId === category.id;
-                return (
-                  <div key={category.id} className="relative">
-                    {isTooltipOpen && (
-                      <div className="absolute -top-2 left-1/2 z-50 w-52 -translate-x-1/2 -translate-y-full rounded-2xl border border-white/12 bg-[rgba(8,14,32,0.97)] px-4 py-3 text-center text-sm leading-6 text-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.55)] backdrop-blur-md">
-                        <div className="mb-1 text-xs font-black text-cyan-300">{category.name}</div>
-                        {category.description || "لا يوجد وصف متاح لهذه الفئة حاليًا."}
-                        <div className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-[rgba(8,14,32,0.97)]" />
-                      </div>
-                    )}
-
-                    <div
-                      role="button"
-                      tabIndex={availability.isSelectable ? 0 : -1}
-                      aria-disabled={!availability.isSelectable}
-                      onClick={() => {
-                        if (availability.isSelectable) {
-                          toggleCategory(category.id);
-                          setTooltipCategoryId(null);
-                        }
-                      }}
-                      onKeyDown={(event) => {
-                        if (!availability.isSelectable) return;
-                        handleCardKeyDown(event, category.id);
-                      }}
-                      className={`group relative w-full overflow-hidden rounded-[1.4rem] border p-0 text-right transition duration-200 ${
-                        !availability.isSelectable
-                          ? "cursor-not-allowed border-white/5 opacity-75"
-                          : active
-                          ? `${theme.selectedRing} scale-[1.01] border-transparent`
-                          : "cursor-pointer border-white/10 hover:-translate-y-0.5 hover:border-white/20"
-                      }`}
-                    >
-                      <div className="relative overflow-hidden">
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt={category.name}
-                            className="h-40 w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-40 items-center justify-center bg-[linear-gradient(160deg,rgba(16,26,52,0.95),rgba(6,12,28,0.98))] text-4xl">
-                            ✨
-                          </div>
-                        )}
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(6,12,28,0.88)] via-transparent to-transparent" />
-
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            setTooltipCategoryId(isTooltipOpen ? null : category.id);
-                          }}
-                          className="absolute left-2 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-[rgba(14,100,180,0.85)] text-sm font-black text-white shadow-lg backdrop-blur-sm transition hover:bg-[rgba(14,130,220,0.95)]"
-                          aria-label={`عرض وصف ${category.name}`}
-                        >
-                          i
-                        </button>
-
-                        <div className={`absolute right-2 top-2 z-20 rounded-full border px-2.5 py-1 text-[10px] font-black backdrop-blur-sm ${badge.className}`}>
-                          {badge.text}
-                        </div>
-
-                        {active && (
-                          <div className="absolute bottom-2 left-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-xs font-black text-white shadow-md">
-                            ✓
-                          </div>
-                        )}
-
-                        {!availability.isSelectable && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px]">
-                            <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1.5 text-xs font-black text-red-200">
-                              غير متاح
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={`px-2 py-2.5 text-center text-sm font-black md:px-3 ${
-                        !availability.isSelectable
-                          ? "bg-[linear-gradient(180deg,rgba(50,20,20,0.80),rgba(30,10,10,0.90))] text-white/50"
-                          : theme.nameBar
-                      }`}>
-                        {category.name}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/55">
+              اختر {remainingSlots > 0 ? `${remainingSlots} فئات إضافية` : "جاهز للبدء"}
             </div>
           </div>
-        ) : null}
-      </section>
+
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {selectedCategoryItems.map((category) => {
+              const theme = getSectionTheme(category.slug, category.name);
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => toggleCategory(category.id)}
+                  className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5 text-right transition hover:border-white/20"
+                >
+                  <div className="h-20 overflow-hidden bg-[rgba(255,255,255,0.88)]">
+                    {category.image_url ? (
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-2xl">✨</div>
+                    )}
+                  </div>
+                  <div className={`px-2 py-2 text-center text-[11px] font-black ${theme.nameBar}`}>
+                    {category.name}
+                  </div>
+                </button>
+              );
+            })}
+
+            {Array.from({ length: remainingSlots }).map((_, index) => (
+              <div
+                key={`empty-slot-${index}`}
+                className="flex h-[112px] items-center justify-center rounded-[1.1rem] border border-dashed border-cyan-400/20 bg-[#081a35] text-center text-xs font-bold text-white/28"
+              >
+                اختر فئة
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="submit"
+            disabled={!isReadyToSubmit || gamesRemaining <= 0}
+            className="mt-4 inline-flex w-full items-center justify-center rounded-[1.3rem] bg-cyan-500 px-5 py-4 text-base font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.20)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            ابدأ اللعب
+          </button>
+        </div>
+      </div>
     </form>
   );
 }
