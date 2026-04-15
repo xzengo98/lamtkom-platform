@@ -1397,7 +1397,7 @@ export default function CodenamesBoardClient({
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">\n      <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)]" />
+    <div className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">     <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)]" />
       <div className="relative mx-auto w-full max-w-[1840px] p-2 sm:p-3 xl:p-4">
         <div className="absolute inset-0 -z-10 rounded-[28px] bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_28%),linear-gradient(180deg,#07111d_0%,#16283a_100%)] sm:rounded-[40px]" />
 

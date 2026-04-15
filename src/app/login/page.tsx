@@ -199,8 +199,7 @@ export default async function LoginPage({
 
                 <p className="mt-4 max-w-2xl text-sm leading-8 text-white/55 md:text-base">
                   ادخل إلى حسابك للوصول السريع إلى جلساتك، متابعة ألعابك غير
-                  المكتملة، والبدء مباشرة من نفس المكان بدون خطوات مربكة أو
-                  انتظار غير ضروري.
+                  المكتملة، والبدء مباشرة من نفس المكان.
                 </p>
 
                 <div className="mt-6 grid gap-3">
