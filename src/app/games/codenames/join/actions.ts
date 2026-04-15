@@ -8,6 +8,12 @@ type ExistingPlayerRow = {
   guest_name: string | null;
 };
 
+type RoomRow = {
+  id: string;
+  room_code: string;
+  status: string | null;
+};
+
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
@@ -17,6 +23,24 @@ function normalizeGuestName(value: string) {
   return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+function buildJoinRedirect(params: {
+  roomCode?: string;
+  error?: string;
+}) {
+  const search = new URLSearchParams();
+
+  if (params.roomCode) {
+    search.set("room_code", params.roomCode);
+  }
+
+  if (params.error) {
+    search.set("error", params.error);
+  }
+
+  const query = search.toString();
+  return query ? `/games/codenames/join?${query}` : "/games/codenames/join";
+}
+
 export async function joinCodenamesRoom(formData: FormData) {
   const supabase = await getSupabaseServerClient();
 
@@ -24,52 +48,74 @@ export async function joinCodenamesRoom(formData: FormData) {
   const guestName = getString(formData, "guest_name");
 
   if (!roomCode) {
-    throw new Error("رمز الغرفة مطلوب");
+    redirect(
+      buildJoinRedirect({
+        error: "رمز الغرفة مطلوب",
+      })
+    );
   }
 
   if (!guestName) {
-    throw new Error("الاسم مطلوب");
+    redirect(
+      buildJoinRedirect({
+        roomCode,
+        error: "الاسم مطلوب",
+      })
+    );
   }
 
   const { data: roomData, error: roomError } = await supabase
     .from("codenames_rooms")
-    .select("id, room_code")
+    .select("id, room_code, status")
     .eq("room_code", roomCode)
     .maybeSingle();
 
   if (roomError || !roomData) {
-    throw new Error(roomError?.message || "الغرفة غير موجودة");
+    redirect(
+      buildJoinRedirect({
+        roomCode,
+        error: roomError?.message || "الغرفة غير موجودة",
+      })
+    );
   }
 
+  const room = roomData as RoomRow;
   const normalizedGuestName = normalizeGuestName(guestName);
 
-  const { data: existingPlayersData, error: existingPlayersError } = await supabase
-    .from("codenames_players")
-    .select("id, guest_name")
-    .eq("room_id", roomData.id);
+  const { data: existingPlayersData, error: existingPlayersError } =
+    await supabase
+      .from("codenames_players")
+      .select("id, guest_name")
+      .eq("room_id", room.id);
 
   if (existingPlayersError) {
-    throw new Error(existingPlayersError.message || "تعذر فحص أسماء اللاعبين");
+    redirect(
+      buildJoinRedirect({
+        roomCode: room.room_code,
+        error: existingPlayersError.message || "تعذر فحص أسماء اللاعبين",
+      })
+    );
   }
 
   const existingPlayers = (existingPlayersData ?? []) as ExistingPlayerRow[];
 
-  const duplicatePlayer = existingPlayers.find((player: ExistingPlayerRow) => {
+  const duplicatePlayer = existingPlayers.find((player) => {
     return normalizeGuestName(player.guest_name ?? "") === normalizedGuestName;
   });
 
   if (duplicatePlayer) {
     redirect(
-      `/games/codenames/join?room_code=${encodeURIComponent(
-        roomData.room_code,
-      )}&error=${encodeURIComponent("هذا الاسم مستخدم بالفعل داخل هذه الغرفة")}`,
+      buildJoinRedirect({
+        roomCode: room.room_code,
+        error: "هذا الاسم مستخدم بالفعل داخل هذه الغرفة",
+      })
     );
   }
 
   const { data: playerData, error: playerError } = await supabase
     .from("codenames_players")
     .insert({
-      room_id: roomData.id,
+      room_id: room.id,
       guest_name: guestName,
       team: "spectator",
       role: "spectator",
@@ -79,8 +125,17 @@ export async function joinCodenamesRoom(formData: FormData) {
     .single();
 
   if (playerError || !playerData) {
-    throw new Error(playerError?.message || "تعذر الانضمام إلى الغرفة");
+    redirect(
+      buildJoinRedirect({
+        roomCode: room.room_code,
+        error: playerError?.message || "تعذر الانضمام إلى الغرفة",
+      })
+    );
   }
 
-  redirect(`/games/codenames/room/${roomData.room_code}?player_id=${playerData.id}`);
+  if (room.status === "active") {
+    redirect(`/games/codenames/board/${room.room_code}?player_id=${playerData.id}`);
+  }
+
+  redirect(`/games/codenames/room/${room.room_code}?player_id=${playerData.id}`);
 }
