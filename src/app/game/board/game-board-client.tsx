@@ -654,19 +654,18 @@ export default function GameBoardClient({
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
 
         {/* ── Top control panel ──────────────────────────────────────────── */}
-        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:p-5">
+        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] px-4 py-3 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-4">
 
-          {/* Title row */}
-          <div className="mb-4 flex flex-col gap-1 sm:mb-5">
-            <div className="text-xs font-bold tracking-[0.22em] text-cyan-300/60">
-              لوحة اللعبة
+          {/* Title row — compact, centered */}
+          <div className="mb-3 flex items-center justify-center gap-3 sm:mb-4">
+            <div className="text-center">
+              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
+                لوحة اللعبة
+              </div>
+              <h1 className="text-lg font-black text-white sm:text-xl md:text-2xl">
+                {gameName}
+              </h1>
             </div>
-            <h1 className="text-xl font-black text-white sm:text-2xl md:text-3xl">
-              {gameName}
-            </h1>
-            <p className="text-xs font-medium text-slate-300/70 sm:text-sm">
-              اختر الأسئلة من لوحة اللعب في الأسفل وابدأ باللعب.
-            </p>
           </div>
 
           {/* Status pills + action buttons */}

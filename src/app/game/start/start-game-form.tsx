@@ -806,7 +806,7 @@ export default function StartGameForm({
     <form
       action={action}
       onSubmit={validateBeforeSubmit}
-      className="mx-auto max-w-[1360px] space-y-6 pb-52 md:pb-56"
+      className="mx-auto max-w-[1360px] space-y-6 pt-4 pb-52 sm:pt-6 md:pb-56"
     >
       <input
         type="hidden"
@@ -909,8 +909,8 @@ export default function StartGameForm({
           />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr_auto]">
-          <div className="sm:col-span-2 xl:col-span-1">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="sm:col-span-2 xl:col-span-1 xl:col-span-1">
             <label className="mb-1.5 block text-xs font-bold text-white/60">
               اسم اللعبة
             </label>
@@ -949,16 +949,7 @@ export default function StartGameForm({
             />
           </div>
 
-          <div className="flex items-end sm:col-span-2 xl:col-span-1">
-            <button
-              type="submit"
-              disabled={!isReadyToSubmit || gamesRemaining <= 0}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3.5 text-sm font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40 md:py-4 md:text-base"
-            >
-              ابدأ اللعبة
-              {isReadyToSubmit && <span className="text-slate-950">←</span>}
-            </button>
-          </div>
+
         </div>
 
         {visibleError ? (

@@ -357,7 +357,7 @@ export default function QuestionPageClient({
   const phaseColor = !showAnswer && !showWinnerPicker
     ? "text-white"
     : showAnswer && !showWinnerPicker
-      ? "text-cyan-300"
+      ? "text-emerald-300"
       : "text-amber-300";
 
   return (
@@ -365,26 +365,31 @@ export default function QuestionPageClient({
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-5 sm:py-6 md:px-6">
 
         {/* ── Score + Timer strip ──────────────────────────────────────── */}
-        <section className="mb-4 overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(150deg,rgba(15,25,50,1)_0%,rgba(7,13,30,1)_100%)] sm:mb-5">
-          {/* Glow blobs */}
-          <div className="pointer-events-none absolute left-0 h-40 w-40 -translate-x-1/2 rounded-full bg-cyan-500/8 blur-2xl" />
-          <div className="pointer-events-none absolute right-0 h-40 w-40 translate-x-1/2 rounded-full bg-orange-500/6 blur-2xl" />
+        <section className="mb-4 overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(8,16,38,1)_0%,rgba(5,10,26,1)_100%)] sm:mb-5">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2 px-3 py-4 sm:gap-4 sm:px-5 sm:py-5">
 
-          <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-4 sm:gap-4 sm:px-5 sm:py-5">
-
-            {/* Team One (أزرق) — يمين */}
-            <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/6 p-3 text-center sm:p-4">
-              <div className="mb-1.5 flex justify-center">
-                <img src={TEAM_BLUE_AVATAR} alt={teamOne} className="h-8 w-8 rounded-full object-contain sm:h-10 sm:w-10" />
-              </div>
-              <div className="truncate text-xs font-bold text-cyan-400/70 sm:text-sm">{teamOne}</div>
-              <div className="mt-1 text-xl font-black text-cyan-300 sm:text-2xl md:text-3xl">
-                {boardState.teamOneScore}
+            {/* ── Team Two (برتقالي) — يمين ── */}
+            <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(20,12,6,0.95)_0%,rgba(10,6,3,0.98)_100%)]">
+              <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 sm:gap-2 sm:px-4 sm:py-5">
+                <div className="relative">
+                  <img
+                    src={TEAM_ORANGE_AVATAR}
+                    alt={teamTwo}
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-orange-400/30 sm:h-14 sm:w-14"
+                  />
+                  <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[rgba(10,6,3,0.98)] bg-orange-400" />
+                </div>
+                <div className="max-w-[80px] truncate text-center text-xs font-bold text-orange-300/80 sm:max-w-[120px] sm:text-sm">
+                  {teamTwo}
+                </div>
+                <div className="text-2xl font-black text-white sm:text-3xl md:text-4xl">
+                  {boardState.teamTwoScore}
+                </div>
               </div>
             </div>
 
-            {/* Timer — وسط */}
-            <div className="flex flex-col items-center gap-2">
+            {/* ── Timer — وسط ── */}
+            <div className="flex flex-col items-center justify-center gap-2">
               <TimerRing
                 timeLeft={boardState.timeLeft}
                 total={QUESTION_TIMER_SECONDS}
@@ -403,7 +408,7 @@ export default function QuestionPageClient({
                     type="button"
                     onClick={() => setTimerRunning((prev) => !prev)}
                     aria-label={timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-cyan-300 transition hover:bg-cyan-400/18 active:scale-95"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 active:scale-95"
                   >
                     {timerRunning ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
                   </button>
@@ -420,14 +425,23 @@ export default function QuestionPageClient({
               )}
             </div>
 
-            {/* Team Two (برتقالي) — يسار */}
-            <div className="rounded-2xl border border-orange-400/15 bg-orange-400/6 p-3 text-center sm:p-4">
-              <div className="mb-1.5 flex justify-center">
-                <img src={TEAM_ORANGE_AVATAR} alt={teamTwo} className="h-8 w-8 rounded-full object-contain sm:h-10 sm:w-10" />
-              </div>
-              <div className="truncate text-xs font-bold text-orange-400/70 sm:text-sm">{teamTwo}</div>
-              <div className="mt-1 text-xl font-black text-orange-300 sm:text-2xl md:text-3xl">
-                {boardState.teamTwoScore}
+            {/* ── Team One (أزرق) — يسار ── */}
+            <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(6,14,34,0.95)_0%,rgba(3,7,20,0.98)_100%)]">
+              <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 sm:gap-2 sm:px-4 sm:py-5">
+                <div className="relative">
+                  <img
+                    src={TEAM_BLUE_AVATAR}
+                    alt={teamOne}
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-cyan-400/30 sm:h-14 sm:w-14"
+                  />
+                  <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[rgba(3,7,20,0.98)] bg-cyan-400" />
+                </div>
+                <div className="max-w-[80px] truncate text-center text-xs font-bold text-cyan-300/80 sm:max-w-[120px] sm:text-sm">
+                  {teamOne}
+                </div>
+                <div className="text-2xl font-black text-white sm:text-3xl md:text-4xl">
+                  {boardState.teamOneScore}
+                </div>
               </div>
             </div>
           </div>
@@ -489,9 +503,9 @@ export default function QuestionPageClient({
             {showAnswer && !showWinnerPicker && (
               <div className="space-y-4">
                 {/* Answer label bar */}
-                <div className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/15 bg-cyan-400/6 px-4 py-2.5">
-                  <AnswerIcon className="h-4 w-4 text-cyan-400" />
-                  <span className="text-sm font-black text-cyan-300">الإجابة الصحيحة</span>
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-2.5">
+                  <AnswerIcon className="h-4 w-4 text-emerald-400" />
+                  <span className="text-sm font-black text-emerald-300">الإجابة الصحيحة</span>
                 </div>
 
                 <RichContent html={question.answer_text} />
