@@ -346,7 +346,7 @@ export default async function HomePage() {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/6 to-transparent" />
 
           <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
-            <SectionLabel label="منصة ألعاب عربية للجلسات والفعاليات" />
+            <SectionLabel label="3 العاب مختلفة متاحة على المنصة" />
 
             <div className="relative mt-8">
               <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/10 blur-3xl" />
@@ -365,8 +365,8 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9">
-              منصة ألعاب عربية للجلسات والفعاليات تضم ألعابًا جماعية جاهزة للبدء
-              بشكل سريع وواضح وأنيق.
+              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل عدة ألعاب اختار ما يناسبك وابدء.
+             
             </p>
 
             <div className="mt-9 flex flex-wrap justify-center gap-3">
@@ -443,8 +443,8 @@ export default async function HomePage() {
           <div className="mx-auto max-w-5xl">
             <div className="mb-10 text-center">
               <h2 className="text-4xl font-black text-white sm:text-5xl">
-                كيف تلعب
-                <span className="mr-3 text-white/92">لمتكم</span>
+                كيف تلعب لمتكم؟
+                <span className="mr-3 text-white/92"></span>
               </h2>
             </div>
 
