@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
 import Navbar from "../components/layout/navbar";
 import AppResumeRefresh from "../components/app/app-resume-refresh";
+import SiteBackground from "../components/layout/site-background";
 import { getViewer } from "../lib/auth/viewer";
 
 export const metadata: Metadata = {
@@ -54,13 +56,12 @@ export default async function RootLayout({
 
   return (
     <html lang="ar" dir="rtl">
-  <body className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-    <div className="min-h-screen bg-transparent text-white">
-      <Navbar initialAuth={viewer} />
-      <AppResumeRefresh />
-      {children}
-    </div>
-  </body>
-</html>
+      <body className="relative min-h-screen overflow-x-hidden">
+        <SiteBackground />
+        <AppResumeRefresh />
+        <Navbar initialAuth={viewer} />
+        <div className="relative z-10">{children}</div>
+      </body>
+    </html>
   );
 }
