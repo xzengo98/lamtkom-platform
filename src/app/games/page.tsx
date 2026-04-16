@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import SiteBackground from "../components/layout/site-background";
+
 
 
 const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
