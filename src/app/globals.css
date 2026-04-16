@@ -2,9 +2,9 @@
 @import "tailwindcss";
 
 :root {
-  --site-bg: #020a1a;
-  --site-bg-2: #030d22;
-  --site-bg-3: #020814;
+  --site-bg: #030712;
+  --site-bg-2: #07101f;
+  --site-bg-3: #030712;
   --site-text: #ffffff;
 }
 
@@ -22,16 +22,16 @@ body {
 
 html {
   -webkit-text-size-adjust: 100%;
-  background:
-    linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
+  background: linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
   background-color: var(--site-bg);
 }
 
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  background:
-    linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
   background-color: var(--site-bg);
 }
 
