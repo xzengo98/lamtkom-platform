@@ -13,6 +13,13 @@ type GameItem = {
   accent: Accent;
 };
 
+type StepItem = {
+  number: string;
+  title: string;
+  description: string;
+  icon: "users" | "target" | "link" | "trophy";
+};
+
 const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
 
 const games: GameItem[] = [
@@ -20,7 +27,7 @@ const games: GameItem[] = [
     title: "لمتكم",
     subtitle: "فئات وأسئلة",
     description:
-      "لعبة جماعية بين فريقين تعتمد على الفئات والصور والنقاط، ومصممة لتظهر بشكل قوي على الشاشات والجلسات.",
+      "لعبة جماعية بين فريقين تعتمد على الفئات والصور والنقاط، بتجربة قوية وواضحة للجلسات والتحدي.",
     href: "/game/start",
     image: "https://a.top4top.io/p_3738qob7g1.png",
     players: "2 فرق",
@@ -30,7 +37,7 @@ const games: GameItem[] = [
     title: "برا السالفة",
     subtitle: "اكتشف المتخفي",
     description:
-      "شخص واحد فقط لا يعرف الكلمة. اسألوا، شكّوا، وصوّتوا قبل أن يكشفكم أو يكتشف الإجابة.",
+      "شخص واحد فقط لا يعرف الكلمة. اسألوا، حللوا، وصوّتوا قبل أن يعرف الجواب أو يضلل الجميع.",
     href: "/game/bara-alsalfah",
     image: "https://l.top4top.io/p_373887e151.png",
     players: "3+ لاعبين",
@@ -40,7 +47,7 @@ const games: GameItem[] = [
     title: "Codenames",
     subtitle: "كلمات وتلميحات",
     description:
-      "تجربة جماعية سريعة تعتمد على التلميحات والتركيز والربط الذكي بين الكلمات داخل الفريق.",
+      "تجربة جماعية تعتمد على الذكاء والتركيز والتلميحات السريعة، وفيها طابع تنافسي ممتع بين الفريقين.",
     href: "/games/codenames/",
     image: "https://b.top4top.io/p_374101e3s1.png",
     players: "4+ لاعبين",
@@ -48,30 +55,51 @@ const games: GameItem[] = [
   },
 ];
 
+const steps: StepItem[] = [
+  {
+    number: "1",
+    title: "جهز فريقك",
+    description: "اختر من يلعب معك واجتمعوا في مكان واحد أو أمام نفس الشاشة.",
+    icon: "users",
+  },
+  {
+    number: "2",
+    title: "اختاروا الفئات",
+    description: "كل فريق يختار فئاته لتبدأ الجولة بتحدي مناسب وممتع.",
+    icon: "target",
+  },
+  {
+    number: "3",
+    title: "اربط اللعبة",
+    description: "ابدأ اللعبة مباشرة واعرضها على التلفاز أو الشاشة بسهولة.",
+    icon: "link",
+  },
+  {
+    number: "4",
+    title: "استمتع بالتحدي",
+    description: "تنافسوا، اجمعوا النقاط، واستمتعوا بجلسة حماسية مليئة بالمرح.",
+    icon: "trophy",
+  },
+];
+
 const accents = {
   cyan: {
-    soft: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
-    text: "text-cyan-300",
     line: "bg-cyan-400",
+    soft: "border-cyan-300/20 bg-cyan-300/10 text-cyan-200",
     button:
-      "bg-cyan-400 text-slate-950 hover:bg-cyan-300 shadow-[0_18px_50px_rgba(34,211,238,0.22)]",
-    glow: "shadow-[0_24px_70px_rgba(34,211,238,0.12)]",
+      "bg-cyan-300 text-[#182012] hover:bg-cyan-200 shadow-[0_18px_40px_rgba(103,232,249,0.18)]",
   },
   orange: {
-    soft: "border-orange-400/20 bg-orange-400/10 text-orange-300",
-    text: "text-orange-300",
-    line: "bg-orange-400",
+    line: "bg-orange-300",
+    soft: "border-orange-300/20 bg-orange-300/10 text-orange-200",
     button:
-      "bg-orange-400 text-slate-950 hover:bg-orange-300 shadow-[0_18px_50px_rgba(251,146,60,0.22)]",
-    glow: "shadow-[0_24px_70px_rgba(251,146,60,0.12)]",
+      "bg-orange-300 text-[#182012] hover:bg-orange-200 shadow-[0_18px_40px_rgba(253,186,116,0.18)]",
   },
   violet: {
-    soft: "border-violet-400/20 bg-violet-400/10 text-violet-300",
-    text: "text-violet-300",
-    line: "bg-violet-400",
+    line: "bg-violet-300",
+    soft: "border-violet-300/20 bg-violet-300/10 text-violet-200",
     button:
-      "bg-violet-400 text-slate-950 hover:bg-violet-300 shadow-[0_18px_50px_rgba(167,139,250,0.22)]",
-    glow: "shadow-[0_24px_70px_rgba(167,139,250,0.12)]",
+      "bg-violet-300 text-[#182012] hover:bg-violet-200 shadow-[0_18px_40px_rgba(196,181,253,0.18)]",
   },
 };
 
@@ -95,24 +123,7 @@ function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="8" width="18" height="8" rx="4" />
-      <path d="M8 12h2M9 11v2M15.5 12h.01M17.5 12h.01" />
-    </svg>
-  );
-}
-
-function UsersIcon({ className = "h-4 w-4" }: { className?: string }) {
+function UsersIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -124,14 +135,14 @@ function UsersIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinejoin="round"
     >
       <circle cx="9" cy="8" r="3" />
-      <path d="M4 19a5 5 0 0 1 10 0" />
       <circle cx="17" cy="9" r="2.5" />
+      <path d="M4 19a5 5 0 0 1 10 0" />
       <path d="M14.5 19a4.5 4.5 0 0 1 5 0" />
     </svg>
   );
 }
 
-function SparkIcon({ className = "h-4 w-4" }: { className?: string }) {
+function TargetIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -142,216 +153,111 @@ function SparkIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="m12 3 1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z" />
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="1.5" />
     </svg>
   );
 }
 
+function LinkIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="6" y="8" width="12" height="8" rx="4" />
+      <path d="M9 12h.01M15 12h.01" />
+      <path d="M12 9.5v5" />
+    </svg>
+  );
+}
+
+function TrophyIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 4h8v3a4 4 0 0 1-8 0V4Z" />
+      <path d="M6 6H4a2 2 0 0 0 2 2" />
+      <path d="M18 6h2a2 2 0 0 1-2 2" />
+      <path d="M12 11v4" />
+      <path d="M9 19h6" />
+      <path d="M10 15h4v4h-4z" />
+    </svg>
+  );
+}
+
+function StepIcon({
+  icon,
+  className,
+}: {
+  icon: StepItem["icon"];
+  className?: string;
+}) {
+  if (icon === "users") return <UsersIcon className={className} />;
+  if (icon === "target") return <TargetIcon className={className} />;
+  if (icon === "link") return <LinkIcon className={className} />;
+  return <TrophyIcon className={className} />;
+}
+
 function SectionLabel({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-extrabold tracking-[0.2em] text-white/50">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+    <span className="inline-flex items-center gap-2 rounded-full border border-[#d9d1ad]/15 bg-[#efe7c5]/[0.05] px-4 py-2 text-[11px] font-extrabold tracking-[0.2em] text-[#efe7c5]/70">
+      <span className="h-1.5 w-1.5 rounded-full bg-[#efe7c5]/80" />
       {label}
     </span>
   );
 }
 
-function HeroChip({
-  title,
-  accent,
-}: {
-  title: string;
-  accent: Accent;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border px-4 py-3 text-center text-xs font-black backdrop-blur-sm",
-        accents[accent].soft,
-      )}
-    >
-      {title}
-    </div>
-  );
-}
-
-function PrimaryGameCard({ game }: { game: GameItem }) {
+function GameCard({ game }: { game: GameItem }) {
   const accent = accents[game.accent];
 
   return (
-    <article
-      className={cn(
-        "overflow-hidden rounded-[2.3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(12,18,32,0.98)_0%,rgba(7,11,21,1)_100%)]",
-        accent.glow,
-      )}
-    >
+    <article className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-[#d8cfaa]/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.20)] transition duration-300 hover:-translate-y-1">
       <div className={cn("h-[2px] w-full", accent.line)} />
 
-      <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="flex flex-col justify-between p-6 sm:p-8 lg:p-10">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black",
-                  accent.soft,
-                )}
-              >
-                <GamepadIcon className="h-3.5 w-3.5" />
-                {game.subtitle}
-              </span>
-
-              <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/45">
-                {game.players}
-              </span>
-            </div>
-
-            <h2 className="mt-6 text-3xl font-black text-white sm:text-4xl">
-              {game.title}
-            </h2>
-
-            <p className="mt-4 max-w-xl text-sm leading-8 text-white/58 sm:text-base">
-              {game.description}
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              {["صور", "فئات", "نقاط", "عرض قوي"].map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/45"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <Link
-              href={game.href}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl px-5 py-3.5 text-sm font-black transition active:scale-[0.98]",
-                accent.button,
-              )}
-            >
-              ابدأ اللعبة
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="relative min-h-[20rem] overflow-hidden lg:min-h-full">
-          <img
-            src={game.image}
-            alt={game.title}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#070b15] via-[#070b1520] to-transparent lg:bg-gradient-to-l lg:from-[#070b1505] lg:via-[#070b1515] lg:to-[#070b15]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.10),transparent_55%)]" />
-        </div>
+      <div className="relative h-60 overflow-hidden">
+        <img
+          src={game.image}
+          alt={game.title}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#202914] via-[#20291450] to-transparent" />
       </div>
-    </article>
-  );
-}
 
-function OverlayGameCard({ game }: { game: GameItem }) {
-  const accent = accents[game.accent];
-
-  return (
-    <article
-      className={cn(
-        "group relative min-h-[22rem] overflow-hidden rounded-[2rem] border border-white/10",
-        accent.glow,
-      )}
-    >
-      <img
-        src={game.image}
-        alt={game.title}
-        className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050812] via-[#05081270] to-[#05081220]" />
-      <div className={cn("absolute inset-x-0 top-0 h-[2px]", accent.line)} />
-
-      <div className="relative flex h-full flex-col justify-end p-6">
-        <span
-          className={cn(
-            "mb-4 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black",
-            accent.soft,
-          )}
-        >
-          <SparkIcon className="h-3.5 w-3.5" />
-          {game.subtitle}
-        </span>
-
-        <h3 className="text-3xl font-black text-white">{game.title}</h3>
-        <p className="mt-3 max-w-md text-sm leading-7 text-white/65">
-          {game.description}
-        </p>
-
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[11px] font-bold text-white/50">
-            <UsersIcon className="h-3.5 w-3.5" />
-            {game.players}
-          </span>
-
-          <Link
-            href={game.href}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition active:scale-[0.98]",
-              accent.button,
-            )}
-          >
-            العب الآن
-            <ArrowLeftIcon className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function CompactGameCard({ game }: { game: GameItem }) {
-  const accent = accents[game.accent];
-
-  return (
-    <article
-      className={cn(
-        "overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(12,18,32,0.98)_0%,rgba(7,11,21,1)_100%)]",
-        accent.glow,
-      )}
-    >
-      <div className={cn("h-[2px] w-full", accent.line)} />
-
-      <div className="p-5 sm:p-6">
-        <div className="overflow-hidden rounded-[1.5rem] border border-white/10">
-          <img
-            src={game.image}
-            alt={game.title}
-            className="h-48 w-full object-cover"
-            loading="lazy"
-          />
-        </div>
-
-        <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="flex flex-1 flex-col p-6">
+        <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn(
-              "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black",
+              "inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-black",
               accent.soft,
             )}
           >
-            <GamepadIcon className="h-3.5 w-3.5" />
             {game.subtitle}
           </span>
-
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/45">
+          <span className="rounded-full border border-[#d8cfaa]/12 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-[#efe7c5]/60">
             {game.players}
           </span>
         </div>
 
-        <h3 className="mt-4 text-2xl font-black text-white">{game.title}</h3>
-        <p className="mt-3 text-sm leading-7 text-white/58">{game.description}</p>
+        <h3 className="mt-4 text-2xl font-black text-[#f6f0d8]">{game.title}</h3>
+
+        <p className="mt-3 flex-1 text-sm leading-8 text-[#efe7c5]/68">
+          {game.description}
+        </p>
 
         <div className="mt-6">
           <Link
@@ -370,9 +276,30 @@ function CompactGameCard({ game }: { game: GameItem }) {
   );
 }
 
+function StepCard({ step }: { step: StepItem }) {
+  return (
+    <div className="relative rounded-[2rem] border border-[#d9d1ad]/14 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.025)_100%)] px-6 pb-7 pt-9 text-center shadow-[0_14px_40px_rgba(0,0,0,0.18)]">
+      <div className="absolute right-4 top-4 rotate-[10deg] rounded-2xl border border-[#cfc7a4] bg-[#f3eed7] px-3 py-2 text-lg font-black leading-none text-[#202914] shadow-[0_10px_20px_rgba(0,0,0,0.12)]">
+        {step.number}
+      </div>
+
+      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#d9d1ad]/18 bg-[#efe7c5]/[0.07] text-[#f2ebd0]">
+        <StepIcon icon={step.icon} className="h-8 w-8" />
+      </div>
+
+      <h3 className="mt-7 text-2xl font-black text-[#f6f0d8]">{step.title}</h3>
+
+      <p className="mt-4 text-base leading-8 text-[#efe7c5]/68">
+        {step.description}
+      </p>
+
+      <div className="mx-auto mt-7 h-1 w-14 rounded-full bg-[#d8cfaa]/35" />
+    </div>
+  );
+}
+
 export default async function HomePage() {
   const viewer = await getViewer();
-
   const isLoggedIn = Boolean(viewer?.isLoggedIn);
   const viewerName =
     typeof viewer?.username === "string" && viewer.username.trim().length > 0
@@ -380,42 +307,34 @@ export default async function HomePage() {
       : "بك";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#030712] text-white">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.10),transparent_26%),radial-gradient(circle_at_top_right,rgba(139,92,246,0.10),transparent_22%),linear-gradient(180deg,#050916_0%,#060d1a_36%,#030712_100%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,0.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:72px_72px]" />
-      </div>
+    <main className="min-h-screen bg-[linear-gradient(180deg,#d8cfaa_0%,#cfc79d_100%)] text-[#f7f1d9]">
+      <div className="relative mx-auto max-w-[1700px] px-4 pb-10 pt-6 md:px-8">
+        <section className="relative overflow-hidden rounded-[2.8rem] border-2 border-[#28311b] bg-[radial-gradient(circle_at_top,#6b7d3b_0%,#586a31_40%,#29341a_100%)] px-6 py-12 shadow-[0_20px_60px_rgba(32,41,20,0.28)] sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+          <div className="pointer-events-none absolute left-8 top-10 h-24 w-24 rounded-full bg-[#f1e9ca]/10" />
+          <div className="pointer-events-none absolute bottom-10 right-10 h-28 w-28 rounded-full bg-[#f1e9ca]/12 blur-sm" />
+          <div className="pointer-events-none absolute left-1/2 top-0 h-48 w-80 -translate-x-1/2 rounded-full bg-[#f1e9ca]/6 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-6 md:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-5 py-10 shadow-[0_40px_120px_rgba(0,0,0,0.40)] sm:px-8 sm:py-12 lg:px-10 lg:py-14">
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 left-1/2 h-56 w-[28rem] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
-
-          <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
             <SectionLabel label="3 ألعاب جاهزة الآن" />
 
-            <div className="mt-7 flex h-40 w-40 items-center justify-center rounded-[2.3rem] border border-cyan-400/15 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.14),transparent_70%)] shadow-[0_20px_80px_rgba(34,211,238,0.08)] sm:h-52 sm:w-52 sm:rounded-[2.8rem]">
+            <div className="mt-10">
               <img
                 src={heroLogo}
                 alt="لمتكم"
-                className="h-28 w-28 object-contain drop-shadow-[0_0_36px_rgba(34,211,238,0.24)] sm:h-36 sm:w-36"
+                className="mx-auto w-[280px] rotate-[-7deg] object-contain drop-shadow-[14px_16px_0_rgba(32,41,20,0.88)] sm:w-[380px] lg:w-[560px]"
               />
             </div>
 
-            <h1 className="mt-8 text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-7xl">
-              لمتكم
-            </h1>
-
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-white/60 sm:text-base sm:leading-9">
-              منصة ألعاب عربية للجلسات والفعاليات تضم ألعابًا جماعية جاهزة للبدء
-              بشكل سريع وواضح وأنيق.
+            <p className="mt-10 max-w-4xl text-lg font-extrabold leading-9 text-[#f4eed6] sm:text-2xl sm:leading-[1.8]">
+              منصة ألعاب عربية تجمع التحدي والمتعة والمعرفة
+              <br className="hidden sm:block" />
+              في تجربة واحدة واضحة وأنيقة
             </p>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Link
                 href="/games"
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_18px_50px_rgba(34,211,238,0.22)] transition hover:bg-cyan-300 active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#efe7c5] px-7 py-4 text-sm font-black text-[#202914] shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:bg-[#f6f0d8] active:scale-[0.98]"
               >
                 استكشف الألعاب
                 <ArrowLeftIcon className="h-4 w-4" />
@@ -424,7 +343,7 @@ export default async function HomePage() {
               {isLoggedIn ? (
                 <Link
                   href="/account"
-                  className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.10]"
+                  className="inline-flex items-center rounded-xl border border-[#efe7c5]/18 bg-[#efe7c5]/[0.07] px-7 py-4 text-sm font-black text-[#f6f0d8] transition hover:bg-[#efe7c5]/[0.12]"
                 >
                   أهلاً {viewerName}
                 </Link>
@@ -432,95 +351,77 @@ export default async function HomePage() {
                 <>
                   <Link
                     href="/register"
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.10]"
+                    className="inline-flex items-center rounded-xl border border-[#efe7c5]/18 bg-[#efe7c5]/[0.07] px-7 py-4 text-sm font-black text-[#f6f0d8] transition hover:bg-[#efe7c5]/[0.12]"
                   >
                     إنشاء حساب
                   </Link>
                   <Link
                     href="/login"
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-transparent px-6 py-3.5 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
+                    className="inline-flex items-center rounded-xl border border-[#efe7c5]/14 bg-transparent px-7 py-4 text-sm font-bold text-[#efe7c5]/72 transition hover:bg-[#efe7c5]/[0.07] hover:text-[#f6f0d8]"
                   >
                     تسجيل الدخول
                   </Link>
                 </>
               )}
             </div>
-
-            <div className="mt-10 grid w-full max-w-3xl gap-3 sm:grid-cols-3">
-              <HeroChip title="فئات وأسئلة" accent="cyan" />
-              <HeroChip title="كشف المتخفي" accent="orange" />
-              <HeroChip title="كلمات وتلميحات" accent="violet" />
-            </div>
           </div>
         </section>
 
-        <section className="mt-20">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <section className="mt-14">
+          <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <SectionLabel label="ألعاب المنصة" />
-              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-                اختر اللعبة المناسبة للجلسة
+              <h2 className="mt-4 text-3xl font-black text-[#263019] sm:text-4xl">
+                اختر اللعبة المناسبة
               </h2>
             </div>
 
             <Link
               href="/games"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#2b341d]/10 bg-[#f3edd2]/60 px-5 py-3 text-sm font-black text-[#263019] transition hover:bg-[#f6f0d8]"
             >
               جميع الألعاب
               <ArrowLeftIcon className="h-4 w-4" />
             </Link>
           </div>
 
-          <div className="space-y-5">
-            <PrimaryGameCard game={games[0]} />
-
-            <div className="grid gap-5 lg:grid-cols-[1.02fr_0.98fr]">
-              <OverlayGameCard game={games[1]} />
-              <CompactGameCard game={games[2]} />
-            </div>
+          <div className="grid gap-5 lg:grid-cols-3">
+            {games.map((game) => (
+              <GameCard key={game.title} game={game} />
+            ))}
           </div>
         </section>
 
-        <section className="mt-20">
-          <div className="overflow-hidden rounded-[2.4rem] border border-white/10 bg-[linear-gradient(135deg,rgba(8,14,24,0.98)_0%,rgba(6,10,18,1)_100%)] px-6 py-10 sm:px-8 lg:px-10 lg:py-12">
-            <div className="pointer-events-none absolute" />
+        <section className="mt-16 overflow-hidden rounded-[2.8rem] border-2 border-[#28311b] bg-[radial-gradient(circle_at_top,#697b3a_0%,#566830_45%,#253117_100%)] px-6 py-10 shadow-[0_20px_60px_rgba(32,41,20,0.20)] sm:px-10 sm:py-12 lg:px-12">
+          <div className="pointer-events-none absolute" />
 
-            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-              <SectionLabel label="ابدأ الآن" />
-              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-                ثلاث ألعاب
-                <span className="block text-cyan-300">وجلسة واحدة ما تنسى</span>
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-4xl font-black text-[#f5efd7] sm:text-6xl">
+                كيف تلعب
+                <span className="mr-3">استبقهم؟</span>
               </h2>
+            </div>
 
-              <p className="mt-4 max-w-2xl text-sm leading-8 text-white/58 sm:text-base">
-                ادخل، اختر اللعبة، وابدأ مباشرة.
-              </p>
+            <div className="grid gap-5 xl:grid-cols-4 md:grid-cols-2">
+              {steps.map((step) => (
+                <StepCard key={step.number} step={step} />
+              ))}
+            </div>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link
-                  href="/games"
-                  className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_18px_50px_rgba(34,211,238,0.22)] transition hover:bg-cyan-300 active:scale-[0.98]"
-                >
-                  استكشف الألعاب
-                  <ArrowLeftIcon className="h-4 w-4" />
-                </Link>
-
-                {!isLoggedIn && (
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.10]"
-                  >
-                    إنشاء حساب مجاني
-                  </Link>
-                )}
-              </div>
+            <div className="mt-8">
+              <Link
+                href="/game/start"
+                className="flex w-full items-center justify-center rounded-[1.8rem] border border-[#d8cfaa]/25 bg-[#efe7c5] px-6 py-5 text-2xl font-black text-[#1f2914] shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition hover:bg-[#f7f1d9]"
+              >
+                ابدأ اللعب الآن
+              </Link>
             </div>
           </div>
         </section>
 
-        <footer className="mt-20 overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)]">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
+        <footer className="mt-14 overflow-hidden rounded-[2rem] border border-[#2c351d]/10 bg-[#2a351b]">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-[#efe7c5]/35 to-transparent" />
 
           <div className="px-6 py-8 sm:px-8">
             <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
@@ -528,14 +429,14 @@ export default async function HomePage() {
                 <img
                   src={heroLogo}
                   alt="لمتكم"
-                  className="h-11 w-auto object-contain opacity-85"
+                  className="h-12 w-auto object-contain opacity-90"
                 />
-                <p className="text-xs text-white/28">
+                <p className="text-xs text-[#efe7c5]/45">
                   منصة ألعاب عربية للجلسات والتجمعات
                 </p>
               </div>
 
-              <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-bold text-white/38">
+              <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-bold text-[#efe7c5]/55">
                 {[
                   { label: "الرئيسية", href: "/" },
                   { label: "الألعاب", href: "/games" },
@@ -545,7 +446,7 @@ export default async function HomePage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="transition hover:text-white/75"
+                    className="transition hover:text-[#f7f1d9]"
                   >
                     {item.label}
                   </Link>
@@ -553,15 +454,15 @@ export default async function HomePage() {
               </nav>
             </div>
 
-            <div className="mt-7 h-px bg-white/5" />
+            <div className="mt-7 h-px bg-[#efe7c5]/8" />
 
-            <div className="mt-5 flex flex-col items-center gap-3 text-xs text-white/20 md:flex-row md:justify-between">
+            <div className="mt-5 flex flex-col items-center gap-3 text-xs text-[#efe7c5]/32 md:flex-row md:justify-between">
               <span>© {new Date().getFullYear()} لمتكم — جميع الحقوق محفوظة.</span>
               <div className="flex gap-5">
-                <Link href="/terms" className="transition hover:text-white/45">
+                <Link href="/terms" className="transition hover:text-[#f7f1d9]/70">
                   الشروط والأحكام
                 </Link>
-                <Link href="/privacy" className="transition hover:text-white/45">
+                <Link href="/privacy" className="transition hover:text-[#f7f1d9]/70">
                   الخصوصية
                 </Link>
               </div>
