@@ -314,7 +314,7 @@ export default async function HomePage() {
       </div>
 
       <div className="relative mx-auto max-w-[1320px] px-4 pb-10 pt-6 md:px-6 lg:px-8">
-        <section className="mx-auto max-w-6xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-12 shadow-[0_40px_120px_rgba(0,0,0,0.40)] sm:px-10 sm:py-16 lg:px-12 lg:py-18">
+        <section className="mx-auto max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-12 shadow-[0_40px_120px_rgba(0,0,0,0.40)] sm:px-10 sm:py-16 lg:px-12 lg:py-18">
           <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-1/2 h-56 w-[28rem] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
@@ -334,7 +334,7 @@ export default async function HomePage() {
             <p className="mt-10 max-w-3xl text-base font-extrabold leading-9 text-white/85 sm:text-2xl sm:leading-[1.8]">
               منصة ألعاب عربية تجمع التحدي والمتعة والمعرفة
               <br className="hidden sm:block" />
-              في تجربة واحدة واضحة وأنيقة
+             في مكان واحد
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
@@ -373,7 +373,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto mt-14 max-w-6xl">
+        <section className="mx-auto mt-14 max-w-7xl">
           <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <SectionLabel label="ألعاب المنصة" />
@@ -398,7 +398,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto mt-16 max-w-6xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-10 shadow-[0_30px_100px_rgba(0,0,0,0.24)] sm:px-8 sm:py-12 lg:px-10">
+        <section className="mx-auto mt-16 max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-10 shadow-[0_30px_100px_rgba(0,0,0,0.24)] sm:px-8 sm:py-12 lg:px-10">
           <div className="pointer-events-none absolute left-0 top-0 h-52 w-52 rounded-full bg-cyan-500/8 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-0 h-52 w-52 rounded-full bg-violet-500/8 blur-3xl" />
 
@@ -406,7 +406,7 @@ export default async function HomePage() {
             <div className="mb-10 text-center">
               <h2 className="text-4xl font-black text-white sm:text-5xl">
                 كيف تلعب
-                <span className="mr-3 text-white/92">استبقهم؟</span>
+                <span className="mr-3 text-white/92">لمتكم</span>
               </h2>
             </div>
 
@@ -427,7 +427,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <footer className="mx-auto mt-14 max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)]">
+        <footer className="mx-auto mt-14 max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)]">
           <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
 
           <div className="px-6 py-8 sm:px-8">
