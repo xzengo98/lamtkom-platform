@@ -221,6 +221,31 @@ function SectionLabel({ label }: { label: string }) {
   );
 }
 
+function HeroGamePill({
+  title,
+  accent,
+}: {
+  title: string;
+  accent: Accent;
+}) {
+  const styles = {
+    cyan: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
+    orange: "border-orange-400/30 bg-orange-400/10 text-orange-300",
+    violet: "border-violet-400/30 bg-violet-400/10 text-violet-300",
+  };
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border px-5 py-4 text-center text-sm font-black shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:-translate-y-0.5",
+        styles[accent],
+      )}
+    >
+      {title}
+    </div>
+  );
+}
+
 function GameCard({ game }: { game: GameItem }) {
   const accent = accents[game.accent];
 
@@ -318,26 +343,33 @@ export default async function HomePage() {
           <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 top-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-1/2 h-56 w-[28rem] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/6 to-transparent" />
 
-          <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-            <SectionLabel label="3 ألعاب جاهزة الآن" />
+          <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+            <SectionLabel label="منصة ألعاب عربية للجلسات والفعاليات" />
 
-            <div className="relative mt-10">
+            <div className="relative mt-8">
               <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/10 blur-3xl" />
               <img
                 src={heroLogo}
                 alt="لمتكم"
-                className="relative mx-auto w-[260px] rotate-[-7deg] object-contain drop-shadow-[14px_16px_0_rgba(8,15,30,0.95)] sm:w-[360px] lg:w-[500px]"
+                className="relative mx-auto w-[250px] rotate-[-7deg] object-contain drop-shadow-[14px_16px_0_rgba(8,15,30,0.95)] sm:w-[340px] lg:w-[470px]"
               />
             </div>
 
-            <p className="mt-10 max-w-3xl text-base font-extrabold leading-9 text-white/85 sm:text-2xl sm:leading-[1.8]">
-              منصة ألعاب عربية تجمع التحدي والمتعة والمعرفة
-              <br className="hidden sm:block" />
-             في مكان واحد
+            <h1 className="mt-8 text-3xl font-black leading-[1.15] text-white sm:text-5xl lg:text-6xl">
+              خلّينا اللمة عليكم
+              <span className="mt-2 block bg-gradient-to-r from-cyan-300 via-white to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(34,211,238,0.18)]">
+                والفعاليات علينا
+              </span>
+            </h1>
+
+            <p className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9">
+              منصة ألعاب عربية للجلسات والفعاليات تضم ألعابًا جماعية جاهزة للبدء
+              بشكل سريع وواضح وأنيق.
             </p>
 
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
                 href="/games"
                 className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-7 py-4 text-sm font-black text-slate-950 shadow-[0_18px_50px_rgba(34,211,238,0.22)] transition hover:bg-cyan-300 active:scale-[0.98]"
@@ -369,6 +401,12 @@ export default async function HomePage() {
                   </Link>
                 </>
               )}
+            </div>
+
+            <div className="mt-8 grid w-full max-w-4xl gap-3 sm:grid-cols-3">
+              <HeroGamePill title="فئات وأسئلة" accent="cyan" />
+              <HeroGamePill title="كشف المتخفي" accent="orange" />
+              <HeroGamePill title="كلمات وتلميحات" accent="violet" />
             </div>
           </div>
         </section>
