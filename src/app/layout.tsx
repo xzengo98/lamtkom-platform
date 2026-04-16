@@ -6,7 +6,7 @@ import { getViewer } from "../lib/auth/viewer";
 
 export const metadata: Metadata = {
   title: {
-    default: "لمتكم | منصة ألعاب عربية",
+    default: "لمتكم | منصة ألعاب عربية جماعية",
     template: "%s | لمتكم",
   },
   description:

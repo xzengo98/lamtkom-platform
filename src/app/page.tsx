@@ -365,7 +365,7 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9">
-              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل عدة ألعاب اختار ما يناسبك وابدء.
+              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل ألعاب اختار ما يناسبك وابدء فورا.
              
             </p>
 
@@ -486,7 +486,8 @@ export default async function HomePage() {
                   { label: "الرئيسية", href: "/" },
                   { label: "الألعاب", href: "/games" },
                   { label: "الباقات", href: "/pricing" },
-                  { label: "الدخول", href: "/login" },
+                  { label: "من نحن", href: "/about" },
+                  { label: "اتصل بنا", href: "/contact" },
                 ].map((item) => (
                   <Link
                     key={item.href}
