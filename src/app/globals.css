@@ -31,7 +31,8 @@ body {
   overflow-x: hidden;
   position: relative;
   isolation: isolate;
-  background: linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
+  background:
+    linear-gradient(180deg, var(--site-bg) 0%, var(--site-bg-2) 55%, var(--site-bg-3) 100%);
   background-color: var(--site-bg);
 }
 
