@@ -44,7 +44,7 @@ export default async function GamePlayPage({
 
   if (!selectedCategory) {
     return (
-      <main className="min-h-screen bg-slate-950 px-6 py-20 text-white">
+      <main className="min-h-screen text-white">
         <div className="mx-auto max-w-4xl rounded-[2rem] border border-white/10 bg-white/5 p-8">
           <h1 className="text-3xl font-black">لا توجد فئة محددة</h1>
           <p className="mt-4 text-slate-300">

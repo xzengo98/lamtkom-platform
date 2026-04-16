@@ -515,7 +515,7 @@ export default function AccountClientPage({
   const roleBadgeClass = getRoleBadgeClass(profile?.role);
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="relative mx-auto max-w-7xl px-4 py-8 md:px-6">
         <section className="relative mb-8 overflow-hidden rounded-[2.6rem] border border-white/8 bg-[linear-gradient(160deg,rgba(8,16,40,1)_0%,rgba(4,8,22,1)_55%,rgba(6,12,30,1)_100%)]">
           <div className="pointer-events-none absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-cyan-500/10 blur-[60px]" />

@@ -567,7 +567,7 @@ export default async function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#07111f] text-white">
+    <main className="min-h-screen text-white">
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[-10%] top-[-80px] h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />

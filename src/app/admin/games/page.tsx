@@ -135,7 +135,7 @@ export default async function AdminGamesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 rounded-[2rem] border border-white/10 bg-white/5 p-5 md:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

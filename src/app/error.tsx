@@ -14,7 +14,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] px-4 py-10 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-2xl rounded-[2rem] border border-white/10 bg-[#071126] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
         <h1 className="text-3xl font-black">حدث خطأ غير متوقع</h1>
         <p className="mt-4 text-white/65">

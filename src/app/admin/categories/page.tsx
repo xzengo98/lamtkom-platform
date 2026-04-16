@@ -264,7 +264,7 @@ export default async function AdminCategoriesPage({
   });
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}

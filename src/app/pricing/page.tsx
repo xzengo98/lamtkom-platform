@@ -453,7 +453,7 @@ function FaqCard({ item, index }: { item: FaqItem; index: number }) {
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
 
         {/* ── Hero ──────────────────────────────────────────────────────────── */}

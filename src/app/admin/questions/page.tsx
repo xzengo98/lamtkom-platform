@@ -345,7 +345,7 @@ export default async function AdminQuestionsPage({ searchParams }: { searchParam
     const activeCategoryLabel  = filteredCategoriesForDropdown.find((c) => c.id === effectiveSelectedCategory)?.name ?? null;
 
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen text-white">
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
 
           {/* ── Header ──────────────────────────────────────────────────── */}

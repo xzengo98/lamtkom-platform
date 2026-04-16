@@ -58,7 +58,7 @@ function PrivacyCard({ item, index }: { item: SectionItem; index: number }) {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
 
         {/* Hero */}

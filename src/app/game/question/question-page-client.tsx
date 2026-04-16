@@ -361,7 +361,7 @@ export default function QuestionPageClient({
       : "text-amber-300";
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-4xl px-3 py-4 sm:px-5 sm:py-6 md:px-6">
 
         {/* ── Score + Timer strip ──────────────────────────────────────── */}
