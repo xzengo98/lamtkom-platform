@@ -25,22 +25,6 @@ function ArrowLeftIcon() {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className="h-4 w-4"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m5 12 4 4L19 6" />
-    </svg>
-  );
-}
-
 export default async function LoginPage({
   searchParams,
 }: {
@@ -65,12 +49,13 @@ export default async function LoginPage({
     const email = String(formData.get("email") ?? "")
       .trim()
       .toLowerCase();
+
     const password = String(formData.get("password") ?? "").trim();
 
     if (!email || !password) {
       redirect(
         "/login?error=" +
-          encodeURIComponent("يرجى إدخال البريد الإلكتروني وكلمة المرور")
+          encodeURIComponent("يرجى إدخال البريد الإلكتروني وكلمة المرور"),
       );
     }
 
@@ -81,160 +66,96 @@ export default async function LoginPage({
 
     if (error) {
       redirect(
-        "/login?error=" + encodeURIComponent("بيانات الدخول غير صحيحة")
+        "/login?error=" + encodeURIComponent("بيانات الدخول غير صحيحة"),
       );
     }
 
     redirect("/");
   }
 
+  const linkClass =
+    "font-bold text-cyan-300 transition hover:text-cyan-200";
+
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
-      <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
-
-      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 py-8 md:px-6">
-        <div className="relative grid w-full gap-6 overflow-hidden rounded-[2.6rem] border border-white/8 bg-[linear-gradient(160deg,rgba(8,16,40,1)_0%,rgba(4,8,22,1)_55%,rgba(6,12,30,1)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.45)] lg:grid-cols-[460px_1fr]">
-          <div className="pointer-events-none absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-cyan-500/10 blur-[60px]" />
-          <div className="pointer-events-none absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-violet-500/8 blur-[60px]" />
-
-          <div className="flex items-center justify-center px-6 py-8 md:px-10 lg:px-10 lg:py-12">
-            <div className="w-full max-w-md rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(10,18,42,0.94)_0%,rgba(4,8,22,0.98)_100%)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] md:p-8">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-black text-white">أهلًا بعودتك</h2>
-                  <p className="mt-2 text-sm text-white/45">
-                    سجّل دخولك للمتابعة بسرعة وأمان
-                  </p>
-                </div>
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/18 bg-cyan-400/10">
-                  <img
-                    src={heroLogo}
-                    alt="لمتكم"
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-              </div>
-
-              {params.error ? (
-                <div className="mb-5 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
-                  {params.error}
-                </div>
-              ) : null}
-
-              <form action={loginAction} className="space-y-4">
-                <div>
-                  <label className="mb-2 block text-sm font-bold text-white/65">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    placeholder="name@email.com"
-                    autoComplete="email"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-bold text-white/65">
-                    كلمة المرور
-                  </label>
-                  <input
-                    name="password"
-                    type="password"
-                    placeholder="******"
-                    autoComplete="current-password"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
-                  />
-                </div>
-
-                <LoginSubmitButton />
-
-                <div className="pt-2 text-sm">
-                  <p className="text-white/45">
-                    ليس لديك حساب؟{" "}
-                    <Link
-                      href="/register"
-                      className="font-black text-cyan-300 transition hover:text-cyan-200"
-                    >
-                      إنشاء حساب جديد
-                    </Link>
-                  </p>
-
-                  <div className="mt-3">
-                    <Link
-                      href="/reset-password"
-                      className="inline-flex items-center text-sm font-bold text-white/50 transition hover:text-white/75"
-                    >
-                      نسيت كلمة المرور؟
-                    </Link>
-                  </div>
-                </div>
-              </form>
-
-              <div className="mt-6 border-t border-white/6 pt-5">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-white/45 transition hover:text-white/70"
-                >
-                  <ArrowLeftIcon />
-                  العودة إلى الرئيسية
-                </Link>
-              </div>
+    <main className="min-h-screen px-4 py-10 text-white md:px-6">
+      <div className="mx-auto flex min-h-[calc(100vh-120px)] max-w-2xl items-center justify-center">
+        <section className="w-full overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.26)] backdrop-blur-sm sm:p-8 md:p-10">
+          <div className="mx-auto flex max-w-lg flex-col items-center text-center">
+            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-[1.8rem] border border-cyan-400/15 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.12),transparent_72%)] sm:h-28 sm:w-28">
+              <img
+                src={heroLogo}
+                alt="لمتكم"
+                className="h-14 w-14 object-contain sm:h-16 sm:w-16"
+              />
             </div>
+
+            <h1 className="text-3xl font-black text-white sm:text-4xl">
+              تسجيل الدخول
+            </h1>
+
+            <p className="mt-3 max-w-md text-sm leading-8 text-white/65 sm:text-base">
+              سجّل دخولك للوصول إلى حسابك والبدء مباشرة من نفس المكان.
+            </p>
           </div>
 
-          <div className="flex flex-col justify-center px-6 py-10 md:px-10 lg:px-12">
-            <div className="grid gap-8 lg:grid-cols-[1.1fr_260px] lg:items-center">
-              <div>
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-1.5 text-xs font-bold text-cyan-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                  تسجيل الدخول
-                </span>
-
-                <h1 className="mt-5 text-3xl font-black leading-tight text-white md:text-5xl">
-                  دخول الحساب
-                </h1>
-
-                <p className="mt-4 max-w-2xl text-sm leading-8 text-white/55 md:text-base">
-                  ادخل إلى حسابك للوصول السريع إلى جلساتك، متابعة ألعابك غير
-                  المكتملة، والبدء مباشرة من نفس المكان.
-                </p>
-
-                <div className="mt-6 grid gap-3">
-                  {[
-                    "الوصول السريع إلى الألعاب والجولات غير المكتملة.",
-                    "متابعة الحساب والباقات من لوحة واحدة واضحة.",
-                    "تجربة دخول بسيطة ومباشرة بدون تعقيد.",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3"
-                    >
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-cyan-300">
-                        <CheckIcon />
-                      </div>
-                      <p className="text-sm leading-7 text-white/65">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-center lg:justify-end">
-                <div className="relative flex h-[250px] w-[250px] items-center justify-center overflow-hidden rounded-[2.2rem] border border-cyan-400/16 bg-[linear-gradient(160deg,rgba(10,20,48,0.98)_0%,rgba(4,8,22,0.99)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.60)]">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.09),transparent_68%)]" />
-                  <div className="absolute inset-6 rounded-[2rem] border border-cyan-400/8" />
-                  <img
-                    src={heroLogo}
-                    alt="لمتكم"
-                    className="relative h-[148px] w-[148px] object-contain drop-shadow-[0_0_36px_rgba(34,211,238,0.20)]"
-                  />
-                </div>
-              </div>
+          {params.error ? (
+            <div className="mx-auto mt-6 max-w-lg rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-center text-sm font-bold text-red-200">
+              {params.error}
             </div>
+          ) : null}
+
+          <form action={loginAction} className="mx-auto mt-8 max-w-lg space-y-5">
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white/80">
+                البريد الإلكتروني
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="name@email.com"
+                autoComplete="email"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-white/80">
+                كلمة المرور
+              </label>
+              <input
+                name="password"
+                type="password"
+                placeholder="******"
+                autoComplete="current-password"
+                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <Link href="/register" className={linkClass}>
+                إنشاء حساب جديد
+              </Link>
+
+              <Link href="/forgot-password" className={linkClass}>
+                نسيت كلمة المرور؟
+              </Link>
+            </div>
+
+            <div className="pt-2">
+              <LoginSubmitButton />
+            </div>
+          </form>
+
+          <div className="mx-auto mt-6 flex max-w-lg justify-center">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm font-bold text-white/55 transition hover:text-white"
+            >
+              العودة إلى الرئيسية
+              <ArrowLeftIcon />
+            </Link>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   );
