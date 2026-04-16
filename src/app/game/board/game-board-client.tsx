@@ -650,7 +650,7 @@ export default function GameBoardClient({
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
 
         {/* ── Top control panel ──────────────────────────────────────────── */}

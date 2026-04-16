@@ -301,7 +301,7 @@ export default async function NewQuestionPage({
   const labelClass = "mb-1.5 block text-xs font-bold text-white/50";
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-4xl px-4 py-8 md:px-6">
 
         {/* ── Page header ── */}

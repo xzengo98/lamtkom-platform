@@ -1,6 +1,6 @@
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-20 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-7xl">
         <h1 className="text-4xl font-black">لوحة المستخدم</h1>
         <p className="mt-4 text-slate-300">

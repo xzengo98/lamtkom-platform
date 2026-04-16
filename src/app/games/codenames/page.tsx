@@ -88,7 +88,7 @@ function ActionCard({
 
 export default function CodenamesHomePage() {
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
 
         {/* ── Hero ── */}

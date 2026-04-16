@@ -248,7 +248,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.06),transparent_20%),linear-gradient(180deg,#020617_0%,#020b1d_40%,#010617_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto flex max-w-[1700px] flex-col gap-6 px-4 py-5 md:px-6 xl:flex-row xl:items-start">
         <aside className="w-full xl:sticky xl:top-4 xl:max-w-[360px]">
           <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,27,52,0.96)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_25px_80px_rgba(0,0,0,0.30)]">

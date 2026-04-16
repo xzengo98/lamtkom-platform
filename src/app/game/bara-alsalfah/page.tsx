@@ -37,7 +37,7 @@ type BaraItem = {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.08),_transparent_28%),linear-gradient(180deg,#020817_0%,#020b1d_55%,#010611_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4 py-10">
         <section className="w-full rounded-[2rem] border border-red-500/20 bg-red-500/10 p-8 text-center shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl border border-red-400/25 bg-red-500/15 text-3xl">

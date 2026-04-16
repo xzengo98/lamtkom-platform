@@ -202,7 +202,7 @@ function renderStatePage(params: {
   const isError = variant === "error";
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
       <div className="relative mx-auto max-w-7xl px-4 py-10 md:px-6">
         <div
@@ -392,7 +392,7 @@ export default async function GameStartPage({
   const safeErrorMessage = sanitizeMessage(params.error, "");
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
       <div className="relative">
         <StartGameForm

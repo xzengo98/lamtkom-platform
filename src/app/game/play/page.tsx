@@ -86,7 +86,7 @@ export default async function GamePlayPage({
   const questions = (data ?? []) as unknown as Question[];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-20 text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
