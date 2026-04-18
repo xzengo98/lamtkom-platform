@@ -604,7 +604,9 @@ export default function GameBoardClient({
         <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55">
           لوحة اللعبة
         </div>
-        <h1 className="mt-1 text-2xl font-black text-white">{gameName}</h1>
+        <h1 className="mt-1 text-2xl font-black text-white">
+          {gameName}
+        </h1>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2">
@@ -681,120 +683,50 @@ export default function GameBoardClient({
   </div>
 
   <div className="hidden xl:block">
-    <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
-      <div className="flex flex-col items-start gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={handleFinishGame}
-            className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-          >
-            <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            إنهاء اللعب
-          </button>
-
-          <Link
-            href="/account"
-            className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-          >
-            <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">الرجوع للحساب</span>
-            <span className="sm:hidden">الحساب</span>
-          </Link>
-        </div>
-
-        <div className="flex justify-center sm:justify-start">
-          <ScoreControl
-            teamName={teamOne}
-            score={boardState.teamOneScore}
-            accent="blue"
-            onIncrease={() =>
-              updateState((prev) => ({
-                ...prev,
-                teamOneScore: Math.max(0, prev.teamOneScore + 100),
-              }))
-            }
-            onDecrease={() =>
-              updateState((prev) => ({
-                ...prev,
-                teamOneScore: Math.max(0, prev.teamOneScore - 100),
-              }))
-            }
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end gap-4">
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <StatusPill
-            label={`الدور: ${activeTurnName}`}
-            icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-          />
-          <StatusPill
-            label={`المتصدر: ${leaderLabel}`}
-            icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-          />
-          <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
-        </div>
-
-        <div className="flex justify-center sm:justify-end">
-          <ScoreControl
-            teamName={teamTwo}
-            score={boardState.teamTwoScore}
-            accent="orange"
-            onIncrease={() =>
-              updateState((prev) => ({
-                ...prev,
-                teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-              }))
-            }
-            onDecrease={() =>
-              updateState((prev) => ({
-                ...prev,
-                teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-              }))
-            }
-          />
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-[-16px] flex justify-center pb-1 sm:pb-2">
+    <div className="mb-3 flex items-center justify-center gap-3 sm:mb-4">
       <div className="text-center">
         <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
           لوحة اللعبة
         </div>
-        <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
+        <h1 className="text-lg font-black text-white sm:text-xl md:text-2xl">
           {gameName}
         </h1>
       </div>
     </div>
-  </div>
-</div>
 
-  <div className="hidden xl:block">
-  <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
-    <div className="flex flex-col items-start gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={handleFinishGame}
-          className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-        >
-          <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          إنهاء اللعب
-        </button>
+    <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
+      <StatusPill
+        label={`الدور: ${activeTurnName}`}
+        icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+      />
+      <StatusPill
+        label={`المتصدر: ${leaderLabel}`}
+        icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+      />
+      <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
 
-        <Link
-          href="/account"
-          className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-        >
-          <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline">الرجوع للحساب</span>
-          <span className="sm:hidden">الحساب</span>
-        </Link>
-      </div>
+      <div className="hidden flex-1 xl:block" />
 
+      <button
+        type="button"
+        onClick={handleFinishGame}
+        className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
+      >
+        <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        إنهاء اللعب
+      </button>
+
+      <Link
+        href="/account"
+        className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
+      >
+        <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        <span className="hidden sm:inline">الرجوع للحساب</span>
+        <span className="sm:hidden">الحساب</span>
+      </Link>
+    </div>
+
+    <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
       <div className="flex justify-center sm:justify-start">
         <ScoreControl
           teamName={teamOne}
@@ -813,20 +745,6 @@ export default function GameBoardClient({
             }))
           }
         />
-      </div>
-    </div>
-
-    <div className="flex flex-col items-end gap-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <StatusPill
-          label={`الدور: ${activeTurnName}`}
-          icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-        />
-        <StatusPill
-          label={`المتصدر: ${leaderLabel}`}
-          icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-        />
-        <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
       </div>
 
       <div className="flex justify-center sm:justify-end">
@@ -848,17 +766,6 @@ export default function GameBoardClient({
           }
         />
       </div>
-    </div>
-  </div>
-
-  <div className="mt-[-16px] flex justify-center pb-1 sm:pb-2">
-    <div className="text-center">
-      <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
-        لوحة اللعبة
-      </div>
-      <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
-        {gameName}
-      </h1>
     </div>
   </div>
 </div>
