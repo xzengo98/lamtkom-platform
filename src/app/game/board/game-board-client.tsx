@@ -206,7 +206,7 @@ function ScoreControl({
         };
 
   return (
-    <div className="w-full max-w-[260px] sm:max-w-[300px]">
+    <div className="w-[168px] shrink-0 sm:w-[250px] lg:w-[320px]">
       <div
         className={`rounded-t-[24px] px-5 pb-4 pt-3.5 text-center text-base font-black text-white sm:rounded-t-[28px] sm:px-6 sm:pb-5 sm:pt-4 sm:text-lg ${palette.top} ${palette.topShadow}`}
       >
