@@ -103,6 +103,49 @@ const accents = {
   },
 };
 
+const stepAccentMap = {
+  "1": {
+    cardGlow: "from-cyan-500/12 via-transparent to-transparent",
+    border: "border-cyan-400/18 hover:border-cyan-400/30",
+    number:
+      "border-cyan-200/20 bg-[linear-gradient(180deg,#cffafe_0%,#a5f3fc_100%)] text-slate-900 shadow-[0_12px_22px_rgba(34,211,238,0.18)]",
+    iconWrap:
+      "border-cyan-400/20 bg-cyan-400/10 text-cyan-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_24px_rgba(34,211,238,0.10)]",
+    title: "text-cyan-100",
+    line: "bg-cyan-400/50",
+  },
+  "2": {
+    cardGlow: "from-violet-500/12 via-transparent to-transparent",
+    border: "border-violet-400/18 hover:border-violet-400/30",
+    number:
+      "border-violet-200/20 bg-[linear-gradient(180deg,#ede9fe_0%,#c4b5fd_100%)] text-slate-900 shadow-[0_12px_22px_rgba(167,139,250,0.18)]",
+    iconWrap:
+      "border-violet-400/20 bg-violet-400/10 text-violet-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_24px_rgba(167,139,250,0.10)]",
+    title: "text-violet-100",
+    line: "bg-violet-400/50",
+  },
+  "3": {
+    cardGlow: "from-orange-500/12 via-transparent to-transparent",
+    border: "border-orange-400/18 hover:border-orange-400/30",
+    number:
+      "border-orange-200/20 bg-[linear-gradient(180deg,#ffedd5_0%,#fdba74_100%)] text-slate-900 shadow-[0_12px_22px_rgba(251,146,60,0.18)]",
+    iconWrap:
+      "border-orange-400/20 bg-orange-400/10 text-orange-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_24px_rgba(251,146,60,0.10)]",
+    title: "text-orange-100",
+    line: "bg-orange-400/50",
+  },
+  "4": {
+    cardGlow: "from-emerald-500/12 via-transparent to-transparent",
+    border: "border-emerald-400/18 hover:border-emerald-400/30",
+    number:
+      "border-emerald-200/20 bg-[linear-gradient(180deg,#dcfce7_0%,#86efac_100%)] text-slate-900 shadow-[0_12px_22px_rgba(52,211,153,0.18)]",
+    iconWrap:
+      "border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_24px_rgba(52,211,153,0.10)]",
+    title: "text-emerald-100",
+    line: "bg-emerald-400/50",
+  },
+} as const;
+
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -302,23 +345,51 @@ function GameCard({ game }: { game: GameItem }) {
 }
 
 function StepCard({ step }: { step: StepItem }) {
+  const accent =
+    stepAccentMap[step.number as keyof typeof stepAccentMap] ??
+    stepAccentMap["1"];
+
   return (
-    <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.045] px-5 pb-6 pt-8 text-center shadow-[0_14px_40px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-      <div className="absolute right-4 top-4 rotate-[10deg] rounded-2xl border border-white/15 bg-[#f5f0d7] px-3 py-2 text-lg font-black leading-none text-[#1a2130] shadow-[0_10px_20px_rgba(0,0,0,0.16)]">
+    <div
+      className={cn(
+        "group relative overflow-hidden rounded-[2rem] border bg-[linear-gradient(180deg,rgba(15,23,42,0.92)_0%,rgba(10,18,34,0.98)_100%)] px-5 pb-6 pt-8 text-center shadow-[0_14px_40px_rgba(0,0,0,0.18)] backdrop-blur-sm transition duration-300 hover:-translate-y-1",
+        accent.border,
+      )}
+    >
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b opacity-80",
+          accent.cardGlow,
+        )}
+      />
+
+      <div
+        className={cn(
+          "absolute right-4 top-4 rotate-[10deg] rounded-2xl border px-3 py-2 text-lg font-black leading-none",
+          accent.number,
+        )}
+      >
         {step.number}
       </div>
 
-      <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full border border-white/14 bg-white/[0.05] text-white/90 sm:h-20 sm:w-20">
+      <div
+        className={cn(
+          "mx-auto flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border sm:h-20 sm:w-20",
+          accent.iconWrap,
+        )}
+      >
         <StepIcon icon={step.icon} className="h-8 w-8" />
       </div>
 
-      <h3 className="mt-6 text-2xl font-black text-white">{step.title}</h3>
+      <h3 className={cn("mt-6 text-2xl font-black", accent.title)}>
+        {step.title}
+      </h3>
 
-      <p className="mt-4 text-sm leading-8 text-white/65 sm:text-base">
+      <p className="mt-4 text-sm leading-8 text-white/68 sm:text-base">
         {step.description}
       </p>
 
-      <div className="mx-auto mt-6 h-1 w-14 rounded-full bg-white/20" />
+      <div className={cn("mx-auto mt-6 h-1 w-14 rounded-full", accent.line)} />
     </div>
   );
 }
@@ -365,8 +436,8 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9">
-              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل ألعاب اختار ما يناسبك وابدء فورا.
-             
+              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل ألعاب
+              اختار ما يناسبك وابدء فورا.
             </p>
 
             <div className="mt-9 flex flex-wrap justify-center gap-3">
@@ -439,13 +510,19 @@ export default async function HomePage() {
         <section className="mx-auto mt-16 max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-10 shadow-[0_30px_100px_rgba(0,0,0,0.24)] sm:px-8 sm:py-12 lg:px-10">
           <div className="pointer-events-none absolute left-0 top-0 h-52 w-52 rounded-full bg-cyan-500/8 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-0 h-52 w-52 rounded-full bg-violet-500/8 blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/[0.03] to-transparent" />
 
           <div className="mx-auto max-w-5xl">
             <div className="mb-10 text-center">
-              <h2 className="text-4xl font-black text-white sm:text-5xl">
-                كيف تلعب لمتكم؟
-                <span className="mr-3 text-white/92"></span>
+              <h2 className="text-4xl font-black sm:text-5xl">
+                <span className="bg-gradient-to-r from-white via-cyan-100 to-violet-100 bg-clip-text text-transparent">
+                  كيف تلعب لمتكم؟
+                </span>
               </h2>
+
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-8 text-white/55 sm:text-base">
+                خطوات بسيطة وواضحة لتبدأ الجولة بشكل جميل ومنظم وحماسي.
+              </p>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -457,7 +534,7 @@ export default async function HomePage() {
             <div className="mx-auto mt-8 max-w-5xl">
               <Link
                 href="/game/start"
-                className="flex w-full items-center justify-center rounded-[1.7rem] border border-white/12 bg-[#f5f0d7] px-6 py-4 text-xl font-black text-[#18212f] shadow-[0_14px_28px_rgba(0,0,0,0.14)] transition hover:bg-white"
+                className="flex w-full items-center justify-center rounded-[1.7rem] border border-cyan-300/20 bg-[linear-gradient(90deg,#f5f0d7_0%,#f8f3df_50%,#ede4be_100%)] px-6 py-4 text-xl font-black text-[#18212f] shadow-[0_14px_28px_rgba(0,0,0,0.14)] transition hover:brightness-105"
               >
                 ابدأ اللعب الآن
               </Link>
