@@ -1036,7 +1036,7 @@ export default function StartGameForm({
 
             <p className="mt-4 max-w-2xl text-sm leading-8 text-white/58 md:text-base md:leading-9">
               اختر اسم اللعبة وأسماء الفرق، ثم حدّد {REQUIRED_CATEGORY_COUNT} فئات
-              تناسب جلستكم لتبدأ الجولة بشكل أوضح وأجمل وبنفس هوية لمتكم.
+              تناسب جلستكم لتبدأ الجولة فورا.
             </p>
 
             <div className="mt-6 flex flex-wrap justify-end gap-2">
