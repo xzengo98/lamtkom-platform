@@ -12,6 +12,20 @@ import {
   markOneNotificationReadAction,
 } from "./actions";
 
+type PageProps = {
+  searchParams: Promise<{
+    filter?: string;
+  }>;
+};
+
+type FilterKey =
+  | "all"
+  | "unread"
+  | "games"
+  | "balance"
+  | "announcements"
+  | "system";
+
 function formatDate(value: string) {
   try {
     return new Date(value).toLocaleString("ar-EG", {
@@ -32,33 +46,86 @@ function typeStyles(type: string) {
       return {
         badge: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
         dot: "bg-emerald-400",
+        label: "إضافة ألعاب",
       };
     case "game_created":
+      return {
+        badge: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
+        dot: "bg-cyan-400",
+        label: "إنشاء لعبة",
+      };
     case "game_consumed":
       return {
         badge: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
         dot: "bg-cyan-400",
+        label: "خصم لعبة",
       };
     case "low_balance":
+      return {
+        badge: "border-orange-400/20 bg-orange-400/10 text-orange-300",
+        dot: "bg-orange-400",
+        label: "رصيد منخفض",
+      };
     case "balance_empty":
       return {
         badge: "border-orange-400/20 bg-orange-400/10 text-orange-300",
         dot: "bg-orange-400",
+        label: "نفاد الرصيد",
       };
     case "announcement":
       return {
         badge: "border-violet-400/20 bg-violet-400/10 text-violet-300",
         dot: "bg-violet-400",
+        label: "إعلان",
+      };
+    case "role_changed":
+      return {
+        badge: "border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-300",
+        dot: "bg-fuchsia-400",
+        label: "تغيير رتبة",
       };
     default:
       return {
         badge: "border-white/10 bg-white/[0.05] text-white/70",
         dot: "bg-white/60",
+        label: "النظام",
       };
   }
 }
 
-export default async function NotificationsPage() {
+function matchesFilter(item: NotificationListItem, filter: FilterKey) {
+  if (filter === "all") return true;
+  if (filter === "unread") return !item.is_read;
+
+  if (filter === "games") {
+    return ["games_added", "game_created", "game_consumed"].includes(item.type);
+  }
+
+  if (filter === "balance") {
+    return ["low_balance", "balance_empty"].includes(item.type);
+  }
+
+  if (filter === "announcements") {
+    return item.type === "announcement";
+  }
+
+  if (filter === "system") {
+    return ["system", "role_changed"].includes(item.type);
+  }
+
+  return true;
+}
+
+function tabClass(active: boolean) {
+  return active
+    ? "rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-black text-cyan-300"
+    : "rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-black text-white/65 transition hover:bg-white/[0.07] hover:text-white";
+}
+
+export default async function NotificationsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const filter = (params.filter ?? "all") as FilterKey;
+
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
@@ -68,16 +135,46 @@ export default async function NotificationsPage() {
     redirect("/login");
   }
 
-  const [notifications, unreadCount] = await Promise.all([
-    getMyNotifications({ limit: 100 }),
+  const [notifications, unreadCount]: [NotificationListItem[], number] =
+  await Promise.all([
+    getMyNotifications({ limit: 200 }),
     getMyUnreadNotificationsCount(),
   ]);
 
+  const visibleNotifications = notifications.filter((item) =>
+    matchesFilter(item, filter),
+  );
+
+  const counts = {
+    all: notifications.length,
+    unread: notifications.filter((item) => !item.is_read).length,
+    games: notifications.filter((item) =>
+      ["games_added", "game_created", "game_consumed"].includes(item.type),
+    ).length,
+    balance: notifications.filter((item) =>
+      ["low_balance", "balance_empty"].includes(item.type),
+    ).length,
+    announcements: notifications.filter((item) => item.type === "announcement")
+      .length,
+    system: notifications.filter((item) =>
+      ["system", "role_changed"].includes(item.type),
+    ).length,
+  };
+
+  const filters: Array<{ key: FilterKey; label: string; count: number }> = [
+    { key: "all", label: "الكل", count: counts.all },
+    { key: "unread", label: "غير المقروء", count: counts.unread },
+    { key: "games", label: "الألعاب", count: counts.games },
+    { key: "balance", label: "الرصيد", count: counts.balance },
+    { key: "announcements", label: "الإعلانات", count: counts.announcements },
+    { key: "system", label: "النظام", count: counts.system },
+  ];
+
   return (
     <main className="min-h-screen px-4 py-8 text-white md:px-6">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-black text-cyan-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
@@ -111,18 +208,32 @@ export default async function NotificationsPage() {
               </Link>
             </div>
           </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {filters.map((item) => (
+              <Link
+                key={item.key}
+                href={`/account/notifications?filter=${item.key}`}
+                className={tabClass(filter === item.key)}
+              >
+                {item.label} ({item.count})
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className="mt-6 space-y-4">
-          {notifications.length === 0 ? (
+          {visibleNotifications.length === 0 ? (
             <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-8 text-center shadow-[0_16px_45px_rgba(0,0,0,0.14)]">
-              <h2 className="text-xl font-black text-white">لا توجد إشعارات حتى الآن</h2>
+              <h2 className="text-xl font-black text-white">
+                لا توجد إشعارات في هذا التصنيف
+              </h2>
               <p className="mt-3 text-sm leading-7 text-white/55">
-                عندما يتم إنشاء لعبة أو إضافة رصيد أو إرسال إعلان من الإدارة، سيظهر هنا.
+                بدّل الفلتر أو انتظر إشعارات جديدة.
               </p>
             </div>
           ) : (
-            notifications.map((item: NotificationListItem) => {
+            visibleNotifications.map((item: NotificationListItem) => {
               const styles = typeStyles(item.type);
 
               return (
@@ -141,7 +252,7 @@ export default async function NotificationsPage() {
                           className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black ${styles.badge}`}
                         >
                           <span className={`h-1.5 w-1.5 rounded-full ${styles.dot}`} />
-                          {item.type}
+                          {styles.label}
                         </span>
 
                         {!item.is_read && (
@@ -176,11 +287,7 @@ export default async function NotificationsPage() {
 
                       {!item.is_read ? (
                         <form action={markOneNotificationReadAction}>
-                          <input
-                            type="hidden"
-                            name="notificationId"
-                            value={item.id}
-                          />
+                          <input type="hidden" name="notificationId" value={item.id} />
                           <button
                             type="submit"
                             className="inline-flex items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/15"
@@ -191,11 +298,7 @@ export default async function NotificationsPage() {
                       ) : null}
 
                       <form action={deleteOneNotificationAction}>
-                        <input
-                          type="hidden"
-                          name="notificationId"
-                          value={item.id}
-                        />
+                        <input type="hidden" name="notificationId" value={item.id} />
                         <button
                           type="submit"
                           className="inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15"

@@ -5,11 +5,20 @@ import type {
   CreateNotificationForUserInput,
   NotificationListItem,
   NotificationPayload,
+  NotificationType,
 } from "./types";
 
 type ProfileIdRow = {
   id: string;
 };
+
+type NotificationFilter =
+  | "all"
+  | "unread"
+  | "games"
+  | "balance"
+  | "announcements"
+  | "system";
 
 function normalizeText(value: string, maxLength: number) {
   return value.trim().slice(0, maxLength);
@@ -29,6 +38,21 @@ function chunkArray<T>(items: T[], size: number) {
     chunks.push(items.slice(index, index + size));
   }
   return chunks;
+}
+
+function resolveTypeFilter(filter: NotificationFilter) {
+  switch (filter) {
+    case "games":
+      return ["games_added", "game_created", "game_consumed"] as NotificationType[];
+    case "balance":
+      return ["low_balance", "balance_empty"] as NotificationType[];
+    case "announcements":
+      return ["announcement"] as NotificationType[];
+    case "system":
+      return ["system", "role_changed"] as NotificationType[];
+    default:
+      return null;
+  }
 }
 
 export async function createNotificationForUser(
@@ -197,6 +221,7 @@ export async function getMyUnreadNotificationsCount() {
 export async function getMyNotifications(options?: {
   limit?: number;
   onlyUnread?: boolean;
+  filter?: NotificationFilter;
 }) {
   const supabase = await getSupabaseServerClient();
   const {
@@ -205,7 +230,7 @@ export async function getMyNotifications(options?: {
 
   if (!user) return [] as NotificationListItem[];
 
-  const limit = Math.min(Math.max(options?.limit ?? 20, 1), 100);
+  const limit = Math.min(Math.max(options?.limit ?? 20, 1), 200);
 
   let query = supabase
     .from("notifications")
@@ -216,8 +241,13 @@ export async function getMyNotifications(options?: {
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (options?.onlyUnread) {
+  if (options?.onlyUnread || options?.filter === "unread") {
     query = query.eq("is_read", false);
+  }
+
+  const typeFilter = resolveTypeFilter(options?.filter ?? "all");
+  if (typeFilter) {
+    query = query.in("type", typeFilter);
   }
 
   const { data, error } = await query;
@@ -338,4 +368,46 @@ export async function createAutomaticGameCreatedNotifications(params: {
       },
     });
   }
+}
+
+export async function createGamesAddedNotification(params: {
+  userId: string;
+  addedGames: number;
+  previousRemaining: number;
+  newRemaining: number;
+}) {
+  if (params.addedGames <= 0) return;
+
+  await createNotificationForUser({
+    userId: params.userId,
+    type: "games_added",
+    title: "تمت إضافة ألعاب إلى حسابك",
+    body: `تمت إضافة ${params.addedGames} لعبة إلى حسابك. الرصيد السابق: ${params.previousRemaining}، والرصيد الحالي: ${params.newRemaining}.`,
+    actionUrl: "/games",
+    payload: {
+      addedGames: params.addedGames,
+      previousRemaining: params.previousRemaining,
+      newRemaining: params.newRemaining,
+    },
+  });
+}
+
+export async function createRoleChangedNotification(params: {
+  userId: string;
+  previousRole: string | null;
+  newRole: string | null;
+}) {
+  if (params.previousRole === params.newRole) return;
+
+  await createNotificationForUser({
+    userId: params.userId,
+    type: "role_changed",
+    title: "تم تحديث صلاحية الحساب",
+    body: `تم تغيير رتبة حسابك من "${params.previousRole ?? "غير محدد"}" إلى "${params.newRole ?? "غير محدد"}".`,
+    actionUrl: "/account",
+    payload: {
+      previousRole: params.previousRole,
+      newRole: params.newRole,
+    },
+  });
 }

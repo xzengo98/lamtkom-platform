@@ -1,3 +1,7 @@
+import {
+  createGamesAddedNotification,
+  createRoleChangedNotification,
+} from "@/lib/notifications/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import AdminEmptyState from "@/components/admin/admin-empty-state";
@@ -79,6 +83,18 @@ async function updateUserAction(formData: FormData) {
     redirect("/admin/users?error=invalid");
   }
 
+  const { data: targetProfileBefore } = await supabase
+    .from("profiles")
+    .select("games_remaining, role")
+    .eq("id", userId)
+    .single();
+
+  const previousGamesRemaining = Math.max(
+    0,
+    Number(targetProfileBefore?.games_remaining ?? 0),
+  );
+  const previousRole = targetProfileBefore?.role ?? null;
+
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -92,9 +108,36 @@ async function updateUserAction(formData: FormData) {
     redirect("/admin/users?error=save");
   }
 
+  const addedGames = gamesRemaining - previousGamesRemaining;
+
+  try {
+    if (addedGames > 0) {
+      await createGamesAddedNotification({
+        userId,
+        addedGames,
+        previousRemaining: previousGamesRemaining,
+        newRemaining: gamesRemaining,
+      });
+    }
+
+    if (previousRole !== role) {
+      await createRoleChangedNotification({
+        userId,
+        previousRole,
+        newRole: role,
+      });
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to create admin-driven notifications",
+      notificationError,
+    );
+  }
+
   revalidatePath("/admin/users");
   revalidatePath("/admin");
   revalidatePath("/account");
+  revalidatePath("/games");
   revalidatePath("/game/start");
   revalidatePath("/");
 

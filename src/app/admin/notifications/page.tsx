@@ -4,6 +4,8 @@ import {
   sendAdminNotificationAction,
 } from "./actions";
 
+import Link from "next/link";
+
 type CampaignRow = {
   id: string;
   category: string;
@@ -15,6 +17,24 @@ type CampaignRow = {
   sent_at: string;
   created_at: string;
 };
+
+type CampaignNotificationRow = {
+  campaign_id: string | null;
+  is_read: boolean;
+};
+
+type PageProps = {
+  searchParams: Promise<{
+    filter?: string;
+  }>;
+};
+
+type CampaignFilter =
+  | "all"
+  | "announcement"
+  | "games"
+  | "balance"
+  | "system";
 
 function formatDate(value: string) {
   try {
@@ -49,16 +69,41 @@ function badgeClass(category: string) {
   }
 }
 
-function audienceLabel(
-  audienceType: string,
-  audienceRole: string | null,
-) {
+function audienceLabel(audienceType: string, audienceRole: string | null) {
   if (audienceType === "all") return "الجميع";
   if (audienceType === "role") return `رتبة: ${audienceRole ?? "-"}`;
   return "مخصص";
 }
 
-export default async function AdminNotificationsPage() {
+function matchesCampaignFilter(item: CampaignRow, filter: CampaignFilter) {
+  if (filter === "all") return true;
+  if (filter === "announcement") return item.category === "announcement";
+  if (filter === "games") {
+    return ["games_added", "game_created", "game_consumed"].includes(
+      item.category,
+    );
+  }
+  if (filter === "balance") {
+    return ["low_balance", "balance_empty"].includes(item.category);
+  }
+  if (filter === "system") {
+    return ["system", "role_changed"].includes(item.category);
+  }
+  return true;
+}
+
+function filterTabClass(active: boolean) {
+  return active
+    ? "rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-black text-cyan-300"
+    : "rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-black text-white/65 transition hover:bg-white/[0.07] hover:text-white";
+}
+
+export default async function AdminNotificationsPage({
+  searchParams,
+}: PageProps) {
+  const params = await searchParams;
+  const filter = (params.filter ?? "all") as CampaignFilter;
+
   const admin = getSupabaseAdminClient();
 
   const { data } = await admin
@@ -67,9 +112,80 @@ export default async function AdminNotificationsPage() {
       "id, category, audience_type, audience_role, title, body, action_url, sent_at, created_at",
     )
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(50);
 
   const campaigns = (data ?? []) as CampaignRow[];
+  const campaignIds = campaigns.map((item) => item.id);
+
+  const { data: campaignNotifications } =
+    campaignIds.length > 0
+      ? await admin
+          .from("notifications")
+          .select("campaign_id, is_read")
+          .in("campaign_id", campaignIds)
+      : { data: [] };
+
+  const notificationsRows =
+    (campaignNotifications ?? []) as CampaignNotificationRow[];
+
+  const statsByCampaign = new Map<
+    string,
+    { total: number; read: number; unread: number }
+  >();
+
+  for (const row of notificationsRows) {
+    if (!row.campaign_id) continue;
+
+    const current = statsByCampaign.get(row.campaign_id) ?? {
+      total: 0,
+      read: 0,
+      unread: 0,
+    };
+
+    current.total += 1;
+    if (row.is_read) {
+      current.read += 1;
+    } else {
+      current.unread += 1;
+    }
+
+    statsByCampaign.set(row.campaign_id, current);
+  }
+
+  const visibleCampaigns = campaigns.filter((item) =>
+    matchesCampaignFilter(item, filter),
+  );
+
+  const counts = {
+    all: campaigns.length,
+    announcement: campaigns.filter((item) => item.category === "announcement")
+      .length,
+    games: campaigns.filter((item) =>
+      ["games_added", "game_created", "game_consumed"].includes(item.category),
+    ).length,
+    balance: campaigns.filter((item) =>
+      ["low_balance", "balance_empty"].includes(item.category),
+    ).length,
+    system: campaigns.filter((item) =>
+      ["system", "role_changed"].includes(item.category),
+    ).length,
+  };
+
+  const totalRecipients = notificationsRows.length;
+  const totalRead = notificationsRows.filter((item) => item.is_read).length;
+  const totalUnread = notificationsRows.filter((item) => !item.is_read).length;
+
+  const filters: Array<{
+    key: CampaignFilter;
+    label: string;
+    count: number;
+  }> = [
+    { key: "all", label: "الكل", count: counts.all },
+    { key: "announcement", label: "الإعلانات", count: counts.announcement },
+    { key: "games", label: "الألعاب", count: counts.games },
+    { key: "balance", label: "الرصيد", count: counts.balance },
+    { key: "system", label: "النظام", count: counts.system },
+  ];
 
   return (
     <main className="space-y-6 text-white">
@@ -89,14 +205,55 @@ export default async function AdminNotificationsPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-black text-cyan-300">
-              الجميع أو حسب الرتبة
-            </span>
-            <span className="rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-2 text-xs font-black text-violet-300">
-              حذف من الجميع
-            </span>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/6 px-4 py-3 text-center">
+              <div className="text-lg font-black text-cyan-300">
+                {campaigns.length}
+              </div>
+              <div className="mt-1 text-[11px] font-bold text-white/45">
+                الحملات
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/6 px-4 py-3 text-center">
+              <div className="text-lg font-black text-emerald-300">
+                {totalRecipients}
+              </div>
+              <div className="mt-1 text-[11px] font-bold text-white/45">
+                المستقبلون
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-violet-400/15 bg-violet-400/6 px-4 py-3 text-center">
+              <div className="text-lg font-black text-violet-300">
+                {totalRead}
+              </div>
+              <div className="mt-1 text-[11px] font-bold text-white/45">
+                المقروء
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-orange-400/15 bg-orange-400/6 px-4 py-3 text-center">
+              <div className="text-lg font-black text-orange-300">
+                {totalUnread}
+              </div>
+              <div className="mt-1 text-[11px] font-bold text-white/45">
+                غير المقروء
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-2">
+          {filters.map((item) => (
+            <Link
+              key={item.key}
+              href={`/admin/notifications?filter=${item.key}`}
+              className={filterTabClass(filter === item.key)}
+            >
+              {item.label} ({item.count})
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -213,60 +370,97 @@ export default async function AdminNotificationsPage() {
           <div className="mb-5">
             <h2 className="text-xl font-black text-white">آخر الحملات</h2>
             <p className="mt-2 text-sm leading-7 text-white/55">
-              آخر 20 رسالة تم إنشاؤها من لوحة الأدمن.
+              آخر الحملات مع إحصائيات الوصول والقراءة.
             </p>
           </div>
 
           <div className="space-y-4">
-            {campaigns.length === 0 ? (
+            {visibleCampaigns.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/55">
-                لا توجد حملات إرسال حتى الآن.
+                لا توجد حملات في هذا التصنيف.
               </div>
             ) : (
-              campaigns.map((item) => (
-                <article
-                  key={item.id}
-                  className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full border px-3 py-1 text-[11px] font-black ${badgeClass(
-                        item.category,
-                      )}`}
-                    >
-                      {item.category}
-                    </span>
+              visibleCampaigns.map((item) => {
+                const campaignStats = statsByCampaign.get(item.id) ?? {
+                  total: 0,
+                  read: 0,
+                  unread: 0,
+                };
 
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-black text-white/60">
-                      {audienceLabel(item.audience_type, item.audience_role)}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-4 text-lg font-black text-white">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-7 text-white/58">
-                    {item.body}
-                  </p>
-
-                  <div className="mt-3 text-xs font-bold text-white/35">
-                    {formatDate(item.created_at)}
-                  </div>
-
-                  <div className="mt-4">
-                    <form action={deleteCampaignAction}>
-                      <input type="hidden" name="campaignId" value={item.id} />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15"
+                return (
+                  <article
+                    key={item.id}
+                    className="rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full border px-3 py-1 text-[11px] font-black ${badgeClass(
+                          item.category,
+                        )}`}
                       >
-                        حذف من الجميع
-                      </button>
-                    </form>
-                  </div>
-                </article>
-              ))
+                        {item.category}
+                      </span>
+
+                      <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-black text-white/60">
+                        {audienceLabel(item.audience_type, item.audience_role)}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-4 text-lg font-black text-white">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-7 text-white/58">
+                      {item.body}
+                    </p>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="rounded-xl border border-cyan-400/15 bg-cyan-400/6 px-3 py-2 text-center">
+                        <div className="text-sm font-black text-cyan-300">
+                          {campaignStats.total}
+                        </div>
+                        <div className="mt-1 text-[10px] font-bold text-white/45">
+                          وصلهم
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-violet-400/15 bg-violet-400/6 px-3 py-2 text-center">
+                        <div className="text-sm font-black text-violet-300">
+                          {campaignStats.read}
+                        </div>
+                        <div className="mt-1 text-[10px] font-bold text-white/45">
+                          قرأوا
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-orange-400/15 bg-orange-400/6 px-3 py-2 text-center">
+                        <div className="text-sm font-black text-orange-300">
+                          {campaignStats.unread}
+                        </div>
+                        <div className="mt-1 text-[10px] font-bold text-white/45">
+                          لم يقرؤوا
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 text-xs font-bold text-white/35">
+                      {formatDate(item.created_at)}
+                    </div>
+
+                    <div className="mt-4">
+                      <form action={deleteCampaignAction}>
+                        <input type="hidden" name="campaignId" value={item.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15"
+                        >
+                          حذف من الجميع
+                        </button>
+                      </form>
+                    </div>
+                  </article>
+                );
+              })
             )}
           </div>
         </div>
