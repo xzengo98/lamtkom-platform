@@ -117,6 +117,20 @@ function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function ChevronDownIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="m6 9 6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function MenuIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
@@ -210,7 +224,7 @@ function NotificationDropdown({
   onMarkAllAsRead,
 }: NotificationDropdownProps) {
   return (
-    <div className="w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07101fe8] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+    <div className="w-full max-w-[380px] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07101fe8] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl">
       <div className="border-b border-white/8 px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -310,12 +324,14 @@ export default function Navbar({ initialAuth }: NavbarProps) {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [latestNotifications, setLatestNotifications] = useState<NotificationPreview[]>([]);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const desktopBellContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileBellContainerRef = useRef<HTMLDivElement | null>(null);
+  const gamesMenuRef = useRef<HTMLDivElement | null>(null);
 
   const [authState, setAuthState] = useState<AuthState>({
     isLoggedIn: initialAuth.isLoggedIn,
@@ -355,22 +371,11 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     setIsMarkingAll(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const response = await fetch("/api/notifications/mark-all-read", {
+        method: "POST",
+      });
 
-      if (!user) return;
-
-      const { error } = await supabase
-        .from("notifications")
-        .update({
-          is_read: true,
-          read_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
-
-      if (!error) {
+      if (response.ok) {
         setUnreadCount(0);
         setLatestNotifications((prev) =>
           prev.map((item) => ({
@@ -510,21 +515,27 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   useEffect(() => {
     setMenuOpen(false);
     setBellOpen(false);
+    setGamesOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (!bellOpen) return;
+    if (!bellOpen && !gamesOpen) return;
 
     function handleDocumentClick(event: MouseEvent) {
       const target = event.target as Node;
 
-      const insideDesktop =
+      const insideDesktopBell =
         desktopBellContainerRef.current?.contains(target) ?? false;
-      const insideMobile =
+      const insideMobileBell =
         mobileBellContainerRef.current?.contains(target) ?? false;
+      const insideGames = gamesMenuRef.current?.contains(target) ?? false;
 
-      if (!insideDesktop && !insideMobile) {
+      if (!insideDesktopBell && !insideMobileBell) {
         setBellOpen(false);
+      }
+
+      if (!insideGames) {
+        setGamesOpen(false);
       }
     }
 
@@ -533,7 +544,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     return () => {
       document.removeEventListener("click", handleDocumentClick);
     };
-  }, [bellOpen]);
+  }, [bellOpen, gamesOpen]);
 
   useEffect(() => {
     if (bellOpen) {
@@ -544,31 +555,38 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   function handleLogout() {
     setMenuOpen(false);
     setBellOpen(false);
+    setGamesOpen(false);
     setAuthState(loggedOutState());
     setUnreadCount(0);
     setLatestNotifications([]);
     window.location.assign("/logout");
   }
 
-  const navLinks = [
+  const simpleLinks = [
     { label: "الرئيسية", href: "/", icon: null },
-    { label: "الألعاب", href: "/games", icon: <GamesIcon className="h-4 w-4" /> },
     { label: "الباقات", href: "/pricing", icon: <PricingIcon className="h-4 w-4" /> },
   ];
 
+  const gameLinks = [
+    { label: "لمتكم", href: "/game/start" },
+    { label: "برا السالفة", href: "/game/bara-alsalfah" },
+    { label: "Codenames", href: "/games/codenames" },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/8 bg-[#040816]/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-3 md:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
+    <header className="sticky top-0 z-40 border-b border-white/8 bg-[#040816]/72 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-[1380px] items-center justify-between gap-4 px-4 py-3 md:px-6 lg:px-8">
+        <Link href="/" className="group relative flex items-center">
+          <span className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/10 blur-2xl opacity-80 transition duration-300 group-hover:opacity-100" />
           <img
             src={heroLogo}
             alt="لمتكم"
-            className="h-10 w-auto object-contain sm:h-11"
+            className="relative h-12 w-auto object-contain drop-shadow-[0_0_18px_rgba(34,211,238,0.18)] transition duration-300 group-hover:scale-[1.03] sm:h-14 lg:h-16"
           />
         </Link>
 
         <nav className="hidden items-center gap-2 lg:flex">
-          {navLinks.map((link) => (
+          {simpleLinks.map((link) => (
             <Link key={link.href} href={link.href} className={navLinkClass(pathname, link.href)}>
               <span className="inline-flex items-center gap-2">
                 {link.icon}
@@ -576,6 +594,48 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               </span>
             </Link>
           ))}
+
+          <div className="relative" ref={gamesMenuRef}>
+            <button
+              type="button"
+              onClick={() => setGamesOpen((prev) => !prev)}
+              className={[
+                "relative rounded-xl px-4 py-2 text-sm font-bold transition duration-200",
+                pathname.startsWith("/game") || pathname.startsWith("/games")
+                  ? "bg-cyan-400/10 text-cyan-300"
+                  : "text-white/60 hover:bg-white/6 hover:text-white",
+              ].join(" ")}
+            >
+              <span className="inline-flex items-center gap-2">
+                <GamesIcon className="h-4 w-4" />
+                الألعاب
+                <ChevronDownIcon
+                  className={`h-4 w-4 transition ${gamesOpen ? "rotate-180" : ""}`}
+                />
+              </span>
+            </button>
+
+            {gamesOpen && (
+              <div className="absolute right-0 top-full z-50 mt-3 w-[240px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07101fe8] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
+                <div className="mb-2 px-2 text-xs font-bold text-white/35">
+                  صفحات الألعاب
+                </div>
+
+                <div className="space-y-2">
+                  {gameLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-black text-white/78 transition hover:bg-white/[0.08] hover:text-white"
+                    >
+                      {item.label}
+                      <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {authState.isLoggedIn && (
             <Link href="/account" className={navLinkClass(pathname, "/account")}>
@@ -626,15 +686,13 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 )}
               </div>
 
-              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2">
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-400/15 text-sm font-black text-cyan-300">
                   {(authState.username || "م").slice(0, 1).toUpperCase()}
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-white/35">مرحبًا</div>
-                  <div className="text-sm font-black text-white">
-                    {authState.username || "مستخدم"}
-                  </div>
+                <div className="text-sm font-black text-white">
+                  <span className="text-white/55">مرحبًا، </span>
+                  <span>{authState.username || "مستخدم"}</span>
                 </div>
               </div>
 
@@ -683,7 +741,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               </button>
 
               {bellOpen && (
-                <div className="absolute left-0 top-full z-50 mt-3">
+                <div className="fixed inset-x-4 top-20 z-50 mx-auto max-w-sm">
                   <NotificationDropdown
                     latestNotifications={latestNotifications}
                     unreadCount={unreadCount}
@@ -709,7 +767,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
       {menuOpen && (
         <div className="border-t border-white/8 bg-[#040816]/95 px-4 py-4 backdrop-blur-xl lg:hidden">
           <div className="mx-auto max-w-[1320px] space-y-2">
-            {navLinks.map((link) => (
+            {simpleLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -719,6 +777,26 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 {link.label}
               </Link>
             ))}
+
+            <div className="overflow-hidden rounded-xl border border-white/8 bg-white/[0.03]">
+              <div className="flex items-center gap-3 px-4 py-3 text-sm font-black text-white/80">
+                <GamesIcon className="h-4 w-4" />
+                الألعاب
+              </div>
+
+              <div className="space-y-2 border-t border-white/8 p-3">
+                {gameLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                  >
+                    {item.label}
+                    <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             {authState.isLoggedIn && (
               <Link
