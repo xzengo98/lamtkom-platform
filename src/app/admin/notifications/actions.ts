@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { createCampaignAndDispatch } from "@/lib/notifications/server";
 import type {
@@ -33,12 +34,15 @@ async function requireAdmin() {
   return user;
 }
 
-function normalizeTextarea(value: FormDataEntryValue | null, maxLength: number) {
+function normalizeText(value: FormDataEntryValue | null, maxLength: number) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
 }
 
-function normalizeOptionalText(value: FormDataEntryValue | null, maxLength: number) {
+function normalizeOptionalText(
+  value: FormDataEntryValue | null,
+  maxLength: number,
+) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim().slice(0, maxLength);
   return trimmed.length > 0 ? trimmed : null;
@@ -48,10 +52,13 @@ export async function sendAdminNotificationAction(formData: FormData) {
   const user = await requireAdmin();
 
   const category = String(formData.get("category") ?? "").trim() as NotificationType;
-  const audienceType = String(formData.get("audienceType") ?? "").trim() as NotificationAudienceType;
+  const audienceType = String(
+    formData.get("audienceType") ?? "",
+  ).trim() as NotificationAudienceType;
   const audienceRoleRaw = String(formData.get("audienceRole") ?? "").trim();
-  const title = normalizeTextarea(formData.get("title"), 140);
-  const body = normalizeTextarea(formData.get("body"), 1000);
+
+  const title = normalizeText(formData.get("title"), 140);
+  const body = normalizeText(formData.get("body"), 1000);
   const actionUrl = normalizeOptionalText(formData.get("actionUrl"), 300);
 
   if (!category || !audienceType || !title || !body) {
@@ -69,7 +76,12 @@ export async function sendAdminNotificationAction(formData: FormData) {
     "system",
   ];
 
-  const allowedAudienceTypes: NotificationAudienceType[] = ["all", "role", "users"];
+  const allowedAudienceTypes: NotificationAudienceType[] = [
+    "all",
+    "role",
+    "users",
+  ];
+
   const allowedRoles: NotificationRoleTarget[] = ["admin", "premium", "user"];
 
   if (!allowedCategories.includes(category)) {
@@ -101,6 +113,23 @@ export async function sendAdminNotificationAction(formData: FormData) {
       source: "admin_panel",
     },
   });
+
+  revalidatePath("/admin/notifications");
+  revalidatePath("/account/notifications");
+  revalidatePath("/");
+}
+
+export async function deleteCampaignAction(formData: FormData) {
+  await requireAdmin();
+
+  const campaignId = String(formData.get("campaignId") ?? "").trim();
+
+  if (!campaignId) return;
+
+  const admin = getSupabaseAdminClient();
+
+  await admin.from("notifications").delete().eq("campaign_id", campaignId);
+  await admin.from("notification_campaigns").delete().eq("id", campaignId);
 
   revalidatePath("/admin/notifications");
   revalidatePath("/account/notifications");

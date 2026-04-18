@@ -1,5 +1,20 @@
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { sendAdminNotificationAction } from "./actions";
+import {
+  deleteCampaignAction,
+  sendAdminNotificationAction,
+} from "./actions";
+
+type CampaignRow = {
+  id: string;
+  category: string;
+  audience_type: string;
+  audience_role: string | null;
+  title: string;
+  body: string;
+  action_url: string | null;
+  sent_at: string;
+  created_at: string;
+};
 
 function formatDate(value: string) {
   try {
@@ -27,27 +42,26 @@ function badgeClass(category: string) {
     case "low_balance":
     case "balance_empty":
       return "border-orange-400/20 bg-orange-400/10 text-orange-300";
+    case "role_changed":
+      return "border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-300";
     default:
       return "border-white/10 bg-white/[0.05] text-white/70";
   }
 }
 
-type CampaignRow = {
-  id: string;
-  category: string;
-  audience_type: string;
-  audience_role: string | null;
-  title: string;
-  body: string;
-  action_url: string | null;
-  sent_at: string;
-  created_at: string;
-};
+function audienceLabel(
+  audienceType: string,
+  audienceRole: string | null,
+) {
+  if (audienceType === "all") return "الجميع";
+  if (audienceType === "role") return `رتبة: ${audienceRole ?? "-"}`;
+  return "مخصص";
+}
 
 export default async function AdminNotificationsPage() {
   const admin = getSupabaseAdminClient();
 
-  const { data: campaignsData } = await admin
+  const { data } = await admin
     .from("notification_campaigns")
     .select(
       "id, category, audience_type, audience_role, title, body, action_url, sent_at, created_at",
@@ -55,7 +69,7 @@ export default async function AdminNotificationsPage() {
     .order("created_at", { ascending: false })
     .limit(20);
 
-  const campaigns = (campaignsData ?? []) as CampaignRow[];
+  const campaigns = (data ?? []) as CampaignRow[];
 
   return (
     <main className="space-y-6 text-white">
@@ -71,7 +85,7 @@ export default async function AdminNotificationsPage() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-8 text-white/55">
-              أرسل إشعارًا لجميع الأعضاء أو حسب الرتبة، مع حفظ سجل الحملات داخل لوحة الأدمن.
+              أرسل إشعارًا لجميع الأعضاء أو حسب الرتبة، مع حفظ سجل الإرسالات داخل لوحة الأدمن.
             </p>
           </div>
 
@@ -80,7 +94,7 @@ export default async function AdminNotificationsPage() {
               الجميع أو حسب الرتبة
             </span>
             <span className="rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-2 text-xs font-black text-violet-300">
-              سجل آخر الإرسالات
+              حذف من الجميع
             </span>
           </div>
         </div>
@@ -91,7 +105,7 @@ export default async function AdminNotificationsPage() {
           <div className="mb-5">
             <h2 className="text-xl font-black text-white">إنشاء إشعار جديد</h2>
             <p className="mt-2 text-sm leading-7 text-white/55">
-              استخدم هذه الصفحة للإعلانات العامة أو التنبيهات المرتبطة بالألعاب والرصيد.
+              استخدم هذا القسم للإعلانات العامة أو التنبيهات المرتبطة بالألعاب والرصيد.
             </p>
           </div>
 
@@ -134,7 +148,7 @@ export default async function AdminNotificationsPage() {
 
             <div>
               <label className="mb-2 block text-sm font-bold text-white/80">
-                الرتبة المستهدفة (إذا اخترت حسب الرتبة)
+                الرتبة المستهدفة
               </label>
               <select
                 name="audienceRole"
@@ -224,11 +238,7 @@ export default async function AdminNotificationsPage() {
                     </span>
 
                     <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-black text-white/60">
-                      {item.audience_type === "all"
-                        ? "الجميع"
-                        : item.audience_type === "role"
-                          ? `رتبة: ${item.audience_role ?? "-"}`
-                          : "مخصص"}
+                      {audienceLabel(item.audience_type, item.audience_role)}
                     </span>
                   </div>
 
@@ -242,6 +252,18 @@ export default async function AdminNotificationsPage() {
 
                   <div className="mt-3 text-xs font-bold text-white/35">
                     {formatDate(item.created_at)}
+                  </div>
+
+                  <div className="mt-4">
+                    <form action={deleteCampaignAction}>
+                      <input type="hidden" name="campaignId" value={item.id} />
+                      <button
+                        type="submit"
+                        className="inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15"
+                      >
+                        حذف من الجميع
+                      </button>
+                    </form>
                   </div>
                 </article>
               ))

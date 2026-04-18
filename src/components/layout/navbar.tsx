@@ -174,11 +174,12 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   }, [router, supabase]);
 
   useEffect(() => {
-    let isCancelled = false;
+    let cancelled = false;
+    let intervalId: number | null = null;
 
-    async function loadUnreadCount() {
+    async function refreshUnreadCount() {
       if (!authState.isLoggedIn) {
-        setUnreadCount(0);
+        if (!cancelled) setUnreadCount(0);
         return;
       }
 
@@ -187,7 +188,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        if (!isCancelled) setUnreadCount(0);
+        if (!cancelled) setUnreadCount(0);
         return;
       }
 
@@ -197,15 +198,30 @@ export default function Navbar({ initialAuth }: NavbarProps) {
         .eq("user_id", user.id)
         .eq("is_read", false);
 
-      if (!isCancelled) {
+      if (!cancelled) {
         setUnreadCount(error ? 0 : count ?? 0);
       }
     }
 
-    void loadUnreadCount();
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        void refreshUnreadCount();
+      }
+    }
+
+    void refreshUnreadCount();
+    intervalId = window.setInterval(() => {
+      void refreshUnreadCount();
+    }, 15000);
+
+    window.addEventListener("focus", handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      isCancelled = true;
+      cancelled = true;
+      if (intervalId) window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibility);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [authState.isLoggedIn, pathname, supabase]);
 
@@ -276,7 +292,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               >
                 <BellIcon className="h-5 w-5" />
                 {unreadCount > 0 ? (
-                  <span className="absolute -left-1 -top-1 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-black text-slate-950 shadow-[0_8px_20px_rgba(34,211,238,0.28)]">
+                  <span className="absolute -left-1 -top-1 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white shadow-[0_10px_20px_rgba(239,68,68,0.35)]">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 ) : null}
@@ -366,7 +382,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 </span>
 
                 {unreadCount > 0 ? (
-                  <span className="inline-flex min-h-[22px] min-w-[22px] items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-black text-slate-950">
+                  <span className="inline-flex min-h-[22px] min-w-[22px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white shadow-[0_10px_20px_rgba(239,68,68,0.35)]">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 ) : null}

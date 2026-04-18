@@ -7,6 +7,7 @@ import {
   getMyUnreadNotificationsCount,
 } from "@/lib/notifications/server";
 import {
+  deleteOneNotificationAction,
   markAllNotificationsReadAction,
   markOneNotificationReadAction,
 } from "./actions";
@@ -188,6 +189,20 @@ export default async function NotificationsPage() {
                           </button>
                         </form>
                       ) : null}
+
+                      <form action={deleteOneNotificationAction}>
+                        <input
+                          type="hidden"
+                          name="notificationId"
+                          value={item.id}
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500/15"
+                        >
+                          حذف
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </article>
