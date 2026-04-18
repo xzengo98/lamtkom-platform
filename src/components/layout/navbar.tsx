@@ -65,6 +65,52 @@ function HomeIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function LoginIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M10 17l5-5-5-5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 12H4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M20 4v16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function RegisterIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M5 19a7 7 0 0 1 14 0"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M19 8h4M21 6v4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function GamesIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
@@ -828,19 +874,22 @@ export default function Navbar({ initialAuth }: NavbarProps) {
             </>
           ) : (
             <>
-              <Link
-                href="/register"
-                className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/[0.1]"
-              >
-                إنشاء حساب
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
-              >
-                تسجيل الدخول
-              </Link>
-            </>
+  <Link
+    href="/register"
+    className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/20 bg-[linear-gradient(180deg,rgba(34,211,238,0.18)_0%,rgba(34,211,238,0.08)_100%)] px-4 py-2.5 text-sm font-black text-cyan-100 shadow-[0_12px_30px_rgba(34,211,238,0.10)] transition hover:bg-[linear-gradient(180deg,rgba(34,211,238,0.24)_0%,rgba(34,211,238,0.12)_100%)]"
+  >
+    <RegisterIcon className="h-4 w-4" />
+    إنشاء حساب
+  </Link>
+
+  <Link
+    href="/login"
+    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.08] px-4 py-2.5 text-sm font-black text-white/85 transition hover:bg-white/[0.12] hover:text-white"
+  >
+    <LoginIcon className="h-4 w-4" />
+    تسجيل الدخول
+  </Link>
+</>
           )}
         </div>
 
@@ -982,17 +1031,20 @@ export default function Navbar({ initialAuth }: NavbarProps) {
             ) : (
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <Link
-                  href="/register"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-black text-white transition hover:bg-white/[0.1]"
-                >
-                  إنشاء حساب
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
-                >
-                  تسجيل الدخول
-                </Link>
+  href="/register"
+  className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-400/20 bg-[linear-gradient(180deg,rgba(34,211,238,0.18)_0%,rgba(34,211,238,0.08)_100%)] px-4 py-3 text-sm font-black text-cyan-100 transition hover:bg-[linear-gradient(180deg,rgba(34,211,238,0.24)_0%,rgba(34,211,238,0.12)_100%)]"
+>
+  <RegisterIcon className="h-4 w-4" />
+  إنشاء حساب
+</Link>
+
+<Link
+  href="/login"
+  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm font-black text-white/85 transition hover:bg-white/[0.12] hover:text-white"
+>
+  <LoginIcon className="h-4 w-4" />
+  تسجيل الدخول
+</Link>
               </div>
             )}
           </div>

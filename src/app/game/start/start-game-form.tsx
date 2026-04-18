@@ -988,13 +988,15 @@ export default function StartGameForm({
             {countLabel ?? `${categoriesList.length} فئة`}
           </div>
           <div className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}>
-            اختر الفئات المناسبة للجولة
+            اختر الفئات المناسبة لك
           </div>
         </div>
 
-        <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
-          {categoriesList.map((category) => renderCategoryCard(category, sectionTheme))}
-        </div>
+        <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.015)_100%)] px-3 py-4 shadow-[0_16px_42px_rgba(0,0,0,0.16)] sm:px-4 sm:py-5">
+  <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
+    {categoriesList.map((category) => renderCategoryCard(category, sectionTheme))}
+  </div>
+</div>
       </section>
     );
   };
