@@ -598,95 +598,95 @@ export default function GameBoardClient({
     <main className="min-h-screen text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
         <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur-sm sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
-          <div className="flex flex-col gap-4 sm:gap-5">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href="/account"
-                  className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-                >
-                  <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">الرجوع للحساب</span>
-                  <span className="sm:hidden">الحساب</span>
-                </Link>
+  <div className="grid gap-5 xl:grid-cols-[minmax(280px,1fr)_auto_minmax(280px,1fr)] xl:items-end">
+    <div className="order-2 flex flex-col gap-3 xl:order-1 xl:items-start">
+      <div className="flex flex-wrap items-center gap-2 xl:justify-start">
+        <StatusPill
+          label={`الدور: ${activeTurnName}`}
+          icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+        />
+        <StatusPill
+          label={`المتصدر: ${leaderLabel}`}
+          icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+        />
+        <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
+      </div>
 
-                <button
-                  type="button"
-                  onClick={handleFinishGame}
-                  className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  إنهاء اللعب
-                </button>
-              </div>
+      <div className="flex justify-center xl:justify-start">
+        <ScoreControl
+          teamName={teamOne}
+          score={boardState.teamOneScore}
+          accent="blue"
+          onIncrease={() =>
+            updateState((prev) => ({
+              ...prev,
+              teamOneScore: Math.max(0, prev.teamOneScore + 100),
+            }))
+          }
+          onDecrease={() =>
+            updateState((prev) => ({
+              ...prev,
+              teamOneScore: Math.max(0, prev.teamOneScore - 100),
+            }))
+          }
+        />
+      </div>
+    </div>
 
-              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                <StatusPill
-                  label={`الدور: ${activeTurnName}`}
-                  icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                />
-                <StatusPill
-                  label={`المتصدر: ${leaderLabel}`}
-                  icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                />
-                <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
-              </div>
-            </div>
-
-            <div className="flex justify-center pt-1 sm:pt-2">
-              <div className="text-center">
-                <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
-                  لوحة اللعبة
-                </div>
-                <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
-                  {gameName}
-                </h1>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
-              <div className="flex justify-center sm:justify-start">
-                <ScoreControl
-                  teamName={teamOne}
-                  score={boardState.teamOneScore}
-                  accent="blue"
-                  onIncrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamOneScore: Math.max(0, prev.teamOneScore + 100),
-                    }))
-                  }
-                  onDecrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamOneScore: Math.max(0, prev.teamOneScore - 100),
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex justify-center sm:justify-end">
-                <ScoreControl
-                  teamName={teamTwo}
-                  score={boardState.teamTwoScore}
-                  accent="orange"
-                  onIncrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-                    }))
-                  }
-                  onDecrease={() =>
-                    updateState((prev) => ({
-                      ...prev,
-                      teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
+    <div className="order-1 flex items-end justify-center xl:order-2 xl:pb-8">
+      <div className="min-w-[220px] text-center">
+        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
+          لوحة اللعبة
         </div>
+        <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
+          {gameName}
+        </h1>
+      </div>
+    </div>
+
+    <div className="order-3 flex flex-col gap-3 xl:items-end">
+      <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+        <button
+          type="button"
+          onClick={handleFinishGame}
+          className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
+        >
+          <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          إنهاء اللعب
+        </button>
+
+        <Link
+          href="/account"
+          className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
+        >
+          <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">الرجوع للحساب</span>
+          <span className="sm:hidden">الحساب</span>
+        </Link>
+      </div>
+
+      <div className="flex justify-center xl:justify-end">
+        <ScoreControl
+          teamName={teamTwo}
+          score={boardState.teamTwoScore}
+          accent="orange"
+          onIncrease={() =>
+            updateState((prev) => ({
+              ...prev,
+              teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+            }))
+          }
+          onDecrease={() =>
+            updateState((prev) => ({
+              ...prev,
+              teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+            }))
+          }
+        />
+      </div>
+    </div>
+  </div>
+</div>
 
         <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(3,14,38,0.82)_0%,rgba(2,9,24,0.92)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.60)] backdrop-blur-sm sm:rounded-[28px] sm:p-4">
           <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
