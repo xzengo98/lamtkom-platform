@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -35,6 +36,7 @@ function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
 }
 
 export default function RegisterPage() {
+  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [username, setUsername] = useState("");
@@ -96,13 +98,15 @@ export default function RegisterPage() {
       password: cleanPassword,
     });
 
+    setLoading(false);
+
     if (loginResult.error) {
-      setLoading(false);
       setErrorMessage("تم إنشاء الحساب لكن تعذر تسجيل الدخول مباشرة.");
       return;
     }
 
-    window.location.assign("/");
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -124,7 +128,7 @@ export default function RegisterPage() {
 
                 <p className="mt-3 text-sm leading-8 text-white/58 md:text-base">
                   أنشئ حسابك للوصول إلى الألعاب، متابعة الجلسات، والاستفادة من
-                  الباقات والخدمات بشكل منظم وواضح.
+                  الباقات والخدمات.
                 </p>
 
                 {errorMessage ? (
@@ -153,7 +157,7 @@ export default function RegisterPage() {
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="05xxxxxxxx أو +971..."
+                      placeholder="079xxxxxxxx او 00962xxxxxx"
                       className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                     />
                   </div>
@@ -240,7 +244,7 @@ export default function RegisterPage() {
                   {[
                     "الوصول إلى الألعاب والجولات من نفس الحساب.",
                     "متابعة الباقات والرصيد والإشعارات بسهولة.",
-                    "تجربة استخدام واضحة وسريعة بنفس هوية المنصة.",
+                    "تجربة استخدام كاملة للمنصة.",
                   ].map((item) => (
                     <div
                       key={item}
