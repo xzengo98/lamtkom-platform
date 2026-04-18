@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -36,7 +35,6 @@ function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   const [email, setEmail] = useState("");
@@ -64,15 +62,13 @@ export default function LoginPage() {
       password: cleanPassword,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setErrorMessage("تعذر تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.");
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    window.location.assign("/");
   }
 
   return (
@@ -94,7 +90,7 @@ export default function LoginPage() {
 
                 <p className="mt-3 text-sm leading-8 text-white/58 md:text-base">
                   ادخل إلى حسابك للوصول إلى الألعاب، متابعة الجلسات، والاستفادة من
-                  الباقات والخدمات.
+                  الباقات والخدمات بشكل منظم وواضح.
                 </p>
 
                 {errorMessage ? (
@@ -187,15 +183,15 @@ export default function LoginPage() {
                 </h2>
 
                 <p className="mt-4 max-w-md text-sm leading-8 text-white/58 md:text-base">
-                  سجل دخولك للوصول السريع إلى الألعاب، الباقات، الجولات، والمتابعة
+                  سجّل دخولك للوصول السريع إلى الألعاب، الباقات، الجولات، والمتابعة
                   من مكان واحد واضح ومنظم.
                 </p>
 
                 <div className="mt-7 w-full max-w-md space-y-3">
                   {[
-                    "الوصول إلى الألعاب والجولات.",
+                    "الوصول إلى الألعاب والجولات من نفس الحساب.",
                     "متابعة الباقات والرصيد والإشعارات بسهولة.",
-                    "تجربة استخدام جميع مزايا المنصة.",
+                    "تجربة استخدام واضحة وسريعة بنفس هوية المنصة.",
                   ].map((item) => (
                     <div
                       key={item}
