@@ -359,19 +359,19 @@ function CategoryCard({
   const totalInCategory = allTiles.filter(Boolean).length;
 
   return (
-    <div className="mx-auto flex w-full max-w-[232px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(7,18,46,0.96)_0%,rgba(4,12,32,0.99)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.52)] transition-transform duration-300 hover:-translate-y-0.5 sm:max-w-[238px] md:max-w-[242px]">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(8,22,54,0.72)_0%,rgba(4,12,32,0.86)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.50)] backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5">
       <div className="relative overflow-hidden">
         {column.category.image_url ? (
           <>
             <img
               src={column.category.image_url}
               alt={column.category.name}
-              className="h-24 w-full object-cover object-center sm:h-28 md:h-32"
+              className="h-[5.5rem] w-full object-cover object-center sm:h-[6.5rem] md:h-[7.5rem]"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.92)] via-[rgba(5,14,38,0.28)] to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.90)] via-[rgba(5,14,38,0.30)] to-transparent" />
           </>
         ) : (
-          <div className="h-24 w-full bg-[linear-gradient(135deg,#0d2060,#05143a)] sm:h-28 md:h-32" />
+          <div className="h-[5.5rem] w-full bg-[linear-gradient(135deg,#0d2060,#05143a)] sm:h-[6.5rem] md:h-[7.5rem]" />
         )}
 
         {totalInCategory > 0 && (
@@ -597,94 +597,98 @@ export default function GameBoardClient({
   return (
     <main className="min-h-screen text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
-        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
-          <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
-            <StatusPill
-              label={`الدور: ${activeTurnName}`}
-              icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            />
-            <StatusPill
-              label={`المتصدر: ${leaderLabel}`}
-              icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            />
-            <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
+        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur-sm sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/account"
+                  className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
+                >
+                  <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">الرجوع للحساب</span>
+                  <span className="sm:hidden">الحساب</span>
+                </Link>
 
-            <div className="hidden flex-1 xl:block" />
-
-            <button
-              type="button"
-              onClick={handleFinishGame}
-              className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-            >
-              <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              إنهاء اللعب
-            </button>
-
-            <Link
-              href="/account"
-              className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">الرجوع للحساب</span>
-              <span className="sm:hidden">الحساب</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center justify-center pb-1 pt-2 sm:pt-3">
-            <div className="text-center">
-              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
-                لوحة اللعبة
+                <button
+                  type="button"
+                  onClick={handleFinishGame}
+                  className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
+                >
+                  <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  إنهاء اللعب
+                </button>
               </div>
-              <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
-                {gameName}
-              </h1>
-            </div>
-          </div>
 
-          <div className="mt-4 grid grid-cols-2 items-start gap-3 sm:mt-5 sm:gap-5">
-            <div className="flex justify-center sm:justify-start">
-              <ScoreControl
-                teamName={teamOne}
-                score={boardState.teamOneScore}
-                accent="blue"
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore - 100),
-                  }))
-                }
-              />
+              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                <StatusPill
+                  label={`الدور: ${activeTurnName}`}
+                  icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                />
+                <StatusPill
+                  label={`المتصدر: ${leaderLabel}`}
+                  icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                />
+                <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
+              </div>
             </div>
 
-            <div className="flex justify-center sm:justify-end">
-              <ScoreControl
-                teamName={teamTwo}
-                score={boardState.teamTwoScore}
-                accent="orange"
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-                  }))
-                }
-              />
+            <div className="flex justify-center pt-1 sm:pt-2">
+              <div className="text-center">
+                <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
+                  لوحة اللعبة
+                </div>
+                <h1 className="mt-1 text-lg font-black text-white sm:text-xl md:text-2xl">
+                  {gameName}
+                </h1>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
+              <div className="flex justify-center sm:justify-start">
+                <ScoreControl
+                  teamName={teamOne}
+                  score={boardState.teamOneScore}
+                  accent="blue"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore - 100),
+                    }))
+                  }
+                />
+              </div>
+
+              <div className="flex justify-center sm:justify-end">
+                <ScoreControl
+                  teamName={teamTwo}
+                  score={boardState.teamTwoScore}
+                  accent="orange"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+                    }))
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(3,14,38,0.98)_0%,rgba(2,9,24,0.995)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.62)] sm:rounded-[28px] sm:p-4">
+        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(3,14,38,0.82)_0%,rgba(2,9,24,0.92)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.60)] backdrop-blur-sm sm:rounded-[28px] sm:p-4">
           <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
             <span className="text-xs font-bold text-white/30 sm:text-sm">الفئات</span>
             <div className="flex-1 h-px bg-white/6" />

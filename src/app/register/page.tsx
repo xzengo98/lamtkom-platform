@@ -128,7 +128,7 @@ export default function RegisterPage() {
 
                 <p className="mt-3 text-sm leading-8 text-white/58 md:text-base">
                   أنشئ حسابك للوصول إلى الألعاب، متابعة الجلسات، والاستفادة من
-                  الباقات والخدمات بشكل منظم وواضح.
+                  الباقات والخدمات.
                 </p>
 
                 {errorMessage ? (
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="05xxxxxxxx أو +971..."
+                      placeholder="079xxxxxxxx او 00962xxxxxx"
                       className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-cyan-400 md:px-5 md:py-4 md:text-base"
                     />
                   </div>
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                   {[
                     "الوصول إلى الألعاب والجولات من نفس الحساب.",
                     "متابعة الباقات والرصيد والإشعارات بسهولة.",
-                    "تجربة استخدام واضحة وسريعة بنفس هوية المنصة.",
+                    "تجربة استخدام كاملة للمنصة.",
                   ].map((item) => (
                     <div
                       key={item}
