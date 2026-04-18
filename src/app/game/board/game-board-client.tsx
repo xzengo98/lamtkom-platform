@@ -285,7 +285,9 @@ function QuestionTile({
         <div
           className={`${base} border-cyan-400/30 bg-[linear-gradient(160deg,#0277bd_0%,#01579b_100%)] text-white shadow-[inset_0_0_20px_rgba(79,195,247,0.12),0_4px_16px_rgba(2,119,189,0.40)]`}
         >
-          <span className="absolute right-1.5 top-1 text-[10px] text-cyan-300/70 sm:text-xs">✓</span>
+          <span className="absolute right-1.5 top-1 text-[10px] text-cyan-300/70 sm:text-xs">
+            ✓
+          </span>
           {points}
         </div>
       );
@@ -296,7 +298,9 @@ function QuestionTile({
         <div
           className={`${base} border-orange-400/30 bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)] text-white shadow-[inset_0_0_20px_rgba(255,183,77,0.12),0_4px_16px_rgba(230,81,0,0.40)]`}
         >
-          <span className="absolute right-1.5 top-1 text-[10px] text-orange-300/70 sm:text-xs">✓</span>
+          <span className="absolute right-1.5 top-1 text-[10px] text-orange-300/70 sm:text-xs">
+            ✓
+          </span>
           {points}
         </div>
       );
@@ -317,9 +321,7 @@ function QuestionTile({
       onClick={onOpen}
       className={`${base} ${pointsColors.bg} ${pointsColors.glow} ${pointsColors.hover} ${pointsColors.border}`}
     >
-      <span
-        className={`${pointsColors.text} [text-shadow:0_1px_0_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.45)]`}
-      >
+      <span className={`${pointsColors.text} [text-shadow:0_1px_0_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.45)]`}>
         {points}
       </span>
     </button>
@@ -363,37 +365,35 @@ function CategoryCard({
   const totalInCategory = allTiles.filter(Boolean).length;
 
   return (
-    <div className="mx-auto flex w-full max-w-[242px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.015)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.42)] backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 sm:max-w-[250px]">
+    <div className="mx-auto flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(10,25,60,0.95)_0%,rgba(5,14,38,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.50)] transition-transform duration-300 hover:-translate-y-0.5 lg:max-w-[460px]">
       <div className="relative overflow-hidden">
         {column.category.image_url ? (
           <>
-            <div className="flex h-24 w-full items-center justify-center bg-[linear-gradient(180deg,rgba(245,248,252,0.95)_0%,rgba(224,232,244,0.97)_100%)] sm:h-28 md:h-32">
-              <img
-                src={column.category.image_url}
-                alt={column.category.name}
-                className="h-full w-full object-contain p-2.5 sm:p-3"
-              />
-            </div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.82)] via-[rgba(5,14,38,0.18)] to-transparent" />
+            <img
+              src={column.category.image_url}
+              alt={column.category.name}
+              className="h-24 w-full object-cover sm:h-28 md:h-32"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.92)] via-[rgba(5,14,38,0.28)] to-transparent" />
           </>
         ) : (
-          <div className="h-24 w-full bg-[linear-gradient(135deg,rgba(13,32,96,0.85),rgba(5,20,58,0.75))] sm:h-28 md:h-32" />
+          <div className="h-24 w-full bg-[linear-gradient(135deg,#0d2060,#05143a)] sm:h-28 md:h-32" />
         )}
 
-        <div className="pointer-events-none absolute top-0 inset-x-0 h-[3px] bg-white/10">
-          {totalInCategory > 0 && (
-            <div
-              className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-500"
-              style={{ width: `${(usedInCategory / totalInCategory) * 100}%` }}
-            />
-          )}
-        </div>
-
-        <div className="absolute bottom-0 inset-x-0 px-3 pb-2.5 pt-6">
+        <div className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-8">
           <div className="truncate text-center text-sm font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-base md:text-lg">
             {column.category.name}
           </div>
         </div>
+
+        {totalInCategory > 0 && (
+          <div className="absolute top-0 inset-x-0 h-[3px] bg-white/10">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-500"
+              style={{ width: `${(usedInCategory / totalInCategory) * 100}%` }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-1.5 p-2 sm:gap-2 sm:p-2.5">
@@ -441,24 +441,6 @@ function CategoryCard({
           result={getResult(right600)}
           onOpen={() => onOpenQuestion(right600)}
         />
-      </div>
-
-      <div className="flex items-center justify-between border-t border-white/6 px-2.5 py-1.5 sm:px-3">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#1b7001]" />
-          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٢٠٠</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#6a1b9a]" />
-          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٤٠٠</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-[#e6c400]" />
-          <span className="text-[10px] font-bold text-white/35 sm:text-xs">٦٠٠</span>
-        </div>
-        <div className="text-[10px] font-bold text-white/25 sm:text-xs">
-          {usedInCategory}/{totalInCategory}
-        </div>
       </div>
     </div>
   );
@@ -620,133 +602,138 @@ export default function GameBoardClient({
 
   return (
     <main className="min-h-screen text-white">
-      <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
-        <div className="mb-4 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.45)] backdrop-blur-xl sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
-          <div className="pointer-events-none absolute left-0 top-0 h-40 w-40 rounded-full bg-cyan-500/8 blur-3xl" />
-          <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-violet-500/8 blur-3xl" />
+      <div className="mx-auto w-full max-w-[1540px] px-3 py-4 sm:px-4 lg:px-6">
+        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,320px)_1fr_minmax(0,320px)] xl:items-end">
+            <div className="order-2 xl:order-1">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <Link
+                  href="/account"
+                  className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
+                >
+                  <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">الرجوع للحساب</span>
+                  <span className="sm:hidden">الحساب</span>
+                </Link>
 
-          <div className="mb-5 flex flex-col items-center text-center">
-            <div className="relative mb-4 flex h-[110px] w-[110px] items-center justify-center overflow-hidden rounded-[2rem] border border-cyan-400/14 bg-[linear-gradient(180deg,rgba(10,24,50,0.75)_0%,rgba(7,14,30,0.88)_100%)] shadow-[0_20px_55px_rgba(0,0,0,0.36)] sm:h-[130px] sm:w-[130px] md:h-[150px] md:w-[150px]">
-              <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.12),transparent_68%)]" />
-              <img
-                src={heroLogo}
-                alt="لمتكم"
-                className="relative h-[84px] w-[84px] object-contain drop-shadow-[0_0_26px_rgba(34,211,238,0.18)] sm:h-[98px] sm:w-[98px] md:h-[112px] md:w-[112px]"
-              />
+                <button
+                  type="button"
+                  onClick={handleFinishGame}
+                  className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
+                >
+                  <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  إنهاء اللعب
+                </button>
+              </div>
+
+              <div className="flex justify-center xl:justify-start">
+                <ScoreControl
+                  teamName={teamOne}
+                  score={boardState.teamOneScore}
+                  accent="blue"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamOneScore: Math.max(0, prev.teamOneScore - 100),
+                    }))
+                  }
+                />
+              </div>
+            </div>
+<img
+                    src={heroLogo}
+                    alt="لمتكم"
+                    className="mx-auto mt-2 h-10 w-auto object-contain drop-shadow-[0_0_18px_rgba(34,211,238,0.18)] sm:h-12"
+                  />
+
+            <div className="order-1 xl:order-2 flex items-end justify-center">
+              <div className="relative w-full max-w-[320px] rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.02)_100%)] px-5 py-5 shadow-[0_18px_40px_rgba(2,6,23,0.28)]">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.10),transparent_70%)]" />
+                <div className="relative text-center">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/60 sm:text-xs">
+                    لوحة اللعبة
+                  </div>
+
+                  <h1 className="mt-2 text-2xl font-black text-white sm:text-3xl">
+                    {gameName}
+                  </h1>
+                </div>
+              </div>
             </div>
 
-            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
-              لوحة اللعبة
-            </div>
-            <h1 className="mt-2 text-xl font-black text-white sm:text-2xl md:text-3xl">
-              {gameName}
-            </h1>
-          </div>
+            <div className="order-3 xl:order-3">
+              <div className="mb-3 flex flex-wrap items-center justify-center gap-2 xl:justify-end">
+                <StatusPill
+                  label={`الدور ${activeTurnName}`}
+                  icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                />
+                <StatusPill
+                  label={`المتصدر ${leaderLabel}`}
+                  icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                />
+                <StatusPill label={`المتبقي ${remainingCount}`} />
+              </div>
 
-          <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
-            <StatusPill
-              label={`الدور: ${activeTurnName}`}
-              icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            />
-            <StatusPill
-              label={`المتصدر: ${leaderLabel}`}
-              icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            />
-            <StatusPill label={`المتبقي ${remainingCount} سؤال`} />
-
-            <div className="hidden flex-1 xl:block" />
-
-            <button
-              type="button"
-              onClick={handleFinishGame}
-              className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-            >
-              <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              إنهاء اللعب
-            </button>
-
-            <Link
-              href="/account"
-              className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-            >
-              <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">الرجوع للحساب</span>
-              <span className="sm:hidden">الحساب</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
-            <div className="flex justify-center sm:justify-start">
-              <ScoreControl
-                teamName={teamOne}
-                score={boardState.teamOneScore}
-                accent="blue"
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamOneScore: Math.max(0, prev.teamOneScore - 100),
-                  }))
-                }
-              />
-            </div>
-
-            <div className="flex justify-center sm:justify-end">
-              <ScoreControl
-                teamName={teamTwo}
-                score={boardState.teamTwoScore}
-                accent="orange"
-                onIncrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-                  }))
-                }
-                onDecrease={() =>
-                  updateState((prev) => ({
-                    ...prev,
-                    teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-                  }))
-                }
-              />
+              <div className="flex justify-center xl:justify-end">
+                <ScoreControl
+                  teamName={teamTwo}
+                  score={boardState.teamTwoScore}
+                  accent="orange"
+                  onIncrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
+                    }))
+                  }
+                  onDecrease={() =>
+                    updateState((prev) => ({
+                      ...prev,
+                      teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
+                    }))
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.52)] backdrop-blur-sm sm:rounded-[28px] sm:p-4">
-          <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
-            <span className="text-xs font-bold text-white/30 sm:text-sm">الفئات</span>
-            <div className="flex-1 h-px bg-white/6" />
-            <div className="flex items-center gap-3 text-[10px] font-bold text-white/30 sm:text-xs">
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#1565c0]" />
-                فريق ١
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#e65100]" />
-                فريق ٢
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#0f1c3a]" />
-                انتهى
-              </span>
+        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(5, 20, 57, 0.41)_0%,rgba(4, 17, 44, 0.7)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.60)] sm:rounded-[28px] sm:p-4">
+          <div className="mx-auto max-w-[1460px]">
+            <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
+              <span className="text-xs font-bold text-white/30 sm:text-sm">الفئات</span>
+              <div className="h-px flex-1 bg-white/6" />
+              <div className="flex items-center gap-3 text-[10px] font-bold text-white/30 sm:text-xs">
+                <span className="flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded bg-[#1565c0]" />
+                  فريق ١
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded bg-[#e65100]" />
+                  فريق ٢
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded bg-[#0f1c3a]" />
+                  انتهى
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
-            {boardColumns.map((column) => (
-              <CategoryCard
-                key={column.category.id}
-                column={column}
-                boardState={boardState}
-                onOpenQuestion={handleOpenQuestion}
-              />
-            ))}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+              {boardColumns.map((column) => (
+                <CategoryCard
+                  key={column.category.id}
+                  column={column}
+                  boardState={boardState}
+                  onOpenQuestion={handleOpenQuestion}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
