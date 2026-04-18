@@ -6,6 +6,31 @@ export const metadata: Metadata = {
     "لمتكم منصة ألعاب عربية للجلسات والتجمعات تضم ألعابًا جماعية مثل لمتكم وبرا السالفة وCodenames.",
 };
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
+    ? process.env.NEXT_PUBLIC_SITE_URL
+    : "https://lamtkom.ads-shwaiter10.workers.dev";
+
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "لمتكم",
+      url: siteUrl,
+      logo: `${siteUrl}/icon`,
+    },
+    {
+      "@type": "WebSite",
+      name: "لمتكم",
+      url: siteUrl,
+      inLanguage: "ar",
+      description:
+        "منصة ألعاب عربية للجلسات والتجمعات تضم أكثر من لعبة في مكان واحد.",
+    },
+  ],
+};
+
 import Link from "next/link";
 import { getViewer } from "../lib/auth/viewer";
 
