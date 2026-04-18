@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "الرئيسية",
+  description:
+    "لمتكم منصة ألعاب عربية للجلسات والتجمعات تضم ألعابًا جماعية مثل لمتكم وبرا السالفة وCodenames.",
+};
+
 import Link from "next/link";
 import { getViewer } from "../lib/auth/viewer";
 
