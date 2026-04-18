@@ -884,80 +884,80 @@ export default function StartGameForm({
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.95)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.22)] md:p-6">
-        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-bold text-white/50">
-              <span className="h-1 w-1 rounded-full bg-cyan-400" />
-              بيانات الجولة
-            </span>
-            <h2 className="mt-2 text-xl font-black text-white md:text-2xl">
-              إعدادات اللعبة الأساسية
-            </h2>
-          </div>
-          <div className="hidden rounded-2xl border border-white/8 bg-white/4 px-4 py-2.5 text-xs font-bold text-white/45 sm:block">
-            ابدأ بعد اكتمال {REQUIRED_CATEGORY_COUNT} فئات
-          </div>
-        </div>
+      <section className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-[linear-gradient(160deg,rgba(8,18,40,0.97)_0%,rgba(4,11,28,0.99)_100%)] shadow-[0_28px_80px_rgba(0,0,0,0.34)]">
+  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/8 to-transparent" />
+  <div className="pointer-events-none absolute left-0 top-0 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl" />
+  <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-violet-500/10 blur-3xl" />
+  <div className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-72 -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
 
-        <div className="mb-5 overflow-hidden rounded-full bg-white/5" style={{ height: 4 }}>
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isReadyToSubmit ? "bg-emerald-400" : "bg-cyan-400"
-            }`}
-            style={{ width: `${progressPct}%` }}
+  <div className="relative grid gap-8 px-5 py-8 md:px-8 md:py-10 xl:grid-cols-[minmax(220px,280px)_minmax(0,1fr)] xl:items-center xl:gap-12">
+    <div className="order-2 xl:order-1">
+      <div className="mx-auto flex w-full max-w-[250px] items-center justify-center xl:mx-0">
+        <div className="relative flex h-[210px] w-[210px] items-center justify-center overflow-hidden rounded-[2rem] border border-cyan-400/12 bg-[linear-gradient(160deg,rgba(12,24,50,0.98)_0%,rgba(7,13,30,0.99)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.40)] sm:h-[230px] sm:w-[230px]">
+          <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.08),transparent_68%)]" />
+          <img
+            src={heroLogo}
+            alt="شعار لمتكم"
+            className="h-[120px] w-[120px] object-contain drop-shadow-[0_0_22px_rgba(34,211,238,0.15)] sm:h-[138px] sm:w-[138px]"
+            decoding="async"
           />
         </div>
+      </div>
+    </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <div className="sm:col-span-2 xl:col-span-1 xl:col-span-1">
-            <label className="mb-1.5 block text-xs font-bold text-white/60">
-              اسم اللعبة
-            </label>
-            <input
-              name="gameName"
-              value={gameName}
-              onChange={(e) => setGameName(e.target.value)}
-              placeholder="مثال: تحدي الأذكياء"
-              className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-400/50 md:py-4"
-            />
-          </div>
+    <div className="order-1 text-right xl:order-2">
+      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-xs font-bold text-cyan-300">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+        </span>
+        إعداد اللعبة
+      </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-bold text-white/60">
-              الفريق الأول
-            </label>
-            <input
-              name="teamOne"
-              value={teamOne}
-              onChange={(e) => setTeamOne(e.target.value)}
-              placeholder="اسم الفريق الأول"
-              className="w-full rounded-2xl border border-cyan-300/15 bg-[#0b1733] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-300/50 md:py-4"
-            />
-          </div>
+      <h1 className="text-3xl font-black leading-[1.08] text-white sm:text-4xl xl:text-6xl">
+        جهّز الجولة
+        <span className="mt-2 block bg-gradient-to-l from-cyan-300 via-white to-cyan-300 bg-clip-text text-transparent">
+          قبل البدء
+        </span>
+      </h1>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-bold text-white/60">
-              الفريق الثاني
-            </label>
-            <input
-              name="teamTwo"
-              value={teamTwo}
-              onChange={(e) => setTeamTwo(e.target.value)}
-              placeholder="اسم الفريق الثاني"
-              className="w-full rounded-2xl border border-orange-300/15 bg-[#24150d] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-300/50 md:py-4"
-            />
-          </div>
+      <p className="mt-4 max-w-2xl text-sm leading-8 text-white/58 md:text-base md:leading-9">
+        اختر اسم اللعبة وأسماء الفرق، ثم حدّد {REQUIRED_CATEGORY_COUNT} فئات
+        تناسب جلستكم لتبدأ الجولة بنفس هوية المنصة بشكل أوضح وأرتب.
+      </p>
 
-
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <div
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-colors duration-300 ${
+            isReadyToSubmit
+              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+              : "border-white/10 bg-white/5 text-white/70"
+          }`}
+        >
+          <GridIcon className="h-4 w-4 shrink-0" />
+          <span>
+            {selectedCount} / {REQUIRED_CATEGORY_COUNT} فئات
+          </span>
+          {isReadyToSubmit && <span className="text-emerald-400">✓</span>}
         </div>
 
-        {visibleError ? (
-          <div className="mt-4 rounded-[1.2rem] border border-red-400/20 bg-red-400/8 px-4 py-3 text-sm font-bold text-red-300">
-            {visibleError}
-          </div>
-        ) : null}
-      </section>
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70">
+          <TicketIcon className="h-4 w-4 shrink-0" />
+          <span>ألعاب متبقية: {gamesRemaining}</span>
+        </div>
+
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-sm font-bold text-cyan-300">
+          <SparklesIcon className="h-4 w-4 shrink-0" />
+          <span>
+            {selectionMode === "dynamic"
+              ? "لا تتكرر الأسئلة السابقة"
+              : "الحساب المجاني قد تتكرر الأسئلة"}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section className="space-y-10">
         {groupedSections.map((section) =>
