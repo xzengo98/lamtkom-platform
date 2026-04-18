@@ -103,6 +103,20 @@ function BellIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M20 6 9 17l-5-5"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function MenuIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
@@ -185,30 +199,49 @@ function getNotificationTypeClasses(type: string) {
 type NotificationDropdownProps = {
   latestNotifications: NotificationPreview[];
   unreadCount: number;
+  isMarkingAll: boolean;
+  onMarkAllAsRead: () => void;
 };
 
 function NotificationDropdown({
   latestNotifications,
   unreadCount,
+  isMarkingAll,
+  onMarkAllAsRead,
 }: NotificationDropdownProps) {
   return (
     <div className="w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07101fe8] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl">
       <div className="border-b border-white/8 px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-sm font-black text-white">الإشعارات</h3>
             <p className="mt-1 text-xs text-white/45">آخر 5 إشعارات في حسابك</p>
           </div>
 
-          {unreadCount > 0 ? (
-            <span className="inline-flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full bg-red-500 px-2 text-[11px] font-black text-white shadow-[0_10px_20px_rgba(239,68,68,0.35)]">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          ) : (
-            <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-black text-white/55">
-              لا جديد
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={onMarkAllAsRead}
+                disabled={isMarkingAll}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-200 transition hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
+                title="تحديد الكل كمقروء"
+                aria-label="تحديد الكل كمقروء"
+              >
+                <CheckIcon className="h-4 w-4" />
+              </button>
+            )}
+
+            {unreadCount > 0 ? (
+              <span className="inline-flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full bg-red-500 px-2 text-[11px] font-black text-white shadow-[0_10px_20px_rgba(239,68,68,0.35)]">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            ) : (
+              <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-black text-white/55">
+                لا جديد
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -279,6 +312,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   const [bellOpen, setBellOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [latestNotifications, setLatestNotifications] = useState<NotificationPreview[]>([]);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const desktopBellContainerRef = useRef<HTMLDivElement | null>(null);
   const mobileBellContainerRef = useRef<HTMLDivElement | null>(null);
@@ -312,6 +346,42 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     } catch {
       setUnreadCount(0);
       setLatestNotifications([]);
+    }
+  }
+
+  async function handleMarkAllAsRead() {
+    if (isMarkingAll || unreadCount === 0) return;
+
+    setIsMarkingAll(true);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("notifications")
+        .update({
+          is_read: true,
+          read_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+
+      if (!error) {
+        setUnreadCount(0);
+        setLatestNotifications((prev) =>
+          prev.map((item) => ({
+            ...item,
+            is_read: true,
+          })),
+        );
+        void loadNotificationSummary();
+      }
+    } finally {
+      setIsMarkingAll(false);
     }
   }
 
@@ -549,6 +619,8 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                     <NotificationDropdown
                       latestNotifications={latestNotifications}
                       unreadCount={unreadCount}
+                      isMarkingAll={isMarkingAll}
+                      onMarkAllAsRead={handleMarkAllAsRead}
                     />
                   </div>
                 )}
@@ -615,6 +687,8 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                   <NotificationDropdown
                     latestNotifications={latestNotifications}
                     unreadCount={unreadCount}
+                    isMarkingAll={isMarkingAll}
+                    onMarkAllAsRead={handleMarkAllAsRead}
                   />
                 </div>
               )}
