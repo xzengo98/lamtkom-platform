@@ -1,5 +1,5 @@
 "use server";
-
+import { createAutomaticGameCreatedNotifications } from "@/lib/notifications/server";
 import { redirect } from "next/navigation";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -501,36 +501,47 @@ export async function createGameSession(formData: FormData) {
 
   const nextRemaining = Math.max(currentGamesRemaining - 1, 0);
 
-  const { data: decrementedProfile, error: decrementError } = await admin
-    .from("profiles")
-    .update({
-      games_remaining: nextRemaining,
-    })
-    .eq("id", user.id)
-    .eq("games_remaining", currentGamesRemaining)
-    .select("id")
-    .maybeSingle();
+const { data: decrementedProfile, error: decrementError } = await admin
+  .from("profiles")
+  .update({
+    games_remaining: nextRemaining,
+  })
+  .eq("id", user.id)
+  .eq("games_remaining", currentGamesRemaining)
+  .select("id")
+  .maybeSingle();
 
-  if (decrementError || !decrementedProfile) {
+if (decrementError || !decrementedProfile) {
+  await admin
+    .from("game_session_questions")
+    .delete()
+    .eq("session_id", insertedSession.id);
+
+  await admin.from("game_sessions").delete().eq("id", insertedSession.id);
+
+  if (preventRepeat && insertedHistoryQuestionIds.length > 0) {
     await admin
-      .from("game_session_questions")
+      .from("user_question_history")
       .delete()
-      .eq("session_id", insertedSession.id);
-
-    await admin.from("game_sessions").delete().eq("id", insertedSession.id);
-
-    if (preventRepeat && insertedHistoryQuestionIds.length > 0) {
-      await admin
-        .from("user_question_history")
-        .delete()
-        .eq("user_id", user.id)
-        .in("question_id", insertedHistoryQuestionIds);
-    }
-
-    redirectWithError(
-      decrementError?.message || "تعذر تأكيد خصم اللعبة. حاول مرة أخرى."
-    );
+      .eq("user_id", user.id)
+      .in("question_id", insertedHistoryQuestionIds);
   }
 
-  redirect(`/game/board?sessionId=${insertedSession.id}`);
+  redirectWithError(
+    decrementError?.message || "تعذر تأكيد خصم اللعبة. حاول مرة أخرى.",
+  );
+}
+
+try {
+  await createAutomaticGameCreatedNotifications({
+    userId: user.id,
+    gameName,
+    remainingGames: nextRemaining,
+    sessionId: insertedSession.id,
+  });
+} catch (notificationError) {
+  console.error("Failed to create automatic notifications", notificationError);
+}
+
+redirect(`/game/board?sessionId=${insertedSession.id}`);
 }

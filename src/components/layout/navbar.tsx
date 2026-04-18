@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "../../lib/supabase/client";
-import type { ViewerData } from "../../lib/auth/viewer";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { ViewerData } from "@/lib/auth/viewer";
 
 type Profile = {
   role: string | null;
@@ -21,6 +21,8 @@ type NavbarProps = {
   initialAuth: ViewerData;
 };
 
+const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+
 function navLinkClass(pathname: string, href: string) {
   const active = pathname === href || (href !== "/" && pathname.startsWith(href));
 
@@ -34,85 +36,75 @@ function navLinkClass(pathname: string, href: string) {
 
 function GamesIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="4" y="8" width="16" height="8" rx="3" />
-      <path d="M8 12h2M9 11v2M16.5 12h.01M18.5 12h.01" />
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="3" y="8" width="18" height="8" rx="4" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 12h2M9 11v2M15.5 12h.01M17.5 12h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 function UserIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="8" r="3.5" />
-      <path d="M5 19a7 7 0 0 1 14 0" />
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M5 19a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 function LogoutIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3" />
-      <path d="M10 17 15 12 10 7" />
-      <path d="M15 12H4" />
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 12H4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M20 4v16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 function ShieldIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 3 5 6v6c0 4.5 2.9 7.7 7 9 4.1-1.3 7-4.5 7-9V6l-7-3Z" />
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" stroke="currentColor" strokeWidth="1.8" />
     </svg>
   );
 }
 
 function PricingIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 1v22" />
-      <path d="M17 5.5C17 3.6 14.8 2 12 2S7 3.6 7 5.5 9.2 9 12 9s5 1.6 5 3.5S14.8 16 12 16s-5 1.6-5 3.5" />
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M12 3v18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.4 2.4 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function BellIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5H4.5L6 16.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MenuIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -129,8 +121,9 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
-
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const [authState, setAuthState] = useState<AuthState>({
     isLoggedIn: initialAuth.isLoggedIn,
     isAdmin: initialAuth.isAdmin,
@@ -146,41 +139,75 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   }, [initialAuth]);
 
   useEffect(() => {
-  const {
-    data: { subscription },
-  } = supabase.auth.onAuthStateChange(
-    async (
-      _event: unknown,
-      session: { user?: { id: string } } | null,
-    ) => {
-      if (!session?.user) {
-        setAuthState(loggedOutState());
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      async (_event: unknown, session: { user?: { id: string } } | null) => {
+        if (!session?.user) {
+          setAuthState(loggedOutState());
+          setUnreadCount(0);
+          router.refresh();
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role, username")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        const typedProfile = (profile as Profile | null) ?? null;
+
+        setAuthState({
+          isLoggedIn: true,
+          isAdmin: typedProfile?.role === "admin",
+          username: typedProfile?.username ?? null,
+        });
+
         router.refresh();
+      },
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadUnreadCount() {
+      if (!authState.isLoggedIn) {
+        setUnreadCount(0);
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, username")
-        .eq("id", session.user.id)
-        .maybeSingle();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const typedProfile = (profile as Profile | null) ?? null;
+      if (!user) {
+        if (!isCancelled) setUnreadCount(0);
+        return;
+      }
 
-      setAuthState({
-        isLoggedIn: true,
-        isAdmin: typedProfile?.role === "admin",
-        username: typedProfile?.username ?? null,
-      });
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
 
-      router.refresh();
-    },
-  );
+      if (!isCancelled) {
+        setUnreadCount(error ? 0 : count ?? 0);
+      }
+    }
 
-  return () => {
-    subscription.unsubscribe();
-  };
-}, [router, supabase]);
+    void loadUnreadCount();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [authState.isLoggedIn, pathname, supabase]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -189,214 +216,201 @@ export default function Navbar({ initialAuth }: NavbarProps) {
   function handleLogout() {
     setMenuOpen(false);
     setAuthState(loggedOutState());
+    setUnreadCount(0);
     window.location.assign("/logout");
   }
 
   const navLinks = [
     { label: "الرئيسية", href: "/", icon: null },
-    {
-      label: "الألعاب",
-      href: "/games",
-      icon: <GamesIcon className="h-3.5 w-3.5" />,
-    },
-    {
-      label: "الباقات",
-      href: "/pricing",
-      icon: <PricingIcon className="h-3.5 w-3.5" />,
-    },
+    { label: "الألعاب", href: "/games", icon: <GamesIcon className="h-4 w-4" /> },
+    { label: "الباقات", href: "/pricing", icon: <PricingIcon className="h-4 w-4" /> },
   ];
 
   return (
-    <header className="relative z-40 border-b border-white/8 bg-[#040c1e]/96 backdrop-blur-xl">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent" />
+    <header className="sticky top-0 z-40 border-b border-white/8 bg-[#040816]/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-4 py-3 md:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3">
+          <img
+            src={heroLogo}
+            alt="لمتكم"
+            className="h-10 w-auto object-contain sm:h-11"
+          />
+        </Link>
 
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="flex min-h-[72px] items-center justify-between gap-4 sm:min-h-[80px]">
-          <Link
-            href="/"
-            className="flex shrink-0 items-center gap-3 transition-opacity hover:opacity-85"
-          >
-            <img
-              src="https://j.top4top.io/p_3742tjd5a1.png"
-              alt="لمتكم"
-              className="h-auto w-[110px] object-contain sm:w-[130px] md:w-[140px]"
-            />
-          </Link>
+        <nav className="hidden items-center gap-2 lg:flex">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className={navLinkClass(pathname, link.href)}>
+              <span className="inline-flex items-center gap-2">
+                {link.icon}
+                {link.label}
+              </span>
+            </Link>
+          ))}
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          {authState.isLoggedIn && (
+            <Link href="/account" className={navLinkClass(pathname, "/account")}>
+              <span className="inline-flex items-center gap-2">
+                <UserIcon className="h-4 w-4" />
+                حسابي
+              </span>
+            </Link>
+          )}
+
+          {authState.isAdmin && (
+            <Link href="/admin" className={navLinkClass(pathname, "/admin")}>
+              <span className="inline-flex items-center gap-2">
+                <ShieldIcon className="h-4 w-4" />
+                الإدارة
+              </span>
+            </Link>
+          )}
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
+          {authState.isLoggedIn ? (
+            <>
+              <Link
+                href="/account/notifications"
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                aria-label="الإشعارات"
+              >
+                <BellIcon className="h-5 w-5" />
+                {unreadCount > 0 ? (
+                  <span className="absolute -left-1 -top-1 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-black text-slate-950 shadow-[0_8px_20px_rgba(34,211,238,0.28)]">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                ) : null}
+              </Link>
+
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-400/15 text-sm font-black text-cyan-300">
+                  {(authState.username || "م").slice(0, 1).toUpperCase()}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-white/35">مرحبًا</div>
+                  <div className="text-sm font-black text-white">
+                    {authState.username || "مستخدم"}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-black text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <LogoutIcon className="h-4 w-4" />
+                خروج
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/register"
+                className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/[0.1]"
+              >
+                إنشاء حساب
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                تسجيل الدخول
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/8 lg:hidden"
+          aria-label="فتح القائمة"
+        >
+          {menuOpen ? <CloseIcon /> : <MenuIcon />}
+        </button>
+      </div>
+
+      {menuOpen && (
+        <div className="border-t border-white/8 bg-[#040816]/95 px-4 py-4 backdrop-blur-xl lg:hidden">
+          <div className="mx-auto max-w-[1320px] space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={navLinkClass(pathname, link.href)}
+                className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
-                <span className="flex items-center gap-1.5">
-                  {link.icon}
-                  {link.label}
-                </span>
+                {link.icon}
+                {link.label}
               </Link>
             ))}
 
             {authState.isLoggedIn && (
-              <Link href="/account" className={navLinkClass(pathname, "/account")}>
-                <span className="flex items-center gap-1.5">
-                  <UserIcon className="h-3.5 w-3.5" />
-                  حسابي
+              <Link
+                href="/account"
+                className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <UserIcon className="h-4 w-4" />
+                حسابي
+              </Link>
+            )}
+
+            {authState.isLoggedIn && (
+              <Link
+                href="/account/notifications"
+                className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <span className="inline-flex items-center gap-3">
+                  <BellIcon className="h-4 w-4" />
+                  الإشعارات
                 </span>
+
+                {unreadCount > 0 ? (
+                  <span className="inline-flex min-h-[22px] min-w-[22px] items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-black text-slate-950">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                ) : null}
               </Link>
             )}
 
             {authState.isAdmin && (
-              <Link href="/admin" className={navLinkClass(pathname, "/admin")}>
-                <span className="flex items-center gap-1.5">
-                  <ShieldIcon className="h-3.5 w-3.5" />
-                  الإدارة
-                </span>
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <ShieldIcon className="h-4 w-4" />
+                الإدارة
               </Link>
             )}
-          </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
             {authState.isLoggedIn ? (
-              <>
-                <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-4 py-2 text-sm font-bold text-white/70">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400/15 text-[11px] font-black text-cyan-300">
-                    {(authState.username || "م").slice(0, 1).toUpperCase()}
-                  </div>
-                  {authState.username || "مستخدم"}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-red-400/18 bg-red-500/8 px-4 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500/14"
-                >
-                  <LogoutIcon className="h-3.5 w-3.5" />
-                  خروج
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                <LogoutIcon className="h-4 w-4" />
+                تسجيل الخروج
+              </button>
             ) : (
-              <>
+              <div className="grid grid-cols-2 gap-2 pt-2">
                 <Link
                   href="/register"
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70 transition hover:bg-white/8 hover:text-white"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-black text-white transition hover:bg-white/[0.1]"
                 >
                   إنشاء حساب
                 </Link>
                 <Link
                   href="/login"
-                  className="rounded-xl bg-cyan-500 px-5 py-2 text-sm font-black text-slate-950 shadow-[0_2px_12px_rgba(34,211,238,0.25)] transition hover:bg-cyan-400 active:scale-[0.98]"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-transparent px-4 py-3 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
                 >
                   تسجيل الدخول
                 </Link>
-              </>
+              </div>
             )}
           </div>
-
-          <button
-            type="button"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/8 lg:hidden"
-            aria-label="فتح القائمة"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="h-5 w-5"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              {menuOpen ? (
-                <>
-                  <path d="m18 6-12 12" />
-                  <path d="m6 6 12 12" />
-                </>
-              ) : (
-                <>
-                  <path d="M4 6h16" />
-                  <path d="M4 12h16" />
-                  <path d="M4 18h10" />
-                </>
-              )}
-            </svg>
-          </button>
         </div>
-
-        {menuOpen && (
-          <div className="border-t border-white/8 pb-4 pt-3 lg:hidden">
-            <div className="flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={navLinkClass(pathname, link.href)}
-                >
-                  <span className="flex items-center gap-2">
-                    {link.icon}
-                    {link.label}
-                  </span>
-                </Link>
-              ))}
-
-              {authState.isLoggedIn && (
-                <Link href="/account" className={navLinkClass(pathname, "/account")}>
-                  <span className="flex items-center gap-2">
-                    <UserIcon className="h-4 w-4" />
-                    حسابي
-                  </span>
-                </Link>
-              )}
-
-              {authState.isAdmin && (
-                <Link href="/admin" className={navLinkClass(pathname, "/admin")}>
-                  <span className="flex items-center gap-2">
-                    <ShieldIcon className="h-4 w-4" />
-                    الإدارة
-                  </span>
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-3 flex flex-col gap-2 border-t border-white/6 pt-3">
-              {authState.isLoggedIn ? (
-                <>
-                  <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/4 px-4 py-3 text-sm font-bold text-white/70">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 text-xs font-black text-cyan-300">
-                      {(authState.username || "م").slice(0, 1).toUpperCase()}
-                    </div>
-                    {authState.username || "مستخدم"}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-400/18 bg-red-500/8 px-4 py-3 text-sm font-bold text-red-300 transition hover:bg-red-500/14"
-                  >
-                    <LogoutIcon className="h-4 w-4" />
-                    تسجيل الخروج
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/70 transition hover:bg-white/8"
-                  >
-                    إنشاء حساب
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 shadow-[0_2px_12px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 active:scale-[0.98]"
-                  >
-                    تسجيل الدخول
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </header>
   );
 }
