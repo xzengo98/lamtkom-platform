@@ -224,7 +224,7 @@ function NotificationDropdown({
   onMarkAllAsRead,
 }: NotificationDropdownProps) {
   return (
-    <div className="w-full max-w-[380px] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07101fe8] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+    <div className="w-[340px] sm:w-[380px] lg:w-[460px] xl:w-[500px] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07101fe8] shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl">
       <div className="border-b border-white/8 px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div>
