@@ -20,7 +20,8 @@ type NavItem = {
     | "bara"
     | "users"
     | "games"
-    | "codenames";
+    | "codenames"
+    | "notifications";
 };
 
 type NavGroup = {
@@ -55,6 +56,7 @@ function Icon({
           <path d="M5 9.5V20h14V9.5" />
         </svg>
       );
+
     case "sections":
       return (
         <svg {...common}>
@@ -62,6 +64,7 @@ function Icon({
           <rect x="4" y="14" width="10" height="5" rx="1.5" />
         </svg>
       );
+
     case "categories":
       return (
         <svg {...common}>
@@ -71,6 +74,7 @@ function Icon({
           <rect x="13" y="13" width="7" height="7" rx="1.5" />
         </svg>
       );
+
     case "questions":
       return (
         <svg {...common}>
@@ -78,6 +82,7 @@ function Icon({
           <path d="M12 17h.01" />
         </svg>
       );
+
     case "upload":
       return (
         <svg {...common}>
@@ -86,6 +91,7 @@ function Icon({
           <path d="M4 20h16" />
         </svg>
       );
+
     case "add":
       return (
         <svg {...common}>
@@ -93,6 +99,7 @@ function Icon({
           <path d="M5 12h14" />
         </svg>
       );
+
     case "bara":
       return (
         <svg {...common}>
@@ -100,6 +107,7 @@ function Icon({
           <circle cx="12" cy="10" r="2.2" />
         </svg>
       );
+
     case "users":
       return (
         <svg {...common}>
@@ -109,6 +117,7 @@ function Icon({
           <path d="M14.5 19a4.5 4.5 0 0 1 5 0" />
         </svg>
       );
+
     case "games":
       return (
         <svg {...common}>
@@ -119,6 +128,7 @@ function Icon({
           <path d="M17.5 12h.01" />
         </svg>
       );
+
     case "codenames":
       return (
         <svg {...common}>
@@ -128,6 +138,15 @@ function Icon({
           <path d="M8 17h7" />
         </svg>
       );
+
+    case "notifications":
+      return (
+        <svg {...common}>
+          <path d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5H4.5L6 16.5Z" />
+          <path d="M10 20a2 2 0 0 0 4 0" />
+        </svg>
+      );
+
     default:
       return null;
   }
@@ -158,6 +177,7 @@ function GroupIcon({
           <path d="M5 9.5V20h14V9.5" />
         </svg>
       );
+
     case "questions":
       return (
         <svg {...common}>
@@ -165,6 +185,7 @@ function GroupIcon({
           <path d="M12 17h.01" />
         </svg>
       );
+
     case "bara":
       return (
         <svg {...common}>
@@ -172,6 +193,7 @@ function GroupIcon({
           <circle cx="12" cy="10" r="2.2" />
         </svg>
       );
+
     case "codenames":
       return (
         <svg {...common}>
@@ -181,6 +203,7 @@ function GroupIcon({
           <path d="M8 17h7" />
         </svg>
       );
+
     case "users":
       return (
         <svg {...common}>
@@ -190,6 +213,7 @@ function GroupIcon({
           <path d="M14.5 19a4.5 4.5 0 0 1 5 0" />
         </svg>
       );
+
     default:
       return null;
   }
@@ -204,6 +228,7 @@ const navGroups: NavGroup[] = [
       { label: "الرئيسية", href: "/admin", icon: "home" },
       { label: "الأعضاء", href: "/admin/users", icon: "users" },
       { label: "الألعاب المنتهية", href: "/admin/games", icon: "games" },
+      { label: "الإشعارات", href: "/admin/notifications", icon: "notifications" },
     ],
   },
   {
@@ -214,7 +239,11 @@ const navGroups: NavGroup[] = [
       { label: "الأقسام الرئيسية", href: "/admin/sections", icon: "sections" },
       { label: "الفئات", href: "/admin/categories", icon: "categories" },
       { label: "الأسئلة", href: "/admin/questions", icon: "questions" },
-      { label: "رفع أسئلة دفعة واحدة", href: "/admin/questions/import", icon: "upload" },
+      {
+        label: "رفع أسئلة دفعة واحدة",
+        href: "/admin/questions/import",
+        icon: "upload",
+      },
       { label: "إضافة قسم جديد", href: "/admin/sections/new", icon: "add" },
       { label: "إضافة فئة جديدة", href: "/admin/categories/new", icon: "add" },
       { label: "إضافة سؤال جديد", href: "/admin/questions/new", icon: "add" },
@@ -226,15 +255,29 @@ const navGroups: NavGroup[] = [
     icon: "bara",
     items: [
       { label: "إدارة برا السالفة", href: "/admin/bara-alsalfah", icon: "bara" },
-      { label: "فئات برا السالفة", href: "/admin/bara-alsalfah/categories", icon: "categories" },
-      { label: "إضافة عنصر برا السالفة", href: "/admin/bara-alsalfah/new", icon: "add" },
+      {
+        label: "فئات برا السالفة",
+        href: "/admin/bara-alsalfah/categories",
+        icon: "categories",
+      },
+      {
+        label: "إضافة عنصر برا السالفة",
+        href: "/admin/bara-alsalfah/new",
+        icon: "add",
+      },
     ],
   },
   {
     title: "Codenames",
     subtitle: "لوحة اللعبة الخاصة",
     icon: "codenames",
-    items: [{ label: "لوحة تحكم Codenames", href: "/admin/codenames", icon: "codenames" }],
+    items: [
+      {
+        label: "لوحة تحكم Codenames",
+        href: "/admin/codenames",
+        icon: "codenames",
+      },
+    ],
   },
 ];
 
@@ -331,7 +374,8 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
                 </h1>
 
                 <p className="mt-3 max-w-2xl text-sm leading-8 text-white/55">
-                  إدارة لمتكم، برا السالفة، وCodenames من مكان واحد، مع وصول واضح وسريع.
+                  إدارة لمتكم، برا السالفة، وCodenames من مكان واحد، مع وصول واضح
+                  وسريع.
                 </p>
               </div>
 
