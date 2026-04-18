@@ -31,7 +31,7 @@ type NotificationPreview = {
   created_at: string;
 };
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 function navLinkClass(pathname: string, href: string) {
   const active = pathname === href || (href !== "/" && pathname.startsWith(href));

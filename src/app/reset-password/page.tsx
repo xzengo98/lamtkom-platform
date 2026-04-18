@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 function ArrowLeftIcon() {
   return (

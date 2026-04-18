@@ -29,7 +29,7 @@ type FaqItem = {
 
 // ─── Data (unchanged) ─────────────────────────────────────────────────────────
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 const plans: Plan[] = [
   {

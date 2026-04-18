@@ -6,7 +6,7 @@ export const metadata = {
     "تواصل مع منصة لمتكم بسهولة عبر نموذج التواصل أو البريد أو الهاتف أو واتساب.",
 };
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 const contactEmail = "adsshweter@gmail.com";
 const displayEmail = "hello@lamtkom.com";
 const displayPhone = "079 0000 000";

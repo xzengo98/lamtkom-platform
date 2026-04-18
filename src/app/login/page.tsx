@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "../../lib/supabase/server";
 import LoginSubmitButton from "./login-submit-button";
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 type SearchParams = Promise<{
   error?: string;

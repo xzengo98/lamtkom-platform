@@ -55,7 +55,7 @@ type CategoryColumn = {
   }[];
 };
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 // ─── State helpers (logic unchanged) ─────────────────────────────────────────
 

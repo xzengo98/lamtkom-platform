@@ -6,7 +6,7 @@ export const metadata = {
     "صفحة الدفع الخاصة بباقات لمتكم، مع خيارات الدفع عبر كليك أو التحويل البنكي.",
 };
 
-const heroLogo = "https://j.top4top.io/p_3742tjd5a1.png";
+const heroLogo = "/logo.png";
 
 type SearchParams = Promise<{
   plan?: string;
