@@ -65,7 +65,7 @@ const steps: StepItem[] = [
   {
     number: "2",
     title: "اختاروا الفئات",
-    description: "كل فريق يختار فئاته لتبدأ الجولة بتحدي مناسب وممتع.",
+    description: "كل فريق يختار 3 فئات لتبدأ الجولة بتحدي بين الفريقين.",
     icon: "target",
   },
   {
@@ -77,7 +77,7 @@ const steps: StepItem[] = [
   {
     number: "4",
     title: "استمتع بالتحدي",
-    description: "تنافسوا، اجمعوا النقاط، واستمتعوا بجلسة حماسية مليئة بالمرح.",
+    description: "تنافسوا، واجمعوا النقاط، وتنتهي اللعبة بانتصار اعلى فريق حصل على نقاط.",
     icon: "trophy",
   },
 ];
@@ -516,7 +516,7 @@ export default async function HomePage() {
             <div className="mb-10 text-center">
               <h2 className="text-4xl font-black sm:text-5xl">
                 <span className="bg-gradient-to-r from-white via-cyan-100 to-violet-100 bg-clip-text text-transparent">
-                  كيف تلعب لمتكم؟
+                  كيف تلعب لعبة لمتكم؟
                 </span>
               </h2>
 
