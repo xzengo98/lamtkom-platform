@@ -258,30 +258,15 @@ function QuestionTile({
   onOpen?: () => void;
 }) {
   // Points-level base style (available state)
-  const pointsColors =
-    points === 200
-      ? {
-          bg: "bg-[linear-gradient(160deg,#1b7001_0%,#145200_100%)]",
-          text: "text-[#a5d6a7]",
-          glow: "shadow-[inset_0_1px_0_rgba(165,214,167,0.25),0_4px_16px_rgba(27,112,1,0.50)]",
-          hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(27,112,1,0.60)]",
-          border: "border-[#2e7d32]/40",
-        }
-      : points === 400
-        ? {
-            bg: "bg-[linear-gradient(160deg,#6a1b9a_0%,#4a148c_100%)]",
-            text: "text-[#ce93d8]",
-            glow: "shadow-[inset_0_1px_0_rgba(206,147,216,0.20),0_4px_16px_rgba(74,20,140,0.50)]",
-            hover: "hover:brightness-125 hover:shadow-[0_6px_24px_rgba(106,27,154,0.55)]",
-            border: "border-[#7b1fa2]/40",
-          }
-        : {
-            bg: "bg-[linear-gradient(160deg,#e6c400_0%,#b89b00_100%)]",
-            text: "text-[#3d2e00]",
-            glow: "shadow-[inset_0_1px_0_rgba(255,236,100,0.35),0_4px_16px_rgba(230,196,0,0.45)]",
-            hover: "hover:brightness-110 hover:shadow-[0_6px_24px_rgba(230,196,0,0.55)]",
-            border: "border-[#e6c400]/50",
-          };
+  const pointsColors = {
+  bg: "bg-[linear-gradient(160deg,#6b7280_0%,#4b5563_100%)]",
+  text: "text-white",
+  glow:
+    "shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_16px_rgba(17,24,39,0.38)]",
+  hover:
+    "hover:brightness-110 hover:shadow-[0_6px_24px_rgba(17,24,39,0.45)]",
+  border: "border-[#9ca3af]/25",
+};
 
   const base =
     "relative flex w-full items-center justify-center rounded-xl border font-black transition-all duration-200 select-none" +
@@ -335,14 +320,16 @@ function QuestionTile({
 
   // ── Question available — clickable ──
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className={`${base} ${pointsColors.bg} ${pointsColors.text} ${pointsColors.glow} ${pointsColors.border} ${pointsColors.hover} cursor-pointer active:scale-95`}
-    >
+  <button
+    type="button"
+    onClick={onOpen}
+    className={`${base} ${pointsColors.bg} ${pointsColors.glow} ${pointsColors.hover} ${pointsColors.border}`}
+  >
+    <span className={`${pointsColors.text} [text-shadow:0_1px_0_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.45)]`}>
       {points}
-    </button>
-  );
+    </span>
+  </button>
+);
 }
 
 // ─── Board: CategoryCard ──────────────────────────────────────────────────────
@@ -663,23 +650,22 @@ export default function GameBoardClient({
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#041335_0%,#051741_45%,#05112c_100%)] text-white">
+    <main className="min-h-screen text-white">
       <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
 
         {/* ── Top control panel ──────────────────────────────────────────── */}
-        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] p-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:p-5">
+        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] px-4 py-3 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-4">
 
-          {/* Title row */}
-          <div className="mb-4 flex flex-col gap-1 sm:mb-5">
-            <div className="text-xs font-bold tracking-[0.22em] text-cyan-300/60">
-              لوحة اللعبة
+          {/* Title row — compact, centered */}
+          <div className="mb-3 flex items-center justify-center gap-3 sm:mb-4">
+            <div className="text-center">
+              <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
+                لوحة اللعبة
+              </div>
+              <h1 className="text-lg font-black text-white sm:text-xl md:text-2xl">
+                {gameName}
+              </h1>
             </div>
-            <h1 className="text-xl font-black text-white sm:text-2xl md:text-3xl">
-              {gameName}
-            </h1>
-            <p className="text-xs font-medium text-slate-300/70 sm:text-sm">
-              اختر الأسئلة من لوحة اللعب في الأسفل وابدأ باللعب.
-            </p>
           </div>
 
           {/* Status pills + action buttons */}
