@@ -596,46 +596,65 @@ export default function Navbar({ initialAuth }: NavbarProps) {
           ))}
 
           <div className="relative" ref={gamesMenuRef}>
-            <button
-              type="button"
-              onClick={() => setGamesOpen((prev) => !prev)}
-              className={[
-                "relative rounded-xl px-4 py-2 text-sm font-bold transition duration-200",
-                pathname.startsWith("/game") || pathname.startsWith("/games")
-                  ? "bg-cyan-400/10 text-cyan-300"
-                  : "text-white/60 hover:bg-white/6 hover:text-white",
-              ].join(" ")}
-            >
-              <span className="inline-flex items-center gap-2">
-                <GamesIcon className="h-4 w-4" />
-                الألعاب
-                <ChevronDownIcon
-                  className={`h-4 w-4 transition ${gamesOpen ? "rotate-180" : ""}`}
-                />
-              </span>
-            </button>
+  <div
+    className={[
+      "relative flex items-center overflow-hidden rounded-xl transition duration-200",
+      pathname.startsWith("/game") || pathname.startsWith("/games")
+        ? "bg-cyan-400/10 text-cyan-300"
+        : "text-white/60 hover:bg-white/6 hover:text-white",
+    ].join(" ")}
+  >
+    <Link
+      href="/games"
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold"
+    >
+      <GamesIcon className="h-4 w-4" />
+      الألعاب
+    </Link>
 
-            {gamesOpen && (
-              <div className="absolute right-0 top-full z-50 mt-3 w-[240px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07101fe8] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
-                <div className="mb-2 px-2 text-xs font-bold text-white/35">
-                  صفحات الألعاب
-                </div>
+    <div className="h-5 w-px bg-white/10" />
 
-                <div className="space-y-2">
-                  {gameLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-black text-white/78 transition hover:bg-white/[0.08] hover:text-white"
-                    >
-                      {item.label}
-                      <ChevronDownIcon className="h-4 w-4 rotate-90" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+    <button
+      type="button"
+      onClick={() => setGamesOpen((prev) => !prev)}
+      className="inline-flex h-full items-center justify-center px-3 py-2 transition hover:bg-white/8"
+      aria-label="فتح قائمة الألعاب"
+    >
+      <ChevronDownIcon
+        className={`h-4 w-4 transition ${gamesOpen ? "rotate-180" : ""}`}
+      />
+    </button>
+  </div>
+
+  {gamesOpen && (
+    <div className="absolute right-0 top-full z-50 mt-3 w-[240px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07101fe8] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
+      <div className="mb-2 px-2 text-xs font-bold text-white/35">
+        صفحات الألعاب
+      </div>
+
+      <div className="space-y-2">
+        <Link
+          href="/games"
+          className="flex items-center justify-between rounded-xl border border-cyan-400/12 bg-cyan-400/[0.05] px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/[0.10]"
+        >
+          جميع الألعاب
+          <ChevronDownIcon className="h-4 w-4 rotate-90" />
+        </Link>
+
+        {gameLinks.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-black text-white/78 transition hover:bg-white/[0.08] hover:text-white"
+          >
+            {item.label}
+            <ChevronDownIcon className="h-4 w-4 rotate-90" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
           {authState.isLoggedIn && (
             <Link href="/account" className={navLinkClass(pathname, "/account")}>
