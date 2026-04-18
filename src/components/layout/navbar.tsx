@@ -40,15 +40,49 @@ function navLinkClass(pathname: string, href: string) {
     "relative rounded-xl px-4 py-2 text-sm font-bold transition duration-200",
     active
       ? "bg-cyan-400/10 text-cyan-300 after:absolute after:bottom-0 after:left-1/2 after:h-px after:w-4 after:-translate-x-1/2 after:rounded-full after:bg-cyan-400"
-      : "text-white/60 hover:bg-white/6 hover:text-white",
+      : "text-white/60 hover:bg-white/[0.06] hover:text-white",
   ].join(" ");
+}
+
+function HomeIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M3 10.5 12 4l9 6.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 9.5V20h14V9.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function GamesIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <rect x="3" y="8" width="18" height="8" rx="4" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8 12h2M9 11v2M15.5 12h.01M17.5 12h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <rect
+        x="3"
+        y="8"
+        width="18"
+        height="8"
+        rx="4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M8 12h2M9 11v2M15.5 12h.01M17.5 12h.01"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -56,8 +90,19 @@ function GamesIcon({ className = "h-4 w-4" }: { className?: string }) {
 function UserIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5 19a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle
+        cx="12"
+        cy="8"
+        r="3.2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M5 19a7 7 0 0 1 14 0"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -65,9 +110,25 @@ function UserIcon({ className = "h-4 w-4" }: { className?: string }) {
 function LogoutIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15 12H4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M20 4v16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M10 17l5-5-5-5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 12H4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M20 4v16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -75,7 +136,11 @@ function LogoutIcon({ className = "h-4 w-4" }: { className?: string }) {
 function ShieldIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
     </svg>
   );
 }
@@ -83,8 +148,18 @@ function ShieldIcon({ className = "h-4 w-4" }: { className?: string }) {
 function PricingIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M12 3v18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.4 2.4 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M12 3v18"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.4 2.4 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -98,7 +173,12 @@ function BellIcon({ className = "h-4 w-4" }: { className?: string }) {
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
-      <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M10 20a2 2 0 0 0 4 0"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -134,7 +214,12 @@ function ChevronDownIcon({ className = "h-4 w-4" }: { className?: string }) {
 function MenuIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -142,7 +227,12 @@ function MenuIcon({ className = "h-5 w-5" }: { className?: string }) {
 function CloseIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -562,10 +652,17 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     window.location.assign("/logout");
   }
 
-  const simpleLinks = [
-    { label: "الرئيسية", href: "/", icon: null },
-    { label: "الباقات", href: "/pricing", icon: <PricingIcon className="h-4 w-4" /> },
-  ];
+  const homeLink = {
+    label: "الرئيسية",
+    href: "/",
+    icon: <HomeIcon className="h-4 w-4" />,
+  };
+
+  const pricingLink = {
+    label: "الباقات",
+    href: "/pricing",
+    icon: <PricingIcon className="h-4 w-4" />,
+  };
 
   const gameLinks = [
     { label: "لمتكم", href: "/game/start" },
@@ -586,75 +683,80 @@ export default function Navbar({ initialAuth }: NavbarProps) {
         </Link>
 
         <nav className="hidden items-center gap-2 lg:flex">
-          {simpleLinks.map((link) => (
-            <Link key={link.href} href={link.href} className={navLinkClass(pathname, link.href)}>
-              <span className="inline-flex items-center gap-2">
-                {link.icon}
-                {link.label}
-              </span>
-            </Link>
-          ))}
+          <Link href={homeLink.href} className={navLinkClass(pathname, homeLink.href)}>
+            <span className="inline-flex items-center gap-2">
+              {homeLink.icon}
+              {homeLink.label}
+            </span>
+          </Link>
 
           <div className="relative" ref={gamesMenuRef}>
-  <div
-    className={[
-      "relative flex items-center overflow-hidden rounded-xl transition duration-200",
-      pathname.startsWith("/game") || pathname.startsWith("/games")
-        ? "bg-cyan-400/10 text-cyan-300"
-        : "text-white/60 hover:bg-white/6 hover:text-white",
-    ].join(" ")}
-  >
-    <Link
-      href="/games"
-      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold"
-    >
-      <GamesIcon className="h-4 w-4" />
-      الألعاب
-    </Link>
+            <div
+              className={[
+                "relative flex items-center overflow-hidden rounded-xl transition duration-200",
+                pathname.startsWith("/game") || pathname.startsWith("/games")
+                  ? "bg-cyan-400/10 text-cyan-300"
+                  : "text-white/60 hover:bg-white/[0.06] hover:text-white",
+              ].join(" ")}
+            >
+              <Link
+                href="/games"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold"
+              >
+                <GamesIcon className="h-4 w-4" />
+                الألعاب
+              </Link>
 
-    <div className="h-5 w-px bg-white/10" />
+              <div className="h-5 w-px bg-white/10" />
 
-    <button
-      type="button"
-      onClick={() => setGamesOpen((prev) => !prev)}
-      className="inline-flex h-full items-center justify-center px-3 py-2 transition hover:bg-white/8"
-      aria-label="فتح قائمة الألعاب"
-    >
-      <ChevronDownIcon
-        className={`h-4 w-4 transition ${gamesOpen ? "rotate-180" : ""}`}
-      />
-    </button>
-  </div>
+              <button
+                type="button"
+                onClick={() => setGamesOpen((prev) => !prev)}
+                className="inline-flex h-full items-center justify-center px-3 py-2 transition hover:bg-white/[0.08]"
+                aria-label="فتح قائمة الألعاب"
+              >
+                <ChevronDownIcon
+                  className={`h-4 w-4 transition ${gamesOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+            </div>
 
-  {gamesOpen && (
-    <div className="absolute right-0 top-full z-50 mt-3 w-[240px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07101fe8] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
-      <div className="mb-2 px-2 text-xs font-bold text-white/35">
-        صفحات الألعاب
-      </div>
+            {gamesOpen && (
+              <div className="absolute right-0 top-full z-50 mt-3 w-[240px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#07101fe8] p-3 shadow-[0_24px_70px_rgba(0,0,0,0.30)] backdrop-blur-xl">
+                <div className="mb-2 px-2 text-xs font-bold text-white/35">
+                  صفحات الألعاب
+                </div>
 
-      <div className="space-y-2">
-        <Link
-          href="/games"
-          className="flex items-center justify-between rounded-xl border border-cyan-400/12 bg-cyan-400/[0.05] px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/[0.10]"
-        >
-          جميع الألعاب
-          <ChevronDownIcon className="h-4 w-4 rotate-90" />
-        </Link>
+                <div className="space-y-2">
+                  <Link
+                    href="/games"
+                    className="flex items-center justify-between rounded-xl border border-cyan-400/12 bg-cyan-400/[0.05] px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/[0.10]"
+                  >
+                    جميع الألعاب
+                    <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                  </Link>
 
-        {gameLinks.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-black text-white/78 transition hover:bg-white/[0.08] hover:text-white"
-          >
-            {item.label}
-            <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                  {gameLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-black text-white/78 transition hover:bg-white/[0.08] hover:text-white"
+                    >
+                      {item.label}
+                      <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Link href={pricingLink.href} className={navLinkClass(pathname, pricingLink.href)}>
+            <span className="inline-flex items-center gap-2">
+              {pricingLink.icon}
+              {pricingLink.label}
+            </span>
           </Link>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
 
           {authState.isLoggedIn && (
             <Link href="/account" className={navLinkClass(pathname, "/account")}>
@@ -682,7 +784,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 <button
                   type="button"
                   onClick={() => setBellOpen((prev) => !prev)}
-                  className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                  className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-amber-300/20 bg-[linear-gradient(180deg,rgba(245,158,11,0.18)_0%,rgba(245,158,11,0.08)_100%)] text-amber-200 shadow-[0_12px_30px_rgba(245,158,11,0.14)] transition hover:bg-[linear-gradient(180deg,rgba(245,158,11,0.22)_0%,rgba(245,158,11,0.12)_100%)]"
                   aria-label="الإشعارات"
                 >
                   <BellIcon className="h-5 w-5" />
@@ -705,12 +807,12 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 )}
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-2">
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-cyan-400/15 bg-[linear-gradient(135deg,rgba(34,211,238,0.12)_0%,rgba(255,255,255,0.04)_100%)] px-3 py-2 shadow-[0_12px_30px_rgba(34,211,238,0.08)]">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-400/15 text-sm font-black text-cyan-300">
                   {(authState.username || "م").slice(0, 1).toUpperCase()}
                 </div>
                 <div className="text-sm font-black text-white">
-                  <span className="text-white/55">مرحبًا، </span>
+                  <span className="text-white/60">مرحبًا، </span>
                   <span>{authState.username || "مستخدم"}</span>
                 </div>
               </div>
@@ -718,7 +820,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-sm font-black text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex items-center gap-2 rounded-xl border border-red-400/20 bg-[linear-gradient(180deg,rgba(239,68,68,0.20)_0%,rgba(239,68,68,0.10)_100%)] px-4 py-2.5 text-sm font-black text-red-100 shadow-[0_12px_30px_rgba(239,68,68,0.12)] transition hover:bg-[linear-gradient(180deg,rgba(239,68,68,0.26)_0%,rgba(239,68,68,0.14)_100%)]"
               >
                 <LogoutIcon className="h-4 w-4" />
                 خروج
@@ -748,7 +850,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setBellOpen((prev) => !prev)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/8"
+                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300/20 bg-[linear-gradient(180deg,rgba(245,158,11,0.18)_0%,rgba(245,158,11,0.08)_100%)] text-amber-200 shadow-[0_10px_24px_rgba(245,158,11,0.12)] transition hover:bg-[linear-gradient(180deg,rgba(245,158,11,0.22)_0%,rgba(245,158,11,0.12)_100%)]"
                 aria-label="الإشعارات"
               >
                 <BellIcon className="h-5 w-5" />
@@ -775,7 +877,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
           <button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/8"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/[0.08]"
             aria-label="فتح القائمة"
           >
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -786,16 +888,13 @@ export default function Navbar({ initialAuth }: NavbarProps) {
       {menuOpen && (
         <div className="border-t border-white/8 bg-[#040816]/95 px-4 py-4 backdrop-blur-xl lg:hidden">
           <div className="mx-auto max-w-[1320px] space-y-2">
-            {simpleLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
+            <Link
+              href={homeLink.href}
+              className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+            >
+              {homeLink.icon}
+              {homeLink.label}
+            </Link>
 
             <div className="overflow-hidden rounded-xl border border-white/8 bg-white/[0.03]">
               <div className="flex items-center gap-3 px-4 py-3 text-sm font-black text-white/80">
@@ -804,6 +903,14 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               </div>
 
               <div className="space-y-2 border-t border-white/8 p-3">
+                <Link
+                  href="/games"
+                  className="flex items-center justify-between rounded-xl border border-cyan-400/12 bg-cyan-400/[0.05] px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/[0.10]"
+                >
+                  جميع الألعاب
+                  <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                </Link>
+
                 {gameLinks.map((item) => (
                   <Link
                     key={item.href}
@@ -816,6 +923,14 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 ))}
               </div>
             </div>
+
+            <Link
+              href={pricingLink.href}
+              className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+            >
+              {pricingLink.icon}
+              {pricingLink.label}
+            </Link>
 
             {authState.isLoggedIn && (
               <Link
@@ -833,7 +948,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
                 className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
                 <span className="inline-flex items-center gap-3">
-                  <BellIcon className="h-4 w-4" />
+                  <BellIcon className="h-4 w-4 text-amber-300" />
                   الإشعارات
                 </span>
 
@@ -859,7 +974,7 @@ export default function Navbar({ initialAuth }: NavbarProps) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="flex w-full items-center gap-3 rounded-xl border border-red-400/20 bg-[linear-gradient(180deg,rgba(239,68,68,0.20)_0%,rgba(239,68,68,0.10)_100%)] px-4 py-3 text-sm font-bold text-red-100 shadow-[0_10px_24px_rgba(239,68,68,0.10)] transition hover:bg-[linear-gradient(180deg,rgba(239,68,68,0.26)_0%,rgba(239,68,68,0.14)_100%)]"
               >
                 <LogoutIcon className="h-4 w-4" />
                 تسجيل الخروج
