@@ -2,12 +2,14 @@
 
 import {
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
+import { useFormStatus } from "react-dom";
 import type { CategoryAvailability } from "./page";
 
 const heroLogo = "/logo.webp";
@@ -43,7 +45,9 @@ type Props = {
 
 const REQUIRED_CATEGORY_COUNT = 6;
 
-// ─── Section Themes (unchanged) ───────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Section themes
+// ──────────────────────────────────────────────────────────────────────────────
 
 const sectionThemes: Record<
   string,
@@ -259,8 +263,6 @@ const sectionThemes: Record<
   },
 };
 
-// ─── Logic helpers (unchanged) ─────────────────────────────────────────────────
-
 function normalizeSectionKey(value: string | null | undefined) {
   return (value ?? "").toLowerCase().replace(/[\s_-]+/g, "").trim();
 }
@@ -285,8 +287,9 @@ function resolveSectionThemeKey(slug: string | null | undefined, name?: string |
     combined.includes("فنأجنبي") ||
     combined.includes("foreignart") ||
     combined.includes("foreignartist")
-  )
+  ) {
     return "foreign_art";
+  }
   if (combined.includes("فنعربي") || combined.includes("arabart") || combined.includes("arabicart")) return "arabic_art";
   if (
     combined.includes("entertain") ||
@@ -294,22 +297,27 @@ function resolveSectionThemeKey(slug: string | null | undefined, name?: string |
     combined.includes("film") ||
     combined.includes("ترفيه") ||
     combined.includes("افلام")
-  )
+  ) {
     return "entertainment";
+  }
   if (combined.includes("technology") || combined.includes("تقن") || combined.includes("tech")) return "technology";
   if (combined.includes("science") || combined.includes("علوم") || combined.includes("علم")) return "science";
   if (combined.includes("history") || combined.includes("تاريخ")) return "history";
-  if (combined.includes("geography") || combined.includes("جغراف") || combined.includes("مكان") || combined.includes("دول")) return "geography";
+  if (combined.includes("geography") || combined.includes("جغراف") || combined.includes("مكان") || combined.includes("دول")) {
+    return "geography";
+  }
   if (
     combined.includes("logo") ||
     combined.includes("brand") ||
     combined.includes("شعار") ||
     combined.includes("شعارات") ||
     combined.includes("ماركات")
-  )
+  ) {
     return "logos";
+  }
   if (combined.includes("currency") || combined.includes("عملات")) return "currencies";
   if (combined.includes("art") || combined.includes("فن") || combined.includes("رسم")) return "arts";
+
   return "default";
 }
 
@@ -325,9 +333,11 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
       exhausted: true,
     };
   }
+
   const count = availability.availableGames ?? 0;
   const gameLabel =
     count === 1 ? "لعبة واحدة" : count > 1 ? `${count} ألعاب` : "متاحة";
+
   return {
     text: gameLabel,
     className: "border-emerald-400/30 bg-emerald-500/18 text-emerald-200",
@@ -335,7 +345,9 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
   };
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Icons
+// ──────────────────────────────────────────────────────────────────────────────
 
 function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -390,18 +402,9 @@ function TicketIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-/** قسم الإسلاميات */
 function MosqueIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 20h16" />
       <path d="M7 20v-6a5 5 0 0 1 10 0v6" />
       <path d="M12 3v4" />
@@ -411,18 +414,9 @@ function MosqueIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** قسم الجغرافيا */
 function GlobeIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <path d="M3 12h18" />
       <path d="M12 3a15 15 0 0 1 0 18" />
@@ -431,214 +425,106 @@ function GlobeIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** قسم الترفيه / أفلام */
 function FilmIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M7 5v14M17 5v14M3 9h18M3 15h18" />
     </svg>
   );
 }
 
-/** قسم الرياضة */
 function TrophyIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" />
       <path d="M5 6H3a2 2 0 0 0 2 4h2M19 6h2a2 2 0 0 1-2 4h-2" />
     </svg>
   );
 }
 
-/** قسم التقنية */
 function CpuIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="7" y="7" width="10" height="10" rx="2" />
       <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" />
     </svg>
   );
 }
 
-/** قسم العلوم — قارورة */
 function FlaskIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 3h6M9 3v6l-5 8a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 20 17l-5-8V3" />
       <path d="M7.5 15h9" />
     </svg>
   );
 }
 
-/** قسم التاريخ — كتاب */
 function BookOpenIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H10a3 3 0 0 1 2 1 3 3 0 0 1 2-1h4.5A2.5 2.5 0 0 1 21 6.5V19a1 1 0 0 1-1.4.92L14 17.5a4 4 0 0 0-4 0l-5.6 2.42A1 1 0 0 1 3 19V6.5Z" />
     </svg>
   );
 }
 
-/** قسم المعلومات العامة — كرة أرضية مع نجمة */
 function StarGlobeIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 2a14.5 14.5 0 0 0 0 20M2 12h20" />
     </svg>
   );
 }
 
-/** قسم الشعارات والماركات — علامة تجارية */
 function TagIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2H7a2 2 0 0 0-2 2v5l9.29 9.29a2 2 0 0 0 2.83 0l4.58-4.58a2 2 0 0 0 0-2.83L12 2Z" />
       <path d="M7 7h.01" />
     </svg>
   );
 }
 
-/** قسم العملات — عملة معدنية */
 function CoinIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="8" />
       <path d="M12 8v8M9.5 10a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4M9.5 18h5" />
     </svg>
   );
 }
 
-/** قسم الألعاب */
 function GameIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="8" width="16" height="8" rx="3" />
       <path d="M8 12h2M9 11v2M16.5 12h.01M18.5 12h.01" />
     </svg>
   );
 }
 
-/** قسم البنات — قلب */
 function HeartIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" />
     </svg>
   );
 }
 
-/** قسم الأردن — علم */
 function FlagIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z" />
       <path d="M4 22v-7" />
     </svg>
   );
 }
 
-/** قسم الأغاني — نوتة موسيقية */
 function MusicIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 18V5l12-2v13" />
       <circle cx="6" cy="18" r="3" />
       <circle cx="18" cy="16" r="3" />
@@ -646,18 +532,9 @@ function MusicIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** قسم التركيز — هدف/بصر */
 function TargetIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9" />
       <circle cx="12" cy="12" r="5" />
       <circle cx="12" cy="12" r="1.5" />
@@ -665,18 +542,9 @@ function TargetIcon({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** قسم الفن — فرشاة رسم */
 function PaintbrushIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
       <path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7" />
       <path d="M14.5 17.5 4.5 15" />
@@ -686,22 +554,12 @@ function PaintbrushIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function SparklesIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
       <path d="M19 17l.7 1.8L21.5 19l-1.8.7L19 21.5l-.7-1.8L16.5 19l1.8-.2L19 17Z" />
     </svg>
   );
 }
-
-// ─── Icon mapping (improved) ───────────────────────────────────────────────────
 
 function getSectionIcon(slug: string | null | undefined, name?: string | null) {
   const key = resolveSectionThemeKey(slug, name);
@@ -731,7 +589,32 @@ function getSectionIcon(slug: string | null | undefined, name?: string | null) {
   return iconMap[key] ?? <BookOpenIcon className="h-5 w-5" />;
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Submit button
+// ──────────────────────────────────────────────────────────────────────────────
+
+function StartGameSubmitButton({
+  disabledByClient,
+}: {
+  disabledByClient: boolean;
+}) {
+  const { pending } = useFormStatus();
+  const disabled = disabledByClient || pending;
+
+  return (
+    <button
+      type="submit"
+      disabled={disabled}
+      className="mt-4 inline-flex w-full items-center justify-center rounded-[1.3rem] bg-cyan-500 px-5 py-4 text-base font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.20)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {disabled ? "جاري إنشاء اللعبة..." : "ابدأ اللعب"}
+    </button>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Main component
+// ──────────────────────────────────────────────────────────────────────────────
 
 export default function StartGameForm({
   sections = [],
@@ -748,6 +631,9 @@ export default function StartGameForm({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [localError, setLocalError] = useState("");
   const [tooltipCategoryId, setTooltipCategoryId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const submitLockRef = useRef(false);
 
   const safeSections = Array.isArray(sections) ? sections : [];
   const safeCategories = Array.isArray(categories) ? categories : [];
@@ -784,11 +670,13 @@ export default function StartGameForm({
   const isReadyToSubmit = selectedCount === REQUIRED_CATEGORY_COUNT;
 
   function toggleCategory(id: string) {
+    if (isSubmitting) return;
+
     const availability = categoryAvailability[id];
 
     if (!availability?.isSelectable) {
       setLocalError(
-        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة."
+        "هذه الفئة غير متاحة حاليًا ولا تحتوي على عدد كافٍ من الأسئلة لبدء لعبة جديدة.",
       );
       return;
     }
@@ -813,7 +701,7 @@ export default function StartGameForm({
 
   function handleInfoToggle(
     event: ReactMouseEvent<HTMLButtonElement>,
-    categoryId: string
+    categoryId: string,
   ) {
     event.preventDefault();
     event.stopPropagation();
@@ -829,6 +717,11 @@ export default function StartGameForm({
   }
 
   function validateBeforeSubmit(event: FormEvent<HTMLFormElement>) {
+    if (submitLockRef.current || isSubmitting) {
+      event.preventDefault();
+      return;
+    }
+
     const cleanGameName = gameName.trim();
     const cleanTeamOne = teamOne.trim();
     const cleanTeamTwo = teamTwo.trim();
@@ -846,7 +739,7 @@ export default function StartGameForm({
     }
 
     const invalidSelection = selectedCategories.find(
-      (id) => !categoryAvailability[id]?.isSelectable
+      (id) => !categoryAvailability[id]?.isSelectable,
     );
 
     if (invalidSelection) {
@@ -862,6 +755,8 @@ export default function StartGameForm({
     }
 
     setLocalError("");
+    submitLockRef.current = true;
+    setIsSubmitting(true);
   }
 
   const visibleError = localError || errorMessage;
@@ -869,7 +764,7 @@ export default function StartGameForm({
 
   const renderCategoryCard = (
     category: Category,
-    theme: ReturnType<typeof getSectionTheme>
+    theme: ReturnType<typeof getSectionTheme>,
   ) => {
     const availability = categoryAvailability[category.id] ?? {
       availableGames: 0,
@@ -896,21 +791,21 @@ export default function StartGameForm({
 
         <div
           role="button"
-          tabIndex={availability.isSelectable ? 0 : -1}
-          aria-disabled={!availability.isSelectable}
+          tabIndex={!isSubmitting && availability.isSelectable ? 0 : -1}
+          aria-disabled={!availability.isSelectable || isSubmitting}
           onClick={() => {
-            if (availability.isSelectable) {
+            if (availability.isSelectable && !isSubmitting) {
               toggleCategory(category.id);
               setTooltipCategoryId(null);
             }
           }}
           onKeyDown={(event) => {
-            if (!availability.isSelectable) return;
+            if (!availability.isSelectable || isSubmitting) return;
             handleCardKeyDown(event, category.id);
           }}
           className={[
             "group relative overflow-hidden rounded-[2rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_14px_32px_rgba(0,0,0,0.22)] transition duration-200",
-            !availability.isSelectable
+            !availability.isSelectable || isSubmitting
               ? "cursor-not-allowed border-white/6 opacity-70"
               : active
                 ? "scale-[1.015] border-yellow-300 shadow-[0_0_0_3px_rgba(253,224,71,0.45),0_18px_34px_rgba(0,0,0,0.30)]"
@@ -937,11 +832,14 @@ export default function StartGameForm({
               onClick={(event) => handleInfoToggle(event, category.id)}
               className="absolute left-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-[#203352] bg-[#24a7df] text-lg font-black text-white shadow-[0_6px_16px_rgba(0,0,0,0.22)] transition hover:brightness-110"
               aria-label={`عرض وصف ${category.name}`}
+              disabled={isSubmitting}
             >
               !
             </button>
 
-            <div className={`absolute right-3 top-3 z-20 rounded-[1rem] px-4 py-2 text-sm font-black shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${theme.titleBar}`}>
+            <div
+              className={`absolute right-3 top-3 z-20 rounded-[1rem] px-4 py-2 text-sm font-black shadow-[0_8px_18px_rgba(0,0,0,0.18)] ${theme.titleBar}`}
+            >
               {badge.text}
             </div>
 
@@ -959,7 +857,9 @@ export default function StartGameForm({
           </div>
 
           <div className={`relative px-3 pb-4 pt-3 text-center ${theme.nameBar}`}>
-            <div className="text-[1.05rem] font-black leading-6 text-white">{category.name}</div>
+            <div className="text-[1.05rem] font-black leading-6 text-white">
+              {category.name}
+            </div>
           </div>
         </div>
       </div>
@@ -971,32 +871,38 @@ export default function StartGameForm({
     categoriesList: Category[],
     themeKeySlug?: string | null,
     themeName?: string | null,
-    countLabel?: string
+    countLabel?: string,
   ) => {
     const sectionTheme = getSectionTheme(themeKeySlug, themeName ?? title);
 
     return (
       <section className="space-y-5" key={title}>
         <div className="flex justify-center">
-          <div className={`min-w-[240px] rounded-[1.4rem] px-7 py-3 text-center text-lg font-black shadow-[0_14px_28px_rgba(0,0,0,0.18)] ${sectionTheme.titleBar}`}>
+          <div
+            className={`min-w-[240px] rounded-[1.4rem] px-7 py-3 text-center text-lg font-black shadow-[0_14px_28px_rgba(0,0,0,0.18)] ${sectionTheme.titleBar}`}
+          >
             {title}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-          <div className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}>
+          <div
+            className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}
+          >
             {countLabel ?? `${categoriesList.length} فئة`}
           </div>
-          <div className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}>
+          <div
+            className={`rounded-[1.1rem] px-4 py-2 text-center text-xs font-black shadow-[0_10px_22px_rgba(0,0,0,0.16)] ${sectionTheme.titleBar}`}
+          >
             اختر الفئات المناسبة لك
           </div>
         </div>
 
         <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035)_0%,rgba(255,255,255,0.015)_100%)] px-3 py-4 shadow-[0_16px_42px_rgba(0,0,0,0.16)] sm:px-4 sm:py-5">
-  <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
-    {categoriesList.map((category) => renderCategoryCard(category, sectionTheme))}
-  </div>
-</div>
+          <div className="grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
+            {categoriesList.map((category) => renderCategoryCard(category, sectionTheme))}
+          </div>
+        </div>
       </section>
     );
   };
@@ -1005,13 +911,9 @@ export default function StartGameForm({
     <form
       action={action}
       onSubmit={validateBeforeSubmit}
-      className="mx-auto max-w-[1360px] space-y-6 pt-4 pb-52 sm:pt-6 md:pb-56"
+      className="mx-auto max-w-[1360px] space-y-6 pb-52 pt-4 sm:pt-6 md:pb-56"
     >
-      <input
-        type="hidden"
-        name="selectedCategories"
-        value={selectedCategories.join(",")}
-      />
+      <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />
 
       <section className="relative overflow-hidden rounded-[2.4rem] border border-white/10 bg-[linear-gradient(160deg,rgba(7,16,37,0.98)_0%,rgba(4,10,26,0.99)_52%,rgba(6,15,35,0.98)_100%)] shadow-[0_30px_90px_rgba(0,0,0,0.34)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/8 to-transparent" />
@@ -1130,7 +1032,8 @@ export default function StartGameForm({
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}
                 placeholder="مثال: تحدي الأذكياء"
-                className="w-full rounded-2xl border border-cyan-300/12 bg-[#091427] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-400/45"
+                disabled={isSubmitting}
+                className="w-full rounded-2xl border border-cyan-300/12 bg-[#091427] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-400/45 disabled:opacity-70"
               />
             </div>
           </div>
@@ -1138,9 +1041,7 @@ export default function StartGameForm({
           <div>
             <div className="rounded-[1.6rem] border border-cyan-300/14 bg-[linear-gradient(180deg,rgba(8,25,54,0.98)_0%,rgba(8,19,40,0.99)_100%)] p-3 shadow-[0_14px_36px_rgba(0,0,0,0.16)]">
               <div className="mb-2 flex items-center justify-between gap-3">
-                <label className="text-sm font-black text-cyan-100">
-                  الفريق الأول
-                </label>
+                <label className="text-sm font-black text-cyan-100">الفريق الأول</label>
                 <span className="rounded-full border border-cyan-300/15 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-300">
                   أزرق
                 </span>
@@ -1150,7 +1051,8 @@ export default function StartGameForm({
                 value={teamOne}
                 onChange={(e) => setTeamOne(e.target.value)}
                 placeholder="اسم الفريق الأول"
-                className="w-full rounded-2xl border border-cyan-300/15 bg-[#0b1733] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-300/50"
+                disabled={isSubmitting}
+                className="w-full rounded-2xl border border-cyan-300/15 bg-[#0b1733] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-cyan-300/50 disabled:opacity-70"
               />
             </div>
           </div>
@@ -1158,9 +1060,7 @@ export default function StartGameForm({
           <div>
             <div className="rounded-[1.6rem] border border-orange-300/14 bg-[linear-gradient(180deg,rgba(42,24,10,0.98)_0%,rgba(28,16,8,0.99)_100%)] p-3 shadow-[0_14px_36px_rgba(0,0,0,0.16)]">
               <div className="mb-2 flex items-center justify-between gap-3">
-                <label className="text-sm font-black text-orange-100">
-                  الفريق الثاني
-                </label>
+                <label className="text-sm font-black text-orange-100">الفريق الثاني</label>
                 <span className="rounded-full border border-orange-300/15 bg-orange-400/10 px-3 py-1 text-[11px] font-black text-orange-300">
                   برتقالي
                 </span>
@@ -1170,7 +1070,8 @@ export default function StartGameForm({
                 value={teamTwo}
                 onChange={(e) => setTeamTwo(e.target.value)}
                 placeholder="اسم الفريق الثاني"
-                className="w-full rounded-2xl border border-orange-300/15 bg-[#24150d] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-300/50"
+                disabled={isSubmitting}
+                className="w-full rounded-2xl border border-orange-300/15 bg-[#24150d] px-4 py-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-300/50 disabled:opacity-70"
               />
             </div>
           </div>
@@ -1190,8 +1091,8 @@ export default function StartGameForm({
             section.categories,
             section.slug,
             section.name,
-            `${section.categories.length} فئة`
-          )
+            `${section.categories.length} فئة`,
+          ),
         )}
 
         {uncategorized.length > 0
@@ -1200,7 +1101,7 @@ export default function StartGameForm({
               uncategorized,
               "default",
               "فئات بدون قسم",
-              `${uncategorized.length} فئة`
+              `${uncategorized.length} فئة`,
             )
           : null}
       </section>
@@ -1228,14 +1129,20 @@ export default function StartGameForm({
 
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {selectedCategoryItems.map((category) => {
-                const section = safeSections.find((item) => item.id === category.section_id) ?? null;
-                const theme = getSectionTheme(section?.slug ?? category.slug, section?.name ?? category.name);
+                const section =
+                  safeSections.find((item) => item.id === category.section_id) ?? null;
+                const theme = getSectionTheme(
+                  section?.slug ?? category.slug,
+                  section?.name ?? category.name,
+                );
+
                 return (
                   <button
                     key={category.id}
                     type="button"
                     onClick={() => toggleCategory(category.id)}
-                    className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5 text-right transition hover:border-white/20"
+                    disabled={isSubmitting}
+                    className="overflow-hidden rounded-[1.1rem] border border-white/10 bg-white/5 text-right transition hover:border-white/20 disabled:opacity-70"
                   >
                     <div className="h-20 overflow-hidden bg-[rgba(255,255,255,0.88)]">
                       {category.image_url ? (
@@ -1267,13 +1174,9 @@ export default function StartGameForm({
               ))}
             </div>
 
-            <button
-              type="submit"
-              disabled={!isReadyToSubmit || gamesRemaining <= 0}
-              className="mt-4 inline-flex w-full items-center justify-center rounded-[1.3rem] bg-cyan-500 px-5 py-4 text-base font-black text-slate-950 shadow-[0_4px_20px_rgba(34,211,238,0.20)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              ابدأ اللعب
-            </button>
+            <StartGameSubmitButton
+              disabledByClient={!isReadyToSubmit || gamesRemaining <= 0 || isSubmitting}
+            />
           </div>
         </div>
       )}
