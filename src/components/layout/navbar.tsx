@@ -575,6 +575,15 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     let intervalId: number | null = null;
     let activeChannel: ReturnType<typeof supabase.channel> | null = null;
 
+    const disableAggressivePollingOnThisPage =
+      pathname === "/" ||
+      pathname === "/pricing" ||
+      pathname === "/about" ||
+      pathname === "/contact" ||
+      pathname === "/terms" ||
+      pathname === "/login" ||
+      pathname === "/register";
+
     async function setupNotifications() {
       if (!authState.isLoggedIn) {
         if (!cancelled) {
@@ -625,9 +634,11 @@ export default function Navbar({ initialAuth }: NavbarProps) {
 
     void setupNotifications();
 
-    intervalId = window.setInterval(() => {
-      void loadNotificationSummary();
-    }, 15000);
+    if (!disableAggressivePollingOnThisPage) {
+      intervalId = window.setInterval(() => {
+        void loadNotificationSummary();
+      }, 15000);
+    }
 
     window.addEventListener("focus", handleVisibility);
     document.addEventListener("visibilitychange", handleVisibility);
