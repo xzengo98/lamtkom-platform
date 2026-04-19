@@ -4,6 +4,7 @@ import SiteBackground from "../components/layout/site-background";
 import Navbar from "../components/layout/navbar";
 import AppResumeRefresh from "../components/app/app-resume-refresh";
 import { getViewer } from "../lib/auth/viewer";
+import DisableImageContextMenu from "@/components/app/disable-image-context-menu";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
@@ -88,6 +89,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const viewer = await getViewer();
+
+<body>
+  <DisableImageContextMenu />
+  {children}
+</body>
 
   return (
     <html lang="ar" dir="rtl">
