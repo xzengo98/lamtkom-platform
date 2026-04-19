@@ -10,14 +10,17 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/games", "/pricing", "/about", "/contact", "/terms", "/privacy"],
         disallow: [
           "/admin",
           "/account",
+          "/dashboard",
           "/login",
           "/register",
           "/payment",
           "/api",
+          "/game",
+          "/games/codenames",
         ],
       },
     ],

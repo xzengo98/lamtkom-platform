@@ -51,23 +51,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.45,
     },
-    {
-      url: `${siteUrl}/game/start`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/game/bara-alsalfah`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${siteUrl}/games/codenames`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
   ];
 }
