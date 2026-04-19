@@ -78,8 +78,7 @@ export default async function LoginPage({
               </h1>
 
               <p className="mt-3 text-center text-sm leading-8 text-white/58 md:text-base">
-                ادخل إلى حسابك للوصول إلى الألعاب، متابعة الجلسات، والاستفادة من
-                الباقات والخدمات بشكل منظم وواضح.
+                ادخل إلى حسابك للوصول إلى الألعاب، متابعة الجلسات، والاستفادة من جميع مزايا المنصة.
               </p>
 
               {params.error && (

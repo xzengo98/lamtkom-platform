@@ -116,7 +116,7 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <label className={labelCls}>رقم الهاتف</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05xxxxxxxx" className={inputCls} />
+                  <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="079xxxxxx او 00962xxxx" className={inputCls} />
                 </div>
               </div>
 
