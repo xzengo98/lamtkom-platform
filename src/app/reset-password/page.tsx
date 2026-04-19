@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 export default function ResetPasswordPage() {
   const router = useRouter();

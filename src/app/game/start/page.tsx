@@ -413,7 +413,7 @@ export default async function GameStartPage({
           <div className="flex flex-col items-center justify-between gap-4 px-5 py-5 text-center sm:flex-row sm:text-right">
             <div className="flex items-center gap-3">
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt="لمتكم"
                 className="h-10 w-auto object-contain opacity-90"
               />

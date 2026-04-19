@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteIncompleteGame } from "@/app/account/actions";
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 export type Profile = {
   id?: string;

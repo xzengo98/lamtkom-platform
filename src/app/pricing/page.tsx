@@ -7,7 +7,7 @@ type GameCard = { title: string; description: string; points: string[]; };
 type FaqItem = { question: string; answer: string; };
 
 // ─── Data (unchanged) ─────────────────────────────────────────────────────────
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 const plans: Plan[] = [
   { name: "الخطة المجانية", badge: "للتجربة", price: "0 JD", description: "مناسبة لتجربة المنصة والتعرّف على طريقة اللعب قبل الانتقال إلى خطة أعلى.", cta: "ابدأ مجانًا", href: "/signup", features: [ { text: "إنشاء حساب والبدء مباشرة" }, { text: "الوصول للتجربة الأساسية" }, { text: "مناسبة للتجربة الأولى" }, { text: "متابعة الألعاب غير المكتملة من الحساب" } ] },

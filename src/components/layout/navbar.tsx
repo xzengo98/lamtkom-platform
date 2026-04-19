@@ -31,7 +31,7 @@ type NotificationPreview = {
   created_at: string;
 };
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 function navLinkClass(pathname: string, href: string) {
   const active = pathname === href || (href !== "/" && pathname.startsWith(href));

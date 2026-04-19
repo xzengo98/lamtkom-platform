@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "صفحة الدفع الخاصة بباقات لمتكم، مع خيارات الدفع عبر كليك أو التحويل البنكي.",
 };
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 type SearchParams = Promise<{
   plan?: string;

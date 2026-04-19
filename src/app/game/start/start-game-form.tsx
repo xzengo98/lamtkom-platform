@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { CategoryAvailability } from "./page";
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 type Category = {
   id: string;

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 type GameCardItem = {
   title: string;
