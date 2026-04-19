@@ -18,10 +18,9 @@ export async function getSupabaseServerClient() {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // no-op in server components where setting cookies is not allowed
           }
         },
       },
-    },
+    }
   );
 }

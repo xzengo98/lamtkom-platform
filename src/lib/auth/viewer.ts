@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { getSupabaseServerClient } from "../supabase/server";
 
 export type ViewerData = {
@@ -12,7 +11,7 @@ type ProfileRow = {
   username: string | null;
 };
 
-const getViewerCached = cache(async (): Promise<ViewerData> => {
+export async function getViewer(): Promise<ViewerData> {
   const supabase = await getSupabaseServerClient();
 
   const {
@@ -40,8 +39,4 @@ const getViewerCached = cache(async (): Promise<ViewerData> => {
     isAdmin: typedProfile?.role === "admin",
     username: typedProfile?.username ?? null,
   };
-});
-
-export async function getViewer(): Promise<ViewerData> {
-  return getViewerCached();
 }
