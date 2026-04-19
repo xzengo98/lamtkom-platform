@@ -53,7 +53,7 @@ type StepItem = {
   icon: "users" | "target" | "link" | "trophy";
 };
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 const games: GameItem[] = [
   {

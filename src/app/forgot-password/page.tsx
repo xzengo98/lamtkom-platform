@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 export default function ForgotPasswordPage() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);

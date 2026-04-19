@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "تواصل مع منصة لمتكم بسهولة عبر الواتساب أو البريد الإلكتروني أو الهاتف، وأرسل استفسارك أو اقتراحك مباشرة.",
 };
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 const contactEmail = "adsshweter@gmail.com";
 const displayEmail = "hello@lamtkom.com";
 const displayPhone = "079 0000 000";

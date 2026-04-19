@@ -17,7 +17,7 @@ type Milestone = { year: string; label: string; description: string };
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const heroLogo = "/logo.png";
+const heroLogo = "/logo.webp";
 
 const stats = [
   { val: "٣",    label: "ألعاب متاحة",        accent: "cyan" },
