@@ -240,8 +240,10 @@ export default async function GameStartPage({
   const supabase = await getSupabaseServerClient();
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user ?? null;
 
   if (!user) {
     redirect("/login");
@@ -392,54 +394,54 @@ export default async function GameStartPage({
   const safeErrorMessage = sanitizeMessage(params.error, "");
 
   return (
-  <main className="min-h-screen text-white">
-    <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
+    <main className="min-h-screen text-white">
+      <div className="pointer-events-none fixed inset-0 opacity-[0.022] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
 
-    <div className="relative">
-      <StartGameForm
-        sections={sections}
-        categories={categories}
-        gamesRemaining={profile.games_remaining ?? 0}
-        action={createGameSession}
-        categoryAvailability={categoryAvailability}
-        selectionMode={selectionMode}
-        errorMessage={safeErrorMessage}
-      />
+      <div className="relative">
+        <StartGameForm
+          sections={sections}
+          categories={categories}
+          gamesRemaining={profile.games_remaining ?? 0}
+          action={createGameSession}
+          categoryAvailability={categoryAvailability}
+          selectionMode={selectionMode}
+          errorMessage={safeErrorMessage}
+        />
 
-      <footer className="mx-auto mt-8 max-w-7xl px-4 pb-8 md:px-6">
-        <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
+        <footer className="mx-auto mt-8 max-w-7xl px-4 pb-8 md:px-6">
+          <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
 
-          <div className="flex flex-col items-center justify-between gap-4 px-5 py-5 text-center sm:flex-row sm:text-right">
-            <div className="flex items-center gap-3">
-              <img
-                src="/logo.webp"
-                alt="لمتكم"
-                className="h-10 w-auto object-contain opacity-90"
-              />
-              <div>
-                <div className="text-sm font-black text-white">لمتكم</div>
-                <div className="text-xs text-white/35">
-                  تجهيز الجولة يبدأ من هنا
+            <div className="flex flex-col items-center justify-between gap-4 px-5 py-5 text-center sm:flex-row sm:text-right">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logo.webp"
+                  alt="لمتكم"
+                  className="h-10 w-auto object-contain opacity-90"
+                />
+                <div>
+                  <div className="text-sm font-black text-white">لمتكم</div>
+                  <div className="text-xs text-white/35">
+                    تجهيز الجولة يبدأ من هنا
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-white/50">
-              <Link href="/" className="transition hover:text-white">
-                الرئيسية
-              </Link>
-              <Link href="/games" className="transition hover:text-white">
-                الألعاب
-              </Link>
-              <Link href="/pricing" className="transition hover:text-white">
-                الباقات
-              </Link>
+              <div className="flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-white/50">
+                <Link href="/" className="transition hover:text-white">
+                  الرئيسية
+                </Link>
+                <Link href="/games" className="transition hover:text-white">
+                  الألعاب
+                </Link>
+                <Link href="/pricing" className="transition hover:text-white">
+                  الباقات
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
-  </main>
-);
+        </footer>
+      </div>
+    </main>
+  );
 }
