@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Tajawal } from "next/font/google";
 import "./globals.css";
 import SiteBackground from "../components/layout/site-background";
 import Navbar from "../components/layout/navbar";
 import AppResumeRefresh from "../components/app/app-resume-refresh";
 import { getViewer } from "../lib/auth/viewer";
+
+const tajawal = Tajawal({
+  subsets: ["arabic", "latin"],
+  weight: ["200", "300", "400", "500", "700", "800", "900"],
+  display: "swap",
+});
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
@@ -88,10 +95,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const viewer = await getViewer();
-  
+
   return (
     <html lang="ar" dir="rtl">
-      <body className="relative min-h-screen overflow-x-hidden text-white">
+      <body className={`${tajawal.className} relative min-h-screen overflow-x-hidden text-white`}>
         <SiteBackground />
         <div className="relative z-10 min-h-screen bg-transparent text-white">
           <Navbar initialAuth={viewer} />
