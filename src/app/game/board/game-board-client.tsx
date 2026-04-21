@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types (unchanged) ────────────────────────────────────────────────────────
 
 type Category = {
   id: string;
@@ -102,9 +102,7 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(storageKey, JSON.stringify(state));
-  } catch {
-    //
-  }
+  } catch { /**/ }
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -112,11 +110,7 @@ function writeLocalBoardState(storageKey: string, state: BoardState) {
 function CrownIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M4 18 2.5 7.5l5.2 4.1L12 5l4.3 6.6 5.2-4.1L20 18H4Z"
-        className="fill-current"
-        opacity="0.9"
-      />
+      <path d="M4 18 2.5 7.5l5.2 4.1L12 5l4.3 6.6 5.2-4.1L20 18H4Z" className="fill-current" opacity="0.9" />
       <path d="M5 20h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
@@ -126,12 +120,7 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <rect x="3.5" y="8" width="17" height="8.5" rx="4.25" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M8 10.5v4M6 12.5h4M15.5 11.25h.01M17.5 13.25h.01"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+      <path d="M8 10.5v4M6 12.5h4M15.5 11.25h.01M17.5 13.25h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -139,13 +128,7 @@ function GamepadIcon({ className = "h-4 w-4" }: { className?: string }) {
 function FlagIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M6 20V5m0 0c2.5-1.8 4.7-.2 7-1.2 2.1-.9 3.7-2 5-1.3V11c-1.3-.7-2.9.4-5 1.3-2.3 1-4.5-.6-7 1.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M6 20V5m0 0c2.5-1.8 4.7-.2 7-1.2 2.1-.9 3.7-2 5-1.3V11c-1.3-.7-2.9.4-5 1.3-2.3 1-4.5-.6-7 1.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -153,94 +136,114 @@ function FlagIcon({ className = "h-4 w-4" }: { className?: string }) {
 function HomeIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M3 12L12 3l9 9M5 10v11h5v-6h4v6h5V10"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M3 12L12 3l9 9M5 10v11h5v-6h4v6h5V10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-// ─── StatusPill ───────────────────────────────────────────────────────────────
-
-function StatusPill({ label, icon }: { label: string; icon?: ReactNode }) {
+function PlusIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/25 bg-[linear-gradient(180deg,#58c6f2_0%,#3caee1_100%)] px-3 py-1.5 text-xs font-black text-white shadow-[0_3px_0_rgba(10,77,111,0.40)] sm:px-4 sm:py-2 sm:text-sm">
-      {icon}
-      <span>{label}</span>
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   );
 }
 
-// ─── ScoreControl ─────────────────────────────────────────────────────────────
+function MinusIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
 
-function ScoreControl({
+// ─── ScoreCard ────────────────────────────────────────────────────────────────
+// Replaces ScoreControl — same logic, new visual
+
+function ScoreCard({
   teamName,
   score,
   accent,
   onIncrease,
   onDecrease,
+  isLeading,
 }: {
   teamName: string;
   score: number;
   accent: "blue" | "orange";
   onIncrease: () => void;
   onDecrease: () => void;
+  isLeading: boolean;
 }) {
-  const palette =
-    accent === "orange"
-      ? {
-          top: "bg-[linear-gradient(180deg,#ff9c52_0%,#f57c1f_100%)]",
-          topShadow: "shadow-[0_4px_0_rgba(150,76,16,0.52)]",
-          circle: "bg-[linear-gradient(180deg,#ffab4f_0%,#f18412_100%)] shadow-[0_4px_0_rgba(148,77,15,0.58)]",
-          ring: "ring-orange-100/70",
-        }
-      : {
-          top: "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)]",
-          topShadow: "shadow-[0_4px_0_rgba(18,82,113,0.45)]",
-          circle: "bg-[linear-gradient(180deg,#39a8da_0%,#1f91c6_100%)] shadow-[0_4px_0_rgba(19,83,113,0.55)]",
-          ring: "ring-cyan-200/60",
-        };
+  const isBlue = accent === "blue";
+
+  const palette = isBlue
+    ? {
+        card:       "border-cyan-400/20 bg-[linear-gradient(160deg,rgba(4,18,48,0.98)_0%,rgba(2,10,28,0.99)_100%)]",
+        bar:        "bg-cyan-400",
+        name:       "text-cyan-300",
+        btnPlus:    "border-cyan-400/30 bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_4px_16px_rgba(34,211,238,0.30)]",
+        btnMinus:   "border-cyan-400/20 bg-cyan-500/12 text-cyan-300 hover:bg-cyan-500/20",
+        score:      "text-white",
+        glow:       isLeading ? "shadow-[0_0_32px_rgba(34,211,238,0.18)]" : "",
+        leadBadge:  "border-cyan-400/30 bg-cyan-400/12 text-cyan-300",
+      }
+    : {
+        card:       "border-orange-400/20 bg-[linear-gradient(160deg,rgba(28,12,4,0.98)_0%,rgba(14,6,2,0.99)_100%)]",
+        bar:        "bg-orange-400",
+        name:       "text-orange-300",
+        btnPlus:    "border-orange-400/30 bg-orange-500 text-white hover:bg-orange-400 shadow-[0_4px_16px_rgba(249,115,22,0.30)]",
+        btnMinus:   "border-orange-400/20 bg-orange-500/12 text-orange-300 hover:bg-orange-500/20",
+        score:      "text-white",
+        glow:       isLeading ? "shadow-[0_0_32px_rgba(249,115,22,0.18)]" : "",
+        leadBadge:  "border-orange-400/30 bg-orange-400/12 text-orange-300",
+      };
 
   return (
-    <div className="w-[214px] shrink-0 sm:w-[250px] xl:w-full xl:max-w-[300px]">
-      <div
-        className={`rounded-t-[24px] px-5 pb-4 pt-3.5 text-center text-base font-black text-white sm:rounded-t-[28px] sm:px-6 sm:pb-5 sm:pt-4 sm:text-lg ${palette.top} ${palette.topShadow}`}
-      >
-        <span className="block truncate">{teamName}</span>
-      </div>
+    <div className={`relative overflow-hidden rounded-[1.6rem] border transition-all duration-300 ${palette.card} ${palette.glow}`}>
+      {/* Accent top bar */}
+      <div className={`h-[3px] w-full ${palette.bar}`} />
 
-      <div className="relative -mt-1 rounded-b-[24px] border-t-4 border-slate-500/30 bg-[linear-gradient(180deg,#ece8e2_0%,#d9d4cc_100%)] px-5 py-3.5 shadow-[0_10px_25px_rgba(0,0,0,0.18)] sm:rounded-b-[28px] sm:px-6 sm:py-4">
-        <button
-          type="button"
-          onClick={onIncrease}
-          className={`absolute left-[-1px] top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-3xl font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 sm:h-[58px] sm:w-[58px] sm:text-[36px] ${palette.ring} ${palette.circle}`}
-          aria-label="زيادة النقاط"
-        >
-          +
-        </button>
-
-        <div className="text-center text-[26px] font-black leading-none text-slate-800 sm:text-[28px]">
-          {score}
+      {/* Leading crown */}
+      {isLeading && (
+        <div className={`absolute right-2.5 top-3 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-black ${palette.leadBadge}`}>
+          <CrownIcon className="h-3 w-3" />
+          يتصدر
         </div>
+      )}
 
+      <div className="flex items-center gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4">
+        {/* Minus */}
         <button
           type="button"
           onClick={onDecrease}
-          className={`absolute right-[-1px] top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full text-3xl font-black text-white ring-4 transition duration-150 hover:scale-105 active:scale-95 sm:h-[58px] sm:w-[58px] sm:text-[36px] ${palette.ring} ${palette.circle}`}
           aria-label="تقليل النقاط"
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-black transition active:scale-90 sm:h-11 sm:w-11 ${palette.btnMinus}`}
         >
-          −
+          <MinusIcon className="h-4 w-4" />
+        </button>
+
+        {/* Name + Score */}
+        <div className="min-w-0 flex-1 text-center">
+          <div className={`truncate text-[11px] font-bold sm:text-xs ${palette.name}`}>{teamName}</div>
+          <div className={`text-3xl font-black leading-none sm:text-4xl ${palette.score}`}>{score}</div>
+        </div>
+
+        {/* Plus */}
+        <button
+          type="button"
+          onClick={onIncrease}
+          aria-label="زيادة النقاط"
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-black transition active:scale-90 sm:h-11 sm:w-11 ${palette.btnPlus}`}
+        >
+          <PlusIcon className="h-4 w-4" />
         </button>
       </div>
     </div>
   );
 }
 
-// ─── Board: QuestionTile ──────────────────────────────────────────────────────
+// ─── QuestionTile (logic unchanged, visual improved) ─────────────────────────
 
 function QuestionTile({
   question,
@@ -255,23 +258,18 @@ function QuestionTile({
   result?: QuestionResult;
   onOpen?: () => void;
 }) {
-  const pointsColors = {
-    bg: "bg-[linear-gradient(160deg,#6b7280_0%,#4b5563_100%)]",
-    text: "text-white",
-    glow:
-      "shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_16px_rgba(17,24,39,0.38)]",
-    hover:
-      "hover:brightness-110 hover:shadow-[0_6px_24px_rgba(17,24,39,0.45)]",
-    border: "border-[#9ca3af]/25",
-  };
+  // Point-level color config
+  const ptCfg = points === 200
+    ? { idle: "bg-[linear-gradient(180deg,#1faf2a_0%,#126e18_100%)] border-[#1faf2a]/30 shadow-[0_4px_0_rgba(10,80,10,0.50)]", label: "text-white" }
+    : points === 400
+    ? { idle: "bg-[linear-gradient(180deg,#8b5cf6_0%,#6d28d9_100%)] border-violet-400/30 shadow-[0_4px_0_rgba(90,30,180,0.45)]", label: "text-white" }
+    : { idle: "bg-[linear-gradient(180deg,#f6c72b_0%,#ca9a10_100%)] border-yellow-300/30 shadow-[0_4px_0_rgba(120,90,0,0.45)]", label: "text-slate-900" };
 
-  const base =
-    "relative flex w-full items-center justify-center rounded-xl border font-black transition-all duration-200 select-none" +
-    " h-12 text-lg sm:h-14 sm:text-xl md:h-16 md:text-2xl";
+  const base = "relative flex w-full items-center justify-center rounded-xl border-2 font-black transition-all duration-150 select-none h-11 text-lg sm:h-12 sm:text-xl md:h-14";
 
   if (!question) {
     return (
-      <div className={`${base} border-white/5 bg-white/[0.03] text-white/15`}>
+      <div className={`${base} border-white/4 bg-white/[0.025] text-white/12`}>
         {points}
       </div>
     );
@@ -280,49 +278,43 @@ function QuestionTile({
   if (used) {
     if (result === "teamOne") {
       return (
-        <div
-          className={`${base} border-cyan-400/30 bg-[linear-gradient(160deg,#0277bd_0%,#01579b_100%)] text-white shadow-[inset_0_0_20px_rgba(79,195,247,0.12),0_4px_16px_rgba(2,119,189,0.40)]`}
-        >
-          <span className="absolute right-1.5 top-1 text-[10px] text-cyan-300/70 sm:text-xs">✓</span>
-          {points}
+        <div className={`${base} border-cyan-400/25 bg-[linear-gradient(160deg,rgba(2,119,189,0.85)_0%,rgba(1,87,155,0.90)_100%)] text-white/90`}>
+          <span className="absolute left-1.5 top-1 text-[9px] text-cyan-300/60 sm:text-[10px]">✓</span>
+          <span className="opacity-80">{points}</span>
         </div>
       );
     }
-
     if (result === "teamTwo") {
       return (
-        <div
-          className={`${base} border-orange-400/30 bg-[linear-gradient(160deg,#e65100_0%,#bf360c_100%)] text-white shadow-[inset_0_0_20px_rgba(255,183,77,0.12),0_4px_16px_rgba(230,81,0,0.40)]`}
-        >
-          <span className="absolute right-1.5 top-1 text-[10px] text-orange-300/70 sm:text-xs">✓</span>
-          {points}
+        <div className={`${base} border-orange-400/25 bg-[linear-gradient(160deg,rgba(230,81,0,0.85)_0%,rgba(191,54,12,0.90)_100%)] text-white/90`}>
+          <span className="absolute left-1.5 top-1 text-[9px] text-orange-300/60 sm:text-[10px]">✓</span>
+          <span className="opacity-80">{points}</span>
         </div>
       );
     }
-
+    // none
     return (
-      <div
-        className={`${base} border-white/5 bg-[linear-gradient(160deg,#0f1c3a_0%,#090f22_100%)] text-white/25 line-through decoration-2`}
-      >
+      <div className={`${base} border-white/4 bg-[linear-gradient(160deg,rgba(10,16,38,0.60)_0%,rgba(5,8,20,0.70)_100%)] text-white/18 line-through`}>
         {points}
       </div>
     );
   }
 
+  // Available — clickable
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={`${base} ${pointsColors.bg} ${pointsColors.glow} ${pointsColors.hover} ${pointsColors.border}`}
+      className={`${base} ${ptCfg.idle} hover:brightness-110 active:scale-[0.96] active:brightness-95`}
     >
-      <span className={`${pointsColors.text} [text-shadow:0_1px_0_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.45)]`}>
+      <span className={`${ptCfg.label} [text-shadow:0_1px_0_rgba(0,0,0,0.20)]`}>
         {points}
       </span>
     </button>
   );
 }
 
-// ─── Board: CategoryCard ──────────────────────────────────────────────────────
+// ─── CategoryCard (logic unchanged, visual rebuilt) ───────────────────────────
 
 function CategoryCard({
   column,
@@ -333,15 +325,16 @@ function CategoryCard({
   boardState: BoardState;
   onOpenQuestion: (question: QuestionRow | null) => void;
 }) {
+  // ── Logic (completely unchanged) ──
   const row200 = column.rows[0];
   const row400 = column.rows[1];
   const row600 = column.rows[2];
 
-  const left200 = row200?.questions[0] ?? null;
+  const left200  = row200?.questions[0] ?? null;
   const right200 = row200?.questions[1] ?? null;
-  const left400 = row400?.questions[0] ?? null;
+  const left400  = row400?.questions[0] ?? null;
   const right400 = row400?.questions[1] ?? null;
-  const left600 = row600?.questions[0] ?? null;
+  const left600  = row600?.questions[0] ?? null;
   const right600 = row600?.questions[1] ?? null;
 
   function getUsed(question: QuestionRow | null) {
@@ -357,84 +350,89 @@ function CategoryCard({
     (q) => q && boardState.usedQuestionIds.includes(q.id),
   ).length;
   const totalInCategory = allTiles.filter(Boolean).length;
+  const pct = totalInCategory > 0 ? (usedInCategory / totalInCategory) * 100 : 0;
+  const isDone = totalInCategory > 0 && usedInCategory >= totalInCategory;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(8,22,54,0.72)_0%,rgba(4,12,32,0.86)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.50)] backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5">
+    <div className={`group flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 ${
+      isDone
+        ? "border-white/5 opacity-70"
+        : "border-white/10 hover:-translate-y-0.5 hover:border-cyan-400/25 hover:shadow-[0_12px_40px_rgba(34,211,238,0.10)]"
+    } bg-[linear-gradient(160deg,rgba(6,16,42,0.95)_0%,rgba(3,9,26,0.98)_100%)] shadow-[0_6px_28px_rgba(0,0,0,0.45)]`}>
+
+      {/* ── Image header ── */}
       <div className="relative overflow-hidden">
         {column.category.image_url ? (
           <>
             <img
               src={column.category.image_url}
               alt={column.category.name}
-              className="h-[5.5rem] w-full object-cover object-center sm:h-[6.5rem] md:h-[7.5rem]"
+              className="h-32 w-full object-cover object-center transition duration-500 group-hover:scale-[1.04] sm:h-36 md:h-40"
+              loading="lazy"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,14,38,0.90)] via-[rgba(5,14,38,0.30)] to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(3,9,26,0.96)] via-[rgba(3,9,26,0.25)] to-transparent" />
           </>
         ) : (
-          <div className="h-[5.5rem] w-full bg-[linear-gradient(135deg,#0d2060,#05143a)] sm:h-[6.5rem] md:h-[7.5rem]" />
+          <div className="h-32 w-full bg-[linear-gradient(135deg,#061a50,#030d2e)] sm:h-36 md:h-40" />
         )}
 
+        {/* Progress bar at top */}
         {totalInCategory > 0 && (
-          <div className="absolute top-0 inset-x-0 h-[3px] bg-white/10">
+          <div className="absolute inset-x-0 top-0 h-[3px] bg-white/8">
             <div
-              className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-500"
-              style={{ width: `${(usedInCategory / totalInCategory) * 100}%` }}
+              className={`h-full transition-all duration-700 ${pct >= 100 ? "bg-white/20" : "bg-gradient-to-r from-cyan-400 to-teal-400"}`}
+              style={{ width: `${pct}%` }}
             />
           </div>
         )}
 
-        <div className="absolute bottom-0 inset-x-0 px-3 pb-2.5 pt-6">
-          <div className="truncate text-center text-sm font-black text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-base md:text-lg">
+        {/* Category name overlay */}
+        <div className="absolute inset-x-0 bottom-0 px-2.5 pb-2">
+          <div className="truncate text-center text-sm font-black text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)] sm:text-[15px] md:text-base">
             {column.category.name}
           </div>
         </div>
+
+        {/* Done overlay */}
+        {isDone && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[1px]">
+            <span className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-black text-white/55">
+              مكتملة
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5 p-2 sm:gap-2 sm:p-2.5">
-        <QuestionTile
-          question={left200}
-          points={200}
-          used={getUsed(left200)}
-          result={getResult(left200)}
-          onOpen={() => onOpenQuestion(left200)}
-        />
-        <QuestionTile
-          question={right200}
-          points={200}
-          used={getUsed(right200)}
-          result={getResult(right200)}
-          onOpen={() => onOpenQuestion(right200)}
-        />
+      {/* ── Cyan name bar ── */}
+      <div className="bg-[linear-gradient(180deg,#2eadc4_0%,#1a8fa8_100%)] px-2 py-2 text-center text-[12px] font-black text-white shadow-[0_-1px_0_rgba(0,0,0,0.20)] sm:text-[13px]">
+        {column.category.name}
+      </div>
 
-        <QuestionTile
-          question={left400}
-          points={400}
-          used={getUsed(left400)}
-          result={getResult(left400)}
-          onOpen={() => onOpenQuestion(left400)}
-        />
-        <QuestionTile
-          question={right400}
-          points={400}
-          used={getUsed(right400)}
-          result={getResult(right400)}
-          onOpen={() => onOpenQuestion(right400)}
-        />
+      {/* ── Question tiles: 3 rows × 2 cols ── */}
+      <div className="grid grid-cols-2 gap-1 bg-[rgba(3,9,26,0.80)] p-1.5 sm:gap-1.5 sm:p-2">
+        <QuestionTile question={left200}  points={200} used={getUsed(left200)}  result={getResult(left200)}  onOpen={() => onOpenQuestion(left200)} />
+        <QuestionTile question={right200} points={200} used={getUsed(right200)} result={getResult(right200)} onOpen={() => onOpenQuestion(right200)} />
+        <QuestionTile question={left400}  points={400} used={getUsed(left400)}  result={getResult(left400)}  onOpen={() => onOpenQuestion(left400)} />
+        <QuestionTile question={right400} points={400} used={getUsed(right400)} result={getResult(right400)} onOpen={() => onOpenQuestion(right400)} />
+        <QuestionTile question={left600}  points={600} used={getUsed(left600)}  result={getResult(left600)}  onOpen={() => onOpenQuestion(left600)} />
+        <QuestionTile question={right600} points={600} used={getUsed(right600)} result={getResult(right600)} onOpen={() => onOpenQuestion(right600)} />
+      </div>
 
-        <QuestionTile
-          question={left600}
-          points={600}
-          used={getUsed(left600)}
-          result={getResult(left600)}
-          onOpen={() => onOpenQuestion(left600)}
-        />
-        <QuestionTile
-          question={right600}
-          points={600}
-          used={getUsed(right600)}
-          result={getResult(right600)}
-          onOpen={() => onOpenQuestion(right600)}
-        />
+      {/* ── Footer legend ── */}
+      <div className="flex items-center justify-between bg-[rgba(3,9,26,0.80)] border-t border-white/5 px-2.5 py-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#1faf2a]" />
+          <span className="text-[9px] font-bold text-white/25 sm:text-[10px]">٢٠٠</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+          <span className="text-[9px] font-bold text-white/25 sm:text-[10px]">٤٠٠</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+          <span className="text-[9px] font-bold text-white/25 sm:text-[10px]">٦٠٠</span>
+        </div>
+        <div className="text-[9px] font-bold text-white/18 sm:text-[10px]">{usedInCategory}/{totalInCategory}</div>
       </div>
     </div>
   );
@@ -461,6 +459,7 @@ export default function GameBoardClient({
   const [boardState, setBoardState] = useState<BoardState>(initialState);
   const saveTimeoutRef = useRef<number | null>(null);
 
+  // ── Load local state (unchanged) ──
   useEffect(() => {
     const localState = readLocalBoardState(storageKey);
     if (localState && localState.savedAt >= initialState.savedAt) {
@@ -470,46 +469,32 @@ export default function GameBoardClient({
     }
   }, [initialState, storageKey]);
 
+  // ── Persist state (unchanged) ──
   useEffect(() => {
     writeLocalBoardState(storageKey, boardState);
-
-    if (saveTimeoutRef.current) {
-      window.clearTimeout(saveTimeoutRef.current);
-    }
-
+    if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = window.setTimeout(async () => {
       await supabase
         .from("game_sessions")
         .update({
-          board_state: {
-            ...boardState,
-            savedAt: boardState.savedAt || Date.now(),
-          },
+          board_state: { ...boardState, savedAt: boardState.savedAt || Date.now() },
         })
         .eq("id", sessionId);
     }, 350);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        window.clearTimeout(saveTimeoutRef.current);
-      }
-    };
+    return () => { if (saveTimeoutRef.current) window.clearTimeout(saveTimeoutRef.current); };
   }, [boardState, sessionId, storageKey, supabase]);
 
+  // ── boardColumns (unchanged) ──
   const boardColumns = useMemo<CategoryColumn[]>(() => {
     const pointsList: (200 | 400 | 600)[] = [200, 400, 600];
-
     return categories.map((category) => {
-      const categoryQuestions = questions.filter(
-        (question) => question.category_id === category.id,
-      );
-
+      const categoryQuestions = questions.filter((q) => q.category_id === category.id);
       return {
         category,
         rows: pointsList.map((points) => ({
           points,
           questions: categoryQuestions
-            .filter((question) => question.points === points)
+            .filter((q) => q.points === points)
             .sort((a, b) => a.id.localeCompare(b.id))
             .slice(0, 2),
         })),
@@ -517,12 +502,12 @@ export default function GameBoardClient({
     });
   }, [categories, questions]);
 
+  // ── Derived state (unchanged) ──
   const usedCount = boardState.usedQuestionIds.length;
 
   const remainingCount = Math.max(
     boardColumns.reduce(
-      (sum, column) =>
-        sum + column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
+      (sum, column) => sum + column.rows.reduce((rowSum, row) => rowSum + row.questions.length, 0),
       0,
     ) - usedCount,
     0,
@@ -530,18 +515,17 @@ export default function GameBoardClient({
 
   const teamOneLeading = boardState.teamOneScore > boardState.teamTwoScore;
   const teamTwoLeading = boardState.teamTwoScore > boardState.teamOneScore;
-  const leaderLabel = teamOneLeading ? teamOne : teamTwoLeading ? teamTwo : "تعادل";
+  const leaderLabel    = teamOneLeading ? teamOne : teamTwoLeading ? teamTwo : "تعادل";
 
-  const activeTurn = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurn     = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
   const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
 
+  // ── Auto-redirect (unchanged) ──
   useEffect(() => {
     if (remainingCount !== 0) return;
     if (hasRedirectedToResult) return;
     if (questions.length === 0) return;
-
     setHasRedirectedToResult(true);
-
     const params = new URLSearchParams({
       sessionId,
       gameName,
@@ -550,28 +534,15 @@ export default function GameBoardClient({
       teamOneScore: String(boardState.teamOneScore),
       teamTwoScore: String(boardState.teamTwoScore),
     });
-
     router.push(`/game/result?${params.toString()}`);
-  }, [
-    remainingCount,
-    hasRedirectedToResult,
-    questions.length,
-    sessionId,
-    gameName,
-    teamOne,
-    teamTwo,
-    boardState.teamOneScore,
-    boardState.teamTwoScore,
-    router,
-  ]);
+  }, [remainingCount, hasRedirectedToResult, questions.length, sessionId, gameName, teamOne, teamTwo, boardState.teamOneScore, boardState.teamTwoScore, router]);
 
+  // ── State updater (unchanged) ──
   function updateState(updater: (prev: BoardState) => BoardState) {
-    setBoardState((prev) => ({
-      ...updater(prev),
-      savedAt: Date.now(),
-    }));
+    setBoardState((prev) => ({ ...updater(prev), savedAt: Date.now() }));
   }
 
+  // ── Handlers (unchanged) ──
   function handleOpenQuestion(question: QuestionRow | null) {
     if (!question) return;
     if (boardState.usedQuestionIds.includes(question.id)) return;
@@ -581,7 +552,6 @@ export default function GameBoardClient({
   function handleFinishGame() {
     if (hasRedirectedToResult) return;
     setHasRedirectedToResult(true);
-
     const params = new URLSearchParams({
       sessionId,
       gameName,
@@ -590,207 +560,141 @@ export default function GameBoardClient({
       teamOneScore: String(boardState.teamOneScore),
       teamTwoScore: String(boardState.teamTwoScore),
     });
-
     router.push(`/game/result?${params.toString()}`);
   }
 
+  // ── Shared score updaters ──
+  const teamOneIncrease = () => updateState((prev) => ({ ...prev, teamOneScore: Math.max(0, prev.teamOneScore + 100) }));
+  const teamOneDecrease = () => updateState((prev) => ({ ...prev, teamOneScore: Math.max(0, prev.teamOneScore - 100) }));
+  const teamTwoIncrease = () => updateState((prev) => ({ ...prev, teamTwoScore: Math.max(0, prev.teamTwoScore + 100) }));
+  const teamTwoDecrease = () => updateState((prev) => ({ ...prev, teamTwoScore: Math.max(0, prev.teamTwoScore - 100) }));
+
   return (
-    <main className="min-h-screen text-white">
-      <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 lg:px-6">
-        <div className="mb-4 rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-4 shadow-[0_18px_60px_rgba(2,6,23,0.50)] backdrop-blur-sm sm:mb-5 sm:rounded-[30px] sm:px-5 sm:py-5">
-  <div className="xl:hidden">
-    <div className="flex flex-col items-center gap-4">
-      <div className="text-center">
-        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55">
-          لوحة اللعبة
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] text-white">
+
+      {/* Subtle grid overlay */}
+      <div className="pointer-events-none fixed inset-0 opacity-[0.018] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:60px_60px]" />
+
+      <div className="relative mx-auto w-full max-w-[1640px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5">
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* CONTROL PANEL                                                      */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="relative mb-3 overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(160deg,rgba(8,16,40,0.98)_0%,rgba(4,8,24,0.99)_100%)] sm:mb-4">
+          {/* Top accent line */}
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/45 to-transparent" />
+
+          {/* Glow blobs */}
+          <div className="pointer-events-none absolute -top-12 left-1/4 h-28 w-52 rounded-full bg-cyan-500/8 blur-2xl" />
+          <div className="pointer-events-none absolute -top-12 right-1/4 h-28 w-52 rounded-full bg-orange-500/6 blur-2xl" />
+
+          <div className="relative px-4 py-3 sm:px-5 sm:py-4">
+
+            {/* ── Top bar: game title + status pills + actions ── */}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+
+              {/* Left: game name */}
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/8">
+                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-cyan-400" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="4" y="8" width="16" height="8" rx="3"/><path d="M8 12h2M9 11v2M16.5 12h.01M18.5 12h.01"/></svg>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/30">لوحة اللعبة</div>
+                  <h1 className="text-base font-black text-white sm:text-lg">{gameName}</h1>
+                </div>
+              </div>
+
+              {/* Center: status pills */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Active turn */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
+                  <GamepadIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  الدور: {activeTurnName}
+                </div>
+
+                {/* Leader */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
+                  <CrownIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  {leaderLabel}
+                </div>
+
+                {/* Remaining */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
+                  {remainingCount} متبقي
+                </div>
+              </div>
+
+              {/* Right: action buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleFinishGame}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-3 py-2 text-[11px] font-black text-white shadow-[0_3px_0_rgba(109,12,55,0.45)] transition hover:brightness-110 active:scale-95 sm:px-4 sm:text-xs"
+                >
+                  <FlagIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">إنهاء اللعب</span>
+                  <span className="sm:hidden">إنهاء</span>
+                </button>
+
+                <Link
+                  href="/account"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 active:scale-95 sm:px-4 sm:text-xs"
+                >
+                  <HomeIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">الحساب</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* ── Score controls ── */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <ScoreCard
+                teamName={teamOne}
+                score={boardState.teamOneScore}
+                accent="blue"
+                onIncrease={teamOneIncrease}
+                onDecrease={teamOneDecrease}
+                isLeading={teamOneLeading}
+              />
+              <ScoreCard
+                teamName={teamTwo}
+                score={boardState.teamTwoScore}
+                accent="orange"
+                onIncrease={teamTwoIncrease}
+                onDecrease={teamTwoDecrease}
+                isLeading={teamTwoLeading}
+              />
+            </div>
+          </div>
         </div>
-        <h1 className="mt-1 text-2xl font-black text-white">
-          {gameName}
-        </h1>
-      </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <StatusPill
-          label={`الدور: ${activeTurnName}`}
-          icon={<GamepadIcon className="h-3.5 w-3.5" />}
-        />
-        <StatusPill
-          label={`المتصدر: ${leaderLabel}`}
-          icon={<CrownIcon className="h-3.5 w-3.5" />}
-        />
-        <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
-      </div>
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* GAME BOARD                                                         */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,rgba(3,10,30,0.85)_0%,rgba(2,7,20,0.92)_100%)] p-2.5 shadow-[0_16px_60px_rgba(2,6,23,0.65)] sm:rounded-[2rem] sm:p-3 lg:p-4">
 
-      <div className="flex justify-center">
-        <ScoreControl
-          teamName={teamOne}
-          score={boardState.teamOneScore}
-          accent="blue"
-          onIncrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamOneScore: Math.max(0, prev.teamOneScore + 100),
-            }))
-          }
-          onDecrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamOneScore: Math.max(0, prev.teamOneScore - 100),
-            }))
-          }
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <button
-          type="button"
-          onClick={handleFinishGame}
-          className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95"
-        >
-          <FlagIcon className="h-3.5 w-3.5" />
-          إنهاء اللعب
-        </button>
-
-        <Link
-          href="/account"
-          className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95"
-        >
-          <HomeIcon className="h-3.5 w-3.5" />
-          الرجوع للحساب
-        </Link>
-      </div>
-
-      <div className="flex justify-center">
-        <ScoreControl
-          teamName={teamTwo}
-          score={boardState.teamTwoScore}
-          accent="orange"
-          onIncrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-            }))
-          }
-          onDecrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-            }))
-          }
-        />
-      </div>
-    </div>
-  </div>
-
-  <div className="hidden xl:block">
-    <div className="mb-3 flex items-center justify-center gap-3 sm:mb-4">
-      <div className="text-center">
-        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300/55 sm:text-xs">
-          لوحة اللعبة
-        </div>
-        <h1 className="text-lg font-black text-white sm:text-xl md:text-2xl">
-          {gameName}
-        </h1>
-      </div>
-    </div>
-
-    <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
-      <StatusPill
-        label={`الدور: ${activeTurnName}`}
-        icon={<GamepadIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-      />
-      <StatusPill
-        label={`المتصدر: ${leaderLabel}`}
-        icon={<CrownIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-      />
-      <StatusPill label={`المتبقي: ${remainingCount} سؤال`} />
-
-      <div className="hidden flex-1 xl:block" />
-
-      <button
-        type="button"
-        onClick={handleFinishGame}
-        className="inline-flex items-center gap-1.5 rounded-[16px] bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-4 py-2.5 text-xs font-black text-white shadow-[0_4px_0_rgba(109,12,55,0.45)] transition duration-150 hover:brightness-105 active:scale-95 sm:rounded-[18px] sm:px-6 sm:py-3 sm:text-sm"
-      >
-        <FlagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        إنهاء اللعب
-      </button>
-
-      <Link
-        href="/account"
-        className="inline-flex items-center gap-1.5 rounded-[16px] border border-white/10 bg-white/6 px-4 py-2.5 text-xs font-black text-white transition duration-150 hover:bg-white/10 active:scale-95 sm:rounded-[18px] sm:px-4 sm:py-3 sm:text-sm"
-      >
-        <HomeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        <span className="hidden sm:inline">الرجوع للحساب</span>
-        <span className="sm:hidden">الحساب</span>
-      </Link>
-    </div>
-
-    <div className="grid grid-cols-2 items-start gap-3 sm:gap-5">
-      <div className="flex justify-center sm:justify-start">
-        <ScoreControl
-          teamName={teamOne}
-          score={boardState.teamOneScore}
-          accent="blue"
-          onIncrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamOneScore: Math.max(0, prev.teamOneScore + 100),
-            }))
-          }
-          onDecrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamOneScore: Math.max(0, prev.teamOneScore - 100),
-            }))
-          }
-        />
-      </div>
-
-      <div className="flex justify-center sm:justify-end">
-        <ScoreControl
-          teamName={teamTwo}
-          score={boardState.teamTwoScore}
-          accent="orange"
-          onIncrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamTwoScore: Math.max(0, prev.teamTwoScore + 100),
-            }))
-          }
-          onDecrease={() =>
-            updateState((prev) => ({
-              ...prev,
-              teamTwoScore: Math.max(0, prev.teamTwoScore - 100),
-            }))
-          }
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
-        <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(3,14,38,0.82)_0%,rgba(2,9,24,0.92)_100%)] p-3 shadow-[0_18px_80px_rgba(2,6,23,0.60)] backdrop-blur-sm sm:rounded-[28px] sm:p-4">
-          <div className="mb-3 flex items-center gap-3 px-1 sm:mb-4">
-            <span className="text-xs font-bold text-white/30 sm:text-sm">الفئات</span>
-            <div className="flex-1 h-px bg-white/6" />
-            <div className="flex items-center gap-3 text-[10px] font-bold text-white/30 sm:text-xs">
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#1565c0]" />
+          {/* Legend */}
+          <div className="mb-2.5 flex items-center gap-3 px-0.5 sm:mb-3">
+            <span className="text-[11px] font-bold text-white/28 sm:text-xs">الفئات</span>
+            <div className="h-px flex-1 bg-white/5" />
+            <div className="flex items-center gap-3 text-[9px] font-bold text-white/28 sm:gap-4 sm:text-[11px]">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.50)]" />
                 فريق ١
               </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#e65100]" />
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_6px_rgba(249,115,22,0.50)]" />
                 فريق ٢
               </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded bg-[#0f1c3a]" />
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-white/18" />
                 انتهى
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+          {/* Category grid */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-3">
             {boardColumns.map((column) => (
               <CategoryCard
                 key={column.category.id}
@@ -801,6 +705,7 @@ export default function GameBoardClient({
             ))}
           </div>
         </div>
+
       </div>
     </main>
   );
