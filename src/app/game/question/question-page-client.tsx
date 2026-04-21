@@ -55,22 +55,17 @@ const NONE_AVATAR        = "https://www.svgrepo.com/show/361654/value-none.svg";
 
 // ─── State helpers (unchanged) ────────────────────────────────────────────────
 
-function normalizeBoardState(
-  raw: Record<string, unknown> | null | undefined,
-): BoardState {
+function normalizeBoardState(raw: Record<string, unknown> | null | undefined): BoardState {
   const rawResults =
     raw && typeof raw.questionResults === "object" && raw.questionResults
       ? (raw.questionResults as Record<string, "teamOne" | "teamTwo" | "none">)
       : {};
-
   const questionResults: Record<string, "teamOne" | "teamTwo" | "none"> = {};
-
   for (const [key, value] of Object.entries(rawResults)) {
     if (value === "teamOne" || value === "teamTwo" || value === "none") {
       questionResults[key] = value;
     }
   }
-
   return {
     teamOneScore:     typeof raw?.teamOneScore === "number" ? raw.teamOneScore : 0,
     teamTwoScore:     typeof raw?.teamTwoScore === "number" ? raw.teamTwoScore : 0,
@@ -90,9 +85,7 @@ function readLocalBoardState(storageKey: string): BoardState | null {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return null;
     return normalizeBoardState(JSON.parse(raw) as Record<string, unknown>);
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function writeLocalBoardState(storageKey: string, state: BoardState) {
@@ -115,69 +108,28 @@ function getYearToleranceLabel(question: QuestionRow) {
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function AnswerIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m5 12 5 5L20 7" />
-    </svg>
-  );
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>;
 }
-
-function PlayIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m8 6 10 6-10 6V6Z" />
-    </svg>
-  );
+function PlayIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 6 10 6-10 6V6Z" /></svg>;
 }
-
-function PauseIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 5v14M14 5v14" />
-    </svg>
-  );
+function PauseIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 5v14M14 5v14" /></svg>;
 }
-
-function RefreshIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
-    </svg>
-  );
+function RefreshIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" /></svg>;
 }
-
-function CloseIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m18 6-12 12M6 6l12 12" />
-    </svg>
-  );
-}
-
 function QuestionIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M9.75 9.25a2.5 2.5 0 1 1 4.1 2c-.75.6-1.35 1.05-1.35 2" />
-      <path d="M12 16.5h.01" />
-    </svg>
-  );
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M9.75 9.25a2.5 2.5 0 1 1 4.1 2c-.75.6-1.35 1.05-1.35 2" /><path d="M12 16.5h.01" /></svg>;
 }
-
 function BoardIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" />
-      <rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" />
-    </svg>
-  );
+  return <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>;
 }
 
-// ─── RichContent (unchanged logic, improved empty state) ──────────────────────
+// ─── RichContent (logic unchanged) ───────────────────────────────────────────
 
 function RichContent({ html }: { html: string | null | undefined }) {
   const safeHtml = html?.trim();
-
   if (!safeHtml) {
     return (
       <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-8 text-center text-white/40">
@@ -185,16 +137,15 @@ function RichContent({ html }: { html: string | null | undefined }) {
       </div>
     );
   }
-
   return (
     <div
-      className="question-rich-content [&_img]:mx-auto [&_img]:my-4 [&_img]:max-h-[320px] [&_img]:w-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-white/10 [&_img]:shadow-[0_16px_30px_rgba(0,0,0,0.22)] [&_iframe]:mx-auto [&_iframe]:my-4 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:max-w-3xl [&_iframe]:rounded-2xl [&_iframe]:border [&_iframe]:border-white/10 [&_iframe]:shadow-[0_16px_30px_rgba(0,0,0,0.22)] [&_video]:mx-auto [&_video]:my-4 [&_video]:w-full [&_video]:max-w-3xl [&_video]:rounded-2xl [&_video]:border [&_video]:border-white/10 [&_video]:shadow-[0_16px_30px_rgba(0,0,0,0.22)] [&_p]:my-3 [&_p]:leading-9 [&_ul]:my-4 [&_ul]:space-y-2 [&_li]:leading-8 text-center text-xl font-black text-white md:text-3xl"
+      className="question-rich-content [&_img]:mx-auto [&_img]:my-3 [&_img]:max-h-[260px] [&_img]:w-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-white/10 [&_img]:shadow-[0_12px_24px_rgba(0,0,0,0.28)] [&_iframe]:mx-auto [&_iframe]:my-3 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:max-w-3xl [&_iframe]:rounded-2xl [&_iframe]:border [&_iframe]:border-white/10 [&_video]:mx-auto [&_video]:my-3 [&_video]:w-full [&_video]:max-w-3xl [&_video]:rounded-2xl [&_video]:border [&_video]:border-white/10 [&_p]:my-2 [&_p]:leading-8 [&_ul]:my-3 [&_ul]:space-y-1.5 [&_li]:leading-7 text-center text-xl font-black text-white md:text-2xl lg:text-3xl"
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }
 
-// ─── Timer ring component ──────────────────────────────────────────────────────
+// ─── Timer ring — compact version ────────────────────────────────────────────
 
 function TimerRing({
   timeLeft,
@@ -205,40 +156,41 @@ function TimerRing({
   total?: number;
   running: boolean;
 }) {
-  const pct     = Math.max(0, Math.min(1, timeLeft / total));
-  const radius  = 38;
-  const circ    = 2 * Math.PI * radius;
-  const dash    = pct * circ;
+  const pct    = Math.max(0, Math.min(1, timeLeft / total));
+  const radius = 32;
+  const circ   = 2 * Math.PI * radius;
+  const dash   = pct * circ;
 
   const color =
-    pct > 0.5 ? "#22d3ee"
+    pct > 0.5  ? "#22d3ee"
     : pct > 0.25 ? "#f59e0b"
     : "#ef4444";
 
   return (
-    <div className="relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32">
-      <svg className="absolute inset-0 -rotate-90" viewBox="0 0 96 96" fill="none">
+    <div className="relative flex h-[88px] w-[88px] items-center justify-center sm:h-24 sm:w-24">
+      {/* Outer glow ring */}
+      <div
+        className="absolute inset-0 rounded-full opacity-20 blur-md"
+        style={{ background: `radial-gradient(circle, ${color}40, transparent 70%)` }}
+      />
+      <svg className="absolute inset-0 -rotate-90" viewBox="0 0 80 80" fill="none">
         {/* Track */}
-        <circle cx="48" cy="48" r={radius} stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+        <circle cx="40" cy="40" r={radius} stroke="rgba(255,255,255,0.07)" strokeWidth="5" />
         {/* Progress */}
         <circle
-          cx="48" cy="48" r={radius}
+          cx="40" cy="40" r={radius}
           stroke={color}
-          strokeWidth="6"
+          strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circ}`}
           style={{ transition: "stroke-dasharray 0.9s linear, stroke 0.4s ease" }}
         />
       </svg>
-      {/* Number */}
       <div className="relative text-center">
-        <div
-          className="text-3xl font-black leading-none sm:text-4xl"
-          style={{ color }}
-        >
+        <div className="text-2xl font-black leading-none sm:text-3xl" style={{ color }}>
           {Math.ceil(timeLeft)}
         </div>
-        <div className="mt-0.5 text-[10px] font-bold text-white/30 uppercase tracking-widest">
+        <div className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-white/28">
           {running ? "يعمل" : "متوقف"}
         </div>
       </div>
@@ -310,9 +262,9 @@ export default function QuestionPageClient({
   }, [timerRunning, showAnswer, showWinnerPicker]);
 
   // ── Derived state (unchanged) ──
-  const usedCount       = boardState.usedQuestionIds.length;
-  const activeTurn      = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
-  const activeTurnName  = activeTurn === "teamOne" ? teamOne : teamTwo;
+  const usedCount      = boardState.usedQuestionIds.length;
+  const activeTurn     = (usedCount + 1) % 2 === 1 ? "teamOne" : "teamTwo";
+  const activeTurnName = activeTurn === "teamOne" ? teamOne : teamTwo;
   const yearToleranceLabel = getYearToleranceLabel(question);
 
   function updateState(updater: (prev: BoardState) => BoardState) {
@@ -328,7 +280,6 @@ export default function QuestionPageClient({
     awardLockedRef.current = true;
     setModalBusy(true);
     setTimerRunning(false);
-
     updateState((prev) => {
       if (prev.usedQuestionIds.includes(question.id)) return prev;
       return {
@@ -343,11 +294,10 @@ export default function QuestionPageClient({
         timeLeft:         QUESTION_TIMER_SECONDS,
       };
     });
-
     router.push(`/game/board?sessionId=${sessionId}`);
   }
 
-  // ── Phase label ──
+  // ── Phase ──
   const phaseLabel = !showAnswer && !showWinnerPicker
     ? "السؤال"
     : showAnswer && !showWinnerPicker
@@ -355,143 +305,148 @@ export default function QuestionPageClient({
       : "تحديد الفريق الفائز";
 
   const phaseColor = !showAnswer && !showWinnerPicker
-    ? "text-white"
+    ? "text-white/60"
     : showAnswer && !showWinnerPicker
       ? "text-emerald-300"
       : "text-amber-300";
 
+  // Points styling
+  const pts = question.points;
+  const ptsStyle =
+    pts === 200 ? { bg: "bg-[#1b7001]/12 border-[#1b7001]/30", text: "text-[#6dbf47]" }
+    : pts === 400 ? { bg: "bg-violet-400/10 border-violet-400/25", text: "text-violet-300" }
+    : { bg: "bg-yellow-400/10 border-yellow-400/25", text: "text-yellow-300" };
+
   return (
-    <main className="min-h-screen text-white">
-      <div className="mx-auto max-w-4xl px-3 py-4 sm:px-5 sm:py-6 md:px-6">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_55%,#020814_100%)] text-white">
 
-        {/* ── Score + Timer strip ──────────────────────────────────────── */}
-        <section className="mb-4 overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,rgba(8,16,38,1)_0%,rgba(5,10,26,1)_100%)] sm:mb-5">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2 px-3 py-4 sm:gap-4 sm:px-5 sm:py-5">
+      {/* Subtle grid */}
+      <div className="pointer-events-none fixed inset-0 opacity-[0.018] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:64px_64px]" />
 
-            {/* ── Team Two (برتقالي) — يمين ── */}
-            <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(20,12,6,0.95)_0%,rgba(10,6,3,0.98)_100%)]">
-              <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 sm:gap-2 sm:px-4 sm:py-5">
-                <div className="relative">
+      <div className="relative mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* SCORE + TIMER STRIP                                               */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <section className="relative mb-3 overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,rgba(8,16,38,1)_0%,rgba(5,10,26,1)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.40)]">
+          {/* Top accent line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 sm:py-3.5">
+
+            {/* ── Team Two (برتقالي) ── */}
+            <div className="relative overflow-hidden rounded-2xl border border-orange-400/14 bg-[linear-gradient(160deg,rgba(28,14,6,0.96)_0%,rgba(10,5,2,0.98)_100%)]">
+              <div className="absolute inset-x-0 bottom-0 h-px bg-orange-400/15" />
+              <div className="flex items-center gap-2.5 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
+                <div className="relative shrink-0">
                   <img
                     src={TEAM_ORANGE_AVATAR}
                     alt={teamTwo}
-                    className="h-12 w-12 rounded-full object-cover ring-2 ring-orange-400/30 sm:h-14 sm:w-14"
+                    className="h-11 w-11 rounded-full object-cover ring-2 ring-orange-400/35 sm:h-13 sm:w-13"
                   />
-                  <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[rgba(10,6,3,0.98)] bg-orange-400" />
+                  <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[rgba(10,5,2,0.98)] bg-orange-400" />
                 </div>
-                <div className="max-w-[80px] truncate text-center text-xs font-bold text-orange-300/80 sm:max-w-[120px] sm:text-sm">
-                  {teamTwo}
-                </div>
-                <div className="text-2xl font-black text-white sm:text-3xl md:text-4xl">
-                  {boardState.teamTwoScore}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[11px] font-bold text-orange-300/70 sm:text-xs">{teamTwo}</div>
+                  <div className="text-2xl font-black text-white sm:text-3xl">{boardState.teamTwoScore}</div>
                 </div>
               </div>
             </div>
 
-            {/* ── Timer — وسط ── */}
-            <div className="flex flex-col items-center justify-center gap-2">
+            {/* ── Timer center ── */}
+            <div className="flex flex-col items-center gap-1.5">
               <TimerRing
                 timeLeft={boardState.timeLeft}
                 total={QUESTION_TIMER_SECONDS}
                 running={timerRunning && !showAnswer && !showWinnerPicker}
               />
 
-              {/* Turn indicator */}
-              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-center text-[10px] font-bold text-white/55 sm:text-xs">
+              {/* Turn pill */}
+              <div className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-center text-[10px] font-bold text-white/50 sm:px-3 sm:text-xs">
                 الدور: <span className="text-white/80">{activeTurnName}</span>
               </div>
 
-              {/* Timer controls — visible only on question phase */}
+              {/* Timer controls */}
               {!showAnswer && !showWinnerPicker && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setTimerRunning((prev) => !prev)}
                     aria-label={timerRunning ? "إيقاف الوقت" : "تشغيل الوقت"}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 active:scale-95"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white active:scale-95"
                   >
-                    {timerRunning ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
+                    {timerRunning ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="h-3.5 w-3.5" />}
                   </button>
-
                   <button
                     type="button"
                     onClick={handleResetTimer}
                     aria-label="إعادة ضبط الوقت"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 active:scale-95"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white active:scale-95"
                   >
-                    <RefreshIcon className="h-4 w-4" />
+                    <RefreshIcon className="h-3.5 w-3.5" />
                   </button>
                 </div>
               )}
             </div>
 
-            {/* ── Team One (أزرق) — يسار ── */}
-            <div className="overflow-hidden rounded-2xl border border-white/8 bg-[linear-gradient(180deg,rgba(6,14,34,0.95)_0%,rgba(3,7,20,0.98)_100%)]">
-              <div className="flex flex-col items-center justify-center gap-1.5 px-3 py-4 sm:gap-2 sm:px-4 sm:py-5">
-                <div className="relative">
+            {/* ── Team One (أزرق) ── */}
+            <div className="relative overflow-hidden rounded-2xl border border-cyan-400/14 bg-[linear-gradient(160deg,rgba(6,14,34,0.96)_0%,rgba(3,7,20,0.98)_100%)]">
+              <div className="absolute inset-x-0 bottom-0 h-px bg-cyan-400/15" />
+              <div className="flex flex-row-reverse items-center gap-2.5 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
+                <div className="relative shrink-0">
                   <img
                     src={TEAM_BLUE_AVATAR}
                     alt={teamOne}
-                    className="h-12 w-12 rounded-full object-cover ring-2 ring-cyan-400/30 sm:h-14 sm:w-14"
+                    className="h-11 w-11 rounded-full object-cover ring-2 ring-cyan-400/35 sm:h-13 sm:w-13"
                   />
-                  <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[rgba(3,7,20,0.98)] bg-cyan-400" />
+                  <div className="absolute -bottom-0.5 -left-0.5 h-3 w-3 rounded-full border-2 border-[rgba(3,7,20,0.98)] bg-cyan-400" />
                 </div>
-                <div className="max-w-[80px] truncate text-center text-xs font-bold text-cyan-300/80 sm:max-w-[120px] sm:text-sm">
-                  {teamOne}
-                </div>
-                <div className="text-2xl font-black text-white sm:text-3xl md:text-4xl">
-                  {boardState.teamOneScore}
+                <div className="min-w-0 flex-1 text-right">
+                  <div className="truncate text-[11px] font-bold text-cyan-300/70 sm:text-xs">{teamOne}</div>
+                  <div className="text-2xl font-black text-white sm:text-3xl">{boardState.teamOneScore}</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Main content card ────────────────────────────────────────── */}
-        <section className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,rgba(16,27,52,0.97)_0%,rgba(6,12,28,0.99)_100%)] shadow-[0_20px_50px_rgba(0,0,0,0.32)]">
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* MAIN QUESTION CARD                                                */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <section className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(160deg,rgba(12,22,48,0.97)_0%,rgba(5,10,24,0.99)_100%)] shadow-[0_16px_50px_rgba(0,0,0,0.38)]">
 
-          {/* Card header */}
-          <div className="border-b border-white/8 bg-white/[0.03] px-4 py-4 sm:px-6">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-
-              {/* Category badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-bold text-white/50">
+          {/* Card header — compact pill row */}
+          <div className="flex items-center justify-between border-b border-white/6 bg-white/[0.025] px-4 py-2.5 sm:px-6">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Category */}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold text-white/45">
                 <span className="h-1 w-1 rounded-full bg-cyan-400" />
                 {category?.name ?? "فئة"}
               </span>
 
-              {/* Points badge */}
-              {(() => {
-                const pts = question.points;
-                const color =
-                  pts === 200 ? "border-[#1b7001]/30 bg-[#1b7001]/10 text-[#6dbf47]"
-                  : pts === 400 ? "border-violet-400/25 bg-violet-400/10 text-violet-300"
-                  : "border-yellow-400/25 bg-yellow-400/10 text-yellow-300";
-                return (
-                  <span className={`rounded-full border px-3.5 py-1.5 text-xs font-black ${color}`}>
-                    {pts} نقطة
-                  </span>
-                );
-              })()}
-
-              {/* Phase badge */}
-              <span className={`rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-black ${phaseColor}`}>
-                {phaseLabel}
+              {/* Points */}
+              <span className={`rounded-full border px-3 py-1 text-[11px] font-black ${ptsStyle.bg} ${ptsStyle.text}`}>
+                {pts} نقطة
               </span>
             </div>
+
+            {/* Phase */}
+            <span className={`rounded-full border border-white/8 bg-white/[0.03] px-3 py-1 text-[11px] font-black ${phaseColor}`}>
+              {phaseLabel}
+            </span>
           </div>
 
           {/* Card body */}
-          <div className="px-4 py-8 sm:px-6 sm:py-10 md:px-8">
+          <div className="px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-7">
 
             {/* ── Phase: Question ── */}
             {!showAnswer && !showWinnerPicker && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <RichContent html={question.question_text} />
                 {yearToleranceLabel && (
                   <div className="flex justify-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/8 px-4 py-2 text-xs font-black text-amber-300 sm:text-sm">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-400/15 text-[11px]">±</span>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/8 px-4 py-1.5 text-xs font-black text-amber-300">
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400/15 text-[10px]">±</span>
                       {yearToleranceLabel}
                     </div>
                   </div>
@@ -501,19 +456,17 @@ export default function QuestionPageClient({
 
             {/* ── Phase: Answer ── */}
             {showAnswer && !showWinnerPicker && (
-              <div className="space-y-4">
-                {/* Answer label bar */}
-                <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-2.5">
+              <div className="space-y-3">
+                {/* Answer label */}
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-2">
                   <AnswerIcon className="h-4 w-4 text-emerald-400" />
                   <span className="text-sm font-black text-emerald-300">الإجابة الصحيحة</span>
                 </div>
-
                 <RichContent html={question.answer_text} />
-
                 {yearToleranceLabel && (
                   <div className="flex justify-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/8 px-4 py-2 text-xs font-black text-amber-300 sm:text-sm">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-400/15 text-[11px]">±</span>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/8 px-4 py-1.5 text-xs font-black text-amber-300">
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-400/15 text-[10px]">±</span>
                       {yearToleranceLabel}
                     </div>
                   </div>
@@ -524,10 +477,9 @@ export default function QuestionPageClient({
             {/* ── Phase: Winner picker ── */}
             {showWinnerPicker && (
               <div>
-                <h3 className="mb-6 text-center text-xl font-black text-white sm:text-2xl md:text-3xl">
+                <h3 className="mb-4 text-center text-lg font-black text-white sm:text-xl md:text-2xl">
                   أي فريق جاوب صح؟
                 </h3>
-
                 <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
 
                   {/* الفريق الأزرق */}
@@ -535,14 +487,14 @@ export default function QuestionPageClient({
                     type="button"
                     onClick={() => handleAwardPoints("teamOne")}
                     disabled={modalBusy}
-                    className="group relative overflow-hidden rounded-[1.5rem] border border-cyan-400/20 bg-[linear-gradient(160deg,rgba(7,45,67,0.94)_0%,rgba(4,15,28,0.98)_100%)] p-5 text-white shadow-[0_16px_35px_rgba(34,211,238,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/35 hover:shadow-[0_20px_40px_rgba(34,211,238,0.14)] disabled:opacity-50 active:scale-[0.98]"
+                    className="group relative overflow-hidden rounded-[1.4rem] border border-cyan-400/20 bg-[linear-gradient(160deg,rgba(6,38,60,0.96)_0%,rgba(3,12,28,0.98)_100%)] p-4 text-white transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:shadow-[0_16px_36px_rgba(34,211,238,0.16)] disabled:opacity-50 active:scale-[0.98]"
                   >
-                    <div className="absolute inset-x-0 top-0 h-[2px] bg-cyan-400 opacity-60" />
-                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-cyan-400/20 bg-cyan-400/10">
-                      <img src={TEAM_BLUE_AVATAR} alt={teamOne} className="h-12 w-12 object-contain" />
+                    <div className="absolute inset-x-0 top-0 h-[2px] bg-cyan-400 opacity-65" />
+                    <div className="mx-auto mb-2.5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-cyan-400/25 bg-cyan-400/10 shadow-[0_0_18px_rgba(34,211,238,0.15)]">
+                      <img src={TEAM_BLUE_AVATAR} alt={teamOne} className="h-11 w-11 object-contain" />
                     </div>
-                    <div className="text-lg font-black sm:text-xl">{teamOne}</div>
-                    <div className="mt-1 text-sm font-bold text-cyan-400/70">{boardState.teamOneScore} نقطة</div>
+                    <div className="text-base font-black sm:text-lg">{teamOne}</div>
+                    <div className="mt-0.5 text-xs font-bold text-cyan-400/65">{boardState.teamOneScore} نقطة</div>
                   </button>
 
                   {/* لا أحد */}
@@ -550,13 +502,13 @@ export default function QuestionPageClient({
                     type="button"
                     onClick={() => handleAwardPoints("none")}
                     disabled={modalBusy}
-                    className="group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] p-5 text-white shadow-[0_16px_35px_rgba(255,255,255,0.03)] transition duration-200 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/8 disabled:opacity-50 active:scale-[0.98]"
+                    className="group relative overflow-hidden rounded-[1.4rem] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)] p-4 text-white transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/6 disabled:opacity-50 active:scale-[0.98]"
                   >
-                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
-                      <img src={NONE_AVATAR} alt="لا أحد" className="h-10 w-10 object-contain opacity-50" />
+                    <div className="mx-auto mb-2.5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
+                      <img src={NONE_AVATAR} alt="لا أحد" className="h-10 w-10 object-contain opacity-45" />
                     </div>
-                    <div className="text-lg font-black text-white/60 sm:text-xl">لا أحد</div>
-                    <div className="mt-1 text-sm font-bold text-white/25">بدون نقاط</div>
+                    <div className="text-base font-black text-white/55 sm:text-lg">لا أحد</div>
+                    <div className="mt-0.5 text-xs font-bold text-white/22">بدون نقاط</div>
                   </button>
 
                   {/* الفريق البرتقالي */}
@@ -564,38 +516,37 @@ export default function QuestionPageClient({
                     type="button"
                     onClick={() => handleAwardPoints("teamTwo")}
                     disabled={modalBusy}
-                    className="group relative overflow-hidden rounded-[1.5rem] border border-orange-400/20 bg-[linear-gradient(160deg,rgba(53,30,15,0.94)_0%,rgba(18,10,5,0.98)_100%)] p-5 text-white shadow-[0_16px_35px_rgba(251,146,60,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-orange-400/35 hover:shadow-[0_20px_40px_rgba(251,146,60,0.14)] disabled:opacity-50 active:scale-[0.98]"
+                    className="group relative overflow-hidden rounded-[1.4rem] border border-orange-400/20 bg-[linear-gradient(160deg,rgba(46,22,8,0.96)_0%,rgba(14,7,3,0.98)_100%)] p-4 text-white transition duration-200 hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-[0_16px_36px_rgba(251,146,60,0.16)] disabled:opacity-50 active:scale-[0.98]"
                   >
-                    <div className="absolute inset-x-0 top-0 h-[2px] bg-orange-400 opacity-60" />
-                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-orange-400/20 bg-orange-400/10">
-                      <img src={TEAM_ORANGE_AVATAR} alt={teamTwo} className="h-12 w-12 object-contain" />
+                    <div className="absolute inset-x-0 top-0 h-[2px] bg-orange-400 opacity-65" />
+                    <div className="mx-auto mb-2.5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-orange-400/25 bg-orange-400/10 shadow-[0_0_18px_rgba(251,146,60,0.15)]">
+                      <img src={TEAM_ORANGE_AVATAR} alt={teamTwo} className="h-11 w-11 object-contain" />
                     </div>
-                    <div className="text-lg font-black sm:text-xl">{teamTwo}</div>
-                    <div className="mt-1 text-sm font-bold text-orange-400/70">{boardState.teamTwoScore} نقطة</div>
+                    <div className="text-base font-black sm:text-lg">{teamTwo}</div>
+                    <div className="mt-0.5 text-xs font-bold text-orange-400/65">{boardState.teamTwoScore} نقطة</div>
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ── Bottom actions ───────────────────────────────────────────── */}
-          <div className="border-t border-white/8 bg-white/[0.03] px-4 py-4 sm:px-6">
+          {/* ── Bottom action bar ── */}
+          <div className="border-t border-white/6 bg-white/[0.025] px-4 py-3 sm:px-6">
 
             {/* Phase: Question */}
             {!showAnswer && !showWinnerPicker && (
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-2.5">
                 <Link
                   href={`/game/board?sessionId=${sessionId}`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
                 >
                   <BoardIcon className="h-4 w-4" />
                   لوحة اللعب
                 </Link>
-
                 <button
                   type="button"
                   onClick={() => setShowAnswer(true)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 text-sm font-black text-slate-950 shadow-[0_4px_16px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-2.5 text-sm font-black text-slate-950 shadow-[0_4px_16px_rgba(34,211,238,0.25)] transition hover:bg-cyan-400 active:scale-[0.98] sm:w-auto"
                 >
                   <AnswerIcon className="h-4 w-4" />
                   إظهار الإجابة
@@ -605,28 +556,26 @@ export default function QuestionPageClient({
 
             {/* Phase: Answer */}
             {showAnswer && !showWinnerPicker && (
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-2.5">
                 <Link
                   href={`/game/board?sessionId=${sessionId}`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
                 >
                   <BoardIcon className="h-4 w-4" />
                   لوحة اللعب
                 </Link>
-
                 <button
                   type="button"
                   onClick={() => setShowAnswer(false)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
                 >
                   <QuestionIcon className="h-4 w-4" />
                   ارجع للسؤال
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setShowWinnerPicker(true)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 text-sm font-black text-slate-950 shadow-[0_4px_16px_rgba(34,211,238,0.22)] transition hover:bg-cyan-400 active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-black text-white shadow-[0_4px_16px_rgba(52,211,153,0.25)] transition hover:bg-emerald-400 active:scale-[0.98] sm:w-auto"
                 >
                   <AnswerIcon className="h-4 w-4" />
                   أي فريق؟
@@ -636,19 +585,18 @@ export default function QuestionPageClient({
 
             {/* Phase: Winner picker */}
             {showWinnerPicker && (
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-2.5">
                 <Link
                   href={`/game/board?sessionId=${sessionId}`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
                 >
                   <BoardIcon className="h-4 w-4" />
                   لوحة اللعب
                 </Link>
-
                 <button
                   type="button"
                   onClick={() => { setShowWinnerPicker(false); setShowAnswer(true); }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-black text-white/60 transition hover:bg-white/8 hover:text-white active:scale-[0.98] sm:w-auto"
                 >
                   <QuestionIcon className="h-4 w-4" />
                   العودة للإجابة
