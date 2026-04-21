@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 // ─── Types (unchanged) ────────────────────────────────────────────────────────
@@ -205,24 +205,24 @@ function ScoreCard({
         bar: "bg-cyan-400",
         name: "text-cyan-300",
         btnPlus:
-          "border-cyan-400/30 bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_4px_14px_rgba(34,211,238,0.26)]",
+          "border-cyan-400/30 bg-cyan-500 text-white hover:bg-cyan-400 shadow-[0_4px_12px_rgba(34,211,238,0.22)]",
         btnMinus:
           "border-cyan-400/20 bg-cyan-500/12 text-cyan-300 hover:bg-cyan-500/20",
         score: "text-white",
-        glow: isLeading ? "shadow-[0_0_26px_rgba(34,211,238,0.16)]" : "",
-        leadBadge: "border-cyan-400/25 bg-cyan-400/10 text-cyan-300",
+        glow: isLeading ? "shadow-[0_0_22px_rgba(34,211,238,0.14)]" : "",
+        leadBadge: "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
       }
     : {
         card: "border-orange-400/20 bg-[linear-gradient(160deg,rgba(28,12,4,0.98)_0%,rgba(14,6,2,0.99)_100%)]",
         bar: "bg-orange-400",
         name: "text-orange-300",
         btnPlus:
-          "border-orange-400/30 bg-orange-500 text-white hover:bg-orange-400 shadow-[0_4px_14px_rgba(249,115,22,0.26)]",
+          "border-orange-400/30 bg-orange-500 text-white hover:bg-orange-400 shadow-[0_4px_12px_rgba(249,115,22,0.22)]",
         btnMinus:
           "border-orange-400/20 bg-orange-500/12 text-orange-300 hover:bg-orange-500/20",
         score: "text-white",
-        glow: isLeading ? "shadow-[0_0_26px_rgba(249,115,22,0.16)]" : "",
-        leadBadge: "border-orange-400/25 bg-orange-400/10 text-orange-300",
+        glow: isLeading ? "shadow-[0_0_22px_rgba(249,115,22,0.14)]" : "",
+        leadBadge: "border-orange-400/20 bg-orange-400/8 text-orange-300",
       };
 
   return (
@@ -233,28 +233,28 @@ function ScoreCard({
 
       {isLeading && (
         <div
-          className={`absolute right-2 top-2.5 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-black sm:right-2.5 sm:top-3 sm:px-2.5 sm:text-[10px] ${palette.leadBadge}`}
+          className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[8px] font-black sm:right-2.5 sm:top-2.5 sm:px-2.5 sm:text-[9px] ${palette.leadBadge}`}
         >
-          <CrownIcon className="h-3 w-3" />
+          <CrownIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           المتصدر
         </div>
       )}
 
-      <div className="flex items-center gap-2 px-2.5 py-3 sm:gap-4 sm:px-4 sm:py-4">
+      <div className="flex items-center gap-2 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
         <button
           type="button"
           onClick={onDecrease}
           aria-label="تقليل النقاط"
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-black transition active:scale-90 sm:h-11 sm:w-11 ${palette.btnMinus}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-10 sm:w-10 sm:rounded-xl ${palette.btnMinus}`}
         >
-          <MinusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <MinusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
 
         <div className="min-w-0 flex-1 px-1 text-center">
           <div className={`truncate text-[10px] font-bold sm:text-xs ${palette.name}`}>
             {teamName}
           </div>
-          <div className={`text-[1.9rem] font-black leading-none sm:text-4xl ${palette.score}`}>
+          <div className={`text-[1.65rem] font-black leading-none sm:text-4xl ${palette.score}`}>
             {score}
           </div>
         </div>
@@ -263,9 +263,9 @@ function ScoreCard({
           type="button"
           onClick={onIncrease}
           aria-label="زيادة النقاط"
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-black transition active:scale-90 sm:h-11 sm:w-11 ${palette.btnPlus}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-10 sm:w-10 sm:rounded-xl ${palette.btnPlus}`}
         >
-          <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
       </div>
     </div>
@@ -406,14 +406,14 @@ function CategoryCard({
             <img
               src={column.category.image_url}
               alt={column.category.name}
-              className="h-32 w-full object-cover object-center transition duration-500 group-hover:scale-[1.03] sm:h-36 md:h-44 lg:h-48"
+              className="h-36 w-full object-cover object-center transition duration-500 group-hover:scale-[1.02] sm:h-40 md:h-48 lg:h-52"
               loading="lazy"
               decoding="async"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(3,9,26,0.96)] via-[rgba(3,9,26,0.25)] to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(3,9,26,0.96)] via-[rgba(3,9,26,0.18)] to-transparent" />
           </>
         ) : (
-          <div className="h-32 w-full bg-[linear-gradient(135deg,#061a50,#030d2e)] sm:h-36 md:h-44 lg:h-48" />
+          <div className="h-36 w-full bg-[linear-gradient(135deg,#061a50,#030d2e)] sm:h-40 md:h-48 lg:h-52" />
         )}
 
         {totalInCategory > 0 && (
@@ -427,9 +427,9 @@ function CategoryCard({
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 px-2.5 pb-2">
-          <div className="truncate text-center text-sm font-black text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)] sm:text-[15px] md:text-base">
-            {column.category.name}
+        <div className="absolute inset-x-0 bottom-0 px-3 pb-3">
+          <div className="mx-auto w-fit max-w-[88%] rounded-full border border-white/12 bg-black/28 px-4 py-1.5 text-center text-sm font-black text-white backdrop-blur-md transition duration-200 group-hover:border-cyan-300/25 group-hover:bg-black/38 sm:text-[15px] md:text-base">
+            <span className="block truncate">{column.category.name}</span>
           </div>
         </div>
 
@@ -442,11 +442,7 @@ function CategoryCard({
         )}
       </div>
 
-      <div className="bg-[linear-gradient(180deg,#2eadc4_0%,#1a8fa8_100%)] px-2 py-2 text-center text-[12px] font-black text-white shadow-[0_-1px_0_rgba(0,0,0,0.20)] sm:text-[13px]">
-        {column.category.name}
-      </div>
-
-      <div className="grid grid-cols-2 gap-1 bg-[rgba(3,9,26,0.80)] p-1.5 sm:gap-1.5 sm:p-2">
+      <div className="grid grid-cols-2 gap-1 bg-[rgba(3,9,26,0.82)] p-1.5 sm:gap-1.5 sm:p-2">
         <QuestionTile
           question={left200}
           points={200}
