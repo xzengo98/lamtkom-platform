@@ -327,13 +327,18 @@ export async function createGameSession(formData: FormData) {
 
   const freshProfile = freshProfileData as ProfileForSession | null;
   const currentGamesRemaining = freshProfile?.games_remaining ?? 0;
+  const normalizedTier = String(freshProfile?.account_tier ?? "free").toLowerCase();
+  const isVipAccount = normalizedTier === "vip";
+  const hasUnlimitedGames = isVipAccount;
 
-  if (!freshProfile || currentGamesRemaining <= 0) {
+  if (!freshProfile || (!hasUnlimitedGames && currentGamesRemaining <= 0)) {
     redirectWithError("لا توجد ألعاب متبقية");
   }
 
   const preventRepeat =
-    freshProfile.role === "admin" || freshProfile.account_tier === "premium";
+    freshProfile.role === "admin" ||
+    normalizedTier === "premium" ||
+    normalizedTier === "vip";
 
   const { data: categoriesData, error: categoriesError } = await supabase
     .from("categories")
@@ -499,49 +504,54 @@ export async function createGameSession(formData: FormData) {
     }
   }
 
-  const nextRemaining = Math.max(currentGamesRemaining - 1, 0);
+  const nextRemaining = hasUnlimitedGames
+    ? currentGamesRemaining
+    : Math.max(currentGamesRemaining - 1, 0);
 
-const { data: decrementedProfile, error: decrementError } = await admin
-  .from("profiles")
-  .update({
-    games_remaining: nextRemaining,
-  })
-  .eq("id", user.id)
-  .eq("games_remaining", currentGamesRemaining)
-  .select("id")
-  .maybeSingle();
+  if (!hasUnlimitedGames) {
+    const { data: decrementedProfile, error: decrementError } = await admin
+      .from("profiles")
+      .update({
+        games_remaining: nextRemaining,
+      })
+      .eq("id", user.id)
+      .eq("games_remaining", currentGamesRemaining)
+      .select("id")
+      .maybeSingle();
 
-if (decrementError || !decrementedProfile) {
-  await admin
-    .from("game_session_questions")
-    .delete()
-    .eq("session_id", insertedSession.id);
+    if (decrementError || !decrementedProfile) {
+      await admin
+        .from("game_session_questions")
+        .delete()
+        .eq("session_id", insertedSession.id);
 
-  await admin.from("game_sessions").delete().eq("id", insertedSession.id);
+      await admin.from("game_sessions").delete().eq("id", insertedSession.id);
 
-  if (preventRepeat && insertedHistoryQuestionIds.length > 0) {
-    await admin
-      .from("user_question_history")
-      .delete()
-      .eq("user_id", user.id)
-      .in("question_id", insertedHistoryQuestionIds);
+      if (preventRepeat && insertedHistoryQuestionIds.length > 0) {
+        await admin
+          .from("user_question_history")
+          .delete()
+          .eq("user_id", user.id)
+          .in("question_id", insertedHistoryQuestionIds);
+      }
+
+      redirectWithError(
+        decrementError?.message || "تعذر تأكيد خصم اللعبة. حاول مرة أخرى.",
+      );
+    }
   }
 
-  redirectWithError(
-    decrementError?.message || "تعذر تأكيد خصم اللعبة. حاول مرة أخرى.",
-  );
-}
+  try {
+    await createAutomaticGameCreatedNotifications({
+      userId: user.id,
+      gameName,
+      remainingGames: hasUnlimitedGames ? null : nextRemaining,
+      sessionId: insertedSession.id,
+      isUnlimited: hasUnlimitedGames,
+    });
+  } catch (notificationError) {
+    console.error("Failed to create automatic notifications", notificationError);
+  }
 
-try {
-  await createAutomaticGameCreatedNotifications({
-    userId: user.id,
-    gameName,
-    remainingGames: nextRemaining,
-    sessionId: insertedSession.id,
-  });
-} catch (notificationError) {
-  console.error("Failed to create automatic notifications", notificationError);
-}
-
-redirect(`/game/board?sessionId=${insertedSession.id}`);
+  redirect(`/game/board?sessionId=${insertedSession.id}`);
 }

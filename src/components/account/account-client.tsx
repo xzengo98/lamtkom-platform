@@ -104,6 +104,18 @@ function getTierBadgeClass(tier: string | null | undefined) {
   return "border-white/10 bg-white/5 text-white/45";
 }
 
+function isVipTier(tier: string | null | undefined) {
+  return String(tier ?? "free").toLowerCase() === "vip";
+}
+
+function formatGamesRemaining(value: number | null | undefined, tier: string | null | undefined) {
+  if (isVipTier(tier)) {
+    return "∞";
+  }
+
+  return Number(value ?? 0);
+}
+
 function getInitials(
   username: string | null | undefined,
   email: string | null | undefined,
@@ -637,12 +649,16 @@ export default function AccountClientPage({
   const roleBadgeClass = getRoleBadgeClass(profile?.role);
   const tierLabel = getTierLabel(profile?.account_tier);
   const tierBadgeClass = getTierBadgeClass(profile?.account_tier);
+  const gamesRemainingLabel = formatGamesRemaining(
+    profile?.games_remaining,
+    profile?.account_tier,
+  );
 
   const stats = useMemo(
     () => [
       {
         label: "الألعاب المتبقية",
-        value: profile?.games_remaining ?? 0,
+        value: gamesRemainingLabel,
         icon: "games" as const,
         tone: "cyan" as const,
       },
@@ -659,7 +675,7 @@ export default function AccountClientPage({
         tone: "orange" as const,
       },
     ],
-    [profile?.games_remaining, profile?.games_played, tierLabel],
+    [gamesRemainingLabel, profile?.games_played, tierLabel],
   );
 
   return (

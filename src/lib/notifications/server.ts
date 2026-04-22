@@ -317,19 +317,41 @@ export async function markAllMyNotificationsAsRead() {
 export async function createAutomaticGameCreatedNotifications(params: {
   userId: string;
   gameName: string;
-  remainingGames: number;
+  remainingGames: number | null;
   sessionId: string;
+  isUnlimited?: boolean;
 }) {
+  if (params.isUnlimited) {
+    await createNotificationForUser({
+      userId: params.userId,
+      type: "game_created",
+      title: "تم إنشاء لعبة جديدة",
+      body: `تم إنشاء لعبة "${params.gameName}" بنجاح. حساب VIP الخاص بك يتيح ألعابًا غير محدودة دون خصم من الرصيد.`,
+      actionUrl: `/game/board?sessionId=${params.sessionId}`,
+      payload: {
+        gameName: params.gameName,
+        remainingGames: null,
+        sessionId: params.sessionId,
+        isUnlimited: true,
+      },
+    });
+
+    return;
+  }
+
+  const safeRemainingGames = Math.max(params.remainingGames ?? 0, 0);
+
   await createNotificationForUser({
     userId: params.userId,
     type: "game_created",
     title: "تم إنشاء لعبة جديدة",
-    body: `تم إنشاء لعبة "${params.gameName}" بنجاح. المتبقي في حسابك: ${params.remainingGames} لعبة.`,
+    body: `تم إنشاء لعبة "${params.gameName}" بنجاح. المتبقي في حسابك: ${safeRemainingGames} لعبة.`,
     actionUrl: `/game/board?sessionId=${params.sessionId}`,
     payload: {
       gameName: params.gameName,
-      remainingGames: params.remainingGames,
+      remainingGames: safeRemainingGames,
       sessionId: params.sessionId,
+      isUnlimited: false,
     },
   });
 
@@ -337,15 +359,16 @@ export async function createAutomaticGameCreatedNotifications(params: {
     userId: params.userId,
     type: "game_consumed",
     title: "تم خصم لعبة من رصيدك",
-    body: `تم استخدام لعبة واحدة من رصيدك. المتبقي الآن: ${params.remainingGames} لعبة.`,
+    body: `تم استخدام لعبة واحدة من رصيدك. المتبقي الآن: ${safeRemainingGames} لعبة.`,
     actionUrl: "/account",
     payload: {
-      remainingGames: params.remainingGames,
+      remainingGames: safeRemainingGames,
       sessionId: params.sessionId,
+      isUnlimited: false,
     },
   });
 
-  if (params.remainingGames === 0) {
+  if (safeRemainingGames === 0) {
     await createNotificationForUser({
       userId: params.userId,
       type: "balance_empty",
@@ -356,15 +379,15 @@ export async function createAutomaticGameCreatedNotifications(params: {
         remainingGames: 0,
       },
     });
-  } else if (params.remainingGames <= 3) {
+  } else if (safeRemainingGames <= 3) {
     await createNotificationForUser({
       userId: params.userId,
       type: "low_balance",
       title: "رصيدك منخفض",
-      body: `بقي لديك ${params.remainingGames} لعبة فقط في حسابك.`,
+      body: `بقي لديك ${safeRemainingGames} لعبة فقط في حسابك.`,
       actionUrl: "/pricing",
       payload: {
-        remainingGames: params.remainingGames,
+        remainingGames: safeRemainingGames,
       },
     });
   }

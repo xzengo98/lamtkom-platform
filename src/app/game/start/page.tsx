@@ -273,7 +273,11 @@ export default async function GameStartPage({
     });
   }
 
-  if ((profile.games_remaining ?? 0) <= 0) {
+  const normalizedTier = String(profile.account_tier ?? "free").toLowerCase();
+  const isVipAccount = normalizedTier === "vip";
+  const canStartWithUnlimitedGames = isVipAccount;
+
+  if (!canStartWithUnlimitedGames && (profile.games_remaining ?? 0) <= 0) {
     return renderStatePage({
       title: "لا توجد ألعاب متبقية",
       message:
@@ -335,7 +339,9 @@ export default async function GameStartPage({
   }
 
   const shouldPreventRepeat =
-    profile.role === "admin" || profile.account_tier === "premium";
+    profile.role === "admin" ||
+    normalizedTier === "premium" ||
+    normalizedTier === "vip";
 
   const selectionMode: "fixed" | "dynamic" = shouldPreventRepeat
     ? "dynamic"
