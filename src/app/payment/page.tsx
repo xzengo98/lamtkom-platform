@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "الدفع | لمتكم",
   description:
-    "صفحة الدفع الخاصة بباقات لمتكم، مع خيارات الدفع عبر كليك أو التحويل البنكي.",
+    "صفحة الدفع الخاصة بباقات لمتكم، مع خيارات الدفع عبر كليك، التحويل البنكي، وUSDT.",
 };
 
 const heroLogo = "/logo.webp";
@@ -24,34 +24,36 @@ type PlanCardItem = {
   tone: "cyan" | "violet" | "emerald";
 };
 
+const usdtAddress = "0xd73d3f67a5b04e38c8518618ebcf40e723a5edcd";
+
 const plans: PlanCardItem[] = [
   {
     key: "featured",
-    name: "الخطة المميزة",
+    name: "Premium",
     price: "10 JD",
     description:
-      "خيار مناسب للمستخدم الذي يريد استخدام المنصة بشكل أوسع وأكثر استمرارية.",
-    highlight: "الخيار الأنسب لمعظم المستخدمين",
+      "الخيار الأنسب للمستخدم الذي يريد تجربة أقوى من المجانية مع استخدام أفضل داخل المنصة.",
+    highlight: "تمنع تكرار الأسئلة وتناسب الاستخدام المستمر",
     features: [
-      "استخدام أكبر من الخطة المجانية",
-      "أنسب للتجربة المستمرة",
-      "متابعة الجولات غير المكتملة",
-      "تفعيل أفضل لتجربة المنصة",
+      "تجربة أقوى من الخطة المجانية",
+      "منع تكرار الأسئلة في لعبة لمتكم",
+      "مناسبة للاستخدام المتكرر",
+      "أفضل للجلسات المستمرة",
     ],
     tone: "cyan",
   },
   {
     key: "premium",
-    name: "Premium",
+    name: "VIP",
     price: "20 JD",
     description:
-      "خطة أعلى مخصصة لمن يريد تجربة أقوى وأكثر مرونة واستخدامًا متقدمًا.",
-    highlight: "خطة أعلى للاستخدام المكثف والاحترافي",
+      "الخطة الأعلى داخل المنصة، وتمنحك كل مزايا Premium مع ألعاب غير محدودة للعبة لمتكم.",
+    highlight: "كل مزايا Premium + ألعاب غير محدودة",
     features: [
-      "مناسبة للاستخدام المتقدم",
-      "مرونة أعلى في التفعيل",
-      "أنسب للتوسع أو الاستخدام الاحترافي",
-      "استفادة أكبر من كامل المنصة",
+      "كل مزايا Premium",
+      "منع تكرار الأسئلة",
+      "ألعاب غير محدودة للعبة لمتكم",
+      "مناسبة للاستخدام المكثف والاحترافي",
     ],
     tone: "violet",
   },
@@ -63,10 +65,9 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 function SectionBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-extrabold tracking-[0.2em] text-white/55">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-400/8 px-4 py-2 text-xs font-black text-cyan-300">
       {children}
-    </span>
+    </div>
   );
 }
 
@@ -81,7 +82,8 @@ function SparkIcon({ className = "h-5 w-5" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
+      <path d="M12 3l1.8 4.8L18.5 10l-4.7 1.8L12 16.5l-1.8-4.7L5.5 10l4.7-2.2L12 3Z" />
+      <path d="M19 17l.7 1.8L21.5 19l-1.8.7L19 21.5l-.7-1.8L16.5 19l1.8-.2L19 17Z" />
     </svg>
   );
 }
@@ -97,7 +99,7 @@ function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M20 6 9 17l-5-5" />
+      <path d="m5 13 4 4L19 7" />
     </svg>
   );
 }
@@ -114,10 +116,8 @@ function BankIcon({ className = "h-5 w-5" }: { className?: string }) {
       strokeLinejoin="round"
     >
       <path d="M3 10 12 4l9 6" />
-      <path d="M5 10v8" />
-      <path d="M10 10v8" />
-      <path d="M14 10v8" />
-      <path d="M19 10v8" />
+      <path d="M4 10h16" />
+      <path d="M6 10v8M10 10v8M14 10v8M18 10v8" />
       <path d="M3 20h18" />
     </svg>
   );
@@ -134,9 +134,45 @@ function WalletIcon({ className = "h-5 w-5" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <rect x="3" y="6" width="18" height="12" rx="2" />
-      <path d="M16 12h.01" />
-      <path d="M3 9h18" />
+      <path d="M4 7h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4V7Z" />
+      <path d="M4 7V5a2 2 0 0 1 2-2h10" />
+      <path d="M16 13h4" />
+    </svg>
+  );
+}
+
+function CryptoIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="8" />
+      <path d="M10 9.5c0-1 1-1.8 2.2-1.8 1.2 0 2.3.6 2.3 1.8 0 2.7-4.5 1.1-4.5 4 0 1.1 1.1 1.9 2.5 1.9 1.3 0 2.5-.6 2.5-1.9" />
+      <path d="M12 6.5v11" />
+    </svg>
+  );
+}
+
+function CardIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 10h18" />
+      <path d="M7 15h3" />
     </svg>
   );
 }
@@ -152,7 +188,8 @@ function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M5 12h14M12 5l7 7-7 7" />
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
     </svg>
   );
 }
@@ -168,8 +205,8 @@ function HomeIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M3 10.5 12 4l9 6.5" />
-      <path d="M5 9.5V20h14V9.5" />
+      <path d="M3 12 12 4l9 8" />
+      <path d="M5 10v10h14V10" />
     </svg>
   );
 }
@@ -185,7 +222,7 @@ function MessageIcon({ className = "h-4 w-4" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M6 18l-2 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6Z" />
+      <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
     </svg>
   );
 }
@@ -237,63 +274,69 @@ function PlanCard({
   const styles = getPlanStyles(item.tone, Boolean(selected));
 
   return (
-    <article
+    <div
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-[2rem] border transition duration-300 hover:-translate-y-1",
+        "relative overflow-hidden rounded-[2rem] border p-5 transition-all duration-300 hover:-translate-y-1",
         styles.card,
       )}
     >
-      <div className={cn("h-[2px] w-full", styles.bar)} />
-      <div className={cn("pointer-events-none absolute left-0 top-0 h-32 w-32 rounded-full blur-3xl", styles.glow)} />
+      <div className={cn("absolute inset-x-0 top-0 h-1", styles.bar)} />
+      <div
+        className={cn(
+          "pointer-events-none absolute -top-10 right-0 h-28 w-28 rounded-full blur-3xl",
+          styles.glow,
+        )}
+      />
 
-      <div className="relative flex flex-1 flex-col p-6">
+      <div className="relative">
         <div className="flex items-center justify-between gap-3">
-          <span
+          <div
             className={cn(
-              "inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-black",
+              "rounded-full border px-3 py-1 text-xs font-black",
               styles.badge,
             )}
           >
             {selected ? "الخطة المختارة" : "باقة متاحة"}
-          </span>
+          </div>
 
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/50">
+          <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-black text-white/50">
             دفع يدوي
-          </span>
+          </div>
         </div>
 
-        <h3 className="mt-5 text-2xl font-black text-white">{item.name}</h3>
+        <h3 className="mt-5 text-center text-2xl font-black text-white">
+          {item.name}
+        </h3>
 
-        <div className="mt-5">
+        <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4 text-center">
           <div className="text-xs font-bold text-white/35">السعر</div>
           <div className={cn("mt-2 text-4xl font-black", styles.price)}>
             {item.price}
           </div>
         </div>
 
-        <p className="mt-4 text-sm leading-8 text-white/62">
+        <p className="mt-4 text-center text-sm leading-8 text-white/58">
           {item.description}
         </p>
 
         {item.highlight ? (
-          <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white/75">
+          <div className="mt-4 rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-sm font-bold text-white/70">
             {item.highlight}
           </div>
         ) : null}
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-3">
           {item.features.map((feature) => (
-            <div
-              key={feature}
-              className="flex items-start gap-3 rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3"
-            >
-              <CheckIcon className={cn("mt-0.5 h-4 w-4 shrink-0", styles.bullet)} />
-              <span className="text-sm leading-7 text-white/72">{feature}</span>
+            <div key={feature} className="flex items-start gap-3">
+              <div className={cn("mt-1", styles.bullet)}>
+                <CheckIcon className="h-4 w-4" />
+              </div>
+              <div className="text-sm leading-7 text-white/70">{feature}</div>
             </div>
           ))}
         </div>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -302,27 +345,86 @@ function PaymentMethodCard({
   subtitle,
   icon,
   content,
+  active = true,
 }: {
   title: string;
   subtitle: string;
   icon: ReactNode;
   content: ReactNode;
+  active?: boolean;
 }) {
   return (
-    <article className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/15 bg-cyan-400/10 text-cyan-300">
-          {icon}
+    <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(160deg,rgba(8,16,40,0.96)_0%,rgba(4,8,22,0.99)_100%)] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "flex h-12 w-12 items-center justify-center rounded-2xl border",
+              active
+                ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-300"
+                : "border-white/10 bg-white/[0.05] text-white/40",
+            )}
+          >
+            {icon}
+          </div>
+
+          <div>
+            <h3 className="text-xl font-black text-white">{title}</h3>
+            <div className="mt-1 text-sm text-white/50">{subtitle}</div>
+          </div>
         </div>
 
-        <div className="min-w-0">
-          <h3 className="text-2xl font-black text-white">{title}</h3>
-          <p className="mt-2 text-sm leading-7 text-white/55">{subtitle}</p>
+        <div
+          className={cn(
+            "rounded-full border px-3 py-1 text-xs font-black",
+            active
+              ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
+              : "border-white/10 bg-white/[0.05] text-white/45",
+          )}
+        >
+          {active ? "متاح الآن" : "قريبًا"}
         </div>
       </div>
 
-      <div className="mt-6">{content}</div>
-    </article>
+      <div className="mt-5">{content}</div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+      <div className="text-xs font-bold text-white/35">{label}</div>
+      <div
+        className={cn(
+          "mt-2 break-all text-sm font-black text-white",
+          mono ? "font-mono tracking-wide" : "",
+        )}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <div className="space-y-2">
+      {items.map((item) => (
+        <div key={item} className="flex items-start gap-2 text-sm leading-7 text-white/70">
+          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-400" />
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -334,41 +436,45 @@ export default async function PaymentPage({
   const params = await searchParams;
   const selectedPlan = String(params.plan ?? "").trim();
 
+  const selectedPlanLabel =
+    selectedPlan === "featured"
+      ? "Premium"
+      : selectedPlan === "premium"
+        ? "VIP"
+        : selectedPlan === "games"
+          ? "شراء ألعاب منفردة"
+          : "اختر الخطة المناسبة";
+
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#030712_0%,#07101f_38%,#030712_100%)] text-white">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.09),transparent_24%),radial-gradient(circle_at_top_right,rgba(139,92,246,0.10),transparent_22%),linear-gradient(180deg,#040816_0%,#07101f_40%,#030712_100%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px)] [background-size:72px_72px]" />
-      </div>
+    <main className="min-h-screen text-white">
+      <div className="pointer-events-none fixed inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(34,211,238,0.35)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.35)_1px,transparent_1px)] [background-size:64px_64px]" />
 
-      <div className="relative mx-auto max-w-[1320px] px-4 pb-10 pt-6 md:px-6 lg:px-8">
-        <section className="mx-auto max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-12 shadow-[0_40px_120px_rgba(0,0,0,0.40)] sm:px-10 sm:py-14 lg:px-12">
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 left-1/2 h-56 w-[28rem] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/6 to-transparent" />
-
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-center">
+      <div className="relative mx-auto max-w-7xl px-4 py-8 md:px-6">
+        <section className="overflow-hidden rounded-[2.6rem] border border-white/10 bg-[linear-gradient(160deg,rgba(7,14,34,0.98)_0%,rgba(3,8,22,0.99)_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.35)]">
+          <div className="grid gap-8 px-6 py-8 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              <SectionBadge>صفحة الدفع</SectionBadge>
+              <div className="text-sm font-bold text-white/35">صفحة الدفع</div>
 
-              <h1 className="mt-6 text-3xl font-black leading-[1.15] text-white sm:text-5xl lg:text-6xl">
+              <div className="mt-4">
+                <SectionBadge>الدفع اليدوي</SectionBadge>
+              </div>
+
+              <h1 className="mt-5 text-4xl font-black leading-tight text-white md:text-6xl">
                 اختر باقتك وأكمل الدفع
-                <span className="mt-2 block bg-gradient-to-r from-cyan-300 via-white to-cyan-300 bg-clip-text text-transparent">
+                <span className="mt-2 block bg-gradient-to-l from-cyan-300 via-white to-cyan-300 bg-clip-text text-transparent">
                   بالطريقة المناسبة لك
                 </span>
               </h1>
 
-              <p className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9">
-                هذه الصفحة مخصصة للدفع اليدوي حاليًا لشراء باقات لمتكم، أو شراء عدد
-                ألعاب معين للعبة لمتكم، عبر التحويل إلى IBAN للمستخدمين من خارج
-                الأردن، أو عبر كليك للمستخدمين داخل الأردن.
+              <p className="mt-5 max-w-2xl text-sm leading-8 text-white/58 md:text-base">
+                هذه الصفحة مخصصة للدفع اليدوي حاليًا لشراء باقات لمتكم أو شراء عدد
+                ألعاب معين للعبة لمتكم، عبر كليك، التحويل البنكي، أو USDT.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.10]"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
                 >
                   الرجوع للباقات
                   <ArrowLeftIcon className="h-4 w-4" />
@@ -376,250 +482,244 @@ export default async function PaymentPage({
 
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-6 py-3.5 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/15"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-5 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
                 >
-                  تواصل معنا
                   <MessageIcon className="h-4 w-4" />
+                  تواصل معنا
                 </Link>
+              </div>
+
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-black text-emerald-200">
+                <SparkIcon className="h-4 w-4" />
+                3 طرق دفع فعالة حاليًا
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-md">
-              <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/10 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] p-8 shadow-[0_30px_80px_rgba(0,0,0,0.30)]">
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-black text-cyan-300">
-                  <SparkIcon className="h-4 w-4" />
-                  دفع آمن وواضح
-                </div>
-
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative flex h-[250px] w-[250px] items-center justify-center overflow-hidden rounded-[2rem] border border-cyan-400/14 bg-[linear-gradient(160deg,rgba(11,23,49,0.98)_0%,rgba(6,12,28,0.99)_100%)] shadow-[0_26px_70px_rgba(0,0,0,0.32)] sm:h-[290px] sm:w-[290px]">
+                <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.12),transparent_68%)]" />
                 <img
                   src={heroLogo}
                   alt="لمتكم"
-                  className="mx-auto mt-6 h-28 w-auto object-contain drop-shadow-[0_16px_30px_rgba(0,0,0,0.30)] sm:h-32"
+                  className="relative h-[170px] w-[170px] object-contain drop-shadow-[0_0_28px_rgba(34,211,238,0.18)] sm:h-[200px] sm:w-[200px]"
                 />
+              </div>
+            </div>
+          </div>
 
-                <div className="mt-6 rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-center">
-                  <div className="text-sm font-bold text-white/45">
-                    الباقة المختارة
-                  </div>
-                  <div className="mt-2 text-xl font-black text-white">
-                    {selectedPlan === "featured"
-                      ? "الخطة المميزة"
-                      : selectedPlan === "premium"
-                        ? "Premium"
-                        : selectedPlan === "games"
-                          ? "شراء ألعاب منفردة"
-                          : "اختر الخطة المناسبة"}
-                  </div>
+          <div className="border-t border-white/8 px-6 py-8 md:px-8">
+            <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+              <div>
+                <SectionBadge>الباقة المختارة</SectionBadge>
+                <h2 className="mt-4 text-3xl font-black text-white">
+                  {selectedPlanLabel}
+                </h2>
+                <p className="mt-3 text-sm leading-8 text-white/58 md:text-base">
+                  اختر الباقة التي تريد تفعيلها، ثم أكمل الدفع بالطريقة الأنسب لك،
+                  وبعدها أرسل بياناتك لتأكيد العملية بسرعة.
+                </p>
+
+                <div className="mt-6 grid gap-5 md:grid-cols-2">
+                  {plans.map((plan) => (
+                    <PlanCard
+                      key={plan.key}
+                      item={plan}
+                      selected={selectedPlan === plan.key}
+                    />
+                  ))}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section className="mx-auto mt-14 max-w-7xl">
-          <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <SectionBadge>الباقات المتاحة للدفع</SectionBadge>
-              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-                اختر الخطة التي تريد تفعيلها
-              </h2>
-            </div>
+                <div className="mt-5 rounded-[2rem] border border-emerald-400/15 bg-[linear-gradient(160deg,rgba(8,32,26,0.94)_0%,rgba(6,12,28,0.98)_100%)] p-5 shadow-[0_20px_50px_rgba(52,211,153,0.08)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-black text-emerald-300">
+                        مرن
+                      </div>
+                      <h3 className="mt-4 text-2xl font-black text-white">
+                        شراء عدد ألعاب معين للعبة لمتكم
+                      </h3>
+                    </div>
 
-            <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-white/55">
-              الباقات بجانب بعضها لسهولة المقارنة
-            </div>
-          </div>
-
-          <div className="grid gap-5 lg:grid-cols-2">
-            {plans.map((plan) => (
-              <PlanCard
-                key={plan.key}
-                item={plan}
-                selected={selectedPlan === plan.key}
-              />
-            ))}
-          </div>
-
-          <div className="mt-5 overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-[linear-gradient(160deg,rgba(8,32,26,0.94)_0%,rgba(6,12,28,0.98)_100%)] shadow-[0_20px_50px_rgba(52,211,153,0.08)]">
-            <div className="h-[2px] w-full bg-emerald-400" />
-
-            <div className="p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1.5 text-[11px] font-black text-emerald-300">
-                  شراء ألعاب لمتكم
-                </span>
-
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/50">
-                  مرن
-                </span>
-              </div>
-
-              <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                <div>
-                  <h3 className="text-2xl font-black text-white">
-                    شراء عدد ألعاب معين للعبة لمتكم
-                  </h3>
-
-                  <p className="mt-4 text-sm leading-8 text-white/65">
-                    إذا كنت لا تريد شراء باقة كاملة، يمكنك شراء عدد ألعاب معين خاص
-                    بلعبة لمتكم فقط.
-                  </p>
-
-                  <div className="mt-5 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-4">
-                    <div className="text-xs font-bold text-white/35">السعر</div>
-                    <div className="mt-2 text-3xl font-black text-emerald-300">
-                      1 JD لكل لعبة واحدة
+                    <div className="text-right">
+                      <div className="text-xs font-bold text-white/35">السعر</div>
+                      <div className="mt-2 text-3xl font-black text-emerald-300">
+                        1 JD / لعبة
+                      </div>
                     </div>
                   </div>
 
-                  <p className="mt-5 text-sm leading-8 text-white/65">
-                    عند الدفع اذكر في رسالتك عدد الألعاب التي تريد شراءها ليتم
-                    تفعيلها لك داخل النظام.
+                  <p className="mt-4 text-sm leading-8 text-white/58">
+                    إذا لم تكن بحاجة إلى باقة كاملة، يمكنك شراء عدد ألعاب معين خاص
+                    بلعبة لمتكم فقط. عند الدفع اذكر عدد الألعاب المطلوبة ليتم
+                    تفعيلها لك.
                   </p>
-                </div>
 
-                <div>
                   <Link
                     href="/payment?plan=games"
-                    className="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-6 py-3.5 text-sm font-black text-emerald-200 transition hover:bg-emerald-400/15"
+                    className="mt-5 inline-flex items-center justify-center rounded-2xl border border-emerald-400/22 bg-emerald-400/10 px-4 py-3 text-sm font-black text-emerald-200 transition hover:bg-emerald-400/18"
                   >
                     اختيار هذا الخيار
-                    <ArrowLeftIcon className="h-4 w-4" />
                   </Link>
+                </div>
+              </div>
+
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
+                <SectionBadge>ملخص سريع</SectionBadge>
+                <h3 className="mt-4 text-2xl font-black text-white">
+                  قبل الدفع
+                </h3>
+
+                <div className="mt-5 space-y-3">
+                  <InfoRow label="الخطة المحددة" value={selectedPlanLabel} />
+                  <InfoRow label="عدد طرق الدفع الفعالة" value="3" />
+                  <InfoRow label="الطريقة القادمة" value="Visa / Mastercard" />
+                </div>
+
+                <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">
+                  <div className="text-sm font-black text-white">بعد الدفع أرسل لنا:</div>
+                  <div className="mt-3">
+                    <BulletList
+                      items={[
+                        "لقطة شاشة أو إثبات عملية الدفع",
+                        "اسم المستخدم الخاص بك داخل الموقع",
+                        "الإيميل الخاص بك داخل الموقع",
+                        "اسم الخطة التي قمت بشرائها",
+                        "أو عدد الألعاب إذا كان الشراء لألعاب لمتكم",
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto mt-16 max-w-7xl">
-          <div className="mb-7">
-            <SectionBadge>طرق الدفع</SectionBadge>
-            <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-              اختر طريقة الدفع المناسبة لك
-            </h2>
-          </div>
+        <section className="mt-8 overflow-hidden rounded-[2.6rem] border border-white/10 bg-[linear-gradient(160deg,rgba(7,14,34,0.98)_0%,rgba(3,8,22,0.99)_100%)] px-6 py-8 shadow-[0_40px_120px_rgba(0,0,0,0.30)] md:px-8">
+          <SectionBadge>طرق الدفع</SectionBadge>
+          <h2 className="mt-4 text-3xl font-black text-white">
+            اختر طريقة الدفع المناسبة لك
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-8 text-white/58 md:text-base">
+            أصبح الدفع متاحًا الآن عبر كليك، التحويل البنكي، وUSDT، مع إضافة
+            Visa / Mastercard قريبًا.
+          </p>
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="mt-6 grid gap-5 lg:grid-cols-2">
             <PaymentMethodCard
-              title="الدفع عبر كليك"
+              title="كليك"
               subtitle="مناسب للمستخدمين داخل الأردن"
               icon={<WalletIcon className="h-5 w-5" />}
               content={
                 <div className="space-y-4">
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs font-bold text-white/35">
-                      اسم المستفيد
-                    </div>
-                    <div className="mt-2 text-xl font-black text-white">
-                      Lamtkom
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs font-bold text-white/35">
-                      رقم كليك
-                    </div>
-                    <div className="mt-2 text-xl font-black text-cyan-300">
-                      079 0000 000
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-cyan-400/10 bg-cyan-400/[0.04] p-4">
-                    <div className="text-sm font-black text-white">
-                      بعد الدفع عبر كليك، أرسل لنا:
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm leading-7 text-white/68">
-                      <div>• لقطة شاشة لعملية الدفع</div>
-                      <div>• اسم المستخدم الخاص بك داخل الموقع</div>
-                      <div>• الإيميل الخاص بك داخل الموقع</div>
-                      <div>• اسم الخطة التي قمت بشرائها</div>
-                      <div>• أو عدد الألعاب إذا كان الشراء لألعاب لمتكم</div>
-                    </div>
-                  </div>
+                  <InfoRow label="اسم المستفيد" value="Lamtkom" />
+                  <InfoRow label="رقم كليك" value="079 0000 000" />
+                  <BulletList
+                    items={[
+                      "بعد الدفع عبر كليك، أرسل لقطة شاشة للعملية",
+                      "أرسل اسم المستخدم والإيميل داخل الموقع",
+                      "اذكر اسم الخطة أو عدد الألعاب المطلوبة",
+                    ]}
+                  />
                 </div>
               }
             />
 
             <PaymentMethodCard
               title="التحويل البنكي"
-              subtitle="مناسب للمستخدمين من خارج الأردن"
+              subtitle="مناسب للتحويل البنكي التقليدي"
               icon={<BankIcon className="h-5 w-5" />}
               content={
                 <div className="space-y-4">
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs font-bold text-white/35">
-                      اسم المستفيد
-                    </div>
-                    <div className="mt-2 text-xl font-black text-white">
-                      Lamtkom
-                    </div>
-                  </div>
+                  <InfoRow label="اسم المستفيد" value="Lamtkom" />
+                  <InfoRow
+                    label="IBAN"
+                    value="JO00 0000 0000 0000 0000 0000 000"
+                    mono
+                  />
+                  <BulletList
+                    items={[
+                      "بعد التحويل البنكي أرسل إثبات التحويل",
+                      "أرسل اسم المستخدم والإيميل داخل الموقع",
+                      "اذكر اسم الخطة أو عدد الألعاب المطلوبة",
+                    ]}
+                  />
+                </div>
+              }
+            />
 
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs font-bold text-white/35">IBAN</div>
-                    <div className="mt-2 break-all text-lg font-black text-violet-300">
-                      JO00 0000 0000 0000 0000 0000 000
-                    </div>
-                  </div>
+            <PaymentMethodCard
+              title="USDT"
+              subtitle="شبكة BNB (BEP20)"
+              icon={<CryptoIcon className="h-5 w-5" />}
+              content={
+                <div className="space-y-4">
+                  <InfoRow label="العملة" value="USDT" />
+                  <InfoRow label="الشبكة" value="BNB (BEP20)" />
+                  <InfoRow label="عنوان التحويل" value={usdtAddress} mono />
+                  <BulletList
+                    items={[
+                      "تأكد من التحويل على شبكة BNB (BEP20) فقط",
+                      "أرسل لقطة شاشة أو Tx Hash بعد الدفع",
+                      "أرسل اسم المستخدم والإيميل داخل الموقع",
+                      "اذكر اسم الخطة أو عدد الألعاب المطلوبة",
+                    ]}
+                  />
+                </div>
+              }
+            />
 
-                  <div className="rounded-2xl border border-violet-400/10 bg-violet-400/[0.04] p-4">
-                    <div className="text-sm font-black text-white">
-                      بعد التحويل البنكي، أرسل لنا:
-                    </div>
-                    <div className="mt-3 space-y-2 text-sm leading-7 text-white/68">
-                      <div>• لقطة شاشة / إثبات التحويل</div>
-                      <div>• اسم المستخدم الخاص بك داخل الموقع</div>
-                      <div>• الإيميل الخاص بك داخل الموقع</div>
-                      <div>• اسم الخطة التي قمت بشرائها</div>
-                      <div>• أو عدد الألعاب إذا كان الشراء لألعاب لمتكم</div>
-                    </div>
-                  </div>
+            <PaymentMethodCard
+              title="Visa / Mastercard"
+              subtitle="بوابة دفع مباشرة"
+              icon={<CardIcon className="h-5 w-5" />}
+              active={false}
+              content={
+                <div className="rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4 text-sm leading-8 text-white/55">
+                  هذه الطريقة قيد التجهيز حاليًا، وستتوفر قريبًا كخيار دفع مباشر
+                  داخل المنصة.
                 </div>
               }
             />
           </div>
         </section>
 
-        <section className="mx-auto mt-16 max-w-7xl overflow-hidden rounded-[2.4rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_22px_70px_rgba(0,0,0,0.22)] sm:p-8">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-orange-400/20 bg-orange-400/10 text-orange-300">
-              <SparkIcon className="h-5 w-5" />
-            </div>
+        <section className="mt-8 overflow-hidden rounded-[2.2rem] border border-white/10 bg-white/[0.03] px-6 py-6 shadow-[0_30px_90px_rgba(0,0,0,0.20)] md:px-8">
+          <h3 className="text-2xl font-black text-white">
+            ملاحظة مهمة لتأكيد عملية الدفع
+          </h3>
 
-            <div>
-              <h3 className="text-2xl font-black text-white">
-                ملاحظة مهمة لتأكيد عملية الدفع
-              </h3>
-              <p className="mt-1 text-sm text-white/55">
-                هذه المعلومات ضرورية لإتمام التفعيل بشكل صحيح.
-              </p>
-            </div>
-          </div>
+          <p className="mt-3 max-w-3xl text-sm leading-8 text-white/58">
+            هذه المعلومات ضرورية لإتمام التفعيل بشكل صحيح بعد أي عملية دفع.
+          </p>
 
-          <div className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">
               <div className="text-sm font-black text-white">
-                بعد الدفع قم بإرسال لقطة شاشة أو إثبات العملية
+                أرسل لنا بعد الدفع:
               </div>
-
-              <div className="mt-4 space-y-3 text-sm leading-7 text-white/68">
-                <div>• اسم المستخدم + الإيميل داخل الموقع</div>
-                <div>• الخطة المشتراة أو عدد الألعاب المطلوبة</div>
-                <div>• لقطة شاشة / سكرين شوت لعملية الدفع</div>
+              <div className="mt-3">
+                <BulletList
+                  items={[
+                    "اسم المستخدم + الإيميل داخل الموقع",
+                    "الخطة المشتراة أو عدد الألعاب المطلوبة",
+                    "لقطة شاشة / سكرين شوت أو إثبات العملية",
+                  ]}
+                />
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-5">
+            <div className="rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-4">
               <div className="text-sm font-black text-white">
-                إرسال المعلومات لتأكيد الدفع
+                طرق التواصل لتأكيد الدفع:
               </div>
-
-              <div className="mt-4 space-y-3 text-sm leading-7 text-white/68">
-                <div>• عبر الواتساب</div>
-                <div>• أو عبر الإيميل</div>
-                <div>• مع ذكر نوع الباقة أو عدد الألعاب المطلوبة</div>
+              <div className="mt-3">
+                <BulletList
+                  items={[
+                    "عبر الواتساب",
+                    "أو عبر الإيميل",
+                    "مع ذكر نوع الباقة أو عدد الألعاب المطلوبة",
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -627,7 +727,7 @@ export default async function PaymentPage({
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_18px_50px_rgba(34,211,238,0.18)] transition hover:bg-cyan-300"
+              className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
             >
               التواصل لتأكيد الدفع
               <ArrowLeftIcon className="h-4 w-4" />
@@ -635,7 +735,7 @@ export default async function PaymentPage({
 
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3.5 text-sm font-black text-white transition hover:bg-white/[0.10]"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
             >
               الرجوع للباقات
               <HomeIcon className="h-4 w-4" />
