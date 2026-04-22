@@ -37,6 +37,7 @@ type Props = {
   sections?: CategorySection[];
   categories?: Category[];
   gamesRemaining: number;
+  isVipAccount: boolean;
   action: (formData: FormData) => void | Promise<void>;
   categoryAvailability: Record<string, CategoryAvailability>;
   selectionMode: "fixed" | "dynamic";
@@ -44,10 +45,6 @@ type Props = {
 };
 
 const REQUIRED_CATEGORY_COUNT = 6;
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Section themes
-// ──────────────────────────────────────────────────────────────────────────────
 
 const sectionThemes: Record<
   string,
@@ -345,10 +342,6 @@ function getAvailabilityBadge(availability: CategoryAvailability) {
   };
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Icons
-// ──────────────────────────────────────────────────────────────────────────────
-
 function GamepadIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg
@@ -589,10 +582,6 @@ function getSectionIcon(slug: string | null | undefined, name?: string | null) {
   return iconMap[key] ?? <BookOpenIcon className="h-5 w-5" />;
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Submit button
-// ──────────────────────────────────────────────────────────────────────────────
-
 function StartGameSubmitButton({
   disabledByClient,
 }: {
@@ -612,14 +601,11 @@ function StartGameSubmitButton({
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Main component
-// ──────────────────────────────────────────────────────────────────────────────
-
 export default function StartGameForm({
   sections = [],
   categories = [],
   gamesRemaining,
+  isVipAccount,
   action,
   categoryAvailability,
   selectionMode,
@@ -668,6 +654,7 @@ export default function StartGameForm({
   const selectedCount = selectedCategories.length;
   const remainingSlots = Math.max(REQUIRED_CATEGORY_COUNT - selectedCount, 0);
   const isReadyToSubmit = selectedCount === REQUIRED_CATEGORY_COUNT;
+  const gamesRemainingLabel = isVipAccount ? "∞" : String(gamesRemaining);
 
   function toggleCategory(id: string) {
     if (isSubmitting) return;
@@ -748,7 +735,7 @@ export default function StartGameForm({
       return;
     }
 
-    if (gamesRemaining <= 0) {
+    if (!isVipAccount && gamesRemaining <= 0) {
       event.preventDefault();
       setLocalError("لا توجد ألعاب متبقية في حسابك.");
       return;
@@ -960,7 +947,10 @@ export default function StartGameForm({
 
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70">
                 <TicketIcon className="h-4 w-4 shrink-0" />
-                <span>ألعاب متبقية: {gamesRemaining}</span>
+                <span>
+                  ألعاب متبقية: {gamesRemainingLabel}
+                  {isVipAccount ? " (غير محدود)" : ""}
+                </span>
               </div>
 
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/8 px-4 py-2 text-sm font-bold text-cyan-300">
@@ -1175,7 +1165,7 @@ export default function StartGameForm({
             </div>
 
             <StartGameSubmitButton
-              disabledByClient={!isReadyToSubmit || gamesRemaining <= 0 || isSubmitting}
+              disabledByClient={!isReadyToSubmit || (!isVipAccount && gamesRemaining <= 0) || isSubmitting}
             />
           </div>
         </div>

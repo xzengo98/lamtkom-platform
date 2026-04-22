@@ -408,6 +408,7 @@ export default async function GameStartPage({
           sections={sections}
           categories={categories}
           gamesRemaining={profile.games_remaining ?? 0}
+          isVipAccount={isVipAccount}
           action={createGameSession}
           categoryAvailability={categoryAvailability}
           selectionMode={selectionMode}
