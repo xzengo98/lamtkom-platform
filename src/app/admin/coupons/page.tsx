@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { createCouponAction, toggleCouponStatusAction } from "./actions";
+import {
+  createCouponAction,
+  deleteCouponAction,
+  toggleCouponStatusAction,
+  updateCouponAction,
+} from "./actions";
 
 type SearchParams = Promise<{
   success?: string;
   error?: string;
+  q?: string;
+  status?: string;
+  reward?: string;
 }>;
 
 type CouponRow = {
@@ -24,6 +32,7 @@ type CouponRow = {
   expires_at: string | null;
   notes: string | null;
   created_at: string;
+  created_by: string | null;
 };
 
 type RedemptionRow = {
@@ -35,6 +44,12 @@ type RedemptionRow = {
   target_tier_snapshot: string | null;
   redeemed_at: string;
   user_id: string;
+};
+
+type ProfileRow = {
+  id: string;
+  username: string | null;
+  email: string | null;
 };
 
 function formatDate(value: string | null) {
@@ -50,8 +65,41 @@ function rewardLabel(coupon: CouponRow) {
   if (coupon.reward_type === "games_balance") {
     return `إضافة ${coupon.games_amount} ألعاب (${coupon.target_game ?? "lamtkom"})`;
   }
-
   return `ترقية إلى ${coupon.target_tier ?? "premium"}`;
+}
+
+function userDisplay(profile: ProfileRow | null | undefined, fallback = "—") {
+  if (!profile) return fallback;
+  if (profile.username && profile.email) {
+    return `${profile.username} — ${profile.email}`;
+  }
+  return profile.username || profile.email || fallback;
+}
+
+function isCouponMatch(
+  coupon: CouponRow,
+  q: string,
+  assignedProfile: ProfileRow | null | undefined,
+  creatorProfile: ProfileRow | null | undefined,
+) {
+  if (!q) return true;
+
+  const haystack = [
+    coupon.code,
+    coupon.reward_type,
+    coupon.target_game,
+    coupon.target_tier,
+    coupon.notes,
+    assignedProfile?.username,
+    assignedProfile?.email,
+    creatorProfile?.username,
+    creatorProfile?.email,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(q.toLowerCase());
 }
 
 export default async function AdminCouponsPage({
@@ -82,20 +130,52 @@ export default async function AdminCouponsPage({
     redirect("/");
   }
 
-  const [{ data: coupons }, { data: redemptions }] = await Promise.all([
-    supabase
-      .from("coupons")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("coupon_redemptions")
-      .select("*")
-      .order("redeemed_at", { ascending: false })
-      .limit(20),
-  ]);
+  const q = String(params.q ?? "").trim();
+  const status = String(params.status ?? "all").trim();
+  const reward = String(params.reward ?? "all").trim();
+
+  const [{ data: coupons }, { data: redemptions }, { data: profiles }] =
+    await Promise.all([
+      supabase.from("coupons").select("*").order("created_at", { ascending: false }),
+      supabase
+        .from("coupon_redemptions")
+        .select("*")
+        .order("redeemed_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("profiles")
+        .select("id, username, email")
+        .order("username", { ascending: true }),
+    ]);
 
   const couponRows = (coupons ?? []) as CouponRow[];
   const redemptionRows = (redemptions ?? []) as RedemptionRow[];
+  const profileRows = (profiles ?? []) as ProfileRow[];
+
+  const profileMap = new Map(profileRows.map((item) => [item.id, item]));
+
+  const filteredCoupons = couponRows.filter((coupon) => {
+    const assignedProfile = coupon.assigned_user_id
+      ? profileMap.get(coupon.assigned_user_id)
+      : null;
+    const creatorProfile = coupon.created_by
+      ? profileMap.get(coupon.created_by)
+      : null;
+
+    const statusPass =
+      status === "all"
+        ? true
+        : status === "active"
+          ? coupon.is_active
+          : !coupon.is_active;
+
+    const rewardPass =
+      reward === "all" ? true : coupon.reward_type === reward;
+
+    const searchPass = isCouponMatch(coupon, q, assignedProfile, creatorProfile);
+
+    return statusPass && rewardPass && searchPass;
+  });
 
   return (
     <main className="min-h-screen text-white">
@@ -113,8 +193,8 @@ export default async function AdminCouponsPage({
             </h1>
 
             <p className="mt-3 max-w-3xl text-sm leading-8 text-white/58 md:text-base">
-              أنشئ كوبونات لإضافة ألعاب أو ترقية الحساب إلى Premium، ثم راقب
-              استخدامها من نفس الصفحة.
+              أنشئ كوبونات لإضافة ألعاب أو ترقية الحساب إلى Premium، مع بحث وفلترة
+              وتعديل وحذف وإظهار أسماء المستخدمين بدل UUID.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -139,7 +219,7 @@ export default async function AdminCouponsPage({
             ) : null}
           </div>
 
-          <div className="grid gap-6 p-6 md:p-8 xl:grid-cols-[420px_minmax(0,1fr)]">
+          <div className="grid gap-6 p-6 md:p-8 xl:grid-cols-[430px_minmax(0,1fr)]">
             <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
               <h2 className="text-xl font-black text-white">إنشاء كوبون جديد</h2>
               <p className="mt-2 text-sm leading-7 text-white/55">
@@ -182,6 +262,8 @@ export default async function AdminCouponsPage({
                     className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
                   >
                     <option value="lamtkom">لمتكم</option>
+                    <option value="bara_alsalfah">برا السالفة</option>
+                    <option value="codenames">Codenames</option>
                   </select>
                 </div>
 
@@ -210,18 +292,26 @@ export default async function AdminCouponsPage({
                     <option value="">بدون</option>
                     <option value="free">free</option>
                     <option value="premium">premium</option>
+                    <option value="vip">vip</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-bold text-white/75">
-                    يوزر المستخدم المخصص له (اختياري)
+                    المستخدم المخصص له (اختياري)
                   </label>
-                  <input
+                  <select
                     name="assignedUserId"
-                    placeholder="uuid"
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
+                    defaultValue=""
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                  >
+                    <option value="">عام — أي مستخدم</option>
+                    {profileRows.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {userDisplay(item, item.id)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -298,90 +388,361 @@ export default async function AdminCouponsPage({
 
             <section className="space-y-6">
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="text-xl font-black text-white">الكوبونات الحالية</h2>
-                  <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-black text-white/60">
-                    {couponRows.length} كوبون
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-black text-white">الكوبونات الحالية</h2>
+                    <div className="mt-1 text-sm text-white/50">
+                      {filteredCoupons.length} نتيجة من أصل {couponRows.length}
+                    </div>
                   </div>
+
+                  <form className="grid w-full gap-3 md:w-auto md:grid-cols-[240px_130px_150px_auto]">
+                    <input
+                      name="q"
+                      defaultValue={q}
+                      placeholder="ابحث بالكود أو المستخدم..."
+                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                    />
+
+                    <select
+                      name="status"
+                      defaultValue={status}
+                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                    >
+                      <option value="all">كل الحالات</option>
+                      <option value="active">المفعلة</option>
+                      <option value="inactive">المتوقفة</option>
+                    </select>
+
+                    <select
+                      name="reward"
+                      defaultValue={reward}
+                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                    >
+                      <option value="all">كل الأنواع</option>
+                      <option value="games_balance">إضافة ألعاب</option>
+                      <option value="account_tier">ترقية الحساب</option>
+                    </select>
+
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
+                    >
+                      بحث / فلترة
+                    </button>
+                  </form>
                 </div>
 
                 <div className="space-y-4">
-                  {couponRows.length === 0 ? (
+                  {filteredCoupons.length === 0 ? (
                     <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-5 text-sm font-bold text-white/50">
-                      لا توجد كوبونات حتى الآن.
+                      لا توجد نتائج مطابقة.
                     </div>
                   ) : (
-                    couponRows.map((coupon) => (
-                      <div
-                        key={coupon.id}
-                        className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] p-4"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <div className="text-lg font-black text-white">
-                              {coupon.code}
+                    filteredCoupons.map((coupon) => {
+                      const assignedProfile = coupon.assigned_user_id
+                        ? profileMap.get(coupon.assigned_user_id)
+                        : null;
+                      const creatorProfile = coupon.created_by
+                        ? profileMap.get(coupon.created_by)
+                        : null;
+
+                      return (
+                        <div
+                          key={coupon.id}
+                          className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <div className="text-lg font-black text-white">
+                                {coupon.code}
+                              </div>
+                              <div className="mt-1 text-sm text-white/55">
+                                {rewardLabel(coupon)}
+                              </div>
                             </div>
-                            <div className="mt-1 text-sm text-white/55">
-                              {rewardLabel(coupon)}
+
+                            <div className="flex flex-wrap gap-2">
+                              <span
+                                className={`rounded-full px-3 py-1 text-xs font-black ${
+                                  coupon.is_active
+                                    ? "border border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
+                                    : "border border-red-400/20 bg-red-500/10 text-red-200"
+                                }`}
+                              >
+                                {coupon.is_active ? "مفعّل" : "متوقف"}
+                              </span>
+
+                              <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-black text-white/60">
+                                {coupon.redeemed_count} / {coupon.max_redemptions}
+                              </span>
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-black ${
-                                coupon.is_active
-                                  ? "border border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
-                                  : "border border-red-400/20 bg-red-500/10 text-red-200"
-                              }`}
-                            >
-                              {coupon.is_active ? "مفعّل" : "متوقف"}
-                            </span>
-
-                            <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-black text-white/60">
-                              {coupon.redeemed_count} / {coupon.max_redemptions}
-                            </span>
+                          <div className="mt-4 grid gap-3 text-sm text-white/65 md:grid-cols-2">
+                            <div>أنشئ في: {formatDate(coupon.created_at)}</div>
+                            <div>ينتهي في: {formatDate(coupon.expires_at)}</div>
+                            <div>
+                              مخصص لمستخدم:{" "}
+                              {coupon.assigned_user_id
+                                ? userDisplay(assignedProfile, coupon.assigned_user_id)
+                                : "عام"}
+                            </div>
+                            <div>
+                              أنشأه:{" "}
+                              {coupon.created_by
+                                ? userDisplay(creatorProfile, coupon.created_by)
+                                : "—"}
+                            </div>
+                            <div>
+                              لكل مستخدم مرة واحدة:{" "}
+                              {coupon.single_use_per_user ? "نعم" : "لا"}
+                            </div>
+                            <div>
+                              البداية: {formatDate(coupon.starts_at)}
+                            </div>
                           </div>
+
+                          {coupon.notes ? (
+                            <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-white/60">
+                              {coupon.notes}
+                            </div>
+                          ) : null}
+
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <form action={toggleCouponStatusAction}>
+                              <input type="hidden" name="couponId" value={coupon.id} />
+                              <input
+                                type="hidden"
+                                name="nextActive"
+                                value={coupon.is_active ? "false" : "true"}
+                              />
+                              <button
+                                type="submit"
+                                className={`inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-black transition ${
+                                  coupon.is_active
+                                    ? "border border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15"
+                                    : "border border-emerald-400/20 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
+                                }`}
+                              >
+                                {coupon.is_active ? "إيقاف الكوبون" : "تفعيل الكوبون"}
+                              </button>
+                            </form>
+
+                            <form action={deleteCouponAction}>
+                              <input type="hidden" name="couponId" value={coupon.id} />
+                              <button
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-2.5 text-sm font-black text-red-200 transition hover:bg-red-500/15"
+                              >
+                                حذف الكوبون
+                              </button>
+                            </form>
+                          </div>
+
+                          <details className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+                            <summary className="cursor-pointer text-sm font-black text-cyan-300">
+                              تعديل الكوبون
+                            </summary>
+
+                            <form action={updateCouponAction} className="mt-4 space-y-4">
+                              <input type="hidden" name="couponId" value={coupon.id} />
+
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    الكود
+                                  </label>
+                                  <input
+                                    name="code"
+                                    defaultValue={coupon.code}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    الحالة
+                                  </label>
+                                  <select
+                                    name="isActive"
+                                    defaultValue={coupon.is_active ? "on" : "off"}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  >
+                                    <option value="on">مفعّل</option>
+                                    <option value="off">متوقف</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    نوع الكوبون
+                                  </label>
+                                  <select
+                                    name="rewardType"
+                                    defaultValue={coupon.reward_type}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  >
+                                    <option value="games_balance">إضافة ألعاب</option>
+                                    <option value="account_tier">ترقية الحساب</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    اللعبة المستهدفة
+                                  </label>
+                                  <select
+                                    name="targetGame"
+                                    defaultValue={coupon.target_game ?? "lamtkom"}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  >
+                                    <option value="lamtkom">لمتكم</option>
+                                    <option value="bara_alsalfah">برا السالفة</option>
+                                    <option value="codenames">Codenames</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    عدد الألعاب
+                                  </label>
+                                  <input
+                                    name="gamesAmount"
+                                    type="number"
+                                    min="0"
+                                    defaultValue={coupon.games_amount}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    الرتبة المستهدفة
+                                  </label>
+                                  <select
+                                    name="targetTier"
+                                    defaultValue={coupon.target_tier ?? ""}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  >
+                                    <option value="">بدون</option>
+                                    <option value="free">free</option>
+                                    <option value="premium">premium</option>
+                                    <option value="vip">vip</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="mb-2 block text-sm font-bold text-white/75">
+                                  المستخدم المخصص له
+                                </label>
+                                <select
+                                  name="assignedUserId"
+                                  defaultValue={coupon.assigned_user_id ?? ""}
+                                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                >
+                                  <option value="">عام — أي مستخدم</option>
+                                  {profileRows.map((item) => (
+                                    <option key={item.id} value={item.id}>
+                                      {userDisplay(item, item.id)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    الحد الأقصى للاستخدام
+                                  </label>
+                                  <input
+                                    name="maxRedemptions"
+                                    type="number"
+                                    min="1"
+                                    defaultValue={coupon.max_redemptions}
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  />
+                                </div>
+
+                                <div className="flex items-end">
+                                  <label className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm font-bold text-white/80">
+                                    <input
+                                      name="singleUsePerUser"
+                                      type="checkbox"
+                                      defaultChecked={coupon.single_use_per_user}
+                                      className="h-4 w-4"
+                                    />
+                                    استخدام مرة واحدة لكل مستخدم
+                                  </label>
+                                </div>
+                              </div>
+
+                              <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    يبدأ من
+                                  </label>
+                                  <input
+                                    name="startsAt"
+                                    type="datetime-local"
+                                    defaultValue={
+                                      coupon.starts_at
+                                        ? new Date(coupon.starts_at)
+                                            .toISOString()
+                                            .slice(0, 16)
+                                        : ""
+                                    }
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="mb-2 block text-sm font-bold text-white/75">
+                                    ينتهي في
+                                  </label>
+                                  <input
+                                    name="expiresAt"
+                                    type="datetime-local"
+                                    defaultValue={
+                                      coupon.expires_at
+                                        ? new Date(coupon.expires_at)
+                                            .toISOString()
+                                            .slice(0, 16)
+                                        : ""
+                                    }
+                                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="mb-2 block text-sm font-bold text-white/75">
+                                  ملاحظات
+                                </label>
+                                <textarea
+                                  name="notes"
+                                  rows={3}
+                                  defaultValue={coupon.notes ?? ""}
+                                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                                />
+                              </div>
+
+                              <button
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-400"
+                              >
+                                حفظ التعديلات
+                              </button>
+                            </form>
+                          </details>
                         </div>
-
-                        <div className="mt-4 grid gap-3 text-sm text-white/65 md:grid-cols-2">
-                          <div>أنشئ في: {formatDate(coupon.created_at)}</div>
-                          <div>ينتهي في: {formatDate(coupon.expires_at)}</div>
-                          <div>
-                            مخصص لمستخدم:{" "}
-                            {coupon.assigned_user_id ? coupon.assigned_user_id : "عام"}
-                          </div>
-                          <div>
-                            لكل مستخدم مرة واحدة:{" "}
-                            {coupon.single_use_per_user ? "نعم" : "لا"}
-                          </div>
-                        </div>
-
-                        {coupon.notes ? (
-                          <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2 text-sm text-white/60">
-                            {coupon.notes}
-                          </div>
-                        ) : null}
-
-                        <form action={toggleCouponStatusAction} className="mt-4">
-                          <input type="hidden" name="couponId" value={coupon.id} />
-                          <input
-                            type="hidden"
-                            name="nextActive"
-                            value={coupon.is_active ? "false" : "true"}
-                          />
-                          <button
-                            type="submit"
-                            className={`inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-black transition ${
-                              coupon.is_active
-                                ? "border border-red-400/20 bg-red-500/10 text-red-200 hover:bg-red-500/15"
-                                : "border border-emerald-400/20 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
-                            }`}
-                          >
-                            {coupon.is_active ? "إيقاف الكوبون" : "تفعيل الكوبون"}
-                          </button>
-                        </form>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -400,33 +761,37 @@ export default async function AdminCouponsPage({
                       لا توجد عمليات تفعيل حتى الآن.
                     </div>
                   ) : (
-                    redemptionRows.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-[1.4rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-3"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-black text-white">
-                              {item.code_snapshot}
+                    redemptionRows.map((item) => {
+                      const userProfile = profileMap.get(item.user_id);
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-[1.4rem] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.015)_100%)] px-4 py-3"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-black text-white">
+                                {item.code_snapshot}
+                              </div>
+                              <div className="mt-1 text-xs text-white/55">
+                                {item.reward_type_snapshot === "games_balance"
+                                  ? `إضافة ${item.games_amount_snapshot} ألعاب`
+                                  : `ترقية إلى ${item.target_tier_snapshot ?? "premium"}`}
+                              </div>
                             </div>
-                            <div className="mt-1 text-xs text-white/55">
-                              {item.reward_type_snapshot === "games_balance"
-                                ? `إضافة ${item.games_amount_snapshot} ألعاب`
-                                : `ترقية إلى ${item.target_tier_snapshot ?? "premium"}`}
+
+                            <div className="text-xs font-bold text-white/45">
+                              {formatDate(item.redeemed_at)}
                             </div>
                           </div>
 
-                          <div className="text-xs font-bold text-white/45">
-                            {formatDate(item.redeemed_at)}
+                          <div className="mt-2 text-xs text-white/40">
+                            المستخدم: {userDisplay(userProfile, item.user_id)}
                           </div>
                         </div>
-
-                        <div className="mt-2 text-xs text-white/40">
-                          المستخدم: {item.user_id}
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

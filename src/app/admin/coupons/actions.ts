@@ -47,14 +47,13 @@ function toNullableDateTime(value: FormDataEntryValue | null) {
   return stringValue ? new Date(stringValue).toISOString() : null;
 }
 
-export async function createCouponAction(formData: FormData) {
-  const { supabase, userId } = await requireAdmin();
-
+function buildCouponPayload(formData: FormData, userId: string) {
   const rewardType = String(formData.get("rewardType") ?? "").trim();
   const rawCode = String(formData.get("code") ?? "").trim();
   const code = normalizeCode(rawCode || generateCouponCode());
 
-  const targetGame = String(formData.get("targetGame") ?? "lamtkom").trim() || "lamtkom";
+  const targetGame =
+    String(formData.get("targetGame") ?? "lamtkom").trim() || "lamtkom";
   const gamesAmount = Number(formData.get("gamesAmount") ?? 0);
   const targetTier = String(formData.get("targetTier") ?? "").trim() || null;
   const assignedUserId = String(formData.get("assignedUserId") ?? "").trim() || null;
@@ -65,24 +64,24 @@ export async function createCouponAction(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!["games_balance", "account_tier"].includes(rewardType)) {
-    redirect("/admin/coupons?error=" + encodeURIComponent("نوع الكوبون غير صالح."));
+    throw new Error("نوع الكوبون غير صالح.");
   }
 
   if (rewardType === "games_balance" && (!Number.isFinite(gamesAmount) || gamesAmount <= 0)) {
-    redirect("/admin/coupons?error=" + encodeURIComponent("عدد الألعاب يجب أن يكون أكبر من صفر."));
+    throw new Error("عدد الألعاب يجب أن يكون أكبر من صفر.");
   }
 
   if (rewardType === "account_tier" && !targetTier) {
-    redirect("/admin/coupons?error=" + encodeURIComponent("يرجى تحديد الرتبة المستهدفة."));
+    throw new Error("يرجى تحديد الرتبة المستهدفة.");
   }
 
   if (!Number.isFinite(maxRedemptions) || maxRedemptions < 1) {
-    redirect("/admin/coupons?error=" + encodeURIComponent("عدد مرات الاستخدام يجب أن يكون 1 أو أكثر."));
+    throw new Error("عدد مرات الاستخدام يجب أن يكون 1 أو أكثر.");
   }
 
-  const payload = {
+  return {
     code,
-    is_active: true,
+    is_active: formData.get("isActive") === "off" ? false : true,
     reward_type: rewardType,
     target_game: rewardType === "games_balance" ? targetGame : null,
     games_amount: rewardType === "games_balance" ? gamesAmount : 0,
@@ -95,21 +94,84 @@ export async function createCouponAction(formData: FormData) {
     notes,
     created_by: userId,
   };
+}
 
-  const { error } = await supabase.from("coupons").insert(payload);
+export async function createCouponAction(formData: FormData) {
+  const { supabase, userId } = await requireAdmin();
 
-  if (error) {
+  try {
+    const payload = buildCouponPayload(formData, userId);
+
+    const { error } = await supabase.from("coupons").insert(payload);
+
+    if (error) {
+      redirect(
+        "/admin/coupons?error=" +
+          encodeURIComponent(error.message || "تعذر إنشاء الكوبون."),
+      );
+    }
+
+    revalidatePath("/admin/coupons");
+    redirect(
+      "/admin/coupons?success=" +
+        encodeURIComponent(`تم إنشاء الكوبون بنجاح: ${payload.code}`),
+    );
+  } catch (error) {
     redirect(
       "/admin/coupons?error=" +
-        encodeURIComponent(error.message || "تعذر إنشاء الكوبون."),
+        encodeURIComponent(
+          error instanceof Error ? error.message : "تعذر إنشاء الكوبون.",
+        ),
     );
   }
+}
 
-  revalidatePath("/admin/coupons");
-  redirect(
-    "/admin/coupons?success=" +
-      encodeURIComponent(`تم إنشاء الكوبون بنجاح: ${code}`),
-  );
+export async function updateCouponAction(formData: FormData) {
+  const { supabase, userId } = await requireAdmin();
+  const couponId = String(formData.get("couponId") ?? "").trim();
+
+  if (!couponId) {
+    redirect("/admin/coupons?error=" + encodeURIComponent("معرف الكوبون مفقود."));
+  }
+
+  try {
+    const payload = buildCouponPayload(formData, userId);
+
+    const { error } = await supabase
+      .from("coupons")
+      .update({
+        code: payload.code,
+        is_active: payload.is_active,
+        reward_type: payload.reward_type,
+        target_game: payload.target_game,
+        games_amount: payload.games_amount,
+        target_tier: payload.target_tier,
+        assigned_user_id: payload.assigned_user_id,
+        max_redemptions: payload.max_redemptions,
+        single_use_per_user: payload.single_use_per_user,
+        starts_at: payload.starts_at,
+        expires_at: payload.expires_at,
+        notes: payload.notes,
+      })
+      .eq("id", couponId);
+
+    if (error) {
+      redirect(
+        "/admin/coupons?error=" +
+          encodeURIComponent(error.message || "تعذر تعديل الكوبون."),
+      );
+    }
+
+    revalidatePath("/admin/coupons");
+    redirect("/admin/coupons?success=" + encodeURIComponent("تم تعديل الكوبون بنجاح."));
+  } catch (error) {
+    redirect(
+      "/admin/coupons?error=" +
+        encodeURIComponent(
+          error instanceof Error ? error.message : "تعذر تعديل الكوبون.",
+        ),
+    );
+  }
 }
 
 export async function toggleCouponStatusAction(formData: FormData) {
@@ -136,4 +198,26 @@ export async function toggleCouponStatusAction(formData: FormData) {
 
   revalidatePath("/admin/coupons");
   redirect("/admin/coupons?success=" + encodeURIComponent("تم تحديث حالة الكوبون."));
+}
+
+export async function deleteCouponAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const couponId = String(formData.get("couponId") ?? "").trim();
+
+  if (!couponId) {
+    redirect("/admin/coupons?error=" + encodeURIComponent("معرف الكوبون مفقود."));
+  }
+
+  const { error } = await supabase.from("coupons").delete().eq("id", couponId);
+
+  if (error) {
+    redirect(
+      "/admin/coupons?error=" +
+        encodeURIComponent(error.message || "تعذر حذف الكوبون."),
+    );
+  }
+
+  revalidatePath("/admin/coupons");
+  redirect("/admin/coupons?success=" + encodeURIComponent("تم حذف الكوبون بنجاح."));
 }
