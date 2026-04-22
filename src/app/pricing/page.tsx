@@ -34,7 +34,7 @@ const plans: Plan[] = [
   {
     name: "الخطة المجانية",
     badge: "للتجربة",
-    price: "0 JD",
+    price: "0JD",
     description:
       "مناسبة للتجربة الأولى والتعرّف على أسلوب اللعب داخل المنصة قبل الانتقال إلى خطة أعلى.",
     cta: "ابدأ مجانًا",
@@ -49,7 +49,7 @@ const plans: Plan[] = [
   {
     name: "Premium",
     badge: "الأكثر طلبًا",
-    price: "10 JD",
+    price: "10JD",
     description:
       "الخيار الأنسب للمستخدم الذي يريد تجربة أقوى من المجانية مع استخدام مستمر ومزايا أفضل أثناء اللعب.",
     highlight: "تمنع تكرار الأسئلة وتناسب الاستخدام المتكرر للأفراد والمجموعات الصغيرة",
@@ -66,7 +66,7 @@ const plans: Plan[] = [
   {
     name: "VIP",
     badge: "الأعلى",
-    price: "20 JD",
+    price: "20JD",
     description:
       "الخطة الأعلى للمستخدم الذي يريد أفضل تجربة ممكنة داخل المنصة مع مرونة كاملة واستخدام غير محدود للعبة لمتكم.",
     highlight: "جميع مزايا Premium بالإضافة إلى ألعاب غير محدودة في لمتكم",
@@ -298,12 +298,6 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
     >
       <div className={`absolute inset-x-0 top-0 h-1 ${c.bar}`} />
 
-      {isFeatured ? (
-        <div className="absolute left-4 top-4 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-300">
-          ★ الأكثر طلبًا
-        </div>
-      ) : null}
-
       <div className="mt-4 flex items-center justify-between gap-3">
         <div className="text-2xl">{c.icon}</div>
         <div className={`rounded-full border px-3 py-1 text-xs font-black ${c.badge}`}>
@@ -470,10 +464,10 @@ export default function PricingPage() {
 
             <div className="mt-6 grid gap-3 md:grid-cols-4">
               {[
-                { label: "0 JD", val: "للتجربة", color: "text-white/60" },
-                { label: "10 JD", val: "Premium", color: "text-cyan-300" },
-                { label: "20 JD", val: "VIP", color: "text-violet-300" },
-                { label: "1 JD / لعبة", val: "مرن", color: "text-emerald-300" },
+                { label: "0JD", val: "للتجربة", color: "text-white/60" },
+                { label: "10JD", val: "Premium", color: "text-cyan-300" },
+                { label: "20JD", val: "VIP", color: "text-violet-300" },
+                { label: "1JD / لعبة", val: "مرن", color: "text-emerald-300" },
               ].map((item) => (
                 <div
                   key={item.label}
