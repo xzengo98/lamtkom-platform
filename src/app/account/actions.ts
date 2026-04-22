@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createGamesAddedNotification,
+  createNotificationForUser,
+} from "@/lib/notifications/server";
 
 type DeleteIncompleteGameResult = {
   ok: boolean;
@@ -125,6 +129,22 @@ export async function redeemCouponAction(
     };
   }
 
+  const { data: beforeProfile, error: beforeProfileError } = await supabase
+    .from("profiles")
+    .select("games_remaining, account_tier")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (beforeProfileError) {
+    return {
+      ok: false,
+      error: beforeProfileError.message || "تعذر قراءة بيانات الحساب.",
+    };
+  }
+
+  const previousGamesRemaining = Number(beforeProfile?.games_remaining ?? 0);
+  const previousTier = String(beforeProfile?.account_tier ?? "free");
+
   const { data, error } = await supabase.rpc("redeem_coupon", {
     p_code: safeCode,
   });
@@ -154,15 +174,48 @@ export async function redeemCouponAction(
     };
   }
 
+  const rewardType = String(result.reward_type ?? "");
+  const gamesAmount = Number(result.games_amount ?? 0);
+  const targetTier = result.target_tier ?? null;
+
+  if (rewardType === "games_balance" && gamesAmount > 0) {
+    const newRemaining = previousGamesRemaining + gamesAmount;
+
+    await createGamesAddedNotification({
+      userId: user.id,
+      addedGames: gamesAmount,
+      previousRemaining: previousGamesRemaining,
+      newRemaining,
+    });
+  }
+
+  if (rewardType === "account_tier" && targetTier) {
+    await createNotificationForUser({
+      userId: user.id,
+      type: "system",
+      title: "تم ترقية حسابك بنجاح",
+      body: `تم تفعيل الكوبون بنجاح وترقية حسابك من "${previousTier}" إلى "${targetTier}".`,
+      actionUrl: "/account",
+      payload: {
+        previousTier,
+        newTier: targetTier,
+        source: "coupon",
+        code: safeCode,
+      },
+    });
+  }
+
   revalidatePath("/account");
+  revalidatePath("/account/notifications");
+  revalidatePath("/");
   revalidatePath("/game/start");
   revalidatePath("/pricing");
 
   return {
     ok: true,
     message: result.message || "تم تفعيل الكوبون بنجاح.",
-    rewardType: result.reward_type,
-    gamesAmount: result.games_amount,
-    targetTier: result.target_tier ?? null,
+    rewardType,
+    gamesAmount,
+    targetTier,
   };
 }
