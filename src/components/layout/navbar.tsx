@@ -1,10 +1,10 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ViewerData } from "@/lib/auth/viewer";
+
 
 type Profile = {
   role: string | null;
@@ -534,15 +534,60 @@ export default function Navbar({ initialAuth }: NavbarProps) {
     });
   }, [initialAuth]);
 
-  useEffect(() => {
-    let mounted = true;
+  type NavbarAuthEvent = string;
 
-    async function hydrateAuthState() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+type NavbarSessionLike = {
+  user?: {
+    id: string;
+  } | null;
+} | null;
 
-      if (!mounted || !session?.user) {
+useEffect(() => {
+  let mounted = true;
+
+  async function hydrateAuthState() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!mounted || !session?.user) {
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, username")
+      .eq("id", session.user.id)
+      .maybeSingle();
+
+    const typedProfile = (profile as Profile | null) ?? null;
+
+    if (!mounted) return;
+
+    setAuthState({
+      isLoggedIn: true,
+      isAdmin: typedProfile?.role === "admin",
+      username: typedProfile?.username ?? null,
+    });
+  }
+
+  void hydrateAuthState();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(
+    async (event: NavbarAuthEvent, session: NavbarSessionLike) => {
+      if (!mounted) return;
+
+      if (event === "SIGNED_OUT") {
+        setAuthState(loggedOutState());
+        setUnreadCount(0);
+        setLatestNotifications([]);
+        router.refresh();
+        return;
+      }
+
+      if (!session?.user) {
         return;
       }
 
@@ -561,62 +606,25 @@ export default function Navbar({ initialAuth }: NavbarProps) {
         isAdmin: typedProfile?.role === "admin",
         username: typedProfile?.username ?? null,
       });
-    }
 
-    void hydrateAuthState();
+      if (
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED" ||
+        event === "INITIAL_SESSION" ||
+        event === "PASSWORD_RECOVERY" ||
+        event === "MFA_CHALLENGE_VERIFIED"
+      ) {
+        router.refresh();
+      }
+    },
+  );
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (
-        event: "INITIAL_SESSION" | "SIGNED_IN" | "SIGNED_OUT" | "TOKEN_REFRESHED" | "USER_UPDATED" | "PASSWORD_RECOVERY",
-        session: { user?: { id: string } } | null,
-      ) => {
-        if (!mounted) return;
-
-        if (event === "SIGNED_OUT") {
-          setAuthState(loggedOutState());
-          setUnreadCount(0);
-          setLatestNotifications([]);
-          router.refresh();
-          return;
-        }
-
-        if (!session?.user) {
-          return;
-        }
-
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, username")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        const typedProfile = (profile as Profile | null) ?? null;
-
-        if (!mounted) return;
-
-        setAuthState({
-          isLoggedIn: true,
-          isAdmin: typedProfile?.role === "admin",
-          username: typedProfile?.username ?? null,
-        });
-
-        if (
-          event === "SIGNED_IN" ||
-          event === "TOKEN_REFRESHED" ||
-          event === "USER_UPDATED"
-        ) {
-          router.refresh();
-        }
-      },
-    );
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [router, supabase]);
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, [router, supabase]);
 
   useEffect(() => {
     let cancelled = false;
