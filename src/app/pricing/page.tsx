@@ -298,6 +298,12 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
     >
       <div className={`absolute inset-x-0 top-0 h-1 ${c.bar}`} />
 
+      {isFeatured ? (
+        <div className="absolute left-4 top-4 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-black text-cyan-300">
+          ★ الأكثر طلبًا
+        </div>
+      ) : null}
+
       <div className="mt-4 flex items-center justify-between gap-3">
         <div className="text-2xl">{c.icon}</div>
         <div className={`rounded-full border px-3 py-1 text-xs font-black ${c.badge}`}>
@@ -305,19 +311,23 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
         </div>
       </div>
 
-      <h3 className="mt-5 text-2xl font-black text-white">{plan.name}</h3>
+      <h3 className="mt-5 text-center text-2xl font-black text-white">
+        {plan.name}
+      </h3>
 
-      <p className="mt-3 min-h-[72px] text-sm leading-8 text-white/58">
+      <p className="mt-3 min-h-[72px] text-center text-sm leading-8 text-white/58">
         {plan.description}
       </p>
 
-      <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4">
+      <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4 text-center">
         <div className="text-xs font-bold text-white/35">السعر</div>
-        <div className={`mt-2 text-4xl font-black ${c.price}`}>{plan.price}</div>
+        <div className={`mt-2 text-center text-4xl font-black ${c.price}`}>
+          {plan.price}
+        </div>
       </div>
 
       {plan.highlight ? (
-        <div className="mt-4 rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white/70">
+        <div className="mt-4 rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-sm font-bold text-white/70">
           {plan.highlight}
         </div>
       ) : null}
