@@ -62,6 +62,7 @@ function buildCouponPayload(formData: FormData, userId: string) {
   const startsAt = toNullableDateTime(formData.get("startsAt"));
   const expiresAt = toNullableDateTime(formData.get("expiresAt"));
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const isActive = String(formData.get("isActive") ?? "on").trim() !== "off";
 
   if (!["games_balance", "account_tier"].includes(rewardType)) {
     throw new Error("نوع الكوبون غير صالح.");
@@ -81,7 +82,7 @@ function buildCouponPayload(formData: FormData, userId: string) {
 
   return {
     code,
-    is_active: formData.get("isActive") === "off" ? false : true,
+    is_active: isActive,
     reward_type: rewardType,
     target_game: rewardType === "games_balance" ? targetGame : null,
     games_amount: rewardType === "games_balance" ? gamesAmount : 0,
@@ -99,23 +100,9 @@ function buildCouponPayload(formData: FormData, userId: string) {
 export async function createCouponAction(formData: FormData) {
   const { supabase, userId } = await requireAdmin();
 
+  let payload;
   try {
-    const payload = buildCouponPayload(formData, userId);
-
-    const { error } = await supabase.from("coupons").insert(payload);
-
-    if (error) {
-      redirect(
-        "/admin/coupons?error=" +
-          encodeURIComponent(error.message || "تعذر إنشاء الكوبون."),
-      );
-    }
-
-    revalidatePath("/admin/coupons");
-    redirect(
-      "/admin/coupons?success=" +
-        encodeURIComponent(`تم إنشاء الكوبون بنجاح: ${payload.code}`),
-    );
+    payload = buildCouponPayload(formData, userId);
   } catch (error) {
     redirect(
       "/admin/coupons?error=" +
@@ -124,6 +111,21 @@ export async function createCouponAction(formData: FormData) {
         ),
     );
   }
+
+  const { error } = await supabase.from("coupons").insert(payload);
+
+  if (error) {
+    redirect(
+      "/admin/coupons?error=" +
+        encodeURIComponent(error.message || "تعذر إنشاء الكوبون."),
+    );
+  }
+
+  revalidatePath("/admin/coupons");
+  redirect(
+    "/admin/coupons?success=" +
+      encodeURIComponent(`تم إنشاء الكوبون بنجاح: ${payload.code}`),
+  );
 }
 
 export async function updateCouponAction(formData: FormData) {
@@ -134,36 +136,9 @@ export async function updateCouponAction(formData: FormData) {
     redirect("/admin/coupons?error=" + encodeURIComponent("معرف الكوبون مفقود."));
   }
 
+  let payload;
   try {
-    const payload = buildCouponPayload(formData, userId);
-
-    const { error } = await supabase
-      .from("coupons")
-      .update({
-        code: payload.code,
-        is_active: payload.is_active,
-        reward_type: payload.reward_type,
-        target_game: payload.target_game,
-        games_amount: payload.games_amount,
-        target_tier: payload.target_tier,
-        assigned_user_id: payload.assigned_user_id,
-        max_redemptions: payload.max_redemptions,
-        single_use_per_user: payload.single_use_per_user,
-        starts_at: payload.starts_at,
-        expires_at: payload.expires_at,
-        notes: payload.notes,
-      })
-      .eq("id", couponId);
-
-    if (error) {
-      redirect(
-        "/admin/coupons?error=" +
-          encodeURIComponent(error.message || "تعذر تعديل الكوبون."),
-      );
-    }
-
-    revalidatePath("/admin/coupons");
-    redirect("/admin/coupons?success=" + encodeURIComponent("تم تعديل الكوبون بنجاح."));
+    payload = buildCouponPayload(formData, userId);
   } catch (error) {
     redirect(
       "/admin/coupons?error=" +
@@ -172,6 +147,34 @@ export async function updateCouponAction(formData: FormData) {
         ),
     );
   }
+
+  const { error } = await supabase
+    .from("coupons")
+    .update({
+      code: payload.code,
+      is_active: payload.is_active,
+      reward_type: payload.reward_type,
+      target_game: payload.target_game,
+      games_amount: payload.games_amount,
+      target_tier: payload.target_tier,
+      assigned_user_id: payload.assigned_user_id,
+      max_redemptions: payload.max_redemptions,
+      single_use_per_user: payload.single_use_per_user,
+      starts_at: payload.starts_at,
+      expires_at: payload.expires_at,
+      notes: payload.notes,
+    })
+    .eq("id", couponId);
+
+  if (error) {
+    redirect(
+      "/admin/coupons?error=" +
+        encodeURIComponent(error.message || "تعذر تعديل الكوبون."),
+    );
+  }
+
+  revalidatePath("/admin/coupons");
+  redirect("/admin/coupons?success=" + encodeURIComponent("تم تعديل الكوبون بنجاح."));
 }
 
 export async function toggleCouponStatusAction(formData: FormData) {

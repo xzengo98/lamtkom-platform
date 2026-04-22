@@ -402,12 +402,11 @@ export default async function AdminPage() {
             </span>
 
             <h1 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-              نظرة عامة
-              <span className="mr-2 text-white/72">على المنصة</span>
+              نظرة عامة على المنصة :
             </h1>
 
             <p className="mt-3 max-w-2xl text-sm leading-8 text-white/55">
-              وصول سريع إلى الإحصائيات وأهم صفحات الإدارة بدون Hero ضخم أو فراغات زائدة.
+              وصول سريع إلى الإحصائيات وأهم صفحات الإدارة.
             </p>
           </div>
 

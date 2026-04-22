@@ -229,6 +229,7 @@ const navGroups: NavGroup[] = [
       { label: "الأعضاء", href: "/admin/users", icon: "users" },
       { label: "الألعاب المنتهية", href: "/admin/games", icon: "games" },
       { label: "الإشعارات", href: "/admin/notifications", icon: "notifications" },
+      { label: "الكوبونات", href: "/admin/coupons", icon: "categories" },
     ],
   },
   {
@@ -315,7 +316,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
             <h2 className="mt-4 text-2xl font-black text-white">الإدارة</h2>
 
             <p className="mt-2 text-sm leading-7 text-white/55">
-              وصول سريع ومنظم لجميع أقسام لوحة الأدمن.
+             الوصول السريع :
             </p>
           </div>
 
@@ -370,12 +371,10 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
                 <h1 className="mt-4 text-3xl font-black text-white sm:text-4xl">
                   تحكم كامل
-                  <span className="mr-2 text-white/72">بشكل أنظف وأسرع</span>
                 </h1>
 
                 <p className="mt-3 max-w-2xl text-sm leading-8 text-white/55">
-                  إدارة لمتكم، برا السالفة، وCodenames من مكان واحد، مع وصول واضح
-                  وسريع.
+                 لوحة لإدارة المنصة بالكامل.
                 </p>
               </div>
 

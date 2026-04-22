@@ -15,6 +15,7 @@ type SearchParams = Promise<{
   status?: string;
   reward?: string;
   page?: string;
+  rpage?: string;
 }>;
 
 type CouponRow = {
@@ -53,7 +54,8 @@ type ProfileRow = {
   email: string | null;
 };
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 3;
+const REDEMPTION_PAGE_SIZE = 3;
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -167,14 +169,19 @@ export default async function AdminCouponsPage({
   const rawPage = Number(params.page ?? "1");
   const requestedPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 
+  const rawRedemptionPage = Number(params.rpage ?? "1");
+  const requestedRedemptionPage =
+    Number.isFinite(rawRedemptionPage) && rawRedemptionPage > 0
+      ? rawRedemptionPage
+      : 1;
+
   const [{ data: coupons }, { data: redemptions }, { data: profiles }] =
     await Promise.all([
       supabase.from("coupons").select("*").order("created_at", { ascending: false }),
       supabase
         .from("coupon_redemptions")
         .select("*")
-        .order("redeemed_at", { ascending: false })
-        .limit(30),
+        .order("redeemed_at", { ascending: false }),
       supabase
         .from("profiles")
         .select("id, username, email")
@@ -202,9 +209,7 @@ export default async function AdminCouponsPage({
           ? coupon.is_active
           : !coupon.is_active;
 
-    const rewardPass =
-      reward === "all" ? true : coupon.reward_type === reward;
-
+    const rewardPass = reward === "all" ? true : coupon.reward_type === reward;
     const searchPass = isCouponMatch(coupon, q, assignedProfile, creatorProfile);
 
     return statusPass && rewardPass && searchPass;
@@ -218,7 +223,26 @@ export default async function AdminCouponsPage({
     startIndex + PAGE_SIZE,
   );
 
+  const totalRedemptionPages = Math.max(
+    1,
+    Math.ceil(redemptionRows.length / REDEMPTION_PAGE_SIZE),
+  );
+  const currentRedemptionPage = Math.min(
+    requestedRedemptionPage,
+    totalRedemptionPages,
+  );
+  const redemptionStartIndex =
+    (currentRedemptionPage - 1) * REDEMPTION_PAGE_SIZE;
+  const paginatedRedemptions = redemptionRows.slice(
+    redemptionStartIndex,
+    redemptionStartIndex + REDEMPTION_PAGE_SIZE,
+  );
+
   const paginationItems = getPaginationItems(totalPages, currentPage);
+  const redemptionPaginationItems = getPaginationItems(
+    totalRedemptionPages,
+    currentRedemptionPage,
+  );
 
   function buildPageHref(page: number) {
     const query = new URLSearchParams();
@@ -227,6 +251,22 @@ export default async function AdminCouponsPage({
     if (status !== "all") query.set("status", status);
     if (reward !== "all") query.set("reward", reward);
     if (page > 1) query.set("page", String(page));
+    if (currentRedemptionPage > 1) {
+      query.set("rpage", String(currentRedemptionPage));
+    }
+
+    const queryString = query.toString();
+    return queryString ? `/admin/coupons?${queryString}` : "/admin/coupons";
+  }
+
+  function buildRedemptionPageHref(page: number) {
+    const query = new URLSearchParams();
+
+    if (q) query.set("q", q);
+    if (status !== "all") query.set("status", status);
+    if (reward !== "all") query.set("reward", reward);
+    if (currentPage > 1) query.set("page", String(currentPage));
+    if (page > 1) query.set("rpage", String(page));
 
     const queryString = query.toString();
     return queryString ? `/admin/coupons?${queryString}` : "/admin/coupons";
@@ -451,18 +491,18 @@ export default async function AdminCouponsPage({
                     </div>
                   </div>
 
-                  <form className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_160px_180px_110px_auto]">
+                  <form className="flex flex-col gap-3 xl:flex-row xl:flex-wrap">
                     <input
                       name="q"
                       defaultValue={q}
                       placeholder="ابحث بالكود أو المستخدم..."
-                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                      className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
                     />
 
                     <select
                       name="status"
                       defaultValue={status}
-                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 xl:w-[170px]"
                     >
                       <option value="all">كل الحالات</option>
                       <option value="active">المفعّلة</option>
@@ -472,7 +512,7 @@ export default async function AdminCouponsPage({
                     <select
                       name="reward"
                       defaultValue={reward}
-                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                      className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 xl:w-[170px]"
                     >
                       <option value="all">كل الأنواع</option>
                       <option value="games_balance">إضافة ألعاب</option>
@@ -480,20 +520,23 @@ export default async function AdminCouponsPage({
                     </select>
 
                     <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="rpage" value={String(currentRedemptionPage)} />
 
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
-                    >
-                      فلترة
-                    </button>
+                    <div className="flex gap-3 xl:w-auto">
+                      <button
+                        type="submit"
+                        className="inline-flex flex-1 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16 xl:flex-none"
+                      >
+                        فلترة
+                      </button>
 
-                    <Link
-                      href="/admin/coupons"
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
-                    >
-                      إعادة تعيين
-                    </Link>
+                      <Link
+                        href="/admin/coupons"
+                        className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-black text-white transition hover:bg-white/[0.08] xl:flex-none"
+                      >
+                        إعادة تعيين
+                      </Link>
+                    </div>
                   </form>
                 </div>
 
@@ -863,12 +906,12 @@ export default async function AdminCouponsPage({
                 </div>
 
                 <div className="space-y-3">
-                  {redemptionRows.length === 0 ? (
+                  {paginatedRedemptions.length === 0 ? (
                     <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-5 text-sm font-bold text-white/50">
                       لا توجد عمليات تفعيل حتى الآن.
                     </div>
                   ) : (
-                    redemptionRows.map((item) => {
+                    paginatedRedemptions.map((item) => {
                       const userProfile = profileMap.get(item.user_id);
 
                       return (
@@ -901,6 +944,57 @@ export default async function AdminCouponsPage({
                     })
                   )}
                 </div>
+
+                {totalRedemptionPages > 1 ? (
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                    <Link
+                      href={buildRedemptionPageHref(Math.max(1, currentRedemptionPage - 1))}
+                      className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                        currentRedemptionPage === 1
+                          ? "pointer-events-none border-white/6 bg-white/[0.03] text-white/25"
+                          : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      السابق
+                    </Link>
+
+                    {redemptionPaginationItems.map((item, index) =>
+                      typeof item === "number" ? (
+                        <Link
+                          key={`${item}-${index}`}
+                          href={buildRedemptionPageHref(item)}
+                          className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                            item === currentRedemptionPage
+                              ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-200"
+                              : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                          }`}
+                        >
+                          {item}
+                        </Link>
+                      ) : (
+                        <span
+                          key={`${item}-${index}`}
+                          className="px-2 text-sm font-black text-white/35"
+                        >
+                          ...
+                        </span>
+                      ),
+                    )}
+
+                    <Link
+                      href={buildRedemptionPageHref(
+                        Math.min(totalRedemptionPages, currentRedemptionPage + 1),
+                      )}
+                      className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                        currentRedemptionPage === totalRedemptionPages
+                          ? "pointer-events-none border-white/6 bg-white/[0.03] text-white/25"
+                          : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      التالي
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             </section>
           </div>
