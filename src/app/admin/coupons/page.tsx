@@ -288,8 +288,7 @@ export default async function AdminCouponsPage({
             </h1>
 
             <p className="mt-3 max-w-3xl text-sm leading-8 text-white/58 md:text-base">
-              أنشئ كوبونات لإضافة ألعاب أو ترقية الحساب إلى Premium، مع بحث وفلترة
-              وتعديل وحذف، وإظهار أسماء المستخدمين بدل UUID.
+              أنشئ كوبونات لإضافة ألعاب أو ترقية الحساب من هنا : 
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
