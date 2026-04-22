@@ -74,7 +74,8 @@ async function updateUserAction(formData: FormData) {
   const gamesRemainingRaw = Number(formData.get("games_remaining") ?? 0);
 
   const role = roleRaw === "admin" ? "admin" : "user";
-  const accountTier = tierRaw === "premium" ? "premium" : "free";
+  const accountTier =
+  tierRaw === "vip" ? "vip" : tierRaw === "premium" ? "premium" : "free";
   const gamesRemaining = Number.isFinite(gamesRemainingRaw)
     ? Math.max(0, Math.floor(gamesRemainingRaw))
     : 0;
@@ -236,7 +237,11 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       {item.role === "admin" ? "ADMIN" : "USER"}
                     </span>
                     <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${item.account_tier === "premium" ? "border-orange-400/25 bg-orange-400/10 text-orange-300" : "border-cyan-400/20 bg-cyan-400/8 text-cyan-300"}`}>
-                      {item.account_tier === "premium" ? "Premium" : "Free"}
+                      {item.account_tier === "vip"
+  ? "VIP"
+  : item.account_tier === "premium"
+    ? "Premium"
+    : "Free"}
                     </span>
                   </div>
                 </div>
@@ -266,10 +271,15 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                   </div>
                   <div>
                     <label className={labelClass}>نوع الحساب</label>
-                    <select name="account_tier" defaultValue={item.account_tier ?? "free"} className={selectClass}>
-                      <option value="free">free</option>
-                      <option value="premium">premium</option>
-                    </select>
+                    <select
+  name="account_tier"
+  defaultValue={item.account_tier ?? "free"}
+  className={selectClass}
+>
+  <option value="free">free</option>
+  <option value="premium">premium</option>
+  <option value="vip">vip</option>
+</select>
                   </div>
                   <div>
                     <label className={labelClass}>الألعاب المتبقية</label>
