@@ -9,8 +9,17 @@ type DeleteIncompleteGameResult = {
   error?: string;
 };
 
+type RedeemCouponResult = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  rewardType?: string;
+  gamesAmount?: number;
+  targetTier?: string | null;
+};
+
 export async function deleteIncompleteGame(
-  sessionId: string
+  sessionId: string,
 ): Promise<DeleteIncompleteGameResult> {
   const safeSessionId = String(sessionId ?? "").trim();
 
@@ -22,7 +31,6 @@ export async function deleteIncompleteGame(
   }
 
   const supabase = await getSupabaseServerClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -91,4 +99,70 @@ export async function deleteIncompleteGame(
   revalidatePath("/game/start");
 
   return { ok: true };
+}
+
+export async function redeemCouponAction(
+  code: string,
+): Promise<RedeemCouponResult> {
+  const safeCode = String(code ?? "").trim().replace(/\s+/g, "").toUpperCase();
+
+  if (!safeCode) {
+    return {
+      ok: false,
+      error: "يرجى إدخال كود الكوبون.",
+    };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      error: "يجب تسجيل الدخول أولًا.",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("redeem_coupon", {
+    p_code: safeCode,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      error: error.message || "تعذر تفعيل الكوبون.",
+    };
+  }
+
+  const result = (data ?? null) as
+    | {
+        ok?: boolean;
+        error?: string;
+        message?: string;
+        reward_type?: string;
+        games_amount?: number;
+        target_tier?: string | null;
+      }
+    | null;
+
+  if (!result?.ok) {
+    return {
+      ok: false,
+      error: result?.message || "تعذر تفعيل الكوبون.",
+    };
+  }
+
+  revalidatePath("/account");
+  revalidatePath("/game/start");
+  revalidatePath("/pricing");
+
+  return {
+    ok: true,
+    message: result.message || "تم تفعيل الكوبون بنجاح.",
+    rewardType: result.reward_type,
+    gamesAmount: result.games_amount,
+    targetTier: result.target_tier ?? null,
+  };
 }
