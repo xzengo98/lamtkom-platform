@@ -865,75 +865,7 @@ export default function AccountClientPage({
             </section>
 
             <section className="space-y-6">
-              <div>
-                <SectionBadge>وصول سريع</SectionBadge>
-                <h2 className="mt-4 text-2xl font-black text-white">
-                  ابدأ لعبة جديدة
-                </h2>
-                <p className="mt-2 text-sm leading-8 text-white/58">
-                  اختر اللعبة التي تريد البدء بها مباشرة.
-                </p>
-              </div>
-
-              <div className="grid gap-4">
-                {[
-                  {
-                    label: "لمتكم",
-                    desc: "أسئلة وأجوبة بين فريقين",
-                    href: "/game/start",
-                    icon: "quiz" as const,
-                    badge:
-                      "border-cyan-400/20 bg-cyan-400/8 text-cyan-300",
-                    btn: "border-cyan-400/20 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/18",
-                  },
-                  {
-                    label: "برا السالفة",
-                    desc: "اكشف الشخص المختلف",
-                    href: "/game/bara-alsalfah",
-                    icon: "bara" as const,
-                    badge:
-                      "border-orange-400/20 bg-orange-400/8 text-orange-300",
-                    btn: "border-orange-400/20 bg-orange-400/10 text-orange-200 hover:bg-orange-400/18",
-                  },
-                  {
-                    label: "Codenames",
-                    desc: "كلمات وتلميحات لفريقين",
-                    href: "/games/codenames",
-                    icon: "spark" as const,
-                    badge:
-                      "border-violet-400/20 bg-violet-400/8 text-violet-300",
-                    btn: "border-violet-400/20 bg-violet-400/10 text-violet-200 hover:bg-violet-400/18",
-                  },
-                ].map((game) => (
-                  <div
-                    key={game.label}
-                    className="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-4 shadow-[0_16px_36px_rgba(0,0,0,0.16)]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div
-                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-black ${game.badge}`}
-                        >
-                          <Icon name={game.icon} className="h-4 w-4" />
-                          {game.label}
-                        </div>
-                        <div className="mt-3 text-sm text-white/55">
-                          {game.desc}
-                        </div>
-                      </div>
-
-                      <Link
-                        href={game.href}
-                        className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-black transition ${game.btn}`}
-                      >
-                        <Icon name="continue" className="h-4 w-4" />
-                        ابدأ الآن
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
+              
               <div>
                 <SectionBadge>لعبة لمتكم</SectionBadge>
                 <h2 className="mt-4 text-2xl font-black text-white">

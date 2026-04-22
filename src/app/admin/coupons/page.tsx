@@ -14,6 +14,7 @@ type SearchParams = Promise<{
   q?: string;
   status?: string;
   reward?: string;
+  page?: string;
 }>;
 
 type CouponRow = {
@@ -51,6 +52,8 @@ type ProfileRow = {
   username: string | null;
   email: string | null;
 };
+
+const PAGE_SIZE = 5;
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -102,6 +105,33 @@ function isCouponMatch(
   return haystack.includes(q.toLowerCase());
 }
 
+function getPaginationItems(totalPages: number, currentPage: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const items: Array<number | string> = [1];
+
+  if (currentPage > 3) {
+    items.push("start-ellipsis");
+  }
+
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+
+  for (let page = start; page <= end; page += 1) {
+    items.push(page);
+  }
+
+  if (currentPage < totalPages - 2) {
+    items.push("end-ellipsis");
+  }
+
+  items.push(totalPages);
+
+  return items;
+}
+
 export default async function AdminCouponsPage({
   searchParams,
 }: {
@@ -133,6 +163,9 @@ export default async function AdminCouponsPage({
   const q = String(params.q ?? "").trim();
   const status = String(params.status ?? "all").trim();
   const reward = String(params.reward ?? "all").trim();
+
+  const rawPage = Number(params.page ?? "1");
+  const requestedPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 
   const [{ data: coupons }, { data: redemptions }, { data: profiles }] =
     await Promise.all([
@@ -177,6 +210,28 @@ export default async function AdminCouponsPage({
     return statusPass && rewardPass && searchPass;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredCoupons.length / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedCoupons = filteredCoupons.slice(
+    startIndex,
+    startIndex + PAGE_SIZE,
+  );
+
+  const paginationItems = getPaginationItems(totalPages, currentPage);
+
+  function buildPageHref(page: number) {
+    const query = new URLSearchParams();
+
+    if (q) query.set("q", q);
+    if (status !== "all") query.set("status", status);
+    if (reward !== "all") query.set("reward", reward);
+    if (page > 1) query.set("page", String(page));
+
+    const queryString = query.toString();
+    return queryString ? `/admin/coupons?${queryString}` : "/admin/coupons";
+  }
+
   return (
     <main className="min-h-screen text-white">
       <div className="pointer-events-none fixed inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(34,211,238,0.35)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.35)_1px,transparent_1px)] [background-size:64px_64px]" />
@@ -194,7 +249,7 @@ export default async function AdminCouponsPage({
 
             <p className="mt-3 max-w-3xl text-sm leading-8 text-white/58 md:text-base">
               أنشئ كوبونات لإضافة ألعاب أو ترقية الحساب إلى Premium، مع بحث وفلترة
-              وتعديل وحذف وإظهار أسماء المستخدمين بدل UUID.
+              وتعديل وحذف، وإظهار أسماء المستخدمين بدل UUID.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -388,7 +443,7 @@ export default async function AdminCouponsPage({
 
             <section className="space-y-6">
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="mb-4 flex flex-col gap-4">
                   <div>
                     <h2 className="text-xl font-black text-white">الكوبونات الحالية</h2>
                     <div className="mt-1 text-sm text-white/50">
@@ -396,50 +451,59 @@ export default async function AdminCouponsPage({
                     </div>
                   </div>
 
-                  <form className="grid w-full gap-3 md:w-auto md:grid-cols-[240px_130px_150px_auto]">
+                  <form className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_160px_180px_110px_auto]">
                     <input
                       name="q"
                       defaultValue={q}
                       placeholder="ابحث بالكود أو المستخدم..."
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
                     />
 
                     <select
                       name="status"
                       defaultValue={status}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
                     >
                       <option value="all">كل الحالات</option>
-                      <option value="active">المفعلة</option>
+                      <option value="active">المفعّلة</option>
                       <option value="inactive">المتوقفة</option>
                     </select>
 
                     <select
                       name="reward"
                       defaultValue={reward}
-                      className="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+                      className="min-w-0 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
                     >
                       <option value="all">كل الأنواع</option>
                       <option value="games_balance">إضافة ألعاب</option>
                       <option value="account_tier">ترقية الحساب</option>
                     </select>
 
+                    <input type="hidden" name="page" value="1" />
+
                     <button
                       type="submit"
                       className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
                     >
-                      بحث / فلترة
+                      فلترة
                     </button>
+
+                    <Link
+                      href="/admin/coupons"
+                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
+                    >
+                      إعادة تعيين
+                    </Link>
                   </form>
                 </div>
 
                 <div className="space-y-4">
-                  {filteredCoupons.length === 0 ? (
+                  {paginatedCoupons.length === 0 ? (
                     <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-5 text-sm font-bold text-white/50">
                       لا توجد نتائج مطابقة.
                     </div>
                   ) : (
-                    filteredCoupons.map((coupon) => {
+                    paginatedCoupons.map((coupon) => {
                       const assignedProfile = coupon.assigned_user_id
                         ? profileMap.get(coupon.assigned_user_id)
                         : null;
@@ -498,9 +562,7 @@ export default async function AdminCouponsPage({
                               لكل مستخدم مرة واحدة:{" "}
                               {coupon.single_use_per_user ? "نعم" : "لا"}
                             </div>
-                            <div>
-                              البداية: {formatDate(coupon.starts_at)}
-                            </div>
+                            <div>البداية: {formatDate(coupon.starts_at)}</div>
                           </div>
 
                           {coupon.notes ? (
@@ -692,9 +754,7 @@ export default async function AdminCouponsPage({
                                     type="datetime-local"
                                     defaultValue={
                                       coupon.starts_at
-                                        ? new Date(coupon.starts_at)
-                                            .toISOString()
-                                            .slice(0, 16)
+                                        ? new Date(coupon.starts_at).toISOString().slice(0, 16)
                                         : ""
                                     }
                                     className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
@@ -710,9 +770,7 @@ export default async function AdminCouponsPage({
                                     type="datetime-local"
                                     defaultValue={
                                       coupon.expires_at
-                                        ? new Date(coupon.expires_at)
-                                            .toISOString()
-                                            .slice(0, 16)
+                                        ? new Date(coupon.expires_at).toISOString().slice(0, 16)
                                         : ""
                                     }
                                     className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
@@ -745,6 +803,55 @@ export default async function AdminCouponsPage({
                     })
                   )}
                 </div>
+
+                {totalPages > 1 ? (
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                    <Link
+                      href={buildPageHref(Math.max(1, currentPage - 1))}
+                      className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                        currentPage === 1
+                          ? "pointer-events-none border-white/6 bg-white/[0.03] text-white/25"
+                          : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      السابق
+                    </Link>
+
+                    {paginationItems.map((item, index) =>
+                      typeof item === "number" ? (
+                        <Link
+                          key={`${item}-${index}`}
+                          href={buildPageHref(item)}
+                          className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                            item === currentPage
+                              ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-200"
+                              : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                          }`}
+                        >
+                          {item}
+                        </Link>
+                      ) : (
+                        <span
+                          key={`${item}-${index}`}
+                          className="px-2 text-sm font-black text-white/35"
+                        >
+                          ...
+                        </span>
+                      ),
+                    )}
+
+                    <Link
+                      href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                      className={`rounded-xl border px-3 py-2 text-sm font-black transition ${
+                        currentPage === totalPages
+                          ? "pointer-events-none border-white/6 bg-white/[0.03] text-white/25"
+                          : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      التالي
+                    </Link>
+                  </div>
+                ) : null}
               </div>
 
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
