@@ -1236,32 +1236,6 @@ router.refresh();
                 ))}
               </div>
 
-              <div className="rounded-[1.7rem] border border-amber-400/15 bg-amber-400/6 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)]">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1 text-xs font-black text-amber-300">
-                      <Icon name="lock" className="h-4 w-4" />
-                      الأمان
-                    </div>
-                    <h3 className="mt-4 text-xl font-black text-white">
-                      تعديل كلمة المرور
-                    </h3>
-                    <p className="mt-2 text-sm leading-8 text-white/58">
-                      يمكنك تحديث كلمة المرور في أي وقت من داخل نفس نافذة التعديلات.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => openEditModal("password")}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-200 transition hover:bg-amber-400/16"
-                  >
-                    <Icon name="lock" className="h-4 w-4" />
-                    تعديل كلمة المرور
-                  </button>
-                </div>
-              </div>
-
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
