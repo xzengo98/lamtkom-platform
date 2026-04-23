@@ -88,8 +88,6 @@ export default async function LoginPage({
                 </div>
               )}
 
-<GoogleAuthButton mode="login" next="/" />
-
               <form action={loginAction} className="mt-6 space-y-4">
                 <div>
                   <label className="mb-2 block text-sm font-bold text-white/75">
@@ -128,6 +126,8 @@ export default async function LoginPage({
 
                 <LoginSubmitButton />
               </form>
+
+<GoogleAuthButton mode="login" next="/" />
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div className="text-white/60">
