@@ -204,8 +204,10 @@ export default async function RegisterPage({
                     <ArrowLeftIcon className="h-4 w-4" />
                   </button>
                 </form>
-<div><GoogleAuthButton mode="register" next="/" /></div>
 
+<div className="mt-4">
+  <GoogleAuthButton mode="register" next="/" />
+</div>
 
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
                   <div className="text-white/60">

@@ -126,9 +126,9 @@ export default async function LoginPage({
 
                 <LoginSubmitButton />
               </form>
-
+<div className="mt-4">
 <GoogleAuthButton mode="login" next="/" />
-
+</div>
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div className="text-white/60">
                   لا تملك حسابًا؟{" "}
