@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "../../lib/supabase/server";
 import LoginSubmitButton from "./login-submit-button";
+import GoogleAuthButton from "@/components/auth/google-auth-button";
 
 const heroLogo = "/logo.webp";
 
@@ -86,6 +87,8 @@ export default async function LoginPage({
                   {params.error}
                 </div>
               )}
+
+<GoogleAuthButton mode="login" next="/" />
 
               <form action={loginAction} className="mt-6 space-y-4">
                 <div>
