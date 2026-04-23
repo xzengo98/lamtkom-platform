@@ -8,7 +8,7 @@ export default function Loading() {
 
         <div className="relative flex h-28 w-28 items-center justify-center rounded-[28px] border border-cyan-400/15 bg-white/[0.03] shadow-[0_0_40px_rgba(34,211,238,0.10)]">
           <Image
-            src="/logo.png"
+            src="/logo.webp"
             alt="لمتكم"
             width={96}
             height={96}
