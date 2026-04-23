@@ -227,36 +227,34 @@ function ScoreCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[1.3rem] border transition-all duration-300 ${palette.card} ${palette.glow}`}
+      className={`relative overflow-hidden rounded-[1.6rem] border transition-all duration-300 ${palette.card} ${palette.glow}`}
     >
       <div className={`h-[3px] w-full ${palette.bar}`} />
 
       {isLeading && (
         <div
-          className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[8px] font-black ${palette.leadBadge}`}
+          className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border px-2 py-[3px] text-[8px] font-black sm:right-2.5 sm:top-2.5 sm:px-2.5 sm:text-[9px] ${palette.leadBadge}`}
         >
-          <CrownIcon className="h-2.5 w-2.5" />
+          <CrownIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           المتصدر
         </div>
       )}
 
-      {/* ↓ Reduced vertical padding to save height */}
-      <div className="flex items-center gap-2 px-2 py-2 sm:gap-3 sm:px-3 sm:py-2.5">
+      <div className="flex items-center gap-2 px-2 py-3 sm:gap-4 sm:px-4 sm:py-4">
         <button
           type="button"
           onClick={onDecrease}
           aria-label="تقليل النقاط"
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-9 sm:w-9 sm:rounded-xl ${palette.btnMinus}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-10 sm:w-10 sm:rounded-xl ${palette.btnMinus}`}
         >
-          <MinusIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          <MinusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
 
         <div className="min-w-0 flex-1 px-1 text-center">
           <div className={`truncate text-[10px] font-bold sm:text-xs ${palette.name}`}>
             {teamName}
           </div>
-          {/* ↓ Reduced score font size to save space */}
-          <div className={`text-2xl font-black leading-none sm:text-3xl ${palette.score}`}>
+          <div className={`text-[1.65rem] font-black leading-none sm:text-4xl ${palette.score}`}>
             {score}
           </div>
         </div>
@@ -265,9 +263,9 @@ function ScoreCard({
           type="button"
           onClick={onIncrease}
           aria-label="زيادة النقاط"
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-9 sm:w-9 sm:rounded-xl ${palette.btnPlus}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-black transition active:scale-90 sm:h-10 sm:w-10 sm:rounded-xl ${palette.btnPlus}`}
         >
-          <PlusIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
       </div>
     </div>
@@ -295,9 +293,8 @@ function QuestionTile({
     label: "text-white",
   };
 
-  // ↓ Removed fixed h-11/h-12/h-14 → tiles now fill their grid cell (h-full)
   const base =
-    "relative flex h-full w-full items-center justify-center rounded-xl border-2 font-black transition-all duration-150 select-none text-sm sm:text-base lg:text-lg";
+    "relative flex w-full items-center justify-center rounded-xl border-2 font-black transition-all duration-150 select-none h-11 text-lg sm:h-12 sm:text-xl md:h-14";
 
   if (!question) {
     return (
@@ -313,7 +310,7 @@ function QuestionTile({
         <div
           className={`${base} border-cyan-400/25 bg-[linear-gradient(160deg,rgba(2,119,189,0.85)_0%,rgba(1,87,155,0.90)_100%)] text-white/90`}
         >
-          <span className="absolute left-1.5 top-1 text-[9px] text-cyan-300/60">
+          <span className="absolute left-1.5 top-1 text-[9px] text-cyan-300/60 sm:text-[10px]">
             ✓
           </span>
           <span className="opacity-80">{points}</span>
@@ -325,7 +322,7 @@ function QuestionTile({
         <div
           className={`${base} border-orange-400/25 bg-[linear-gradient(160deg,rgba(230,81,0,0.85)_0%,rgba(191,54,12,0.90)_100%)] text-white/90`}
         >
-          <span className="absolute left-1.5 top-1 text-[9px] text-orange-300/60">
+          <span className="absolute left-1.5 top-1 text-[9px] text-orange-300/60 sm:text-[10px]">
             ✓
           </span>
           <span className="opacity-80">{points}</span>
@@ -396,29 +393,27 @@ function CategoryCard({
   const isDone = totalInCategory > 0 && usedInCategory >= totalInCategory;
 
   return (
-    // ↓ Added h-full so the card stretches to fill the grid row
     <div
-      className={`group flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-200 ${
+      className={`group flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 ${
         isDone
           ? "border-white/5 opacity-70"
           : "border-white/10 hover:-translate-y-0.5 hover:border-cyan-400/25 hover:shadow-[0_12px_40px_rgba(34,211,238,0.10)]"
       } bg-[linear-gradient(160deg,rgba(6,16,42,0.95)_0%,rgba(3,9,26,0.98)_100%)] shadow-[0_6px_28px_rgba(0,0,0,0.45)]`}
     >
-      {/* ↓ Image section: shrink-0 with reduced heights to leave more room for tiles */}
-      <div className="relative shrink-0 overflow-hidden">
+      <div className="relative overflow-hidden">
         {column.category.image_url ? (
           <>
             <img
               src={column.category.image_url}
               alt={column.category.name}
-              className="h-20 w-full object-cover object-center transition duration-500 group-hover:scale-[1.02] sm:h-24 lg:h-28"
+              className="h-36 w-full object-cover object-center transition duration-500 group-hover:scale-[1.02] sm:h-40 md:h-48 lg:h-52"
               loading="lazy"
               decoding="async"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(3,9,26,0.96)] via-[rgba(3,9,26,0.18)] to-transparent" />
           </>
         ) : (
-          <div className="h-20 w-full bg-[linear-gradient(135deg,#061a50,#030d2e)] sm:h-24 lg:h-28" />
+          <div className="h-36 w-full bg-[linear-gradient(135deg,#061a50,#030d2e)] sm:h-40 md:h-48 lg:h-52" />
         )}
 
         {totalInCategory > 0 && (
@@ -432,8 +427,8 @@ function CategoryCard({
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 px-2 pb-2">
-          <div className="mx-auto w-fit max-w-[90%] rounded-full border border-white/12 bg-black/28 px-3 py-1 text-center text-xs font-black text-white backdrop-blur-md transition duration-200 group-hover:border-cyan-300/25 group-hover:bg-black/38 sm:text-[13px]">
+        <div className="absolute inset-x-0 bottom-0 px-3 pb-3">
+          <div className="mx-auto w-fit max-w-[88%] rounded-full border border-white/12 bg-black/28 px-4 py-1.5 text-center text-sm font-black text-white backdrop-blur-md transition duration-200 group-hover:border-cyan-300/25 group-hover:bg-black/38 sm:text-[15px] md:text-base">
             <span className="block truncate">{column.category.name}</span>
           </div>
         </div>
@@ -447,52 +442,49 @@ function CategoryCard({
         )}
       </div>
 
-      {/* ↓ Questions section: flex-1 + grid-rows-3 so tiles stretch to fill remaining card height */}
-      <div className="flex flex-1 flex-col bg-[rgba(3,9,26,0.82)] p-1 sm:p-1.5">
-        <div className="grid flex-1 grid-cols-2 grid-rows-3 gap-1 sm:gap-1.5">
-          <QuestionTile
-            question={left200}
-            points={200}
-            used={getUsed(left200)}
-            result={getResult(left200)}
-            onOpen={() => onOpenQuestion(left200)}
-          />
-          <QuestionTile
-            question={right200}
-            points={200}
-            used={getUsed(right200)}
-            result={getResult(right200)}
-            onOpen={() => onOpenQuestion(right200)}
-          />
-          <QuestionTile
-            question={left400}
-            points={400}
-            used={getUsed(left400)}
-            result={getResult(left400)}
-            onOpen={() => onOpenQuestion(left400)}
-          />
-          <QuestionTile
-            question={right400}
-            points={400}
-            used={getUsed(right400)}
-            result={getResult(right400)}
-            onOpen={() => onOpenQuestion(right400)}
-          />
-          <QuestionTile
-            question={left600}
-            points={600}
-            used={getUsed(left600)}
-            result={getResult(left600)}
-            onOpen={() => onOpenQuestion(left600)}
-          />
-          <QuestionTile
-            question={right600}
-            points={600}
-            used={getUsed(right600)}
-            result={getResult(right600)}
-            onOpen={() => onOpenQuestion(right600)}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-1 bg-[rgba(3,9,26,0.82)] p-1.5 sm:gap-1.5 sm:p-2">
+        <QuestionTile
+          question={left200}
+          points={200}
+          used={getUsed(left200)}
+          result={getResult(left200)}
+          onOpen={() => onOpenQuestion(left200)}
+        />
+        <QuestionTile
+          question={right200}
+          points={200}
+          used={getUsed(right200)}
+          result={getResult(right200)}
+          onOpen={() => onOpenQuestion(right200)}
+        />
+        <QuestionTile
+          question={left400}
+          points={400}
+          used={getUsed(left400)}
+          result={getResult(left400)}
+          onOpen={() => onOpenQuestion(left400)}
+        />
+        <QuestionTile
+          question={right400}
+          points={400}
+          used={getUsed(right400)}
+          result={getResult(right400)}
+          onOpen={() => onOpenQuestion(right400)}
+        />
+        <QuestionTile
+          question={left600}
+          points={600}
+          used={getUsed(left600)}
+          result={getResult(left600)}
+          onOpen={() => onOpenQuestion(left600)}
+        />
+        <QuestionTile
+          question={right600}
+          points={600}
+          used={getUsed(right600)}
+          result={getResult(right600)}
+          onOpen={() => onOpenQuestion(right600)}
+        />
       </div>
     </div>
   );
@@ -662,36 +654,24 @@ export default function GameBoardClient({
     }));
 
   return (
-    /*
-     * ↓ LAYOUT CHANGE: min-h-screen → h-dvh (dynamic viewport height, no scroll)
-     *   + overflow-hidden flex flex-col so children can fill the height exactly
-     */
-    <main className="flex h-dvh flex-col overflow-hidden bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] text-white">
-      {/* Grid overlay – unchanged */}
+    <main className="min-h-screen bg-[linear-gradient(180deg,#020a1a_0%,#030d22_60%,#020814_100%)] text-white">
       <div className="pointer-events-none fixed inset-0 opacity-[0.018] [background-image:linear-gradient(rgba(34,211,238,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.5)_1px,transparent_1px)] [background-size:60px_60px]" />
 
-      {/*
-       * ↓ Outer wrapper: flex-1 flex flex-col min-h-0 so it stretches
-       *   and children can push against the viewport bottom.
-       *   Reduced py slightly to reclaim space.
-       */}
-      <div className="relative mx-auto flex min-h-0 w-full max-w-[1640px] flex-1 flex-col px-2 py-2 sm:px-3 sm:py-2.5 lg:px-5 lg:py-3">
-
-        {/* ── Header panel ── shrink-0 so it never grows/compresses */}
-        <div className="relative mb-2 shrink-0 overflow-hidden rounded-[1.6rem] border border-white/8 bg-[linear-gradient(160deg,rgba(8,16,40,0.98)_0%,rgba(4,8,24,0.99)_100%)] sm:mb-2.5 sm:rounded-[1.8rem]">
+      <div className="relative mx-auto w-full max-w-[1640px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5">
+        <div className="relative mb-3 overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(160deg,rgba(8,16,40,0.98)_0%,rgba(4,8,24,0.99)_100%)] sm:mb-4">
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/45 to-transparent" />
+
           <div className="pointer-events-none absolute -top-12 left-1/4 h-28 w-52 rounded-full bg-cyan-500/8 blur-2xl" />
           <div className="pointer-events-none absolute -top-12 right-1/4 h-28 w-52 rounded-full bg-orange-500/6 blur-2xl" />
 
-          {/* ↓ Reduced inner padding to save vertical space */}
-          <div className="relative px-3 py-2 sm:px-4 sm:py-3">
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/8 sm:h-8 sm:w-8">
+          <div className="relative px-4 py-3 sm:px-5 sm:py-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/8">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
-                    className="h-3.5 w-3.5 text-cyan-400 sm:h-4 sm:w-4"
+                    className="h-4 w-4 text-cyan-400"
                     stroke="currentColor"
                     strokeWidth="1.8"
                     strokeLinecap="round"
@@ -704,47 +684,50 @@ export default function GameBoardClient({
                   <div className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/30">
                     لوحة اللعبة
                   </div>
-                  <h1 className="text-sm font-black text-white sm:text-base">
+                  <h1 className="text-base font-black text-white sm:text-lg">
                     {gameName}
                   </h1>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-1">
-                <div className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-2.5 py-1 text-[10px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-3 sm:text-[11px]">
-                  <GamepadIcon className="h-3 w-3" />
+              <div className="flex flex-wrap items-center gap-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
+                  <GamepadIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   الدور: {activeTurnName}
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-2.5 py-1 text-[10px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-3 sm:text-[11px]">
-                  <CrownIcon className="h-3 w-3" />
+
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
+                  <CrownIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   المتصدر: {leaderLabel}
                 </div>
-                <div className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-2.5 py-1 text-[10px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-3 sm:text-[11px]">
+
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/25 bg-[linear-gradient(180deg,rgba(46,173,196,0.90)_0%,rgba(26,143,168,0.95)_100%)] px-3 py-1.5 text-[11px] font-black text-white shadow-[0_2px_0_rgba(10,77,111,0.35)] sm:px-4 sm:text-xs">
                   المتبقي: {remainingCount} سؤال
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleFinishGame}
-                  className="inline-flex items-center gap-1 rounded-xl bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-2.5 py-1.5 text-[10px] font-black text-white shadow-[0_3px_0_rgba(109,12,55,0.45)] transition hover:brightness-110 active:scale-95 sm:px-3 sm:text-[11px]"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#e11d74_0%,#c51160_100%)] px-3 py-2 text-[11px] font-black text-white shadow-[0_3px_0_rgba(109,12,55,0.45)] transition hover:brightness-110 active:scale-95 sm:px-4 sm:text-xs"
                 >
-                  <FlagIcon className="h-3 w-3" />
+                  <FlagIcon className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">إنهاء اللعب</span>
                   <span className="sm:hidden">إنهاء</span>
                 </button>
+
                 <Link
                   href="/account"
-                  className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/6 px-2.5 py-1.5 text-[10px] font-black text-white transition hover:bg-white/10 active:scale-95 sm:px-3 sm:text-[11px]"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/6 px-3 py-2 text-[11px] font-black text-white transition hover:bg-white/10 active:scale-95 sm:px-4 sm:text-xs"
                 >
-                  <HomeIcon className="h-3 w-3" />
+                  <HomeIcon className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">الحساب</span>
                 </Link>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               <ScoreCard
                 teamName={teamOne}
                 score={boardState.teamOneScore}
@@ -765,45 +748,29 @@ export default function GameBoardClient({
           </div>
         </div>
 
-        {/*
-         * ── Categories panel ──
-         * ↓ flex-1 min-h-0: takes ALL remaining vertical space after the header.
-         *   flex flex-col: lets the inner grid stretch properly.
-         *   overflow-hidden: no internal scroll — content scales to fit.
-         */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,rgba(3,10,30,0.85)_0%,rgba(2,7,20,0.92)_100%)] p-2 shadow-[0_16px_60px_rgba(2,6,23,0.65)] sm:rounded-[2rem] sm:p-2.5 lg:p-3">
-
-          {/* ↓ Legend bar: shrink-0 so it keeps its natural height */}
-          <div className="mb-1.5 flex shrink-0 items-center gap-3 px-0.5 sm:mb-2">
-            <span className="text-[10px] font-bold text-white/28 sm:text-xs">
+        <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,rgba(3,10,30,0.85)_0%,rgba(2,7,20,0.92)_100%)] p-2.5 shadow-[0_16px_60px_rgba(2,6,23,0.65)] sm:rounded-[2rem] sm:p-3 lg:p-4">
+          <div className="mb-2.5 flex items-center gap-3 px-0.5 sm:mb-3">
+            <span className="text-[11px] font-bold text-white/28 sm:text-xs">
               الفئات
             </span>
             <div className="h-px flex-1 bg-white/5" />
-            <div className="flex items-center gap-2.5 text-[9px] font-bold text-white/28 sm:gap-4 sm:text-[11px]">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center gap-3 text-[9px] font-bold text-white/28 sm:gap-4 sm:text-[11px]">
+              <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.50)]" />
                 فريق ١
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_6px_rgba(249,115,22,0.50)]" />
                 فريق ٢
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-white/18" />
                 انتهى
               </span>
             </div>
           </div>
 
-          {/*
-           * ↓ Cards grid: flex-1 min-h-0 → fills remaining panel height.
-           *   Grid columns:
-           *     • Portrait mobile  → 2 cols (default)
-           *     • Landscape mobile → 6 cols (landscape: variant, same as desktop)
-           *     • lg desktop       → 6 cols
-           *   Each card gets h-full automatically from CSS grid stretch.
-           */}
-          <div className="grid min-h-0 flex-1 grid-cols-2 gap-1.5 landscape:grid-cols-6 lg:grid-cols-6 sm:gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-3">
             {boardColumns.map((column) => (
               <CategoryCard
                 key={column.category.id}
