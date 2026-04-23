@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import {
   deleteIncompleteGame,
   redeemCouponAction,
+  updatePasswordAction,
+  updateProfileDetailsAction,
 } from "@/app/account/actions";
 
 const heroLogo = "/logo.webp";
@@ -49,6 +51,9 @@ type AccountClientPageProps = {
   initialCouponRedemptions: CouponRedemption[];
   initialUserId: string;
 };
+
+type EditModalSection = "profile" | "password";
+
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "-";
@@ -146,7 +151,11 @@ function Icon({
     | "trash"
     | "spark"
     | "gift"
-    | "ticket";
+    | "ticket"
+    | "edit"
+    | "lock"
+    | "close"
+    | "check";
   className?: string;
 }) {
   const common = {
@@ -290,6 +299,33 @@ function Icon({
           <path d="M12 7v10" />
         </svg>
       );
+    case "edit":
+      return (
+        <svg {...common}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+        </svg>
+      );
+    case "lock":
+      return (
+        <svg {...common}>
+          <rect x="4" y="11" width="16" height="10" rx="2" />
+          <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+        </svg>
+      );
+    case "close":
+      return (
+        <svg {...common}>
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
+        </svg>
+      );
+    case "check":
+      return (
+        <svg {...common}>
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -386,11 +422,15 @@ function InfoCard({
   value,
   icon,
   truncate = false,
+  actionLabel,
+  onActionClick,
 }: {
   label: string;
   value: string;
   icon: "user" | "email" | "phone" | "calendar" | "shield";
   truncate?: boolean;
+  actionLabel?: string;
+  onActionClick?: () => void;
 }) {
   const iconTone = infoIconTones[icon];
   const barColor = infoBarColors[icon];
@@ -405,7 +445,22 @@ function InfoCard({
           <Icon name={icon} className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-bold text-white/45">{label}</div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="text-sm font-bold text-white/45">{label}</div>
+
+            {onActionClick ? (
+              <button
+                type="button"
+                onClick={onActionClick}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/65 transition hover:border-cyan-400/20 hover:bg-cyan-400/10 hover:text-cyan-300"
+                aria-label={actionLabel || "تعديل"}
+                title={actionLabel || "تعديل"}
+              >
+                <Icon name="edit" className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
+
           {truncate ? (
             <div className="mt-2 truncate text-base font-black text-white/85">
               {value}
@@ -414,6 +469,258 @@ function InfoCard({
             <div className="mt-2 break-words text-base font-black text-white/85">
               {value}
             </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function EditAccountModal({
+  open,
+  profileUsername,
+  profilePhone,
+  onClose,
+  onProfileSubmit,
+  onPasswordSubmit,
+  profileSaving,
+  passwordSaving,
+  profileError,
+  profileMessage,
+  passwordError,
+  passwordMessage,
+  initialSection = "profile",
+}: {
+  open: boolean;
+  profileUsername: string;
+  profilePhone: string;
+  onClose: () => void;
+  onProfileSubmit: (values: { username: string; phone: string }) => Promise<void>;
+  onPasswordSubmit: (values: {
+    newPassword: string;
+    confirmPassword: string;
+  }) => Promise<void>;
+  profileSaving: boolean;
+  passwordSaving: boolean;
+  profileError: string;
+  profileMessage: string;
+  passwordError: string;
+  passwordMessage: string;
+  initialSection?: EditModalSection;
+}) {
+  const [activeSection, setActiveSection] =
+    useState<EditModalSection>(initialSection);
+  const [username, setUsername] = useState(profileUsername);
+  const [phone, setPhone] = useState(profilePhone);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-md">
+      <div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(150deg,rgba(8,16,40,0.98)_0%,rgba(4,8,22,0.99)_50%,rgba(6,12,30,0.98)_100%)] shadow-[0_35px_120px_rgba(0,0,0,0.45)]">
+        <div className="flex items-start justify-between gap-4 border-b border-white/8 px-5 py-5 md:px-7">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-400/8 px-3 py-1 text-xs font-black text-cyan-300">
+              <Icon name="edit" className="h-4 w-4" />
+              تعديلات بياناتي
+            </div>
+            <h3 className="mt-3 text-2xl font-black text-white">
+              تعديل معلومات الحساب
+            </h3>
+            <p className="mt-2 text-sm leading-7 text-white/55">
+              عدّل اسم المستخدم ورقم الهاتف وكلمة المرور من مكان واحد.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-300"
+            aria-label="إغلاق"
+          >
+            <Icon name="close" className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="border-b border-white/8 px-5 py-4 md:px-7">
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setActiveSection("profile")}
+              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
+                activeSection === "profile"
+                  ? "border-cyan-400/20 bg-cyan-400/10 text-cyan-200"
+                  : "border-white/10 bg-white/[0.04] text-white/65 hover:bg-white/[0.08]"
+              }`}
+            >
+              <Icon name="user" className="h-4 w-4" />
+              الاسم ورقم الهاتف
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveSection("password")}
+              className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
+                activeSection === "password"
+                  ? "border-amber-400/20 bg-amber-400/10 text-amber-200"
+                  : "border-white/10 bg-white/[0.04] text-white/65 hover:bg-white/[0.08]"
+              }`}
+            >
+              <Icon name="lock" className="h-4 w-4" />
+              كلمة المرور
+            </button>
+          </div>
+        </div>
+
+        <div className="max-h-[calc(92vh-190px)] overflow-y-auto px-5 py-5 md:px-7">
+          {activeSection === "profile" ? (
+            <form
+              onSubmit={async (event) => {
+                event.preventDefault();
+                await onProfileSubmit({ username, phone });
+              }}
+              className="space-y-5"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <div className="mb-2 text-sm font-black text-white/70">
+                    اسم المستخدم
+                  </div>
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="أدخل اسم المستخدم"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                  />
+                </label>
+
+                <label className="block">
+                  <div className="mb-2 text-sm font-black text-white/70">
+                    رقم الهاتف
+                  </div>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="أدخل رقم الهاتف"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                    dir="ltr"
+                  />
+                </label>
+              </div>
+
+              {profileMessage ? (
+                <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">
+                  {profileMessage}
+                </div>
+              ) : null}
+
+              {profileError ? (
+                <div className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+                  {profileError}
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
+                >
+                  إلغاء
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={profileSaving}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_4px_28px_rgba(34,211,238,0.28)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Icon name="check" className="h-4 w-4" />
+                  {profileSaving ? "جارٍ حفظ البيانات..." : "حفظ البيانات"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form
+              onSubmit={async (event) => {
+                event.preventDefault();
+                await onPasswordSubmit({
+                  newPassword,
+                  confirmPassword,
+                });
+
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
+              className="space-y-5"
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <div className="mb-2 text-sm font-black text-white/70">
+                    كلمة المرور الجديدة
+                  </div>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="أدخل كلمة المرور الجديدة"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-amber-400"
+                  />
+                </label>
+
+                <label className="block">
+                  <div className="mb-2 text-sm font-black text-white/70">
+                    تأكيد كلمة المرور الجديدة
+                  </div>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="أعد إدخال كلمة المرور"
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-amber-400"
+                  />
+                </label>
+              </div>
+
+              <div className="rounded-2xl border border-amber-400/15 bg-amber-400/8 px-4 py-4 text-sm leading-7 text-amber-100/90">
+                اجعل كلمة المرور الجديدة مكونة من 8 أحرف على الأقل.
+              </div>
+
+              {passwordMessage ? (
+                <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">
+                  {passwordMessage}
+                </div>
+              ) : null}
+
+              {passwordError ? (
+                <div className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+                  {passwordError}
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white transition hover:bg-white/[0.08]"
+                >
+                  إلغاء
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={passwordSaving}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_4px_28px_rgba(251,191,36,0.22)] transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Icon name="lock" className="h-4 w-4" />
+                  {passwordSaving ? "جارٍ تحديث كلمة المرور..." : "تحديث كلمة المرور"}
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>
@@ -554,9 +861,94 @@ export default function AccountClientPage({
   const [redeeming, setRedeeming] = useState(false);
   const [couponMessage, setCouponMessage] = useState("");
   const [couponError, setCouponError] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editModalSection, setEditModalSection] =
+    useState<EditModalSection>("profile");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [profileEditMessage, setProfileEditMessage] = useState("");
+  const [profileEditError, setProfileEditError] = useState("");
+  const [passwordEditMessage, setPasswordEditMessage] = useState("");
+  const [passwordEditError, setPasswordEditError] = useState("");
 
   function handleLogout() {
     window.location.assign("/logout");
+  }
+
+  function openEditModal(section: EditModalSection = "profile") {
+    setEditModalSection(section);
+    setProfileEditError("");
+    setProfileEditMessage("");
+    setPasswordEditError("");
+    setPasswordEditMessage("");
+    setIsEditModalOpen(true);
+  }
+
+  function closeEditModal() {
+    setIsEditModalOpen(false);
+  }
+
+  async function handleProfileUpdate(values: {
+    username: string;
+    phone: string;
+  }) {
+    setProfileSaving(true);
+    setProfileEditError("");
+    setProfileEditMessage("");
+
+    try {
+      const result = await updateProfileDetailsAction(values);
+
+if (!result.ok) {
+  setProfileEditError(result.error ?? "تعذر تحديث البيانات.");
+  return;
+}
+
+if (!result.profile) {
+  setProfileEditError("تعذر تحديث البيانات.");
+  return;
+}
+
+const updatedProfile = result.profile;
+
+setProfile((prev) =>
+  prev
+    ? {
+        ...prev,
+        username: updatedProfile.username,
+        phone: updatedProfile.phone,
+      }
+    : prev,
+);
+
+setProfileEditMessage("تم تحديث اسم المستخدم ورقم الهاتف بنجاح.");
+router.refresh();
+    } finally {
+      setProfileSaving(false);
+    }
+  }
+
+  async function handlePasswordUpdate(values: {
+    newPassword: string;
+    confirmPassword: string;
+  }) {
+    setPasswordSaving(true);
+    setPasswordEditError("");
+    setPasswordEditMessage("");
+
+    try {
+      const result = await updatePasswordAction(values);
+
+      if (!result.ok) {
+        setPasswordEditError(result.error || "تعذر تحديث كلمة المرور.");
+        return;
+      }
+
+      setPasswordEditMessage(result.message || "تم تحديث كلمة المرور بنجاح.");
+      router.refresh();
+    } finally {
+      setPasswordSaving(false);
+    }
   }
 
   async function handleDeleteSession(sessionId: string) {
@@ -680,6 +1072,22 @@ export default function AccountClientPage({
 
   return (
     <main className="min-h-screen text-white">
+      <EditAccountModal
+        open={isEditModalOpen}
+        initialSection={editModalSection}
+        profileUsername={profile?.username || ""}
+        profilePhone={profile?.phone || ""}
+        onClose={closeEditModal}
+        onProfileSubmit={handleProfileUpdate}
+        onPasswordSubmit={handlePasswordUpdate}
+        profileSaving={profileSaving}
+        passwordSaving={passwordSaving}
+        profileError={profileEditError}
+        profileMessage={profileEditMessage}
+        passwordError={passwordEditError}
+        passwordMessage={passwordEditMessage}
+      />
+
       <div className="pointer-events-none fixed inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(34,211,238,0.4)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.4)_1px,transparent_1px)] [background-size:64px_64px]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 md:px-6">
@@ -762,11 +1170,22 @@ export default function AccountClientPage({
 
           <div className="grid gap-6 p-6 md:p-8 xl:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-6">
-              <div>
-                <SectionBadge>معلومات الحساب</SectionBadge>
-                <h2 className="mt-4 text-2xl font-black text-white">
-                  بياناتك الأساسية
-                </h2>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <SectionBadge>معلومات الحساب</SectionBadge>
+                  <h2 className="mt-4 text-2xl font-black text-white">
+                    بياناتك الأساسية
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openEditModal("profile")}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
+                >
+                  <Icon name="edit" className="h-4 w-4" />
+                  تعديل بياناتي
+                </button>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -774,6 +1193,8 @@ export default function AccountClientPage({
                   label="اسم المستخدم"
                   value={profile?.username || "-"}
                   icon="user"
+                  actionLabel="تعديل اسم المستخدم"
+                  onActionClick={() => openEditModal("profile")}
                 />
                 <InfoCard
                   label="البريد الإلكتروني"
@@ -785,6 +1206,8 @@ export default function AccountClientPage({
                   label="رقم الهاتف"
                   value={profile?.phone || "-"}
                   icon="phone"
+                  actionLabel="تعديل رقم الهاتف"
+                  onActionClick={() => openEditModal("profile")}
                 />
                 <InfoCard
                   label="تاريخ الانضمام"
@@ -813,6 +1236,32 @@ export default function AccountClientPage({
                     tone={stat.tone}
                   />
                 ))}
+              </div>
+
+              <div className="rounded-[1.7rem] border border-amber-400/15 bg-amber-400/6 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)]">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/15 bg-amber-400/8 px-3 py-1 text-xs font-black text-amber-300">
+                      <Icon name="lock" className="h-4 w-4" />
+                      الأمان
+                    </div>
+                    <h3 className="mt-4 text-xl font-black text-white">
+                      تعديل كلمة المرور
+                    </h3>
+                    <p className="mt-2 text-sm leading-8 text-white/58">
+                      يمكنك تحديث كلمة المرور في أي وقت من داخل نفس نافذة التعديلات.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openEditModal("password")}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-200 transition hover:bg-amber-400/16"
+                  >
+                    <Icon name="lock" className="h-4 w-4" />
+                    تعديل كلمة المرور
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.18)]">

@@ -22,6 +22,21 @@ type RedeemCouponResult = {
   targetTier?: string | null;
 };
 
+type UpdateProfileDetailsResult = {
+  ok: boolean;
+  error?: string;
+  profile?: {
+    username: string;
+    phone: string | null;
+  };
+};
+
+type UpdatePasswordResult = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+};
+
 export async function deleteIncompleteGame(
   sessionId: string,
 ): Promise<DeleteIncompleteGameResult> {
@@ -217,5 +232,143 @@ export async function redeemCouponAction(
     rewardType,
     gamesAmount,
     targetTier,
+  };
+}
+
+export async function updateProfileDetailsAction(input: {
+  username: string;
+  phone: string;
+}): Promise<UpdateProfileDetailsResult> {
+  const safeUsername = String(input?.username ?? "").trim();
+  const safePhoneRaw = String(input?.phone ?? "").trim();
+  const safePhone = safePhoneRaw || null;
+
+  if (!safeUsername) {
+    return {
+      ok: false,
+      error: "يرجى إدخال اسم المستخدم.",
+    };
+  }
+
+  if (safeUsername.length < 3) {
+    return {
+      ok: false,
+      error: "اسم المستخدم يجب أن يكون 3 أحرف على الأقل.",
+    };
+  }
+
+  if (safeUsername.length > 30) {
+    return {
+      ok: false,
+      error: "اسم المستخدم طويل جدًا. الحد الأقصى 30 حرفًا.",
+    };
+  }
+
+  if (
+    safePhone &&
+    !/^[0-9+()\-\s]{6,20}$/.test(safePhone)
+  ) {
+    return {
+      ok: false,
+      error: "رقم الهاتف غير صالح.",
+    };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      error: "يجب تسجيل الدخول أولًا.",
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      username: safeUsername,
+      phone: safePhone,
+    })
+    .eq("id", user.id)
+    .select("username, phone")
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      error: error.message || "تعذر تحديث بيانات الحساب.",
+    };
+  }
+
+  revalidatePath("/account");
+
+  return {
+    ok: true,
+    profile: {
+      username: String(data?.username ?? safeUsername),
+      phone: (data?.phone as string | null | undefined) ?? safePhone,
+    },
+  };
+}
+
+export async function updatePasswordAction(input: {
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<UpdatePasswordResult> {
+  const newPassword = String(input?.newPassword ?? "");
+  const confirmPassword = String(input?.confirmPassword ?? "");
+
+  if (!newPassword) {
+    return {
+      ok: false,
+      error: "يرجى إدخال كلمة المرور الجديدة.",
+    };
+  }
+
+  if (newPassword.length < 8) {
+    return {
+      ok: false,
+      error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
+    };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return {
+      ok: false,
+      error: "تأكيد كلمة المرور غير مطابق.",
+    };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      error: "يجب تسجيل الدخول أولًا.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      error: error.message || "تعذر تحديث كلمة المرور.",
+    };
+  }
+
+  revalidatePath("/account");
+
+  return {
+    ok: true,
+    message: "تم تحديث كلمة المرور بنجاح.",
   };
 }
