@@ -142,43 +142,43 @@ const faqs: FaqItem[] = [
 
 const planCfg = [
   {
-    bar: "bg-white/25",
-    badge: "border-white/12 bg-white/6 text-white/55",
+    bar: "bg-white/20",
+    badge: "border-white/12 bg-white/[0.05] text-white/60",
     price: "text-white",
     check: "text-white/35",
-    btn: "border border-white/12 bg-white/6 text-white/70 hover:bg-white/10 hover:text-white",
-    card: "border-white/8 bg-[linear-gradient(160deg,rgba(14,22,46,0.92)_0%,rgba(5,10,24,0.98)_100%)]",
-    glow: "",
+    btn: "border border-white/12 bg-white/[0.03] text-white/80 hover:bg-white/[0.07] hover:text-white",
+    card: "border-white/10 bg-[linear-gradient(180deg,rgba(9,14,34,0.98)_0%,rgba(2,6,23,0.98)_100%)]",
+    glow: "shadow-[0_20px_60px_rgba(2,6,23,0.32)]",
     icon: "",
   },
   {
-    bar: "bg-cyan-400",
-    badge: "border-cyan-400/30 bg-cyan-400/12 text-cyan-300",
-    price: "text-cyan-300",
-    check: "text-cyan-400",
-    btn: "bg-cyan-500 text-slate-950 hover:bg-cyan-400 shadow-[0_4px_24px_rgba(34,211,238,0.32)]",
-    card: "border-cyan-400/28 bg-[linear-gradient(160deg,rgba(6,22,56,0.98)_0%,rgba(3,10,28,0.99)_100%)]",
-    glow: "shadow-[0_28px_72px_rgba(34,211,238,0.13)]",
-    icon: "★",
+    bar: "bg-[linear-gradient(90deg,#a78bfa_0%,#22d3ee_100%)]",
+    badge: "border-cyan-400/25 bg-cyan-400/10 text-cyan-300",
+    price: "text-white",
+    check: "text-cyan-300",
+    btn: "bg-[linear-gradient(90deg,#9b87f5_0%,#22d3ee_100%)] text-slate-950 hover:opacity-95 shadow-[0_18px_45px_rgba(34,211,238,0.24)]",
+    card: "border-violet-400/35 bg-[linear-gradient(180deg,rgba(38,33,74,0.96)_0%,rgba(7,11,30,0.98)_100%)]",
+    glow: "shadow-[0_25px_80px_rgba(139,92,246,0.18)]",
+    icon: "",
   },
   {
     bar: "bg-violet-400",
     badge: "border-violet-400/25 bg-violet-400/10 text-violet-300",
-    price: "text-violet-300",
-    check: "text-violet-400",
+    price: "text-white",
+    check: "text-violet-300",
     btn: "border border-violet-400/22 bg-violet-400/10 text-violet-200 hover:bg-violet-400/18",
-    card: "border-violet-400/16 bg-[linear-gradient(160deg,rgba(18,10,48,0.94)_0%,rgba(5,10,24,0.98)_100%)]",
-    glow: "shadow-[0_24px_60px_rgba(139,92,246,0.09)]",
-    icon: "♛",
+    card: "border-violet-400/18 bg-[linear-gradient(180deg,rgba(13,10,34,0.98)_0%,rgba(2,6,23,0.98)_100%)]",
+    glow: "shadow-[0_22px_65px_rgba(139,92,246,0.10)]",
+    icon: "",
   },
   {
     bar: "bg-emerald-400",
     badge: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
-    price: "text-emerald-300",
-    check: "text-emerald-400",
+    price: "text-white",
+    check: "text-emerald-300",
     btn: "border border-emerald-400/22 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/18",
-    card: "border-emerald-400/16 bg-[linear-gradient(160deg,rgba(5,24,20,0.94)_0%,rgba(5,10,24,0.98)_100%)]",
-    glow: "shadow-[0_24px_60px_rgba(52,211,153,0.09)]",
+    card: "border-emerald-400/16 bg-[linear-gradient(180deg,rgba(6,22,20,0.96)_0%,rgba(2,6,23,0.98)_100%)]",
+    glow: "shadow-[0_22px_65px_rgba(52,211,153,0.10)]",
     icon: "",
   },
 ];
@@ -294,56 +294,90 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[2rem] border p-5 transition-all duration-300 hover:-translate-y-1 ${c.card} ${c.glow}`}
+      className={[
+        "group relative flex h-full flex-col overflow-hidden rounded-[30px] border p-6 sm:p-7 transition duration-300",
+        "hover:-translate-y-1.5",
+        c.card,
+        c.glow,
+        isFeatured ? "lg:-mt-4" : "",
+      ].join(" ")}
     >
       <div className={`absolute inset-x-0 top-0 h-1 ${c.bar}`} />
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <div className="text-2xl">{c.icon}</div>
-        <div className={`rounded-full border px-3 py-1 text-xs font-black ${c.badge}`}>
-          {plan.badge}
-        </div>
-      </div>
-
-      <h3 className="mt-5 text-center text-2xl font-black text-white">
-        {plan.name}
-      </h3>
-
-      <p className="mt-3 min-h-[72px] text-center text-sm leading-8 text-white/58">
-        {plan.description}
-      </p>
-
-      <div className="mt-5 rounded-[1.4rem] border border-white/8 bg-white/[0.03] px-4 py-4 text-center">
-        <div className="text-xs font-bold text-white/35">السعر</div>
-        <div className={`mt-2 text-center text-4xl font-black ${c.price}`}>
-          {plan.price}
-        </div>
-      </div>
-
-      {plan.highlight ? (
-        <div className="mt-4 rounded-[1.2rem] border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-sm font-bold text-white/70">
-          {plan.highlight}
+      {isFeatured ? (
+        <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2">
+          <div className="rounded-full bg-[linear-gradient(90deg,#a78bfa_0%,#22d3ee_100%)] px-5 py-2 text-sm font-extrabold text-white shadow-[0_10px_30px_rgba(34,211,238,0.18)]">
+            {plan.badge}
+          </div>
         </div>
       ) : null}
 
-      <div className="mt-5 space-y-3">
-        {plan.features.map((f) => (
-          <div key={f.text} className="flex items-start gap-3">
-            <div className={`mt-1 ${c.check}`}>
-              <CheckIcon className="h-4 w-4" />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="text-center">
+          {!isFeatured ? (
+            <div
+              className={[
+                "mx-auto inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-bold",
+                c.badge,
+              ].join(" ")}
+            >
+              {plan.badge}
             </div>
-            <div className="text-sm leading-7 text-white/70">{f.text}</div>
-          </div>
-        ))}
-      </div>
+          ) : null}
 
-      <Link
-        href={plan.href}
-        className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black transition ${c.btn}`}
-      >
-        {plan.cta}
-        <ArrowIcon className="h-4 w-4" />
-      </Link>
+          <h3 className="mt-5 text-3xl font-black tracking-tight text-white">
+            {plan.name}
+          </h3>
+
+          <p className="mt-4 text-sm leading-7 text-white/68 sm:text-base">
+            {plan.description}
+          </p>
+
+          <div className="mt-7">
+            <div className={`text-5xl font-black leading-none sm:text-6xl ${c.price}`}>
+              {plan.price}
+            </div>
+            <div className="mt-3 text-sm font-semibold text-white/45">
+              السعر
+            </div>
+          </div>
+
+          {plan.highlight ? (
+            <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-7 text-white/72">
+              {plan.highlight}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-8 flex-1 space-y-4">
+          {plan.features.map((f) => (
+            <div
+              key={f.text}
+              className="flex items-start justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+            >
+              <span className="text-right text-sm leading-7 text-white/88 sm:text-base">
+                {f.text}
+              </span>
+
+              <span className={`mt-1 shrink-0 ${c.check}`}>
+                <CheckIcon className="h-4.5 w-4.5" />
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <Link
+            href={plan.href}
+            className={[
+              "inline-flex w-full items-center justify-center rounded-2xl px-5 py-4 text-base font-black transition",
+              c.btn,
+            ].join(" ")}
+          >
+            {plan.cta}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
