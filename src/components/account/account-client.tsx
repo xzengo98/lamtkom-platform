@@ -1135,7 +1135,14 @@ router.refresh();
                     <Icon name="home" className="h-4 w-4" />
                     الرئيسية
                   </Link>
-
+<button
+                  type="button"
+                  onClick={() => openEditModal("profile")}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
+                >
+                  <Icon name="edit" className="h-4 w-4" />
+                  تعديل بياناتي
+                </button>
                   <Link
                     href="/pricing"
                     className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
@@ -1177,15 +1184,6 @@ router.refresh();
                     بياناتك الأساسية
                   </h2>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => openEditModal("profile")}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-black text-cyan-200 transition hover:bg-cyan-400/16"
-                >
-                  <Icon name="edit" className="h-4 w-4" />
-                  تعديل بياناتي
-                </button>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
