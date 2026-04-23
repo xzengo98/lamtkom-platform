@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+
+import { getViewer } from "../lib/auth/viewer";
+import { AnimateOnScroll, StatsBar, AnimatedOrbs } from "./home-client";
+import HeroParticles from "@/components/home/hero-particles";
 
 export const metadata: Metadata = {
   title: "الرئيسية",
@@ -6,10 +12,9 @@ export const metadata: Metadata = {
     "لمتكم منصة ألعاب عربية للجلسات والتجمعات تضم ألعابًا جماعية مثل لمتكم وبرا السالفة وCodenames.",
 };
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
-    ? process.env.NEXT_PUBLIC_SITE_URL
-    : "https://lamtkom.ads-shwaiter10.workers.dev";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.startsWith("http")
+  ? process.env.NEXT_PUBLIC_SITE_URL
+  : "https://lamtkom.ads-shwaiter10.workers.dev";
 
 const homeJsonLd = {
   "@context": "https://schema.org",
@@ -25,15 +30,10 @@ const homeJsonLd = {
       name: "لمتكم",
       url: siteUrl,
       inLanguage: "ar",
-      description:
-        "منصة ألعاب عربية للجلسات والتجمعات تضم أكثر من لعبة في مكان واحد.",
+      description: "منصة ألعاب عربية للجلسات والتجمعات تضم أكثر من لعبة في مكان واحد.",
     },
   ],
 };
-
-import Link from "next/link";
-import { getViewer } from "../lib/auth/viewer";
-import { AnimateOnScroll, StatsBar, AnimatedOrbs } from "./home-client";
 
 type Accent = "cyan" | "orange" | "violet";
 
@@ -111,12 +111,11 @@ const steps: StepItem[] = [
   {
     number: "4",
     title: "استمتع بالتحدي",
-    description: "تنافسوا، واجمعوا النقاط، وتنتهي اللعبة بانتصار اعلى فريق حصل على نقاط.",
+    description: "تنافسوا، واجمعوا النقاط، وتنتهي اللعبة بانتصار أعلى فريق حصل على نقاط.",
     icon: "trophy",
   },
 ];
 
-/* ── New: platform features ── */
 const features = [
   {
     emoji: "⚡",
@@ -126,7 +125,7 @@ const features = [
     glow: "rgba(34,211,238,0.08)",
   },
   {
-    emoji: "🌍",
+    emoji: "💬",
     title: "بالعربي أصيل",
     desc: "محتوى وتجربة مصممة خصيصاً للمستخدم العربي",
     color: "border-violet-400/20 bg-violet-400/[0.06] text-violet-300",
@@ -140,7 +139,7 @@ const features = [
     glow: "rgba(251,146,60,0.08)",
   },
   {
-    emoji: "👥",
+    emoji: "🎉",
     title: "للجلسات والتجمعات",
     desc: "مثالي للعائلة والأصدقاء والفعاليات الاجتماعية",
     color: "border-emerald-400/20 bg-emerald-400/[0.06] text-emerald-300",
@@ -167,7 +166,7 @@ const accents = {
     button:
       "bg-violet-400 text-slate-950 hover:bg-violet-300 shadow-[0_18px_40px_rgba(167,139,250,0.20)]",
   },
-};
+} as const;
 
 const stepAccentMap = {
   "1": {
@@ -218,65 +217,77 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 function ArrowLeftIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14M12 5l7 7-7 7" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function UsersIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="8" r="3" />
-      <circle cx="17" cy="9" r="2.5" />
-      <path d="M4 19a5 5 0 0 1 10 0" />
-      <path d="M14.5 19a4.5 4.5 0 0 1 5 0" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 11A3.5 3.5 0 1 0 9.5 4a3.5 3.5 0 0 0 0 7ZM17 11a3 3 0 1 0 0-6m4 16v-2a4 4 0 0 0-3-3.87"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function TargetIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="4.5" />
-      <circle cx="12" cy="12" r="1.5" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
     </svg>
   );
 }
 
 function LinkIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="6" y="8" width="12" height="8" rx="4" />
-      <path d="M9 12h.01M15 12h.01" />
-      <path d="M12 9.5v5" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M10 13a5 5 0 0 1 0-7l1.2-1.2a5 5 0 1 1 7.07 7.07L17 13M14 11a5 5 0 0 1 0 7l-1.2 1.2a5 5 0 1 1-7.07-7.07L7 11"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function TrophyIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 4h8v3a4 4 0 0 1-8 0V4Z" />
-      <path d="M6 6H4a2 2 0 0 0 2 2" />
-      <path d="M18 6h2a2 2 0 0 1-2 2" />
-      <path d="M12 11v4" />
-      <path d="M9 19h6" />
-      <path d="M10 15h4v4h-4z" />
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Zm10 1h2a2 2 0 0 1 2 2c0 2.8-1.8 5-5 5M7 5H5a2 2 0 0 0-2 2c0 2.8 1.8 5 5 5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function StepIcon({ icon, className }: { icon: StepItem["icon"]; className?: string }) {
+function StepIcon({
+  icon,
+  className,
+}: {
+  icon: StepItem["icon"];
+  className?: string;
+}) {
   if (icon === "users") return <UsersIcon className={className} />;
   if (icon === "target") return <TargetIcon className={className} />;
   if (icon === "link") return <LinkIcon className={className} />;
@@ -285,10 +296,10 @@ function StepIcon({ icon, className }: { icon: StepItem["icon"]; className?: str
 
 function SectionLabel({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-extrabold tracking-[0.2em] text-white/55">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" style={{ animation: "lamtkom-dot-pulse 2s ease-in-out infinite" }} />
+    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/80 backdrop-blur">
+      <span className="h-2 w-2 rounded-full bg-cyan-400" />
       {label}
-    </span>
+    </div>
   );
 }
 
@@ -298,61 +309,105 @@ function HeroGamePill({ title, accent }: { title: string; accent: Accent }) {
     orange: "border-orange-400/30 bg-orange-400/10 text-orange-300",
     violet: "border-violet-400/30 bg-violet-400/10 text-violet-300",
   };
+
   return (
-    <div className={cn("rounded-2xl border px-5 py-4 text-center text-sm font-black shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:brightness-110", styles[accent])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold sm:text-sm",
+        styles[accent],
+      )}
+    >
       {title}
-    </div>
+    </span>
   );
 }
 
 function GameCard({ game }: { game: GameItem }) {
   const accent = accents[game.accent];
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] shadow-[0_18px_50px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(0,0,0,0.32)]">
-      <div className={cn("h-[2px] w-full", accent.line)} />
-      <div className="relative h-52 overflow-hidden sm:h-56">
-        <img
-          src={game.image}
-          alt={game.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07101f] via-[#07101f66] to-transparent" />
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={cn("inline-flex items-center rounded-full border px-3 py-1.5 text-[11px] font-black", accent.soft)}>{game.subtitle}</span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-bold text-white/50">{game.players}</span>
+    <AnimateOnScroll>
+      <article className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.92))] p-4 shadow-[0_25px_70px_rgba(2,6,23,0.45)] transition duration-300 hover:-translate-y-1 hover:border-white/20">
+        <div className={cn("absolute inset-x-0 top-0 h-1", accent.line)} />
+        <div className="relative aspect-[16/10] overflow-hidden rounded-[22px] border border-white/10 bg-slate-950/50">
+          <Image
+            src={game.image}
+            alt={game.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition duration-500 group-hover:scale-[1.04]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
         </div>
-        <h3 className="mt-4 text-2xl font-black text-white">{game.title}</h3>
-        <p className="mt-3 flex-1 text-sm leading-8 text-white/62">{game.description}</p>
+
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <span className={cn("rounded-full border px-3 py-1 text-xs font-bold", accent.soft)}>
+            {game.subtitle}
+          </span>
+          <span className="text-xs font-semibold text-white/55">{game.players}</span>
+        </div>
+
+        <h3 className="mt-4 text-2xl font-black tracking-tight text-white">{game.title}</h3>
+        <p className="mt-3 text-sm leading-7 text-white/68">{game.description}</p>
+
         <div className="mt-6">
           <Link
             href={game.href}
-            className={cn("inline-flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-sm font-black transition active:scale-[0.98]", accent.button)}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition",
+              accent.button,
+            )}
           >
-            <span>ابدأ اللعبة</span>
-            <ArrowLeftIcon className="h-4 w-4" />
+            ابدأ اللعبة
+            <ArrowLeftIcon />
           </Link>
         </div>
-      </div>
-    </article>
+      </article>
+    </AnimateOnScroll>
   );
 }
 
 function StepCard({ step }: { step: StepItem }) {
   const accent = stepAccentMap[step.number as keyof typeof stepAccentMap] ?? stepAccentMap["1"];
+
   return (
-    <div className={cn("group relative overflow-hidden rounded-[2rem] border bg-[linear-gradient(180deg,rgba(15,23,42,0.92)_0%,rgba(10,18,34,0.98)_100%)] px-5 pb-6 pt-8 text-center shadow-[0_14px_40px_rgba(0,0,0,0.18)] backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,0,0,0.25)]", accent.border)}>
-      <div className={cn("pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b opacity-80", accent.cardGlow)} />
-      <div className={cn("absolute right-4 top-4 rotate-[10deg] rounded-2xl border px-3 py-2 text-lg font-black leading-none", accent.number)}>{step.number}</div>
-      <div className={cn("mx-auto flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border sm:h-20 sm:w-20", accent.iconWrap)}>
-        <StepIcon icon={step.icon} className="h-8 w-8" />
-      </div>
-      <h3 className={cn("mt-6 text-2xl font-black", accent.title)}>{step.title}</h3>
-      <p className="mt-4 text-sm leading-8 text-white/68 sm:text-base">{step.description}</p>
-      <div className={cn("mx-auto mt-6 h-1 w-14 rounded-full", accent.line)} />
-    </div>
+    <AnimateOnScroll>
+      <article
+        className={cn(
+          "relative overflow-hidden rounded-[28px] border bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.92))] p-6 shadow-[0_18px_50px_rgba(2,6,23,0.35)] transition duration-300 hover:-translate-y-1",
+          accent.border,
+        )}
+      >
+        <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80", accent.cardGlow)} />
+        <div className="relative flex items-start gap-4">
+          <div
+            className={cn(
+              "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-base font-black",
+              accent.number,
+            )}
+          >
+            {step.number}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className={cn("text-xl font-black", accent.title)}>{step.title}</h3>
+              <div
+                className={cn(
+                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border",
+                  accent.iconWrap,
+                )}
+              >
+                <StepIcon icon={step.icon} className="h-5 w-5" />
+              </div>
+            </div>
+
+            <div className={cn("mt-4 h-px w-16", accent.line)} />
+            <p className="mt-4 text-sm leading-7 text-white/68">{step.description}</p>
+          </div>
+        </div>
+      </article>
+    </AnimateOnScroll>
   );
 }
 
@@ -365,321 +420,238 @@ export default async function HomePage() {
       : "بك";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#030712_0%,#07101f_38%,#030712_100%)] text-white">
-
-      {/* ── Global CSS Keyframes ── */}
-      <style>{`
-        @keyframes lamtkom-logo-float {
-          0%, 100% { transform: translateY(0px) rotate(-7deg); }
-          50%       { transform: translateY(-14px) rotate(-7deg); }
-        }
-        @keyframes lamtkom-fade-up {
-          from { opacity: 0; transform: translateY(26px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes lamtkom-fade-in {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes lamtkom-shimmer {
-          0%   { background-position: 200% center; }
-          100% { background-position: -200% center; }
-        }
-        @keyframes lamtkom-pulse-cta {
-          0%, 100% { box-shadow: 0 18px 50px rgba(34,211,238,0.22); }
-          50%       { box-shadow: 0 18px 50px rgba(34,211,238,0.50), 0 0 80px rgba(34,211,238,0.12); }
-        }
-        @keyframes lamtkom-dot-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.5; transform: scale(0.7); }
-        }
-        @keyframes lamtkom-orb-1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(60px, -50px) scale(1.1); }
-          66%       { transform: translate(-40px, 60px) scale(0.9); }
-        }
-        @keyframes lamtkom-orb-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(-70px, 40px) scale(0.9); }
-          66%       { transform: translate(50px, -60px) scale(1.1); }
-        }
-        @keyframes lamtkom-orb-3 {
-          0%, 100% { transform: translateX(-50%) scale(1); }
-          50%       { transform: translateX(-50%) scale(1.15); }
-        }
-        @keyframes lamtkom-line-grow {
-          from { width: 0; opacity: 0; }
-          to   { width: 3.5rem; opacity: 1; }
-        }
-      `}</style>
-
-      {/* ── JSON-LD ── */}
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
 
-      {/* ── Static grid background ── */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(249,115,22,0.09),transparent_24%),radial-gradient(circle_at_top_right,rgba(139,92,246,0.10),transparent_22%),linear-gradient(180deg,#040816_0%,#07101f_40%,#030712_100%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px)] [background-size:72px_72px]" />
-      </div>
+      <main className="relative overflow-hidden">
+        <AnimatedOrbs />
 
-      {/* ── Animated floating orbs (client component) ── */}
-      <AnimatedOrbs />
+        <section className="relative isolate overflow-hidden">
+          <HeroParticles />
 
-      <div className="relative mx-auto max-w-[1320px] px-4 pb-10 pt-6 md:px-6 lg:px-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.09),transparent_28%),linear-gradient(180deg,rgba(2,6,23,0.22),transparent_28%)]" />
+          <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24 lg:pt-16">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
+              <div className="order-2 lg:order-1">
+                <AnimateOnScroll>
+                  <SectionLabel label="منصة ألعاب عربية للجلسات" />
+                </AnimateOnScroll>
 
-        {/* ════════════════════════════════════════════
-            HERO SECTION
-        ════════════════════════════════════════════ */}
-        <section className="mx-auto max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-12 shadow-[0_40px_120px_rgba(0,0,0,0.40)] sm:px-10 sm:py-16 lg:px-12 lg:py-18">
-          {/* hero glows */}
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 top-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 left-1/2 h-56 w-[28rem] -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cyan-400/6 to-transparent" />
+                <AnimateOnScroll>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <HeroGamePill title="لمتكم" accent="cyan" />
+                    <HeroGamePill title="برا السالفة" accent="orange" />
+                    <HeroGamePill title="Codenames" accent="violet" />
+                  </div>
+                </AnimateOnScroll>
 
-          <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+                <AnimateOnScroll>
+                  <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[1.15] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    ألعاب جماعية عربية
+                    <span className="block bg-gradient-to-l from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">
+                      للجلسات والتحدي والمتعة
+                    </span>
+                  </h1>
+                </AnimateOnScroll>
 
-            {/* Label */}
-            <div style={{ animation: "lamtkom-fade-up 0.7s ease both" }}>
-              <SectionLabel label="3 العاب مختلفة متاحة على المنصة" />
-            </div>
+                <AnimateOnScroll>
+                  <p className="mt-5 max-w-2xl text-base leading-8 text-white/72 sm:text-lg">
+                    اجمع أصحابك أو عائلتك وابدؤوا التحدي فورًا. لمتكم تعطيكم أكثر من لعبة في
+                    مكان واحد، بتجربة سريعة ومرتبة ومناسبة للشاشات الكبيرة والجلسات.
+                  </p>
+                </AnimateOnScroll>
 
-            {/* Floating logo */}
-            <div className="relative mt-8" style={{ animation: "lamtkom-fade-in 0.8s ease 0.15s both" }}>
-              <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/10 blur-3xl" />
-              <img
-                src={heroLogo}
-                alt="لمتكم"
-                className="relative mx-auto w-[250px] object-contain drop-shadow-[14px_16px_0_rgba(8,15,30,0.95)] sm:w-[340px] lg:w-[470px]"
-                style={{ animation: "lamtkom-logo-float 4.5s ease-in-out infinite" }}
-              />
-            </div>
+                <AnimateOnScroll>
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <Link
+                      href="/games"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.24)] transition hover:bg-cyan-300"
+                    >
+                      استعرض الألعاب
+                      <ArrowLeftIcon />
+                    </Link>
 
-            {/* Headline */}
-            <h1
-              className="mt-8 text-3xl font-black leading-[1.15] text-white sm:text-5xl lg:text-6xl"
-              style={{ animation: "lamtkom-fade-up 0.8s ease 0.3s both" }}
-            >
-              خلّينا اللمة عليكم
-              <span
-                className="mt-2 block bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: "linear-gradient(90deg, #67e8f9, #ffffff, #a78bfa, #ffffff, #67e8f9)",
-                  backgroundSize: "300% auto",
-                  animation: "lamtkom-shimmer 5s linear infinite",
-                }}
-              >
-                والفعاليات علينا
-              </span>
-            </h1>
+                    <Link
+                      href={isLoggedIn ? "/game/start" : "/register"}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.04] px-6 py-3.5 text-sm font-black text-white transition hover:border-white/20 hover:bg-white/[0.07]"
+                    >
+                      {isLoggedIn ? `ابدأ اللعب يا ${viewerName}` : "أنشئ حسابك الآن"}
+                    </Link>
+                  </div>
+                </AnimateOnScroll>
 
-            {/* Subtitle */}
-            <p
-              className="mt-5 max-w-3xl text-sm font-bold leading-8 text-white/72 sm:text-lg sm:leading-9"
-              style={{ animation: "lamtkom-fade-up 0.8s ease 0.45s both" }}
-            >
-              منصة ألعاب عربية للجلسات و التجمعات نقدم لكم الفعاليات على شكل ألعاب
-              اختار ما يناسبك وابدء فورا.
-            </p>
+                <div className="mt-10">
+                  <StatsBar />
+                </div>
+              </div>
 
-            {/* CTA buttons */}
-            <div
-              className="mt-9 flex flex-wrap justify-center gap-3"
-              style={{ animation: "lamtkom-fade-up 0.8s ease 0.6s both" }}
-            >
-              <Link
-                href="/games"
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-7 py-4 text-sm font-black text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98]"
-                style={{ animation: "lamtkom-pulse-cta 3s ease-in-out infinite 1s" }}
-              >
-                استكشف الألعاب
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Link>
+              <div className="order-1 lg:order-2">
+                <AnimateOnScroll>
+                  <div className="relative mx-auto max-w-[560px]">
+                    <div className="absolute -left-8 top-10 h-40 w-40 rounded-full bg-cyan-400/12 blur-3xl" />
+                    <div className="absolute -right-6 bottom-8 h-40 w-40 rounded-full bg-violet-400/10 blur-3xl" />
 
-              {isLoggedIn ? (
-                <Link
-                  href="/account"
-                  className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-7 py-4 text-sm font-black text-white transition hover:bg-white/[0.10]"
-                >
-                  أهلاً {viewerName}
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/register"
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.06] px-7 py-4 text-sm font-black text-white transition hover:bg-white/[0.10]"
-                  >
-                    إنشاء حساب
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-transparent px-7 py-4 text-sm font-bold text-white/65 transition hover:bg-white/[0.06] hover:text-white"
-                  >
-                    تسجيل الدخول
-                  </Link>
-                </>
-              )}
-            </div>
+                    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.9))] p-5 shadow-[0_35px_90px_rgba(2,6,23,0.52)]">
+                      <div className="flex items-center justify-between gap-4 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-3">
+                        <div>
+                          <p className="text-xs font-semibold text-white/50">منصة الجلسات العربية</p>
+                          <p className="mt-1 text-sm font-black text-white">Lamtkom</p>
+                        </div>
+                        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-black text-cyan-300">
+                          جاهز للعب
+                        </div>
+                      </div>
 
-            {/* Game pills */}
-            <div
-              className="mt-8 grid w-full max-w-4xl gap-3 sm:grid-cols-3"
-              style={{ animation: "lamtkom-fade-up 0.8s ease 0.75s both" }}
-            >
-              <HeroGamePill title="فئات وأسئلة" accent="cyan" />
-              <HeroGamePill title="كشف المتخفي" accent="orange" />
-              <HeroGamePill title="كلمات وتلميحات" accent="violet" />
+                      <div className="relative mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.08),transparent_38%),linear-gradient(180deg,rgba(15,23,42,0.85),rgba(2,6,23,0.94))] p-6">
+                        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_40%,rgba(255,255,255,0.02))]" />
+
+                        <div className="relative flex flex-col items-center text-center">
+                          <div className="relative flex h-28 w-28 items-center justify-center rounded-[28px] border border-cyan-400/20 bg-white/[0.03] shadow-[0_0_35px_rgba(34,211,238,0.10)]">
+                            <Image
+                              src={heroLogo}
+                              alt="شعار لمتكم"
+                              width={88}
+                              height={88}
+                              priority
+                              className="h-auto w-auto object-contain"
+                            />
+                          </div>
+
+                          <h2 className="mt-5 text-2xl font-black text-white sm:text-3xl">لمتكم</h2>
+                          <p className="mt-3 max-w-md text-sm leading-7 text-white/65">
+                            منصة ألعاب عربية للجلسات والتجمعات، تجمع أكثر من تجربة جماعية في
+                            مكان واحد بشكل أنيق وسريع.
+                          </p>
+
+                          <div className="mt-6 grid w-full grid-cols-3 gap-3">
+                            {games.map((game) => (
+                              <div
+                                key={game.title}
+                                className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3 text-center"
+                              >
+                                <div className="text-[11px] font-bold text-white/45">{game.subtitle}</div>
+                                <div className="mt-1 text-sm font-black text-white">{game.title}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </AnimateOnScroll>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════
-            STATS BAR  (new section)
-        ════════════════════════════════════════════ */}
-        <section className="mx-auto mt-8 max-w-7xl">
-          <StatsBar />
-        </section>
-
-        {/* ════════════════════════════════════════════
-            GAMES SECTION
-        ════════════════════════════════════════════ */}
-        <section className="mx-auto mt-14 max-w-7xl">
-          <AnimateOnScroll className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <SectionLabel label="ألعاب المنصة" />
-              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-                اختر اللعبة المناسبة
-              </h2>
+        <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <AnimateOnScroll>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <SectionLabel label="ليش لمتكم؟" />
+                <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">تجربة منظمة وراقية للجلسات</h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/68 sm:text-base">
+                  كل شيء مصمم ليكون سهلًا وسريعًا وواضحًا، من لحظة الدخول وحتى بداية اللعب.
+                </p>
+              </div>
             </div>
-            <Link
-              href="/games"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-black text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-            >
-              جميع الألعاب
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Link>
           </AnimateOnScroll>
 
-          <div className="grid gap-5 lg:grid-cols-3">
-            {games.map((game, i) => (
-              <AnimateOnScroll key={game.title} delay={i * 100} className="flex">
-                <GameCard game={game} />
-              </AnimateOnScroll>
-            ))}
-          </div>
-        </section>
-
-        {/* ════════════════════════════════════════════
-            FEATURES STRIP  (new section)
-        ════════════════════════════════════════════ */}
-        <section className="mx-auto mt-14 max-w-7xl">
-          <AnimateOnScroll className="mb-8 text-center">
-            <SectionLabel label="لماذا لمتكم؟" />
-            <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">
-              منصة مصممة للجلسات العربية
-            </h2>
-          </AnimateOnScroll>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {features.map((f, i) => (
-              <AnimateOnScroll key={f.title} delay={i * 90}>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {features.map((feature) => (
+              <AnimateOnScroll key={feature.title}>
                 <div
                   className={cn(
-                    "group relative overflow-hidden rounded-[1.7rem] border px-5 py-6 transition duration-300 hover:-translate-y-1 hover:brightness-110",
-                    f.color,
+                    "relative overflow-hidden rounded-[26px] border p-5 shadow-[0_15px_40px_rgba(2,6,23,0.25)]",
+                    feature.color,
                   )}
-                  style={{ boxShadow: `0 14px 40px ${f.glow}` }}
+                  style={{ boxShadow: `0 10px 35px ${feature.glow}` }}
                 >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white/[0.04] to-transparent" />
-                  <div className="text-3xl">{f.emoji}</div>
-                  <h3 className="mt-3 text-lg font-black text-white">{f.title}</h3>
-                  <p className="mt-2 text-xs leading-6 text-white/55">{f.desc}</p>
+                  <div className="text-2xl">{feature.emoji}</div>
+                  <h3 className="mt-4 text-lg font-black text-white">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-white/70">{feature.desc}</p>
                 </div>
               </AnimateOnScroll>
             ))}
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════
-            HOW TO PLAY SECTION
-        ════════════════════════════════════════════ */}
-        <section className="mx-auto mt-16 max-w-7xl overflow-hidden rounded-[2.7rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-10 shadow-[0_30px_100px_rgba(0,0,0,0.24)] sm:px-8 sm:py-12 lg:px-10">
-          <div className="pointer-events-none absolute left-0 top-0 h-52 w-52 rounded-full bg-cyan-500/8 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 right-0 h-52 w-52 rounded-full bg-violet-500/8 blur-3xl" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/[0.03] to-transparent" />
-
-          <div className="mx-auto max-w-5xl">
-            <AnimateOnScroll className="mb-10 text-center">
-              <h2 className="text-4xl font-black sm:text-5xl">
-                <span className="bg-gradient-to-r from-white via-cyan-100 to-violet-100 bg-clip-text text-transparent">
-                  كيف تلعب لعبة لمتكم؟
-                </span>
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-sm leading-8 text-white/55 sm:text-base">
-                خطوات بسيطة وواضحة لتبدأ الجولة بشكل جميل ومنظم وحماسي.
-              </p>
-            </AnimateOnScroll>
-
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {steps.map((step, i) => (
-                <AnimateOnScroll key={step.number} delay={i * 110}>
-                  <StepCard step={step} />
-                </AnimateOnScroll>
-              ))}
-            </div>
-
-            <AnimateOnScroll delay={200} className="mx-auto mt-8 max-w-5xl">
+        <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+          <AnimateOnScroll>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <SectionLabel label="الألعاب المتوفرة" />
+                <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">اختر اللعبة المناسبة للجلسة</h2>
+              </div>
               <Link
-                href="/game/start"
-                className="group flex w-full items-center justify-center gap-3 rounded-[1.7rem] border border-cyan-300/20 bg-[linear-gradient(90deg,#f5f0d7_0%,#f8f3df_50%,#ede4be_100%)] px-6 py-4 text-xl font-black text-[#18212f] shadow-[0_14px_28px_rgba(0,0,0,0.14)] transition hover:brightness-105 active:scale-[0.99]"
+                href="/games"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-black text-white transition hover:border-white/20 hover:bg-white/[0.07]"
               >
-                ابدأ اللعب الآن
-                <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span>
+                عرض كل الألعاب
+                <ArrowLeftIcon />
               </Link>
-            </AnimateOnScroll>
+            </div>
+          </AnimateOnScroll>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            {games.map((game) => (
+              <GameCard key={game.title} game={game} />
+            ))}
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════
-            FOOTER
-        ════════════════════════════════════════════ */}
-        <footer className="mx-auto mt-14 max-w-7xl overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)]">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
-          <div className="px-6 py-8 sm:px-8">
-            <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-              <div className="flex flex-col items-center gap-3 md:items-start">
-                <img src={heroLogo} alt="لمتكم" className="h-12 w-auto object-contain opacity-90" />
-                <p className="text-xs text-white/35">منصة ألعاب عربية للجلسات والتجمعات</p>
-              </div>
-              <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-bold text-white/50">
-                {[
-                  { label: "الرئيسية", href: "/" },
-                  { label: "الألعاب", href: "/games" },
-                  { label: "الباقات", href: "/pricing" },
-                  { label: "من نحن", href: "/about" },
-                  { label: "اتصل بنا", href: "/contact" },
-                ].map((item) => (
-                  <Link key={item.href} href={item.href} className="transition hover:text-white">
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
+        <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+          <AnimateOnScroll>
+            <div className="text-center">
+              <SectionLabel label="كيف تبدأ؟" />
+              <h2 className="mt-4 text-3xl font-black text-white sm:text-4xl">أربع خطوات وتبدأ الجلسة</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/68 sm:text-base">
+                التجربة بسيطة جدًا: جهز الفريق، اختر اللعبة، وابدأ التحدي خلال دقائق.
+              </p>
             </div>
-            <div className="mt-7 h-px bg-white/5" />
-            <div className="mt-5 flex flex-col items-center gap-3 text-xs text-white/25 md:flex-row md:justify-between">
-              <span>© {new Date().getFullYear()} لمتكم — جميع الحقوق محفوظة.</span>
-              <div className="flex gap-5">
-                <Link href="/terms" className="transition hover:text-white/70">الشروط والأحكام</Link>
-                <Link href="/privacy" className="transition hover:text-white/70">الخصوصية</Link>
-              </div>
-            </div>
-          </div>
-        </footer>
+          </AnimateOnScroll>
 
-      </div>
-    </main>
+          <div className="mt-8 grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+            {steps.map((step) => (
+              <StepCard key={step.number} step={step} />
+            ))}
+          </div>
+        </section>
+
+        <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+          <AnimateOnScroll>
+            <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.92))] px-6 py-10 text-center shadow-[0_25px_80px_rgba(2,6,23,0.42)] sm:px-10 sm:py-14">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_28%),radial-gradient(circle_at_bottom,rgba(167,139,250,0.08),transparent_30%)]" />
+              <div className="relative">
+                <h2 className="text-3xl font-black text-white sm:text-4xl">جاهز تبدأ الجلسة؟</h2>
+                <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
+                  ادخل الآن واختر لعبتك وابدأ التحدي بتجربة مرتبة وسريعة ومناسبة لكل جلسة.
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    href={isLoggedIn ? "/game/start" : "/register"}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 shadow-[0_18px_45px_rgba(34,211,238,0.24)] transition hover:bg-cyan-300"
+                  >
+                    {isLoggedIn ? "ابدأ اللعب الآن" : "أنشئ حسابك"}
+                    <ArrowLeftIcon />
+                  </Link>
+
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.04] px-6 py-3.5 text-sm font-black text-white transition hover:border-white/20 hover:bg-white/[0.07]"
+                  >
+                    عرض الباقات
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </AnimateOnScroll>
+        </section>
+      </main>
+    </>
   );
 }
