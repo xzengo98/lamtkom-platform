@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "../../lib/supabase/server";
 import LoginSubmitButton from "./login-submit-button";
-import GoogleAuthButton from "@/components/auth/google-auth-button";
+import GoogleAuthButton from "@/app/auth/google-auth-button";
 
 const heroLogo = "/logo.webp";
 
